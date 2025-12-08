@@ -1,0 +1,16 @@
+{
+  "name": "electron-react",
+  "version": "1.0.0",
+  "description": "testing project",
+  "license": "ISC",
+  "author": "SRV",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "electron": "^39.2.6"
+  }
+}
