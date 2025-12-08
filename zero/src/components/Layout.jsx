@@ -1,11 +1,16 @@
 import React from "react";
 import {
+    AiOutlineBarChart,
+    AiOutlineHome,
     AiFillAlert,
     AiFillBell,
     AiFillControl,
     AiFillMediumCircle,
+    AiOutlineUser,
+    AiOutlineSetting
 } from "react-icons/ai";
 import { NavLink } from "react-router-dom";
+import mainMenu from "../utils/Menu"
 
 const Layout = ({ children }) => {
     const sideBase = "text-xl w-full p-2 rounded-lg flex flex-col justify-center items-center transition";
@@ -21,49 +26,64 @@ const Layout = ({ children }) => {
 
             {/* Left Sidebar */}
             <div className="w-[60px] bg-slate-900 p-2 flex flex-col items-center gap-2">
-                <NavLink to="/" className={({ isActive }) =>
-                    `${sideBase} ${isActive ? sideActive : sideInactive}`
-                }>
-                    <AiFillAlert />
-                    <span className="text-xs">Home</span>
+
+                {/* Top Menu */}
+                <NavLink
+                    to="/"
+                    className={({ isActive }) => `${sideBase} ${isActive ? sideActive : sideInactive}`}
+                    title="Home"
+                >
+                    <AiOutlineHome />
                 </NavLink>
 
-                <NavLink to="/about" className={({ isActive }) =>
-                    `${sideBase} ${isActive ? sideActive : sideInactive}`
-                }>
+                <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) => `${sideBase} ${isActive ? sideActive : sideInactive}`}
+                    title="Dashboard"
+                >
+                    <AiOutlineBarChart />
+                </NavLink>
+
+                <NavLink
+                    to="/notification"
+                    className={({ isActive }) => `${sideBase} ${isActive ? sideActive : sideInactive}`}
+                    title="Notification"
+                >
                     <AiFillBell />
-                    <span className="text-xs">About</span>
                 </NavLink>
 
-                <NavLink to="/cello" className={({ isActive }) =>
-                    `${sideBase} ${isActive ? sideActive : sideInactive}`
-                }>
-                    <AiFillControl />
-                    <span className="text-xs">Cello</span>
-                </NavLink>
+                {/* Push bottom section down */}
+                <div className="mt-auto flex flex-col items-center gap-2">
 
-                <NavLink to="/mello" className={({ isActive }) =>
-                    `${sideBase} ${isActive ? sideActive : sideInactive}`
-                }>
-                    <AiFillMediumCircle />
-                    <span className="text-xs">Mello</span>
-                </NavLink>
+                    <NavLink
+                        to="/profile"
+                        className={({ isActive }) => `${sideBase} ${isActive ? sideActive : sideInactive}`}
+                        title="Profile"
+                    >
+                        <AiOutlineUser />
+                    </NavLink>
+
+                    <NavLink
+                        to="/settings"
+                        className={({ isActive }) => `${sideBase} ${isActive ? sideActive : sideInactive}`}
+                        title="Settings"
+                    >
+                        <AiOutlineSetting />
+                    </NavLink>
+
+                </div>
             </div>
 
             {/* Middle Sidebar */}
             <div className="w-[240px] bg-slate-800 p-2 flex flex-col gap-2">
-                {[1, 2, 3].map((_, i) => (
-                    <NavLink
-                        key={i}
-                        to={`/mello${i}`}
-                        className={({ isActive }) =>
-                            `${menuBase} ${isActive ? menuActive : menuInactive}`
-                        }
-                    >
-                        <AiFillMediumCircle />
-                        <span className="text-xs">Mello {i + 1}</span>
-                    </NavLink>
-                ))}
+                {
+                    mainMenu.map((item, index) => (
+                        <NavLink key={index} to={item.url} className={({ isActive }) => `${menuBase} ${isActive ? menuActive : menuInactive}`}>
+                            {item.icon}
+                            <span className="text-xs">{item.title}</span>
+                        </NavLink>
+                    ))
+                }
             </div>
 
             {/* Content */}
