@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
+require("./server");
 
 function createWindow() {
     const win = new BrowserWindow({ width: 1024, height: 1024 });
