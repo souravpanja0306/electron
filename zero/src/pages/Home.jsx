@@ -16,7 +16,7 @@ const Home = () => {
           <p><span className="font-semibold text-white">Location:</span> Kolkata, India</p>
         </div>
 
-        <div className="mt-5 p-4 rounded-lg bg-slate-700 text-sm text-slate-300">
+        <div className="mt-5 p-4 rounded-md bg-slate-700 text-sm text-slate-300">
           Helping businesses automate billing, inventory, finance & day-to-day operations.
         </div>
 

@@ -5,7 +5,9 @@ import {
     AiOutlineUser,
     AiOutlineSetting,
     AiOutlinePieChart,
-    AiOutlineFolder
+    AiOutlineFolder,
+    AiOutlineUpSquare,
+    AiOutlineDownSquare
 } from "react-icons/ai";
 import { NavLink } from "react-router-dom";
 import MenuMap from "../utils/menuMap";
@@ -13,7 +15,7 @@ import { useState } from "react";
 
 
 const Layout = ({ children }) => {
-
+    const [subMenu, setSubMenu] = useState({ index: null, active: false })
     const [currentMenu, setCurrentMenu] = useState(MenuMap["home"]);
     const [activeMenu, setActiveManu] = useState("home");
 
@@ -28,12 +30,12 @@ const Layout = ({ children }) => {
         <div className="flex min-h-screen bg-black text-white w-full">
 
             {/* Left Sidebar */}
-            <div className="min-w-[70px] bg-slate-950 p-1 flex flex-col items-center gap-1">
+            <div className="min-w-[70px] bg-slate-950 p-1 flex flex-col items-center gap-1 select-none">
 
                 {/* Top Menu */}
                 <div
                     onClick={() => changeMenu({ menu: "home" })}
-                    className={`text-2xl w-full p-2 rounded-lg flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "home" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
+                    className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "home" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
                     title="Home"
                 >
                     <AiOutlineHome />
@@ -41,7 +43,7 @@ const Layout = ({ children }) => {
                 </div>
                 <div
                     onClick={() => changeMenu({ menu: "work" })}
-                    className={`text-2xl w-full p-2 rounded-lg flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "work" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
+                    className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "work" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
                     title="Work"
                 >
                     <AiOutlineFolder />
@@ -49,7 +51,7 @@ const Layout = ({ children }) => {
                 </div>
                 <div
                     onClick={() => changeMenu({ menu: "dashboard" })}
-                    className={`text-2xl w-full p-2 rounded-lg flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "dashboard" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
+                    className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "dashboard" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
                     title="Dashboard"
                 >
                     <AiOutlineBarChart />
@@ -57,7 +59,7 @@ const Layout = ({ children }) => {
                 </div>
                 <div
                     onClick={() => changeMenu({ menu: "report" })}
-                    className={`text-2xl w-full p-2 rounded-lg flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "report" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
+                    className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "report" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
                     title="Reports"
                 >
                     <AiOutlinePieChart />
@@ -68,7 +70,7 @@ const Layout = ({ children }) => {
                 <div className="mt-auto p-1 flex flex-col items-center gap-1">
                     <div
                         onClick={() => changeMenu({ menu: "notification" })}
-                        className={`text-2xl w-full p-2 rounded-lg flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "notification" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
+                        className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "notification" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
                         title="Notification"
                     >
                         <AiOutlineBell />
@@ -76,7 +78,7 @@ const Layout = ({ children }) => {
                     </div>
                     <div
                         onClick={() => changeMenu({ menu: "profile" })}
-                        className={`text-2xl w-full p-2 rounded-lg flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "profile" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
+                        className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "profile" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
                         title="Profile"
                     >
                         <AiOutlineUser />
@@ -84,7 +86,7 @@ const Layout = ({ children }) => {
                     </div>
                     <div
                         onClick={() => changeMenu({ menu: "settings" })}
-                        className={`text-2xl w-full p-2 rounded-lg flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "settings" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
+                        className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "settings" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
                         title="Settings"
                     >
                         <AiOutlineSetting />
@@ -94,21 +96,53 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Middle Sidebar */}
-            <div className="min-w-[270px] bg-slate-900 p-1 flex flex-col gap-1">
+            <div className="min-w-[270px] bg-slate-900 p-1 flex flex-col gap-1 select-none">
                 {currentMenu.map((item, index) => (
-                    <NavLink
-                        key={index}
-                        to={item.url}
-                        className={({ isActive }) =>
-                            `text-xl w-full p-2 rounded-lg flex gap-1 items-center border border-slate-700 transition ${isActive
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-800 hover:bg-slate-700 text-slate-300"
-                            }`
-                        }
-                    >
-                        {item.icon}
-                        <span className="text-xs">{item.title}</span>
-                    </NavLink>
+                    item?.type === "main" ? (
+                        <div key={index}>
+                            <div
+                                onClick={() => setSubMenu({ index, active: subMenu.index !== index ? true : !subMenu.active })}
+                                className={`${subMenu.index === index && subMenu.active ? "bg-blue-600" : "bg-slate-700 hover:bg-slate-700"} text-xl w-full p-1 flex justify-between gap-1 items-center transition text-slate-300 cursor-pointer`}
+                            >
+                                <div className="flex justify-center items-center gap-2">
+                                    {item.icon}
+                                    <span className="text-xs">{item.title}</span>
+                                </div>
+                                {subMenu.index === index && subMenu.active ? <AiOutlineUpSquare /> : <AiOutlineDownSquare />}
+                            </div>
+                            <div className={`${subMenu.index === index && subMenu.active ? "min-h-12" : "hidden"} p-1 rounded-b-md bg-slate-950 flex flex-col gap-1 transition-all duration-500 border border-blue-600`} >
+                                {item?.submenu?.map((sub, i) => (
+                                    <NavLink
+                                        key={i}
+                                        to={sub.url}
+                                        className={({ isActive }) =>
+                                            `text-xl w-full p-1 rounded-md flex gap-1 border border-slate-700 items-center transition ${isActive
+                                                ? "bg-blue-600 text-white"
+                                                : "bg-slate-800 hover:bg-slate-700 text-slate-300"
+                                            }`
+                                        }
+                                    >
+                                        {sub.icon}
+                                        <span className="text-xs">{sub.title}</span>
+                                    </NavLink>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <NavLink
+                            key={index}
+                            to={item.url}
+                            className={({ isActive }) =>
+                                `text-xl w-full p-1 rounded-md flex gap-1 border border-slate-700 items-center transition ${isActive
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-slate-800 hover:bg-slate-700 text-slate-300"
+                                }`
+                            }
+                        >
+                            {item.icon}
+                            <span className="text-xs">{item.title}</span>
+                        </NavLink>
+                    )
                 ))}
             </div>
 

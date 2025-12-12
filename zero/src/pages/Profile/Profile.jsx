@@ -64,7 +64,7 @@ const Profile = () => {
             </p>
           </div>
 
-          <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium">
+          <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium">
             Upgrade Plan
           </button>
         </div>

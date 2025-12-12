@@ -51,7 +51,7 @@ const CreateInvoice = () => {
         </div>
 
         {/* Submit */}
-        <button className="bg-blue-600 hover:bg-blue-700 w-full p-2 rounded-lg font-medium">
+        <button className="bg-blue-600 hover:bg-blue-700 w-full p-2 rounded-md font-medium">
           Save Invoice
         </button>
 

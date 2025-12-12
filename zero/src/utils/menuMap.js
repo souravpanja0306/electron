@@ -1,12 +1,48 @@
-import { AiOutlineDiff, AiOutlineUser, AiOutlineLock, AiOutlineUnlock, AiOutlineEdit } from "react-icons/ai";
+import {
+    AiOutlineDiff,
+    AiOutlineUser,
+    AiOutlineLock,
+    AiOutlineUnlock,
+    AiOutlineEdit,
+    AiOutlinePlusSquare,
+    AiOutlineFileSearch
+} from "react-icons/ai";
 
 const MenuMap = {
     "home": [
         { title: "Home", url: "/", icon: <AiOutlineDiff /> },
     ],
     "work": [
-        { title: "Create Invoice", url: "/create-invoice", icon: <AiOutlineDiff /> },
-        { title: "View Invoice", url: "/view-invoice", icon: <AiOutlineDiff /> },
+        {
+            type: "main",
+            title: "Recipts/Challans",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Create Challan", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
+                { title: "View Challans", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+            ],
+        },
+        {
+            type: "main",
+            title: "Invoices",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Create Invoice", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
+                { title: "View Invoices", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+            ]
+        },
+        {
+            type: "main",
+            title: "Vehicle",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Add Vehicle", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
+                { title: "View Vehicles", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+            ]
+        }
     ],
     "dashboard": [
         { title: "Dashboard", url: "/dashboard", icon: <AiOutlineDiff /> },
