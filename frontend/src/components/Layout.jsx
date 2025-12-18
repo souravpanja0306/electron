@@ -7,7 +7,9 @@ import {
     AiOutlinePieChart,
     AiOutlineFolder,
     AiOutlineUpSquare,
-    AiOutlineDownSquare
+    AiOutlineDownSquare,
+    AiOutlineMenu,
+    AiOutlineMenuFold,
 } from "react-icons/ai";
 import { NavLink } from "react-router-dom";
 import MenuMap from "../utils/menuMap";
@@ -18,9 +20,11 @@ const Layout = ({ children }) => {
     const [subMenu, setSubMenu] = useState({ index: null, active: false })
     const [currentMenu, setCurrentMenu] = useState(MenuMap["home"]);
     const [activeMenu, setActiveManu] = useState("home");
+    const [sideBar, setSideBar] = useState(false);
 
     const changeMenu = ({ menu = "" }) => {
         if (menu) {
+            setSideBar(true)
             setActiveManu(menu);
             setCurrentMenu(MenuMap[menu] || []);
         };
@@ -30,9 +34,16 @@ const Layout = ({ children }) => {
         <div className="flex min-h-screen bg-black text-white w-full">
 
             {/* Left Sidebar */}
-            <div className="min-w-[70px] bg-slate-950 p-1 flex flex-col items-center gap-1 select-none">
+            <div className="w-[70px] bg-slate-950 p-1 flex flex-col items-center gap-1 select-none">
 
                 {/* Top Menu */}
+                <div
+                    onClick={() => setSideBar(!sideBar)}
+                    className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer hover:bg-slate-700 hover:text-slate-200 text-slate-500`}
+                    title="Home"
+                >
+                    {sideBar ? <AiOutlineMenuFold /> : <AiOutlineMenu />}
+                </div>
                 <div
                     onClick={() => changeMenu({ menu: "home" })}
                     className={`text-2xl w-full p-2 rounded-md flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "home" ? "bg-blue-600 text-white" : "hover:bg-slate-700 hover:text-slate-200 text-slate-500"}`}
@@ -96,7 +107,7 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Middle Sidebar */}
-            <div className="min-w-[270px] bg-slate-900 p-1 flex flex-col gap-1 select-none">
+            <div className={`${sideBar ? "min-w-[270px] p-1" : "max-w-0 p-0"} bg-slate-900 flex flex-col gap-1 select-none`}>
                 {currentMenu.map((item, index) => (
                     item?.type === "main" ? (
                         <div key={index}>
@@ -147,7 +158,9 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Content */}
-            <div className="w-full bg-slate-800 p-1">{children}</div>
+            <div className="w-full bg-slate-800 p-1">
+                {children}
+            </div>
         </div>
     );
 };
