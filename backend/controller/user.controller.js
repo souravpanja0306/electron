@@ -1,43 +1,43 @@
-const Service = require("../service/user.service");
+const UserService = require("../service/user.service");
 
-const createParty = async (data) => {
+const createUser = async (data) => {
     try {
-        await Service.addUser(data);
+        await UserService.addUser(data);
         return {
             status: "200",
             message: "User created successfully",
             body: []
         };
     } catch (error) {
-        console.log("Something went worng: Controller: createParty: ", error);
+        console.log("Something went worng: Controller: createUser: ", error);
     };
 };
 
-const getAllParty = async (params = {}) => {
+const getAllUser = async (params = {}) => {
     try {
-        const result = await Service.listUsers(params);
+        const result = await UserService.listUsers(params);
         return {
             status: "200",
             message: "User created successfully",
             body: result
         };
     } catch (error) {
-        console.log("Something went worng: Controller: getAllParty: ", error);
+        console.log("Something went worng: Controller: getAllUser: ", error);
     };
 };
 
 
-const deleteParty = async (params = {}) => {
+const deleteUser = async (params = {}) => {
     try {
-        const result = await Service.removeUsers(params);
+        const result = await UserService.removeUsers(params);
         return {
             status: "200",
             message: "User created successfully",
             body: result
         };
     } catch (error) {
-        console.log("Something went worng: Controller: deleteParty: ", error);
+        console.log("Something went worng: Controller: deleteUser: ", error);
     };
 };
 
-module.exports = { createParty, getAllParty, deleteParty };
+module.exports = { createUser, getAllUser, deleteUser };

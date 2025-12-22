@@ -13,8 +13,8 @@ import Profile from './pages/Profile/Profile';
 import Setting from './pages/Setting';
 import SalesReport from './pages/Reports/SalesReport';
 import EditProfile from './pages/Profile/EditProfile';
-import PartyMaster from './pages/Master/PartyMaster';
-import Party from './pages/Master/Party';
+import PartyMaster from './pages/Master/PartyMaster/PartyMaster';
+import Party from './pages/Master/PartyMaster/Party';
 import CompanyMaster from './pages/Master/CompanyMaster'
 import Company from './pages/Master/Company'
 import ProductMaster from './pages/Master/ProductMaster'

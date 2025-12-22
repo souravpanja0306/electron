@@ -35,7 +35,7 @@ const Dashboard = () => {
 
     return (
         <div className="p-4">
-            <table className="min-w-full border border-slate-700 text-sm text-white">
+            <table className="min-w-full border border-slate-700 text-xs text-white">
                 <thead className="bg-slate-800">
                     <tr>
                         <th className="border border-slate-700 px-3 py-2">ID</th>

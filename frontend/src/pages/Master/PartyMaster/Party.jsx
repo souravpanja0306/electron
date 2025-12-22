@@ -1,8 +1,8 @@
 import React from 'react'
-import PageTitle from '../../components/PageTitle';
-import ActionArea from '../../components/ActionArea';
-import MainArea from '../../components/MainArea';
-import CustomButton from '../../components/CustomButton';
+import PageTitle from '../../../components/PageTitle';
+import ActionArea from '../../../components/ActionArea';
+import MainArea from '../../../components/MainArea';
+import CustomButton from '../../../components/CustomButton';
 import { Link } from "react-router-dom";
 import { AiOutlineFileAdd } from "react-icons/ai";
 
@@ -24,11 +24,13 @@ const Party = () => {
                 <MainArea>
                     <table>
                         <thead>
-                            <th>Name</th>
-                            <th>Mobile</th>
-                            <th>Email</th>
-                            <th>Address</th>
-                            <th></th>
+                            <tr>
+                                <td>Name</td>
+                                <td>Mobile</td>
+                                <td>Email</td>
+                                <td>Address</td>
+                                <td></td>
+                            </tr>
                         </thead>
                         <tbody>
                             <tr>

@@ -18,15 +18,16 @@ import { useState } from "react";
 
 const Layout = ({ children }) => {
     const [subMenu, setSubMenu] = useState({ index: null, active: false })
-    const [currentMenu, setCurrentMenu] = useState(MenuMap["home"]);
-    const [activeMenu, setActiveManu] = useState("home");
-    const [sideBar, setSideBar] = useState(false);
+    const [currentMenu, setCurrentMenu] = useState(MenuMap[localStorage.getItem("currentMenu")]);
+    const [activeMenu, setActiveManu] = useState(localStorage.getItem("currentMenu"));
+    const [sideBar, setSideBar] = useState(true);
 
     const changeMenu = ({ menu = "" }) => {
         if (menu) {
             setSideBar(true)
             setActiveManu(menu);
             setCurrentMenu(MenuMap[menu] || []);
+            localStorage.setItem("currentMenu", menu);
         };
     };
 
@@ -34,7 +35,7 @@ const Layout = ({ children }) => {
         <div className="flex min-h-screen bg-black text-white w-full">
 
             {/* Left Sidebar */}
-            <div className="w-[70px] bg-slate-950 p-1 flex flex-col items-center gap-1 select-none">
+            <div className="w-[70px] bg-slate-950 p-1 flex flex-col items-center gap-1 select-none border-r border-slate-700">
 
                 {/* Top Menu */}
                 <div
@@ -107,7 +108,7 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Middle Sidebar */}
-            <div className={`${sideBar ? "min-w-[270px] p-1" : "max-w-0 p-0"} bg-slate-900 flex flex-col gap-1 select-none`}>
+            <div className={`${sideBar ? "min-w-[270px] p-1" : "max-w-0 p-0"} bg-slate-950 flex flex-col gap-1 select-none border-r border-slate-700`}>
                 {currentMenu.map((item, index) => (
                     item?.type === "main" ? (
                         <div key={index}>
@@ -157,8 +158,8 @@ const Layout = ({ children }) => {
                 ))}
             </div>
 
-            {/* Content */}
-            <div className="max-h-screen w-full bg-slate-800 p-1 overflow-auto">
+            {/* Main Content */}
+            <div className="max-h-screen w-full bg-slate-900 p-1 overflow-auto">
                 {children}
             </div>
         </div>

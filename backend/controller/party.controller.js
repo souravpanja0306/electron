@@ -1,11 +1,11 @@
-const Service = require("../service/user.service");
+const PartyService = require("../service/party.service");
 
 const createParty = async (data) => {
     try {
-        await Service.addUser(data);
+        await PartyService.addParty(data);
         return {
             status: "200",
-            message: "User created successfully",
+            message: "Data created successfully",
             body: []
         };
     } catch (error) {
@@ -15,10 +15,10 @@ const createParty = async (data) => {
 
 const getAllParty = async (params = {}) => {
     try {
-        const result = await Service.listParty(params);
+        const result = await PartyService.listParty(params);
         return {
             status: "200",
-            message: "User created successfully",
+            message: "Data fetched successfully",
             body: result
         };
     } catch (error) {
@@ -28,10 +28,10 @@ const getAllParty = async (params = {}) => {
 
 const deleteParty = async (params = {}) => {
     try {
-        const result = await Service.removeParty(params);
+        const result = await PartyService.removeParty(params);
         return {
             status: "200",
-            message: "User created successfully",
+            message: "Data deleted successfully",
             body: result
         };
     } catch (error) {

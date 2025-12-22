@@ -1,8 +1,8 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 
-// 🔥 MUST be here
 require(path.join(__dirname, "backend/ipc/user.ipc.js"));
+require(path.join(__dirname, "backend/ipc/party.ipc.js"));
 
 function createWindow() {
     const win = new BrowserWindow({

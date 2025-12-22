@@ -1,10 +1,10 @@
 module.exports = `
   CREATE TABLE IF NOT EXISTS party (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
+    company_name TEXT,
     email TEXT,
     mobile TEXT,
-    contact_person TEXT,
+    owner TEXT,
     address_1 TEXT,
     address_2 TEXT,
     city TEXT,
@@ -12,7 +12,12 @@ module.exports = `
     district TEXT,
     pincode TEXT,
     country TEXT,
-    gst_no TEXT,
-    pan_no TEXT
+    gst TEXT,
+    pan TEXT,
+    trade_licence TEXT,
+    bank TEXT,
+    ifse TEXT,
+    branch TEXT,
+    account_no TEXT
   );
 `;
