@@ -1,8 +1,11 @@
 import React from 'react'
+import PageTitle from '../../components/PageTitle';
 
 const EditProfile = () => {
     return (
-        <div>EditProfile</div>
+        <>
+            <PageTitle>Update Profile</PageTitle>
+        </>
     )
 }
 

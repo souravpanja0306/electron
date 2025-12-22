@@ -37,7 +37,7 @@ const ViewInvoice = () => {
             />
 
             {/* Table */}
-            <div className="bg-slate-800 p-4 rounded-xl">
+            <div className="bg-slate-800 p-4 rounded-md">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-slate-700 text-slate-300">

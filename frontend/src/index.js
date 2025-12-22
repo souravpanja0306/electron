@@ -13,6 +13,12 @@ import Profile from './pages/Profile/Profile';
 import Setting from './pages/Setting';
 import SalesReport from './pages/Reports/SalesReport';
 import EditProfile from './pages/Profile/EditProfile';
+import PartyMaster from './pages/Master/PartyMaster';
+import Party from './pages/Master/Party';
+import CompanyMaster from './pages/Master/CompanyMaster'
+import Company from './pages/Master/Company'
+import ProductMaster from './pages/Master/ProductMaster'
+import Product from './pages/Master/Product'
 
 const router = createHashRouter([
   { path: "/", element: <Layout> <Home /></Layout> },
@@ -29,6 +35,14 @@ const router = createHashRouter([
 
   { path: "/profile", element: <Layout> <Profile /></Layout> },
   { path: "/edit-profile", element: <Layout> <EditProfile /></Layout> },
+
+  // Master
+  { path: "/add-party", element: <Layout> <PartyMaster /></Layout> },
+  { path: "/party", element: <Layout> <Party /></Layout> },
+  { path: "/add-company", element: <Layout> <CompanyMaster /></Layout> },
+  { path: "/company", element: <Layout> <Company /></Layout> },
+  { path: "/add-product", element: <Layout> <ProductMaster /></Layout> },
+  { path: "/product", element: <Layout> <Product /></Layout> },
 
   { path: "/about", element: <Layout> <About /></Layout> },
 

@@ -5,7 +5,10 @@ import {
     AiOutlineUnlock,
     AiOutlineEdit,
     AiOutlinePlusSquare,
-    AiOutlineFileSearch
+    AiOutlineFileSearch,
+    AiOutlineBank,
+    AiOutlineUsergroupAdd,
+    AiOutlineShopping,
 } from "react-icons/ai";
 
 const MenuMap = {
@@ -52,8 +55,27 @@ const MenuMap = {
     ],
     "notification": [],
     "profile": [
-        { title: "Profile", url: "/profile", icon: <AiOutlineUser /> },
-        { title: "Edit Profile", url: "/edit-profile", icon: <AiOutlineEdit /> },
+        {
+            type: "main",
+            title: "Profile",
+            url: "#",
+            icon: <AiOutlineUser />,
+            submenu: [
+                { title: "Profile", url: "/profile", icon: <AiOutlineUsergroupAdd /> },
+                { title: "Edit Profile", url: "/edit-profile", icon: <AiOutlineEdit /> },
+            ]
+        },
+        {
+            type: "main",
+            title: "Add/Update Master",
+            url: "#",
+            icon: <AiOutlineEdit />,
+            submenu: [
+                { title: "Party", url: "/party", icon: <AiOutlineUsergroupAdd /> },
+                { title: "Company", url: "/company", icon: <AiOutlineBank /> },
+                { title: "Product", url: "/product", icon: <AiOutlineShopping /> },
+            ]
+        },
     ],
     "settings": [
         { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },

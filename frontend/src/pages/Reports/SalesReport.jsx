@@ -24,7 +24,7 @@ const SalesReport = () => {
       <h1 className="text-2xl font-semibold mb-4">Sales Report</h1>
 
       {/* Chart Box */}
-      <div className="bg-slate-800 p-4 rounded-xl mb-6">
+      <div className="bg-slate-800 p-4 rounded-md mb-6">
         <h2 className="text-lg font-medium mb-3">Monthly Sales Chart</h2>
 
         <div className="w-full h-64">
@@ -41,7 +41,7 @@ const SalesReport = () => {
       </div>
 
       {/* Table Box */}
-      <div className="bg-slate-800 p-4 rounded-xl">
+      <div className="bg-slate-800 p-4 rounded-md">
         <h2 className="text-lg font-medium mb-3">Sales Table</h2>
 
         <table className="w-full text-sm">

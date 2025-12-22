@@ -15,7 +15,7 @@ const createParty = async (data) => {
 
 const getAllParty = async (params = {}) => {
     try {
-        const result = await Service.listUsers(params);
+        const result = await Service.listParty(params);
         return {
             status: "200",
             message: "User created successfully",
@@ -26,10 +26,9 @@ const getAllParty = async (params = {}) => {
     };
 };
 
-
 const deleteParty = async (params = {}) => {
     try {
-        const result = await Service.removeUsers(params);
+        const result = await Service.removeParty(params);
         return {
             status: "200",
             message: "User created successfully",
