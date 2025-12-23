@@ -17,9 +17,10 @@ import { useState } from "react";
 
 
 const Layout = ({ children }) => {
+    const currentMenuValue = localStorage.getItem("currentMenu") ? localStorage.getItem("currentMenu") : "home"
     const [subMenu, setSubMenu] = useState({ index: null, active: false })
-    const [currentMenu, setCurrentMenu] = useState(MenuMap[localStorage.getItem("currentMenu")]);
-    const [activeMenu, setActiveManu] = useState(localStorage.getItem("currentMenu"));
+    const [currentMenu, setCurrentMenu] = useState(MenuMap[currentMenuValue]);
+    const [activeMenu, setActiveManu] = useState(currentMenuValue);
     const [sideBar, setSideBar] = useState(true);
 
     const changeMenu = ({ menu = "" }) => {

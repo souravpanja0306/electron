@@ -60,13 +60,14 @@ const listParty = ({
 
 
 const removeParty = ({
-    id = ""
+    ids = ""
 }) => {
-    if (!id) throw new Error("ID is required");
+    if (!ids.length) throw new Error("ID is required");
+    const placeholders = ids.map(() => "?").join(",");
 
     return db
-        .prepare("DELETE FROM party WHERE id = ?")
-        .run(id);
+        .prepare(`DELETE FROM party WHERE id IN (${placeholders})`)
+        .run(...ids);
 };
 
 module.exports = { addParty, listParty, removeParty };
