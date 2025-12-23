@@ -4,7 +4,7 @@ const createUser = async (data) => {
     try {
         await UserService.addUser(data);
         return {
-            status: "200",
+            status: 200,
             message: "User created successfully",
             body: []
         };
@@ -17,7 +17,7 @@ const getAllUser = async (params = {}) => {
     try {
         const result = await UserService.listUsers(params);
         return {
-            status: "200",
+            status: 200,
             message: "User created successfully",
             body: result
         };
@@ -31,7 +31,7 @@ const deleteUser = async (params = {}) => {
     try {
         const result = await UserService.removeUsers(params);
         return {
-            status: "200",
+            status: 200,
             message: "User created successfully",
             body: result
         };

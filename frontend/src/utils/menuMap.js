@@ -9,6 +9,7 @@ import {
     AiOutlineBank,
     AiOutlineUsergroupAdd,
     AiOutlineShopping,
+    AiOutlineUserAdd,
 } from "react-icons/ai";
 
 const MenuMap = {
@@ -67,13 +68,22 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Add/Update Master",
+            title: "Party",
             url: "#",
             icon: <AiOutlineEdit />,
             submenu: [
-                { title: "Party", url: "/party", icon: <AiOutlineUsergroupAdd /> },
-                { title: "Company", url: "/company", icon: <AiOutlineBank /> },
-                { title: "Product", url: "/product", icon: <AiOutlineShopping /> },
+                { title: "Create Party", url: "/add-party", icon: <AiOutlineUserAdd /> },
+                { title: "View Parties", url: "/party", icon: <AiOutlineUser /> },
+            ]
+        },
+        {
+            type: "main",
+            title: "Company",
+            url: "#",
+            icon: <AiOutlineEdit />,
+            submenu: [
+                { title: "Create Company", url: "/party", icon: <AiOutlineUsergroupAdd /> },
+                { title: "View Companies", url: "/company", icon: <AiOutlineBank /> },
             ]
         },
     ],

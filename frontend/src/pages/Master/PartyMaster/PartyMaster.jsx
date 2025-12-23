@@ -5,10 +5,11 @@ import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
 import { Link } from "react-router-dom";
 import { AiOutlineFileAdd } from "react-icons/ai";
-
+import Alert from "../../../components/Alert";
 
 
 const PartyMaster = () => {
+    const [alart, setAlart] = useState({ show: false });
     const [data, setData] = useState({
         company_name: "",
         email: "",
@@ -32,30 +33,46 @@ const PartyMaster = () => {
 
     const handleSubmit = async () => {
         try {
-            console.log("🚀 ~ handleSubmit ~ data:", data)
+            if (!data.company_name && data.company_name == "") {
+                setAlart({
+                    show: true,
+                    title: "Field required",
+                    type: "warning",
+                    message: "Company Name Required."
+                });
+                return;
+            };
             if (!window.api) return;
             await window.api.createParty(data).then((res) => {
-                console.log(res);
-                setData({
-                    company_name: "",
-                    email: "",
-                    mobile: "",
-                    owner: "",
-                    address_1: "",
-                    address_2: "",
-                    city: "",
-                    state: "",
-                    district: "",
-                    pincode: "",
-                    country: "INDIA",
-                    gst: "",
-                    pan: "",
-                    trade_licence: "",
-                    bank: "",
-                    ifse: "",
-                    branch: "",
-                    account_no: ""
-                })
+                if (parseInt(res.status) === 200) {
+                    console.log("hello")
+                    setData({
+                        company_name: "",
+                        email: "",
+                        mobile: "",
+                        owner: "",
+                        address_1: "",
+                        address_2: "",
+                        city: "",
+                        state: "",
+                        district: "",
+                        pincode: "",
+                        country: "INDIA",
+                        gst: "",
+                        pan: "",
+                        trade_licence: "",
+                        bank: "",
+                        ifse: "",
+                        branch: "",
+                        account_no: ""
+                    });
+                    setAlart({
+                        show: true,
+                        title: "Sccesss",
+                        type: "success",
+                        message: "Party Created Successfully..."
+                    });
+                };
             });
         } catch (error) {
             console.log(error);
@@ -283,6 +300,13 @@ const PartyMaster = () => {
                     </MainArea>
                 </form>
             </div >
+            <Alert
+                open={alart.show}
+                type={alart.type}
+                title={alart.title}
+                message={alart.message}
+                onClose={() => setAlart({ ...alart, show: false })}
+            />
         </>
     )
 }

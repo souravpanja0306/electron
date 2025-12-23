@@ -31,13 +31,17 @@ const Party = () => {
         try {
             if (!checkedIds.length) {
                 window.alert("Please select an item, that you want to delete.")
+            } else {
+                await window.api.deleteParty({ ids: checkedIds }).then((res) => {
+                    console.log(res, "res")
+                    if (res.status === 200) {
+                        setCheckedIds([])
+                    };
+                });
+                await window.api.getParty({}).then((data) => {
+                    setParty(data.body);
+                });
             };
-            await window.api.deleteParty({ ids: checkedIds }).then((res) => {
-                console.log(res, "res")
-            });
-            await window.api.getParty({}).then((data) => {
-                setParty(data.body);
-            });
         } catch (error) {
             console.log(error);
         };
@@ -72,27 +76,41 @@ const Party = () => {
                         </thead>
                         <tbody>
                             {
-                                party && party.map((item, index) => {
-                                    return (
-                                        <tr key={index} className="border-b border-slate-700 p-1 hover:bg-slate-800 duration-200 cursor-pointer">
-                                            <td className="p-1 text-center">
-                                                <input type="checkbox" onChange={(e) => handleChecked(e, item.id)} />
-                                            </td>
-                                            <td className="p-1 text-center hover:underline hover:text-blue-600">
-                                                <Link to={`/`}>
-                                                    {item.company_name ? item.company_name : "--"}
-                                                </Link>
-                                            </td>
-                                            <td className="p-1 text-center">{item.mobile ? item.mobile : "--"}</td>
-                                            <td className="p-1 text-center">{item.email ? item.email : "--"}</td>
-                                            <td className="p-1 text-center">{item.owner ? item.owner : "--"}</td>
-                                            <td className="p-1 text-center">{item.pan ? item.pan : "--"}</td>
-                                            <td className="p-1 text-center">{item.gst ? item.gst : "--"}</td>
-                                            <td className="p-1 text-center">{item.trade_licence ? item.trade_licence : "--"}</td>
-                                            <td className="p-1 text-center">{item.account_no ? item.account_no : "--"}</td>
-                                        </tr>
-                                    )
-                                })
+                                party && party.length
+                                    ?
+                                    <>
+                                        {
+                                            party.map((item, index) => {
+                                                return (
+                                                    <tr key={item.id} className="border-b border-slate-700 p-1 hover:bg-slate-800 duration-200 cursor-pointer">
+                                                        <td className="p-1 text-center">
+                                                            <input type="checkbox" onChange={(e) => handleChecked(e, item.id)} />
+                                                        </td>
+                                                        <td className="p-1 text-center hover:underline hover:text-blue-600">
+                                                            <Link to={`/`}>
+                                                                {item.company_name ? item.company_name : "--"}
+                                                            </Link>
+                                                        </td>
+                                                        <td className="p-1 text-center">{item.mobile ? item.mobile : "--"}</td>
+                                                        <td className="p-1 text-center">{item.email ? item.email : "--"}</td>
+                                                        <td className="p-1 text-center">{item.owner ? item.owner : "--"}</td>
+                                                        <td className="p-1 text-center">{item.pan ? item.pan : "--"}</td>
+                                                        <td className="p-1 text-center">{item.gst ? item.gst : "--"}</td>
+                                                        <td className="p-1 text-center">{item.trade_licence ? item.trade_licence : "--"}</td>
+                                                        <td className="p-1 text-center">{item.account_no ? item.account_no : "--"}</td>
+                                                    </tr>
+                                                )
+                                            })
+                                        }
+                                    </>
+                                    :
+                                    <>
+                                        {
+                                            <tr className="border-b border-slate-700 p-1 hover:bg-slate-800 duration-200 cursor-pointer">
+                                                <td className="p-1 text-center" colSpan={9}>No Data Found</td>
+                                            </tr>
+                                        }
+                                    </>
                             }
                         </tbody>
                     </table>

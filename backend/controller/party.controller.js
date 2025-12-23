@@ -4,7 +4,7 @@ const createParty = async (data) => {
     try {
         await PartyService.addParty(data);
         return {
-            status: "200",
+            status: 200,
             message: "Data created successfully",
             body: []
         };
@@ -17,7 +17,7 @@ const getAllParty = async (params = {}) => {
     try {
         const result = await PartyService.listParty(params);
         return {
-            status: "200",
+            status: 200,
             message: "Data fetched successfully",
             body: result
         };
@@ -30,7 +30,7 @@ const deleteParty = async (params = {}) => {
     try {
         const result = await PartyService.removeParty(params);
         return {
-            status: "200",
+            status: 200,
             message: "Data deleted successfully",
             body: result
         };
