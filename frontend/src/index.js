@@ -15,10 +15,12 @@ import SalesReport from './pages/Reports/SalesReport';
 import EditProfile from './pages/Profile/EditProfile';
 import PartyMaster from './pages/Master/PartyMaster/PartyMaster';
 import Party from './pages/Master/PartyMaster/Party';
-import CompanyMaster from './pages/Master/CompanyMaster'
-import Company from './pages/Master/Company'
-import ProductMaster from './pages/Master/ProductMaster'
-import Product from './pages/Master/Product'
+import CompanyMaster from './pages/Master/CompanyMaster';
+import Company from './pages/Master/Company';
+import ProductMaster from './pages/Master/ProductMaster';
+import Product from './pages/Master/Product';
+import Signin from './pages/Auth/Signin';
+import ForgotPassword from './pages/Auth/ForgotPassword';
 
 const router = createHashRouter([
   { path: "/", element: <Layout> <Home /></Layout> },
@@ -36,7 +38,7 @@ const router = createHashRouter([
   { path: "/profile", element: <Layout> <Profile /></Layout> },
   { path: "/edit-profile", element: <Layout> <EditProfile /></Layout> },
 
-  // Master
+  // Master...
   { path: "/add-party", element: <Layout> <PartyMaster /></Layout> },
   { path: "/party", element: <Layout> <Party /></Layout> },
   { path: "/add-company", element: <Layout> <CompanyMaster /></Layout> },
@@ -46,9 +48,13 @@ const router = createHashRouter([
 
   { path: "/about", element: <Layout> <About /></Layout> },
 
+  // Setting...
   { path: "/settings", element: <Layout> <Setting /></Layout> },
   { path: "/change-password", element: <Layout> <Setting /></Layout> },
-  { path: "/forgot-password", element: <Layout> <Setting /></Layout> },
+
+  // Auth...
+  { path: "/signin", element: <Signin /> },
+  { path: "/forgot-password", element: <ForgotPassword /> },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

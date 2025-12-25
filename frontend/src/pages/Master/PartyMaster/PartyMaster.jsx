@@ -90,9 +90,10 @@ const PartyMaster = () => {
                     </div>
                 </ActionArea>
                 <form className='flex flex-col gap-1'>
+                    <br />
+                    <PageTitle>Personal Details</PageTitle>
                     <MainArea>
                         <div className='flex flex-col w-full gap-1'>
-                            <PageTitle>Personal Details</PageTitle>
                             <div className='flex gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Company Name <span className='text-red-600'>*</span></label>
@@ -193,7 +194,7 @@ const PartyMaster = () => {
                                         onChange={(e) => setData({ ...data, district: e.target.value })}
                                     />
                                 </div>
-                                <div className='flex flex-col w-full gap-1'>
+                                <div className='flex flex-col w-full gap-1 min-w-48'>
                                     <label className='text-xs uppercase'>Pincode</label>
                                     <input
                                         className='bg-slate-600 p-1 rounded-md w-full'
@@ -216,9 +217,10 @@ const PartyMaster = () => {
                             </div>
                         </div>
                     </MainArea>
+                    <br />
+                    <PageTitle>Business Details</PageTitle>
                     <MainArea>
                         <div className='flex flex-col w-full gap-1'>
-                            <PageTitle>Business Details</PageTitle>
                             <div className='flex gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>GST</label>

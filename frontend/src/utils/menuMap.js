@@ -86,6 +86,15 @@ const MenuMap = {
                 { title: "View Companies", url: "/company", icon: <AiOutlineBank /> },
             ]
         },
+        {
+            type: "main",
+            title: "signin",
+            url: "#",
+            icon: <AiOutlineEdit />,
+            submenu: [
+                { title: "signin signin", url: "/signin", icon: <AiOutlineUsergroupAdd /> },
+            ]
+        },
     ],
     "settings": [
         { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
