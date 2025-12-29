@@ -24,7 +24,7 @@ const SalesReport = () => {
       <h1 className="text-2xl font-semibold mb-4">Sales Report</h1>
 
       {/* Chart Box */}
-      <div className="bg-slate-800 p-4 rounded-md mb-6">
+      <div className="bg-slate-900 p-4 rounded-md mb-6">
         <h2 className="text-lg font-medium mb-3">Monthly Sales Chart</h2>
 
         <div className="w-full h-64">
@@ -41,12 +41,12 @@ const SalesReport = () => {
       </div>
 
       {/* Table Box */}
-      <div className="bg-slate-800 p-4 rounded-md">
+      <div className="bg-slate-900 p-4 rounded-md">
         <h2 className="text-lg font-medium mb-3">Sales Table</h2>
 
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-700 text-slate-300">
+            <tr className="border-b border-slate-600 text-slate-300">
               <th className="py-2 text-left">Month</th>
               <th className="py-2 text-left">Sales (₹)</th>
             </tr>
@@ -54,7 +54,7 @@ const SalesReport = () => {
 
           <tbody>
             {data.map((item, i) => (
-              <tr key={i} className="border-b border-slate-700">
+              <tr key={i} className="border-b border-slate-600">
                 <td className="py-2">{item.month}</td>
                 <td className="py-2">₹ {item.sales.toLocaleString()}</td>
               </tr>

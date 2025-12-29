@@ -1,42 +1,70 @@
-const PartyService = require("../service/party.service");
+const db = require("../database/connection");
 
-const createParty = async (data) => {
+const addParty = (data) => {
     try {
-        await PartyService.addParty(data);
+        const fields = [
+            "company_name", "email", "mobile", "owner",
+            "address_1", "address_2", "city", "state", "district",
+            "pincode", "country", "gst", "pan", "trade_licence",
+            "bank", "ifse", "branch", "account_no"
+        ];
+        const values = fields.map(item => data[item]);
+        const result = db
+            .prepare(`INSERT INTO party (${fields.join(",")}) VALUES (${fields.map(() => "?").join(",")})`)
+            .run(values);
+
         return {
             status: 200,
-            message: "Data created successfully",
-            body: []
+            message: "Data created successfully.",
+            body: result,
         };
     } catch (error) {
-        console.log("Something went worng: Controller: createParty: ", error);
+        console.log(error)
     };
 };
 
-const getAllParty = async (params = {}) => {
+const listParty = ({
+    id = "",
+    skip = 0,
+    limit = 0
+}) => {
     try {
-        const result = await PartyService.listParty(params);
+        let query = "SELECT * FROM party";
+        let params = [];
+
+        if (id) {
+            query += " WHERE id = ?";
+            params.push(id);
+        };
+
+        if (limit) {
+            query += " LIMIT ? OFFSET ?";
+            params.push(Number(limit), Number(skip));
+        };
+        console.log("🚀 ~ listParty ~ query:", query)
+        let result = db.prepare(query).all(...params);
         return {
             status: 200,
-            message: "Data fetched successfully",
-            body: result
+            message: "Data fetched succesfully.",
+            body: result,
         };
     } catch (error) {
-        console.log("Something went worng: Controller: getAllParty: ", error);
+        console.log(error);
     };
 };
 
-const deleteParty = async (params = {}) => {
+const removeParty = async ({
+    ids = ""
+}) => {
     try {
-        const result = await PartyService.removeParty(params);
-        return {
-            status: 200,
-            message: "Data deleted successfully",
-            body: result
-        };
+        if (!ids.length) throw new Error("ID is required");
+        const placeholders = ids.map(() => "?").join(",");
+
+        let result = await db.prepare(`DELETE FROM party WHERE id IN (${placeholders})`).run(...ids);
+        return result;
     } catch (error) {
-        console.log("Something went worng: Controller: deleteParty: ", error);
+        console.log(error);
     };
 };
 
-module.exports = { createParty, getAllParty, deleteParty };
+module.exports = { addParty, listParty, removeParty };

@@ -95,6 +95,15 @@ const MenuMap = {
                 { title: "signin signin", url: "/signin", icon: <AiOutlineUsergroupAdd /> },
             ]
         },
+        {
+            type: "main",
+            title: "HSN",
+            url: "#",
+            icon: <AiOutlineEdit />,
+            submenu: [
+                { title: "signin signin", url: "/signin", icon: <AiOutlineUsergroupAdd /> },
+            ]
+        },
     ],
     "settings": [
         { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },

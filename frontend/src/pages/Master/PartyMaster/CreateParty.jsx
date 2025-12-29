@@ -8,7 +8,7 @@ import { AiOutlineFileAdd } from "react-icons/ai";
 import Alert from "../../../components/Alert";
 
 
-const PartyMaster = () => {
+const CreateParty = () => {
     const [alart, setAlart] = useState({ show: false });
     const [data, setData] = useState({
         company_name: "",
@@ -45,7 +45,6 @@ const PartyMaster = () => {
             if (!window.api) return;
             await window.api.createParty(data).then((res) => {
                 if (parseInt(res.status) === 200) {
-                    console.log("hello")
                     setData({
                         company_name: "",
                         email: "",
@@ -98,44 +97,45 @@ const PartyMaster = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Company Name <span className='text-red-600'>*</span></label>
                                     <input
-                                        className="bg-slate-600 p-1 rounded-md w-full"
+                                        className="p-1 rounded-md w-full capitalize"
                                         placeholder="Company Name..."
                                         value={data.company_name}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, company_name: e.target.value })}
+                                        onChange={(e) => setData({ ...data, company_name: (e.target.value).toLowerCase() })}
                                         required
+                                        autoCapitalize='true'
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Mobile <span className='text-red-600'>*</span></label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Mobile...'
                                         value={data.mobile}
                                         type="tel"
-                                        onChange={(e) => setData({ ...data, mobile: e.target.value })}
+                                        onChange={(e) => setData({ ...data, mobile: (e.target.value).toLowerCase() })}
                                         required
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Email <span className='text-red-600'>*</span></label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Email...'
                                         value={data.email}
                                         type="email"
-                                        onChange={(e) => setData({ ...data, email: e.target.value })}
+                                        onChange={(e) => setData({ ...data, email: (e.target.value).toLowerCase() })}
                                         required
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Director/Proprietor/Owner</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Director/Proprietor/Owner...'
                                         value={data.owner}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, owner: e.target.value })}
+                                        onChange={(e) => setData({ ...data, owner: (e.target.value).toLowerCase() })}
                                         required
                                     />
                                 </div>
@@ -145,31 +145,31 @@ const PartyMaster = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Address 1</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Address 1...'
                                         value={data.address_1}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, address_1: e.target.value })}
+                                        onChange={(e) => setData({ ...data, address_1: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Address 2</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Address 2...'
                                         value={data.address_2}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, address_2: e.target.value })}
+                                        onChange={(e) => setData({ ...data, address_2: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>City</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='City...'
                                         value={data.city}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, city: e.target.value })}
+                                        onChange={(e) => setData({ ...data, city: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                             </div>
@@ -177,31 +177,31 @@ const PartyMaster = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>State</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='State...'
                                         value={data.state}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, state: e.target.value })}
+                                        onChange={(e) => setData({ ...data, state: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>District</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='District...'
                                         value={data.district}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, district: e.target.value })}
+                                        onChange={(e) => setData({ ...data, district: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1 min-w-48'>
                                     <label className='text-xs uppercase'>Pincode</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Pincode...'
                                         value={data.pincode}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, pincode: e.target.value })}
+                                        onChange={(e) => setData({ ...data, pincode: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
@@ -210,7 +210,7 @@ const PartyMaster = () => {
                                         value="INDIA"
                                         disabled
                                         type="text"
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Country...'
                                     />
                                 </div>
@@ -225,31 +225,31 @@ const PartyMaster = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>GST</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='GST...'
                                         value={data.gst}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, gst: e.target.value })}
+                                        onChange={(e) => setData({ ...data, gst: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>PAN</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='PAN...'
                                         value={data.pan}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, pan: e.target.value })}
+                                        onChange={(e) => setData({ ...data, pan: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Trade Licence</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Trade Licence...'
                                         value={data.trade_licence}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, trade_licence: e.target.value })}
+                                        onChange={(e) => setData({ ...data, trade_licence: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                             </div>
@@ -258,11 +258,11 @@ const PartyMaster = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Bank Name</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Bank Name...'
                                         value={data.bank}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, bank: e.target.value })}
+                                        onChange={(e) => setData({ ...data, bank: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                             </div>
@@ -270,31 +270,31 @@ const PartyMaster = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Branch</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Branch...'
                                         value={data.branch}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, branch: e.target.value })}
+                                        onChange={(e) => setData({ ...data, branch: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>IFSE Code</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='IFSE Code...'
                                         value={data.ifse}
                                         type="tel"
-                                        onChange={(e) => setData({ ...data, ifse: e.target.value })}
+                                        onChange={(e) => setData({ ...data, ifse: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Account No</label>
                                     <input
-                                        className='bg-slate-600 p-1 rounded-md w-full'
+                                        className='p-1 rounded-md w-full capitalize'
                                         placeholder='Account No...'
                                         value={data.account_no}
                                         type="tel"
-                                        onChange={(e) => setData({ ...data, account_no: e.target.value })}
+                                        onChange={(e) => setData({ ...data, account_no: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                             </div>
@@ -313,4 +313,4 @@ const PartyMaster = () => {
     )
 }
 
-export default PartyMaster
+export default CreateParty

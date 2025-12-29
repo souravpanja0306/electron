@@ -19,7 +19,7 @@ const Signin = () => {
   return (
     <>
       <div className='min-h-screen w-full bg-slate-900 flex justify-center items-center'>
-        <div className='w-[400px] bg-slate-800 rounded-md shadow-md shadow-slate-600 p-1'>
+        <div className='w-[400px] bg-slate-900 rounded-md shadow-md shadow-slate-600 p-1'>
           <h1 className='text-white text-center text-xl'>Signin</h1>
 
           <form className='flex flex-col justify-center items-center gap-2' onSubmit={() => handleSubmit()}>
@@ -27,7 +27,7 @@ const Signin = () => {
             <div className='flex flex-col w-full gap-1'>
               <label className='text-white text-xs uppercase'>Username</label>
               <input
-                className="bg-slate-600 p-1 text-white rounded-md w-full lowercase"
+                className="bg-slate-900 p-1 text-white rounded-md w-full lowercase"
                 placeholder="Username"
                 value={data.username}
                 type="text"
@@ -38,7 +38,7 @@ const Signin = () => {
             <div className='flex flex-col w-full gap-1'>
               <label className='text-white text-xs uppercase'>Password</label>
               <input
-                className="bg-slate-600 p-1 text-white rounded-md w-full"
+                className="bg-slate-900 p-1 text-white rounded-md w-full"
                 placeholder="Password"
                 value={data.password}
                 type="password"
@@ -48,13 +48,13 @@ const Signin = () => {
             </div>
             <div className='flex w-full gap-1 justify-between'>
               <div className='text-start text-xs text-white'>Don't have an account?
-                <Link to="/" className='hover:text-blue-600'> click here</Link>
+                <Link to="/" className='hover:text-slate-600'> click here</Link>
               </div>
               <div className='text-start text-xs text-white'>
-                <Link to="/forgot-password" className='hover:text-blue-600'>Forgot password</Link>
+                <Link to="/forgot-password" className='hover:text-slate-600'>Forgot password</Link>
               </div>
             </div>
-            <button type="submit" className='border border-blue-600 p-1 w-full bg-blue-500 rounded-md' >
+            <button type="submit" className='border border-slate-600 p-1 w-full bg-blue-500 rounded-md' >
               Signin
             </button>
           </form>

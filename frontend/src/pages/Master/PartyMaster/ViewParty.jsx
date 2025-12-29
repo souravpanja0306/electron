@@ -8,7 +8,7 @@ import { AiOutlineFileAdd } from "react-icons/ai";
 
 
 
-const Party = () => {
+const ViewParty = () => {
     const [party, setParty] = useState([]);
 
     useEffect(() => {
@@ -62,7 +62,7 @@ const Party = () => {
                 <MainArea>
                     <table className="table-fixed w-full">
                         <thead>
-                            <tr className="border-b border-slate-700 p-1 ">
+                            <tr className="border-b border-slate-600 p-1 ">
                                 <th className="p-1">#</th>
                                 <th className="p-1">Company</th>
                                 <th className="p-1">Mobile</th>
@@ -82,22 +82,22 @@ const Party = () => {
                                         {
                                             party.map((item, index) => {
                                                 return (
-                                                    <tr key={item.id} className="border-b border-slate-700 p-1 hover:bg-slate-800 duration-200 cursor-pointer">
-                                                        <td className="p-1 text-center">
+                                                    <tr key={item.id} className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                                        <td className="p-1 text-center truncate capitalize">
                                                             <input type="checkbox" onChange={(e) => handleChecked(e, item.id)} />
                                                         </td>
-                                                        <td className="p-1 text-center hover:underline hover:text-blue-600">
+                                                        <td className="p-1 text-center truncate capitalize hover:underline hover:text-slate-600">
                                                             <Link to={`/`}>
                                                                 {item.company_name ? item.company_name : "--"}
                                                             </Link>
                                                         </td>
-                                                        <td className="p-1 text-center">{item.mobile ? item.mobile : "--"}</td>
-                                                        <td className="p-1 text-center">{item.email ? item.email : "--"}</td>
-                                                        <td className="p-1 text-center">{item.owner ? item.owner : "--"}</td>
-                                                        <td className="p-1 text-center">{item.pan ? item.pan : "--"}</td>
-                                                        <td className="p-1 text-center">{item.gst ? item.gst : "--"}</td>
-                                                        <td className="p-1 text-center">{item.trade_licence ? item.trade_licence : "--"}</td>
-                                                        <td className="p-1 text-center">{item.account_no ? item.account_no : "--"}</td>
+                                                        <td className="p-1 text-center truncate capitalize">{item.mobile ? item.mobile : "--"}</td>
+                                                        <td className="p-1 text-center truncate capitalize">{item.email ? item.email : "--"}</td>
+                                                        <td className="p-1 text-center truncate capitalize">{item.owner ? item.owner : "--"}</td>
+                                                        <td className="p-1 text-center truncate capitalize">{item.pan ? item.pan : "--"}</td>
+                                                        <td className="p-1 text-center truncate capitalize">{item.gst ? item.gst : "--"}</td>
+                                                        <td className="p-1 text-center truncate capitalize">{item.trade_licence ? item.trade_licence : "--"}</td>
+                                                        <td className="p-1 text-center truncate capitalize">{item.account_no ? item.account_no : "--"}</td>
                                                     </tr>
                                                 )
                                             })
@@ -106,7 +106,7 @@ const Party = () => {
                                     :
                                     <>
                                         {
-                                            <tr className="border-b border-slate-700 p-1 hover:bg-slate-800 duration-200 cursor-pointer">
+                                            <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
                                                 <td className="p-1 text-center" colSpan={9}>No Data Found</td>
                                             </tr>
                                         }
@@ -120,4 +120,4 @@ const Party = () => {
     )
 }
 
-export default Party
+export default ViewParty

@@ -13,8 +13,8 @@ import Profile from './pages/Profile/Profile';
 import Setting from './pages/Setting';
 import SalesReport from './pages/Reports/SalesReport';
 import EditProfile from './pages/Profile/EditProfile';
-import PartyMaster from './pages/Master/PartyMaster/PartyMaster';
-import Party from './pages/Master/PartyMaster/Party';
+import CreateParty from './pages/Master/PartyMaster/CreateParty';
+import ViewParty from './pages/Master/PartyMaster/ViewParty';
 import CompanyMaster from './pages/Master/CompanyMaster';
 import Company from './pages/Master/Company';
 import ProductMaster from './pages/Master/ProductMaster';
@@ -39,8 +39,8 @@ const router = createHashRouter([
   { path: "/edit-profile", element: <Layout> <EditProfile /></Layout> },
 
   // Master...
-  { path: "/add-party", element: <Layout> <PartyMaster /></Layout> },
-  { path: "/party", element: <Layout> <Party /></Layout> },
+  { path: "/add-party", element: <Layout> <CreateParty /></Layout> },
+  { path: "/party", element: <Layout> <ViewParty /></Layout> },
   { path: "/add-company", element: <Layout> <CompanyMaster /></Layout> },
   { path: "/company", element: <Layout> <Company /></Layout> },
   { path: "/add-product", element: <Layout> <ProductMaster /></Layout> },

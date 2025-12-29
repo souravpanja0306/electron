@@ -1,14 +1,14 @@
 const { ipcMain } = require("electron");
-const UserController = require("../controller/user.controller");
+const InvoiceController = require("../controller/");
 
 ipcMain.handle("user:create", (_, data) =>
-    UserController.createUser(data)
+    InvoiceController.addUser(data)
 );
 
 ipcMain.handle("user:list", (_, params) =>
-    UserController.getAllUser(params)
+    InvoiceController.listUsers(params)
 );
 
 ipcMain.handle("user:delete", (_, params) =>
-    UserController.deleteUser(params)
+    InvoiceController.removeUsers(params)
 );

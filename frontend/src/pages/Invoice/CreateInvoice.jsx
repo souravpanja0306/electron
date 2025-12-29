@@ -1,106 +1,319 @@
-import React from 'react'
-import { AiOutlinePlusSquare } from "react-icons/ai";
-import PageTitle from '../../components/PageTitle'
-
+import React, { useEffect, useState } from 'react';
+import PageTitle from '../../components/PageTitle';
+import ActionArea from '../../components/ActionArea';
+import MainArea from '../../components/MainArea';
+import CustomButton from '../../components/CustomButton';
+import { AiOutlinePlusSquare, AiOutlineFileAdd, AiOutlineMinusSquare } from "react-icons/ai";
+import Alert from '../../components/Alert';
 
 const CreateInvoice = () => {
+  let randomNumber = Math.floor(Math.random() * 10000000000);
 
-  let party = [
-    "TechNova",
-    "CloudNest",
-    "CodeCraft",
-    "DataSpark",
-    "NextGen Labs",
-    "AppVibe",
-    "DigitalHive",
-    "StackFlow",
-    "PixelWorks",
-    "SoftEdge",
-    "ByteWave",
-    "InnoTech",
-    "WebOrbit",
-    "LogicLoop",
-    "DevSphere",
-    "SmartOps",
-    "NetFusion",
-    "CodeMint",
-    "AIForge",
-    "CyberNest",
-    "TechBridge",
-    "CloudMatrix",
-    "AppCore",
-    "DataPulse",
-    "SoftNest"
-  ]
+  const [grandTotal, setGrandTotal] = useState({
+    total_quantity: 0,
+    total_value: 0,
+    tax_amount: 0,
+
+  });
+  const [alart, setAlart] = useState({ show: false });
+  const [party, setParty] = useState([]);
+  const [invoiceFields, setInvoiceFields] = useState([
+    { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
+    { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
+    { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
+  ]);
+
+  useEffect(() => {
+    if (!window.api) return;
+    window.api.getParty({}).then((data) => {
+      setParty(data.body);
+    });
+  }, []);
+
+  const handleSubmit = async (e) => {
+  };
+
+  const handleAddFields = (e) => {
+    setInvoiceFields([...invoiceFields, {
+      id: randomNumber,
+      sl_no: "",
+      description: "",
+      hsn: "",
+      quantity: 0,
+      rate: 0,
+      percentage: 0,
+      discount: 0,
+      total: 0,
+    }]);
+  };
+
+  const handleRemoveFields = (id) => {
+    let invoiceData = invoiceFields.find(item => item.id == id);
+    if (invoiceData) {
+      if (invoiceData.description != "") {
+        setAlart({
+          show: true,
+          title: "Error",
+          type: "error",
+          message: "You can’t delete this field because it contains data."
+        });
+        return;
+      };
+      if (invoiceData.quantity != "") {
+        setAlart({
+          show: true,
+          title: "Error",
+          type: "error",
+          message: "You can’t delete this field because it contains data."
+        });
+        return;
+      };
+    };
+    setInvoiceFields(invoiceFields.filter(item => item.id !== id));
+  };
+
+  const handleChange = ({
+    id = "",
+    key = "",
+    value = ""
+  }) => {
+    setInvoiceFields(prev => {
+
+      let updatedData = prev.map(item =>
+        item.id === id ? { ...item, [key]: value } : item
+      );
+
+      let finalQuantity = 0;
+      let finalValue = 0;
+      updatedData.map(item => {
+        finalQuantity += parseFloat(item.quantity);
+        finalValue += (parseFloat(item.quantity) * parseFloat(item.rate));
+      });
+      setGrandTotal({ total_quantity: finalQuantity, total_value: finalValue });
+
+      return updatedData;
+    });
+  };
+
 
   return (
     <>
-      <PageTitle>Create Invoice</PageTitle>
-      <div className="w-full h-full p-4 text-white">
-        <div className='flex flex-col gap-1'>
+      <PageTitle>Create Tax Invoice</PageTitle>
 
-          <div className='flex justify-between border-solid border border-blue-600 rounded-md p-1'>
-            <div className='flex flex-col w-[250px]'>
-              <div className='w-full flex flex-col'>
-                <label>Party/Customer</label>
-                <select className='p-1 w-full rounded-md text-black'>
-                  <option selected disabled>Please Select Party</option>
-                  {
-                    party && party.map(item => {
-                      return (
-                        <div>
-                          <option>{item}</option>
-                        </div>
-                      )
-                    })
-                  }
-                </select>
+      <div className="flex flex-col gap-1">
+        <ActionArea>
+          <div onClick={(e) => handleSubmit(e)}>
+            <CustomButton title={"Save"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+          </div>
+        </ActionArea>
+        <br />
+        <form className='flex flex-col text-sm'>
+
+          <PageTitle>Party Information</PageTitle>
+          <MainArea>
+            <div className='flex gap-1 justify-between w-full'>
+
+              <div className='flex flex-col w-[250px] gap-1'>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs uppercase'>Bill To</label>
+                  <select className="p-1 rounded-md w-full uppercase text-slate-900">
+                    <option selected disabled>Please Select Party</option>
+                    {
+                      party && party.map(item => {
+                        return (
+                          <option value={item.id}>{item.company_name}</option>
+                        )
+                      })
+                    }
+                  </select>
+                </div>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs uppercase'>Date</label>
+                  <input
+                    className="p-1 rounded-md w-full uppercase text-slate-900"
+                    placeholder="Date"
+                    type="date"
+                    required
+                  />
+                </div>
               </div>
-              <div className='w-full flex flex-col'>
-                <label>Date</label>
-                <input className='p-1 w-full rounded-md text-black' />
+
+              <div className='flex flex-col w-[250px] gap-1'>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs uppercase'>Date</label>
+                  <input
+                    className="p-1 rounded-md w-full uppercase text-slate-900"
+                    placeholder="Date"
+                    type="date"
+                    required
+                  />
+                </div>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs uppercase'>Invoice</label>
+                  <input
+                    className="p-1 rounded-md w-full uppercase text-slate-900"
+                    placeholder="Invoice"
+                    type="text"
+                    required
+                  />
+                </div>
               </div>
             </div>
-            <div className='flex flex-col w-[250px]'>
-              <div className='w-full flex flex-col'>
-                <label>Date</label>
-                <input type='date' className='p-1 w-full rounded-md text-black' />
-              </div>
-              <div className='w-full flex flex-col'>
-                <label>Invoice No</label>
-                <input className='p-1 w-full rounded-md text-black' />
-              </div>
+          </MainArea>
+
+          <br />
+          <PageTitle>Invoice Details</PageTitle>
+          <MainArea>
+            <table className='w-full select-none'>
+              <thead>
+                <tr className='text-white text-sm font-semibold text-center'>
+                  <th className='w-12'>Sl. No.</th>
+                  <th className=''>Description</th>
+                  <th className=''>HSN</th>
+                  <th className='w-12'>Quantity</th>
+                  <th className='w-24'>Rate</th>
+                  <th className='w-24'>Amount</th>
+                  <th className='w-12'>Tax</th>
+                  <th className='w-24'>Total</th>
+                  <th className='w-12'>#</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  invoiceFields && invoiceFields.map((item, index) => {
+                    const isLast = index === invoiceFields.length - 1;
+                    return (
+                      <tr key={item.id} className='items-center text-black'>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded-md border border-slate-600 text-center"
+                            value={index + 1}
+                            disabled
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded-md border border-slate-600 capitalize"
+                            value={item.description}
+                            onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "description" })}
+                            type="text"
+                          />
+                        </td>
+                        <td className=''>
+                          <div className='flex flex-col w-full gap-1'>
+                            <select className="w-full p-1 rounded-md border border-slate-600 uppercase">
+                              <option selected disabled>HSN</option>
+                              {party && party.map((item, index) =>
+                                (<option value={item.id}>{150250 + index}</option>)
+                              )}
+                            </select>
+                          </div>
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            value={item.quantity}
+                            onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "quantity" })}
+                            type='number'
+                            onFocus={(e) => e.target.select()}
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            value={item.rate}
+                            onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "rate" })}
+                            type='number'
+                            onFocus={(e) => e.target.select()}
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                            value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
+                            type='number'
+                            readOnly
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                            value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
+                            type='number'
+                            readOnly
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                            value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
+                            type='number'
+                            readOnly
+                          />
+                        </td>
+                        <td className=''>
+                          <div
+                            className="w-full flex justify-center text-2xl cursor-pointer transition"
+                            onClick={(e) => isLast ? handleAddFields(e) : handleRemoveFields(item.id)}
+                          >
+                            {isLast ? (
+                              <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
+                            ) : (
+                              <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
+                }
+              </tbody>
+            </table>
+          </MainArea>
+          <br />
+
+          <div className='flex '>
+            <div className='w-3/4'>
+              <PageTitle>Info</PageTitle>
+            </div>
+
+            <div className='w-1/4'>
+              <PageTitle>Summary</PageTitle>
+              <MainArea>
+                <div className='flex flex-col justify-end gap-1 w-full'>
+
+                  <div className='w-full gap-1'>
+                    <label className='text-xs uppercase'>Total Quantity</label>
+                    <input
+                      className="p-1 rounded-md w-full uppercase text-slate-900 text-end font-bold"
+                      type="number"
+                      value={parseFloat(grandTotal.total_quantity).toFixed()}
+                      readOnly
+                    />
+                  </div>
+                  <div className='w-full gap-1'>
+                    <label className='text-xs uppercase'>Total Value</label>
+                    <input
+                      className="p-1 rounded-md w-full uppercase text-slate-900 text-end font-bold"
+                      type="number"
+                      value={parseFloat(grandTotal.total_value).toFixed(2)}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </MainArea>
             </div>
           </div>
-
-          <div className="border border-blue-600 rounded-md p-1 space-y-2">
-            {/* Header */}
-            <div className="grid grid-cols-[100px_1fr_100px_150px_150px_150px_60px] gap-1 text-white text-sm font-semibold text-center">
-              <div className='p-1 rounded-md'>Sl. No</div>
-              <div className='p-1 rounded-md'>Description</div>
-              <div className='p-1 rounded-md'>HSN</div>
-              <div className='p-1 rounded-md'>Quantity</div>
-              <div className='p-1 rounded-md'>Rate</div>
-              <div className='p-1 rounded-md'>Total</div>
-              <div className='p-1 rounded-md'>#</div>
-            </div>
-
-            {/* Row */}
-            <div className="grid grid-cols-[100px_1fr_100px_150px_150px_150px_60px] gap-1 items-center text-black">
-              <input className="p-1 rounded-md border border-blue-600 text-center " placeholder="1" />
-              <input className="p-1 rounded-md border border-blue-600 capitalize" placeholder="Description" />
-              <input className="p-1 rounded-md border border-blue-600 uppercase text-center " placeholder="HSN" />
-              <input className="p-1 rounded-md border border-blue-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" placeholder="Qty" type='number' />
-              <input className="p-1 rounded-md border border-blue-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" placeholder="Rate" type='number' />
-              <input className="p-1 rounded-md border border-blue-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" placeholder="Total" type='number' />
-              <button className="flex justify-center text-2xl text-blue-600 hover:text-green-600 transition">
-                <AiOutlinePlusSquare />
-              </button>
-            </div>
-          </div>
-
-        </div>
+        </form>
       </div>
+
+      <Alert
+        open={alart.show}
+        type={alart.type}
+        title={alart.title}
+        message={alart.message}
+        onClose={() => setAlart({ ...alart, show: false })}
+      />
     </>
   )
 }

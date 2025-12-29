@@ -2,6 +2,25 @@ module.exports = `
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    email TEXT
+    mobile TEXT,
+    email TEXT,
+    username TEXT UNIQUE,
+    password 
+    address_1 TEXT,
+    address_2 TEXT,
+    city TEXT,
+    state TEXT,
+    district TEXT,
+    pincode TEXT,
+    country TEXT,
+    gst TEXT,
+    pan TEXT,
+    trade_licence TEXT,
+    bank TEXT,
+    ifse TEXT,
+    branch TEXT,
+    account_no TEXT
+    is_active INTEGER DEFAULT 1,
+    is_deleted INTEGER DEFAULT 0
   )
 `;

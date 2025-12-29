@@ -13,7 +13,7 @@ const Alert = ({
         success: "border-green-600 text-green-600",
         error: "border-red-600 text-red-600",
         warning: "border-yellow-600 text-yellow-600",
-        info: "border-blue-600 text-blue-600",
+        info: "border-slate-600 text-slate-600",
     };
 
     return (
@@ -25,7 +25,7 @@ const Alert = ({
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={onClose}
-                        className="px-3 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600"
+                        className="px-3 py-1 text-xs rounded bg-slate-900 hover:bg-slate-600"
                     >
                         OK
                     </button>

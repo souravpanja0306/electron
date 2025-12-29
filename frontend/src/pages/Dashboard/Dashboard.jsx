@@ -35,24 +35,24 @@ const Dashboard = () => {
 
     return (
         <div className="p-4">
-            <table className="min-w-full border border-slate-700 text-xs text-white">
-                <thead className="bg-slate-800">
+            <table className="min-w-full border border-slate-600 text-xs text-white">
+                <thead className="bg-slate-900">
                     <tr>
-                        <th className="border border-slate-700 px-3 py-2">ID</th>
-                        <th className="border border-slate-700 px-3 py-2">Name</th>
-                        <th className="border border-slate-700 px-3 py-2">Email</th>
-                        <th className="border border-slate-700 px-3 py-2">Action</th>
+                        <th className="border border-slate-600 px-3 py-2">ID</th>
+                        <th className="border border-slate-600 px-3 py-2">Name</th>
+                        <th className="border border-slate-600 px-3 py-2">Email</th>
+                        <th className="border border-slate-600 px-3 py-2">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {users.map(u => (
-                        <tr key={u.id} className="hover:bg-slate-800">
-                            <td className="border border-slate-700 px-3 py-2">{u.id}</td>
-                            <td className="border border-slate-700 px-3 py-2">{u.name}</td>
-                            <td className="border border-slate-700 px-3 py-2">{u.email}</td>
-                            <td className="border border-slate-700 px-3 py-2">
+                        <tr key={u.id} className="hover:bg-slate-600">
+                            <td className="border border-slate-600 px-3 py-2">{u.id}</td>
+                            <td className="border border-slate-600 px-3 py-2">{u.name}</td>
+                            <td className="border border-slate-600 px-3 py-2">{u.email}</td>
+                            <td className="border border-slate-600 px-3 py-2">
                                 <button
-                                    className="mb-4 px-3 py-1 bg-blue-600 rounded"
+                                    className="mb-4 px-3 py-1 bg-slate-600 rounded"
                                     onClick={() => submitDelete(u.id)}
                                 >
                                     Delete User
@@ -64,7 +64,7 @@ const Dashboard = () => {
             </table>
 
             <button
-                className="mb-4 px-3 py-1 bg-blue-600 rounded"
+                className="mb-4 px-3 py-1 bg-slate-600 rounded"
                 onClick={(e) => submitData(e)}
             >
                 Add User

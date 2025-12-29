@@ -9,7 +9,7 @@ const Setting = () => {
             <ActionArea>
                 <div className='flex flex-col w-full gap-1'>
                     <label className='text-white text-xs uppercase'>Theme</label>
-                    <select className='bg-slate-600 p-1 text-white rounded-md w-48'>
+                    <select className='bg-slate-900 p-1 text-white rounded-md w-48'>
                         <option selected disabled>Select Theme</option>
                         <option>Light</option>
                         <option>Dark</option>

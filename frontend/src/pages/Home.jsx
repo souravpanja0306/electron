@@ -6,9 +6,9 @@ const Home = () => {
       <PageTitle>About</PageTitle>
 
       <div className="w-full h-full flex justify-center items-center p-6">
-        <div className="w-[500px] bg-slate-800 rounded-md p-6 text-white shadow-lg">
+        <div className="w-[500px] bg-slate-900 rounded-md p-6 text-white shadow-lg">
           <h1 className="text-2xl font-semibold mb-2">Welcome to Anthropic</h1>
-          <p className="text-slate-400 mb-4">
+          <p className="text-slate-600 mb-4">
             Your intelligent business management system.
           </p>
 
@@ -19,7 +19,7 @@ const Home = () => {
             <p><span className="font-semibold text-white">Location:</span> Kolkata, India</p>
           </div>
 
-          <div className="mt-5 p-4 rounded-md bg-slate-700 text-sm text-slate-300">
+          <div className="mt-5 p-4 rounded-md bg-slate-900 text-sm text-slate-300">
             Helping businesses automate billing, inventory, finance & day-to-day operations.
           </div>
         </div>

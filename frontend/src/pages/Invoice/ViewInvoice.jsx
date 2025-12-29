@@ -33,14 +33,14 @@ const ViewInvoice = () => {
                 placeholder="Search invoice or customer..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="w-full p-2 mb-4 rounded bg-slate-800"
+                className="w-full p-2 mb-4 rounded bg-slate-900"
             />
 
             {/* Table */}
-            <div className="bg-slate-800 p-4 rounded-md">
+            <div className="bg-slate-900 p-4 rounded-md">
                 <table className="w-full text-sm">
                     <thead>
-                        <tr className="border-b border-slate-700 text-slate-300">
+                        <tr className="border-b border-slate-600 text-slate-300">
                             <th className="py-2 text-left">Invoice</th>
                             <th className="py-2 text-left">Customer</th>
                             <th className="py-2 text-left">Amount</th>
@@ -50,7 +50,7 @@ const ViewInvoice = () => {
 
                     <tbody>
                         {paginated.map((item) => (
-                            <tr key={item.id} className="border-b border-slate-700">
+                            <tr key={item.id} className="border-b border-slate-600">
                                 <td className="py-2">{item.invoice}</td>
                                 <td className="py-2">{item.customer}</td>
                                 <td className="py-2">₹ {item.amount}</td>
@@ -65,7 +65,7 @@ const ViewInvoice = () => {
                     <button
                         disabled={page === 1}
                         onClick={() => setPage(page - 1)}
-                        className="px-3 py-1 bg-slate-700 rounded disabled:opacity-40"
+                        className="px-3 py-1 bg-slate-900 rounded disabled:opacity-40"
                     >
                         Prev
                     </button>
@@ -77,7 +77,7 @@ const ViewInvoice = () => {
                     <button
                         disabled={page === totalPages}
                         onClick={() => setPage(page + 1)}
-                        className="px-3 py-1 bg-slate-700 rounded disabled:opacity-40"
+                        className="px-3 py-1 bg-slate-900 rounded disabled:opacity-40"
                     >
                         Next
                     </button>

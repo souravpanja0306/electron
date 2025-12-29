@@ -26,7 +26,7 @@ const Profile = () => {
         <h1 className="text-2xl font-semibold mb-4">Profile</h1>
 
         {/* Profile card */}
-        <div className="bg-slate-800 p-4 rounded-md flex gap-4 items-center">
+        <div className="bg-slate-900 p-4 rounded-md flex gap-4 items-center">
           <img
             src="https://via.placeholder.com/80"
             alt="profile"
@@ -35,12 +35,12 @@ const Profile = () => {
 
           <div>
             <h2 className="text-xl font-medium">Sourav Panja</h2>
-            <p className="text-slate-400 text-sm">Software Engineer</p>
+            <p className="text-slate-600 text-sm">Software Engineer</p>
           </div>
         </div>
 
         {/* Account */}
-        <div className="mt-4 bg-slate-800 p-4 rounded-md">
+        <div className="mt-4 bg-slate-900 p-4 rounded-md">
           <h3 className="text-lg font-semibold mb-2">Account Details</h3>
 
           <div className="space-y-2 text-sm text-slate-300">
@@ -51,7 +51,7 @@ const Profile = () => {
         </div>
 
         {/* Subscription */}
-        <div className="mt-4 bg-slate-800 p-4 rounded-md">
+        <div className="mt-4 bg-slate-900 p-4 rounded-md">
           <h3 className="text-lg font-semibold mb-3">Subscription</h3>
 
           <div className="flex justify-between items-center">
@@ -59,8 +59,8 @@ const Profile = () => {
               <p className="text-slate-300 text-sm">Current Plan:</p>
               <p className="text-xl font-medium">{subscription.plan}</p>
 
-              <p className="text-slate-400 text-sm mt-1">Price: {subscription.price}</p>
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-600 text-sm mt-1">Price: {subscription.price}</p>
+              <p className="text-slate-600 text-sm">
                 Remaining Days:{" "}
                 <span className="text-green-400 font-semibold">
                   {subscription.daysLeft}
@@ -68,14 +68,14 @@ const Profile = () => {
               </p>
             </div>
 
-            <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium">
+            <button className="bg-slate-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium">
               Upgrade Plan
             </button>
           </div>
         </div>
 
         {/* Business Details */}
-        <div className="mt-4 bg-slate-800 p-4 rounded-md">
+        <div className="mt-4 bg-slate-900 p-4 rounded-md">
           <h3 className="text-lg font-semibold mb-3">Business Details</h3>
 
           <div className="space-y-2 text-sm text-slate-300">

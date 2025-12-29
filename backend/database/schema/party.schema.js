@@ -18,6 +18,8 @@ module.exports = `
     bank TEXT,
     ifse TEXT,
     branch TEXT,
-    account_no TEXT
+    account_no TEXT,
+    is_active INTEGER DEFAULT 1,
+    is_deleted INTEGER DEFAULT 0
   );
 `;
