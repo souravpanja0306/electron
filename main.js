@@ -3,6 +3,7 @@ const path = require("path");
 
 require(path.join(__dirname, "backend/router/user.ipc.js"));
 require(path.join(__dirname, "backend/router/party.ipc.js"));
+require(path.join(__dirname, "backend/router/auth.ipc.js"));
 
 function createWindow() {
     const win = new BrowserWindow({

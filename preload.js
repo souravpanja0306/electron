@@ -19,4 +19,9 @@ contextBridge.exposeInMainWorld("api", {
     createInvoice: (data) => ipcRenderer.invoke("invoice:create", data),
     updateInvoice: (data) => ipcRenderer.invoke("invoice:update", data),
     deleteInvoice: (id) => ipcRenderer.invoke("invoice:delete", id),
+
+    // SIGNIN
+    signin: () => ipcRenderer.invoke("auth:signin"),
+    forgotPassword: (id) => ipcRenderer.invoke("auth:forgot", id),
+    resetPassword: (data) => ipcRenderer.invoke("auth:reset", data),
 });

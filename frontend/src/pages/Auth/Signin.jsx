@@ -11,6 +11,10 @@ const Signin = () => {
 
   const handleSubmit = async () => {
     try {
+      console.log(data)
+      await window.api.signin(data).then((res) => {
+
+      })
     } catch (error) {
       console.log(error)
     };
@@ -18,7 +22,7 @@ const Signin = () => {
 
   return (
     <>
-      <div className='min-h-screen w-full bg-slate-900 flex justify-center items-center'>
+      <div className='min-h-screen w-full bg-slate-900 flex justify-center items-center select-none'>
         <div className='w-[400px] bg-slate-900 rounded-md shadow-md shadow-slate-600 p-1'>
           <h1 className='text-white text-center text-xl'>Signin</h1>
 
@@ -27,7 +31,7 @@ const Signin = () => {
             <div className='flex flex-col w-full gap-1'>
               <label className='text-white text-xs uppercase'>Username</label>
               <input
-                className="bg-slate-900 p-1 text-white rounded-md w-full lowercase"
+                className="p-1 rounded-md w-full uppercase text-slate-900"
                 placeholder="Username"
                 value={data.username}
                 type="text"
@@ -38,7 +42,7 @@ const Signin = () => {
             <div className='flex flex-col w-full gap-1'>
               <label className='text-white text-xs uppercase'>Password</label>
               <input
-                className="bg-slate-900 p-1 text-white rounded-md w-full"
+                className="p-1 rounded-md w-full text-slate-900"
                 placeholder="Password"
                 value={data.password}
                 type="password"
