@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import PageTitle from '../../components/PageTitle';
-import ActionArea from '../../components/ActionArea';
-import MainArea from '../../components/MainArea';
-import CustomButton from '../../components/CustomButton';
+import PageTitle from '../../../components/PageTitle';
+import ActionArea from '../../../components/ActionArea';
+import MainArea from '../../../components/MainArea';
+import CustomButton from '../../../components/CustomButton';
 import { AiOutlinePlusSquare, AiOutlineFileAdd, AiOutlineMinusSquare } from "react-icons/ai";
-import Alert from '../../components/Alert';
+import Alert from '../../../components/Alert';
+import { useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+
+
+// Functions...
+import { handleSubmit, handleGetParty } from "./CreateInvoiceService"
 
 const CreateInvoice = () => {
   let randomNumber = Math.floor(Math.random() * 10000000000);
@@ -13,7 +19,6 @@ const CreateInvoice = () => {
     total_quantity: 0,
     total_value: 0,
     tax_amount: 0,
-
   });
   const [alart, setAlart] = useState({ show: false });
   const [party, setParty] = useState([]);
@@ -23,15 +28,15 @@ const CreateInvoice = () => {
     { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
   ]);
 
+  const loads = async () => {
+    let result = await handleGetParty();
+    setParty(result);
+  };
   useEffect(() => {
-    if (!window.api) return;
-    window.api.getParty({}).then((data) => {
-      setParty(data.body);
-    });
+    loads();
   }, []);
 
-  const handleSubmit = async (e) => {
-  };
+
 
   const handleAddFields = (e) => {
     setInvoiceFields([...invoiceFields, {
@@ -95,6 +100,24 @@ const CreateInvoice = () => {
     });
   };
 
+  const navigate = useNavigate();
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        handleSubmit(e, invoiceFields);
+      };
+
+      if (e.ctrlKey && e.key === 'i') {
+        e.preventDefault();
+        navigate("/view-invoice");
+      };
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [invoiceFields]);
+
+
 
   return (
     <>
@@ -102,9 +125,12 @@ const CreateInvoice = () => {
 
       <div className="flex flex-col gap-1">
         <ActionArea>
-          <div onClick={(e) => handleSubmit(e)}>
-            <CustomButton title={"Save"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+          <div onClick={(e) => handleSubmit(e, invoiceFields)}>
+            <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
           </div>
+          <Link to="/view-invoice">
+            <CustomButton title={"View (Ctrl+I)"} color={"yellow"}><AiOutlineFileAdd /></CustomButton>
+          </Link>
         </ActionArea>
         <br />
         <form className='flex flex-col text-sm'>
