@@ -8,13 +8,13 @@ import { AiOutlineFileAdd } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 
 // Services...
-import { getParty } from "./ViewPartyService"
+import { handleGetParty } from "./ViewPartyService"
 
 const ViewParty = () => {
     const [party, setParty] = useState([]);
 
     const getPartys = async () => {
-        let result = await getParty();
+        let result = await handleGetParty();
         if (result.body.length) {
             result.body.map(item => item.is_selected = false)
             setParty(result.body);

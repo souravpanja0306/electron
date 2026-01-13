@@ -58,11 +58,26 @@ exports.listParty = async (req, res) => {
 exports.removeParty = async (req, res) => {
     let response = contents.defaultResponse;
     try {
-        if (!ids.length) throw new Error("ID is required");
-        const placeholders = ids.map(() => "?").join(",");
+        const { ids } = req.body;
+        if (!ids) {
+            response.status = 400;
+            response.message = "IDs are required";
+            response.body = [];
+            return res.json(response).status(response.status);
+        };
 
-        let result = await db.prepare(`DELETE FROM party WHERE id IN (${placeholders})`).run(...ids);
-        return result;
+        let result = await PartyService.deleteParty({ ids: ids });
+
+        if (result.length) {
+            response.status = 200;
+            response.message = "Data deleted succesfully.";
+            response.body = result;
+        } else {
+            response.status = 204;
+            response.message = "Data not found.";
+            response.body = [];
+        };
+
     } catch (error) {
         console.log(error);
     };

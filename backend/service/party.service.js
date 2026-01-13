@@ -44,10 +44,22 @@ exports.getParty = async ({
             query += " LIMIT ? OFFSET ?";
             params.push(Number(limit), Number(skip));
         };
-        console.log("🚀 ~ query:", query);
 
         let result = db.prepare(query).all(...params);
 
+        return result;
+    } catch (error) {
+        console.log(error)
+    };
+};
+
+exports.deleteParty = async ({
+    ids = "",
+}) => {
+    try {
+        const placeholders = ids.map(() => "?").join(",");
+
+        let result = await db.prepare(`DELETE FROM party WHERE id IN (${placeholders})`).run(...ids);
         return result;
     } catch (error) {
         console.log(error)

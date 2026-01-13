@@ -28,15 +28,15 @@ const CreateInvoice = () => {
     { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
   ]);
 
-  const loads = async () => {
+  const getPartys = async () => {
     let result = await handleGetParty();
-    setParty(result);
+    if (result.body.length) {
+      setParty(result.body);
+    };
   };
   useEffect(() => {
-    loads();
+    getPartys();
   }, []);
-
-
 
   const handleAddFields = (e) => {
     setInvoiceFields([...invoiceFields, {
