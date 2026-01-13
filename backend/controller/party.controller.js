@@ -1,61 +1,62 @@
-const db = require("../database/connection");
+const contents = require("../content/contents");
+const PartyService = require("../service/party.service")
 
-const addParty = (data) => {
+exports.addParty = async (req, res) => {
+    let response = contents.defaultResponse;
     try {
-        const fields = [
-            "company_name", "email", "mobile", "owner",
-            "address_1", "address_2", "city", "state", "district",
-            "pincode", "country", "gst", "pan", "trade_licence",
-            "bank", "ifse", "branch", "account_no"
-        ];
-        const values = fields.map(item => data[item]);
-        const result = db
-            .prepare(`INSERT INTO party (${fields.join(",")}) VALUES (${fields.map(() => "?").join(",")})`)
-            .run(values);
-
-        return {
-            status: 200,
-            message: "Data created successfully.",
-            body: result,
+        let isMobileExist = await PartyService.getParty({ mobile: req.body.mobile });
+        if (isMobileExist.length) {
+            response.status = 409;
+            response.message = "Mobile number already registered.";
+            response.body = [];
+            return res.json(response).status(response.status);
         };
+        let isEmailExist = await PartyService.getParty({ mobile: req.body.email });
+        if (isEmailExist.length) {
+            response.status = 409;
+            response.message = "Email already registered.";
+            response.body = [];
+            return res.json(response).status(response.status);
+        };
+
+        let result = await PartyService.createParty(req.body);
+
+        response.status = 200;
+        response.message = "Data created successfully.";
+        response.body = result;
     } catch (error) {
         console.log(error)
     };
+    return res.json(response).status(response.status);
 };
 
-const listParty = ({
-    id = "",
-    skip = 0,
-    limit = 0
-}) => {
+exports.listParty = async (req, res) => {
+    let response = contents.defaultResponse;
     try {
-        let query = "SELECT * FROM party";
-        let params = [];
+        const { id } = req.query;
 
-        if (id) {
-            query += " WHERE id = ?";
-            params.push(id);
-        };
+        let search_key = {};
+        if (id) search_key["id"] = id;
 
-        if (limit) {
-            query += " LIMIT ? OFFSET ?";
-            params.push(Number(limit), Number(skip));
-        };
-        console.log("🚀 ~ listParty ~ query:", query)
-        let result = db.prepare(query).all(...params);
-        return {
-            status: 200,
-            message: "Data fetched succesfully.",
-            body: result,
+        let result = await PartyService.getParty(search_key);
+
+        if (result.length) {
+            response.status = 200;
+            response.message = "Data fetched succesfully.";
+            response.body = result;
+        } else {
+            response.status = 204;
+            response.message = "Data not found.";
+            response.body = [];
         };
     } catch (error) {
         console.log(error);
     };
+    return res.json(response).status(response.status);
 };
 
-const removeParty = async ({
-    ids = ""
-}) => {
+exports.removeParty = async (req, res) => {
+    let response = contents.defaultResponse;
     try {
         if (!ids.length) throw new Error("ID is required");
         const placeholders = ids.map(() => "?").join(",");
@@ -65,6 +66,5 @@ const removeParty = async ({
     } catch (error) {
         console.log(error);
     };
+    return res.json(response).status(response.status);
 };
-
-module.exports = { addParty, listParty, removeParty };

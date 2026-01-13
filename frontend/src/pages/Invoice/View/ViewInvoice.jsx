@@ -1,25 +1,29 @@
 import { useEffect, useState } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { AiOutlineFileAdd } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
+
+// Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import { Link, NavLink } from "react-router-dom";
 import Alert from '../../../components/Alert';
-import { AiOutlineFileAdd } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+
+// Service...
+import { handleGetParty } from "./ViewInvoiceService"
 
 
 const ViewInvoices = () => {
     const [alart, setAlart] = useState({ show: false });
     const [party, setParty] = useState([]);
+
+    const loads = async () => {
+        let result = await handleGetParty({});
+        setParty(result);
+    };
     useEffect(() => {
-        if (!window.api) return;
-        window.api.getParty({}).then((data) => {
-            if (data.body.length) {
-                data.body.map(item => item.is_selected = false)
-                setParty(data.body);
-            };
-        });
+        loads();
     }, []);
 
     const [checkedIds, setCheckedIds] = useState([]);

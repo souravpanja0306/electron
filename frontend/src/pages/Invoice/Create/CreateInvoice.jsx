@@ -227,11 +227,17 @@ const CreateInvoice = () => {
                         </td>
                         <td className=''>
                           <div className='flex flex-col w-full gap-1'>
-                            <select className="w-full p-1 rounded-md border border-slate-600 uppercase">
+                            <select
+                              className="w-full p-1 rounded-md border border-slate-600 uppercase"
+                              defaultValue=""
+                              onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "hsn" })}
+                            >
                               <option selected disabled>HSN</option>
-                              {party && party.map((item, index) =>
-                                (<option value={item.id}>{150250 + index}</option>)
-                              )}
+                              {
+                                party && party.map((item, index) => (
+                                  <option>{150250 + index}</option>
+                                ))
+                              }
                             </select>
                           </div>
                         </td>

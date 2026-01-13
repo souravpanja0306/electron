@@ -7,18 +7,21 @@ import { Link, NavLink } from "react-router-dom";
 import { AiOutlineFileAdd } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 
+// Services...
+import { getParty } from "./ViewPartyService"
 
 const ViewParty = () => {
     const [party, setParty] = useState([]);
 
+    const getPartys = async () => {
+        let result = await getParty();
+        if (result.body.length) {
+            result.body.map(item => item.is_selected = false)
+            setParty(result.body);
+        };
+    };
     useEffect(() => {
-        if (!window.api) return;
-        window.api.getParty({}).then((data) => {
-            if (data.body.length) {
-                data.body.map(item => item.is_selected = false)
-                setParty(data.body);
-            };
-        });
+        getPartys();
     }, []);
 
     const [checkedIds, setCheckedIds] = useState([]);
