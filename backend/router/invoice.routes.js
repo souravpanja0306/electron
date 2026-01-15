@@ -1,24 +1,29 @@
-// // Package...
-// const express = require("express");
-// const router = express.Router()
+// Package...
+const express = require("express");
+const router = express.Router()
 
-// // Controllers...
-// const InvoiceController = require("../controller/invoice.controller");
+// Controllers...
+const InvoiceController = require("../controller/invoice.controller");
 
-// router.post(
-//     "/user-create",
-//     InvoiceController.addUser()
-// );
+router.get(
+    "/generate-invoice-no",
+    InvoiceController.generateInvoiceNo
+);
 
-// router.get(
-//     "/user-list",
-//     InvoiceController.listUsers()
-// );
+router.post(
+    "/invoice-create",
+    InvoiceController.createInvoice
+);
 
-// router.delete(
-//     "/user-delete",
-//     InvoiceController.removeUsers()
-// );
+router.get(
+    "/invoice-list",
+    InvoiceController.getAllInvoice
+);
+
+router.delete(
+    "/invoice-delete",
+    InvoiceController.deleteInvoice
+);
 
 
-// module.exports = router;
+module.exports = router;

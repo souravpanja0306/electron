@@ -1,15 +1,18 @@
 module.exports = `
     CREATE TABLE IF NOT EXISTS invoice (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      party_id INTEGER,
+      type TEXT,
       invoice_no TEXT UNIQUE,
+      eway_bill TEXT,
+      party_id INTEGER,
+      transporter TEXT,
+      placeOfSupply TEXT,
+      data TEXT,
       invoice_date TEXT,
       total_amount REAL,
       created_by INTEGER,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       is_active INTEGER DEFAULT 1,
-      is_deleted INTEGER DEFAULT 0,
-      FOREIGN KEY (party_id) REFERENCES party(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
+      is_deleted INTEGER DEFAULT 0
     );
 `

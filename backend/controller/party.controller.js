@@ -1,8 +1,17 @@
+// Package...
+const moment = require("moment");
+
+// Contents...
 const contents = require("../content/contents");
-const PartyService = require("../service/party.service")
+
+// Services...
+const PartyService = require("../service/party.service");
+const AuthService = require("../service/auth.service")
+const InvoiceService = require("../service/invoice.service");
+
 
 exports.addParty = async (req, res) => {
-    let response = contents.defaultResponse;
+    let response = { ...contents.defaultResponse };
     try {
         let isMobileExist = await PartyService.getParty({ mobile: req.body.mobile });
         if (isMobileExist.length) {
@@ -31,7 +40,7 @@ exports.addParty = async (req, res) => {
 };
 
 exports.listParty = async (req, res) => {
-    let response = contents.defaultResponse;
+    let response = { ...contents.defaultResponse };
     try {
         const { id } = req.query;
 
@@ -56,7 +65,7 @@ exports.listParty = async (req, res) => {
 };
 
 exports.removeParty = async (req, res) => {
-    let response = contents.defaultResponse;
+    let response = { ...contents.defaultResponse };
     try {
         const { ids } = req.body;
         if (!ids) {

@@ -1,38 +1,81 @@
+// Package...
+const moment = require("moment");
+const jwt = require("jsonwebtoken")
 
+// Contents...
+const contents = require("../content/contents");
 
-const signin = async ({
+// Services...
+const UserService = require("../service/user.service");
+const AdminService = require("../service/admin.service")
+const PartyService = require("../service/party.service");
+const AuthService = require("../service/auth.service")
+const InvoiceService = require("../service/invoice.service");
 
-}) => {
+exports.signin = async (req, res) => {
+    let response = { ...contents.defaultResponse };
     try {
-        console.log("hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello ")
+        const { username, password } = req.body;
+        if (!username) {
+            response.status = 403;
+            response.message = "Username Required.";
+            response.body = result;
+            return res.json(response).status(response.status);
+        };
+        if (!password) {
+            response.status = 403;
+            response.message = "Username Required.";
+            response.body = result;
+            return res.json(response).status(response.status);
+        };
+        let getUserDetails = await UserService.getUsers({
+            password: password,
+            username: username,
+        });
+        if (getUserDetails.length) {
+            let tokenData = {
+                TOKEN_UID: getUserDetails[0].id,
+                TOKEN_MOBILE: getUserDetails[0].mobile,
+                TONEN_USERNAME: getUserDetails[0].username,
+                TONEN_NAME: getUserDetails[0].name,
+            };
+            let token = jwt.sign(tokenData, "secretOrPrivateKey");
 
+            response.status = 200;
+            response.message = "User Signin Succesfull";
+            response.body = {
+                name: getUserDetails[0].name,
+                id: getUserDetails[0].id,
+                token: token,
+            };
+        } else {
+            response.status = 403;
+            response.message = "Incorrect Username Or Password! Please Contect to Adminitrator...";
+            response.body = result;
+            return res.json(response).status(response.status);
+        };
     } catch (error) {
-        console.log(error);
+        console.log(`Something went wrong: controller: signin: ${error}`);
     };
+    return res.json(response).status(response.status);
 };
 
-const forgot = async ({
-
-}) => {
+exports.forgotPassword = async (req, res) => {
+    let response = { ...contents.defaultResponse };
     try {
 
     } catch (error) {
-        console.log(error);
+        console.log(`Something went wrong: controller: forgotPassword: ${error}`);
     };
+    return res.json(response).status(response.status);
 };
 
-const reset = async ({
-
-}) => {
+exports.resetPassword = async (req, res) => {
+    let response = { ...contents.defaultResponse };
     try {
 
     } catch (error) {
-        console.log(error);
+        console.log(`Something went wrong: controller: resetPassword: ${error}`);
     };
-};
-
-module.exports = {
-    forgot,
-    reset,
-    signin
+    return res.json(response).status(response.status);
 };

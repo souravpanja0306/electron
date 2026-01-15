@@ -1,5 +1,5 @@
 const db = require("../database/connection");
-
+db.exec(require("../database/schema/party.schema"));
 
 exports.createParty = async (data) => {
     try {
@@ -23,33 +23,37 @@ exports.getParty = async ({
 }) => {
     try {
         let query = "SELECT * FROM party";
+        let search_key = [];
         let params = [];
 
         if (id) {
-            query += " WHERE id = ?";
+            search_key.push("id = ?");
             params.push(id);
         };
-
         if (mobile) {
-            query += " WHERE mobile = ?";
+            search_key.push("mobile = ?");
             params.push(mobile);
         };
-
         if (email) {
-            query += " WHERE email = ?";
+            search_key.push("email = ?");
             params.push(email);
         };
 
-        if (limit && skip) {
+        if (search_key.length) query = `${query} WHERE ${search_key.join(" AND ")}`;
+        else query = `${query}`;
+
+        if (limit) {
             query += " LIMIT ? OFFSET ?";
-            params.push(Number(limit), Number(skip));
+            params.push(Number(limit));
         };
-
+        if (skip) {
+            query += " OFFSET ?";
+            params.push(Number(skip));
+        };
         let result = db.prepare(query).all(...params);
-
         return result;
     } catch (error) {
-        console.log(error)
+        console.log(error);
     };
 };
 

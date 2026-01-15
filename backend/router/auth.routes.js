@@ -5,14 +5,19 @@ const router = express.Router()
 // Controllers...
 const AuthController = require("../controller/auth.controller");
 
-router.post("auth:signin",
-    AuthController.signin()
+router.post(
+    "/signin",
+    AuthController.signin
 );
 
-router.post("auth:forgot",
-    AuthController.forgot()
+router.get(
+    "/forgot-password",
+    AuthController.forgotPassword
 );
 
-router.post("auth:reset",
-    AuthController.reset()
+router.get(
+    "/reset-password",
+    AuthController.resetPassword
 );
+
+module.exports = router;

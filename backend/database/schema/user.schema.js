@@ -5,7 +5,7 @@ module.exports = `
     mobile TEXT,
     email TEXT,
     username TEXT UNIQUE,
-    password 
+    password TEXT,
     address_1 TEXT,
     address_2 TEXT,
     city TEXT,

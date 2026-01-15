@@ -6,16 +6,24 @@ const router = express.Router()
 const UserController = require("../controller/user.controller");
 
 router.post(
-    "/user-create",
-    UserController.addUser(data)
+    "/create-users",
+    UserController.addUser
 );
 
 router.get(
-    "/user-list",
-    UserController.listUsers(params)
+    "/get-all-users",
+    UserController.listUsers
 );
+
+router.get(
+    "/get-user/:id",
+    UserController.getUsers
+);
+
 
 router.delete(
     "/user-delete",
-    UserController.removeUsers(params)
+    UserController.removeUsers
 );
+
+module.exports = router;
