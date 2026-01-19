@@ -16,7 +16,7 @@ const CustomButton = ({
     return (
         <div className={`min-w-16 p-1 cursor-pointer rounded-md text-xs flex gap-1 items-center 
         justify-center select-none ${COLORS[color]}`}>
-            <div className='text-xs'>
+            <div className='text-lg'>
                 {children}
             </div>
             <span className='uppercase'>

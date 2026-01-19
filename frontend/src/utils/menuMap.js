@@ -19,12 +19,22 @@ const MenuMap = {
     "work": [
         {
             type: "main",
-            title: "Recipts/Challans",
+            title: "Challans",
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [
                 { title: "Create Challan", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
                 { title: "View Challans", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+            ],
+        },
+        {
+            type: "main",
+            title: "Recipts",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Create Recipts", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
+                { title: "View Recipts", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
             ],
         },
         {
@@ -52,7 +62,16 @@ const MenuMap = {
         { title: "Dashboard", url: "/dashboard", icon: <AiOutlineDiff /> },
     ],
     "report": [
-        { title: "Sales Reports", url: "/sales-reports", icon: <AiOutlineDiff /> },
+        {
+            type: "main",
+            title: "Ladgers",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Party Ladger", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
+                { title: "View Challans", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+            ],
+        },
     ],
     "notification": [],
     "profile": [
