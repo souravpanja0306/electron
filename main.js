@@ -1,11 +1,11 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
-require("./server");
+// require("./backend/server.js");
 
 function createWindow() {
     const win = new BrowserWindow({
-        width: 8,
-        height: 8,
+        width: 800,
+        height: 1200,
         minWidth: 1000,
         minHeight: 600,
         webPreferences: {

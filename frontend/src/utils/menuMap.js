@@ -89,9 +89,9 @@ const MenuMap = {
             type: "main",
             title: "Party",
             url: "#",
-            icon: <AiOutlineEdit />,
+            icon: <AiOutlineUsergroupAdd />,
             submenu: [
-                { title: "Create Party", url: "/add-party", icon: <AiOutlineUserAdd /> },
+                { title: "Create Party", url: "/add-party", icon: <AiOutlineUsergroupAdd /> },
                 { title: "View Parties", url: "/party", icon: <AiOutlineUser /> },
             ]
         },

@@ -9,11 +9,11 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use(`/api/${VERSION}/party/`, require("./backend/router/party.routes"));
-app.use(`/api/${VERSION}/invoice/`, require("./backend/router/invoice.routes"));
-app.use(`/api/${VERSION}/auth/`, require("./backend/router/auth.routes"));
-app.use(`/api/${VERSION}/user/`, require("./backend/router/user.routes"));
-app.use(`/api/${VERSION}/admin/`, require("./backend/router/admin.routes"));
+app.use(`/api/${VERSION}/party/`, require("./router/party.routes"));
+app.use(`/api/${VERSION}/invoice/`, require("./router/invoice.routes"));
+app.use(`/api/${VERSION}/auth/`, require("./router/auth.routes"));
+app.use(`/api/${VERSION}/user/`, require("./router/user.routes"));
+app.use(`/api/${VERSION}/admin/`, require("./router/admin.routes"));
 
 app.get("/", (req, res) => {
     return res.json({
