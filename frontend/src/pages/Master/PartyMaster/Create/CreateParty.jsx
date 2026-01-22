@@ -4,7 +4,7 @@ import ActionArea from '../../../../components/ActionArea';
 import MainArea from '../../../../components/MainArea';
 import CustomButton from '../../../../components/CustomButton';
 import { Link, NavLink } from "react-router-dom";
-import { AiOutlineFileAdd } from "react-icons/ai";
+import { AiOutlineFileAdd, AiOutlineIdcard } from "react-icons/ai";
 import Alert from "../../../../components/Alert";
 import { useNavigate } from "react-router-dom";
 
@@ -109,179 +109,175 @@ const CreateParty = () => {
                         <CustomButton title={"View (Ctrl+I)"} color={"yellow"}><AiOutlineFileAdd /></CustomButton>
                     </Link>
                 </ActionArea>
-                <form className='flex flex-col gap-1'>
-                    <br />
-                    <PageTitle>Personal Details</PageTitle>
+
+                <form className='flex gap-1'>
                     <MainArea>
                         <div className='flex flex-col w-full gap-1'>
-                            <div className='flex gap-1 w-full'>
-                                <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Company Name <span className='text-red-600'>*</span></label>
-                                    <input
-                                        className="p-1 rounded-md w-full capitalize text-slate-900"
-                                        placeholder="Company Name..."
-                                        value={data.company_name}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, company_name: (e.target.value).toLowerCase() })}
-                                        required
-                                        autoCapitalize='true'
-                                    />
+                            <PageTitle>Personal Details</PageTitle>
+                            <hr />
+                            <div className='flex flex-col gap-1 w-full'>
+                                <div className='flex gap-1 w-full'>
+                                    <div className='flex flex-col w-full gap-1'>
+                                        {/* <label className='text-xs uppercase'>Company Name : <span className='text-red-600'>*</span></label> */}
+                                        <input
+                                            className="p-1 rounded-md w-full capitalize text-slate-900"
+                                            placeholder="Company Name"
+                                            value={data.company_name}
+                                            type="text"
+                                            onChange={(e) => setData({ ...data, company_name: (e.target.value).toLowerCase() })}
+                                            required
+                                            autoCapitalize='true'
+                                        />
+                                    </div>
+                                    <div className='flex flex-col w-full gap-1'>
+                                        {/* <label className='text-xs uppercase'>Director/Proprietor/Owner</label> */}
+                                        <input
+                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            placeholder='Director/ Proprietor/ Owner'
+                                            value={data.owner}
+                                            type="text"
+                                            onChange={(e) => setData({ ...data, owner: (e.target.value).toLowerCase() })}
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Mobile <span className='text-red-600'>*</span></label>
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Mobile...'
-                                        value={data.mobile}
-                                        maxLength={10}
-                                        type="tel"
-                                        onChange={(e) => setData({ ...data, mobile: e.target.value.replace(/\D/g, '') })}
-                                        required
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Email <span className='text-red-600'>*</span></label>
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Email...'
-                                        value={data.email}
-                                        type="email"
-                                        onChange={(e) => setData({ ...data, email: (e.target.value).toLowerCase() })}
-                                        required
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Director/Proprietor/Owner</label>
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Director/Proprietor/Owner...'
-                                        value={data.owner}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, owner: (e.target.value).toLowerCase() })}
-                                        required
-                                    />
+                                <div className='flex gap-1 w-full'>
+                                    <div className='flex flex-col w-full gap-1'>
+                                        {/* <label className='text-xs uppercase'>Email <span className='text-red-600'>*</span></label> */}
+                                        <input
+                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            placeholder='Email'
+                                            value={data.email}
+                                            type="email"
+                                            onChange={(e) => setData({ ...data, email: (e.target.value).toLowerCase() })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className='flex flex-col w-full gap-1'>
+                                        {/* <label className='text-xs uppercase'>Mobile <span className='text-red-600'>*</span></label> */}
+                                        <input
+                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            placeholder='Mobile'
+                                            value={data.mobile}
+                                            maxLength={10}
+                                            type="tel"
+                                            onChange={(e) => setData({ ...data, mobile: e.target.value.replace(/\D/g, '') })}
+                                            required
+                                        />
+                                    </div>
                                 </div>
                             </div>
+
+                            <PageTitle>Address Details</PageTitle>
                             <hr />
-                            <div className='flex gap-1 w-full'>
+                            <div className='flex flex-col gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Address 1</label>
+                                    {/* <label className='text-xs uppercase'>Address 1:</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Address 1...'
+                                        placeholder='Address/ Street/ Road'
                                         value={data.address_1}
                                         type="text"
                                         onChange={(e) => setData({ ...data, address_1: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Address 2</label>
+                                    {/* <label className='text-xs uppercase'>Address 2:</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Address 2...'
+                                        placeholder='Flat No./ Builing Name/ Floor'
                                         value={data.address_2}
                                         type="text"
                                         onChange={(e) => setData({ ...data, address_2: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
+                            </div>
+                            <div className='flex gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>City</label>
+                                    {/* <label className='text-xs uppercase'>City</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='City...'
+                                        placeholder='City'
                                         value={data.city}
                                         type="text"
                                         onChange={(e) => setData({ ...data, city: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
-                            </div>
-                            <div className='flex gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>State</label>
+                                    {/* <label className='text-xs uppercase'>State</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='State...'
+                                        placeholder='State'
                                         value={data.state}
                                         type="text"
                                         onChange={(e) => setData({ ...data, state: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>District</label>
+                                    {/* <label className='text-xs uppercase'>District</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='District...'
+                                        placeholder='District'
                                         value={data.district}
                                         type="text"
                                         onChange={(e) => setData({ ...data, district: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1 min-w-48'>
-                                    <label className='text-xs uppercase'>Pincode</label>
+                                    {/* <label className='text-xs uppercase'>Pincode</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Pincode...'
+                                        placeholder='Pincode'
                                         value={data.pincode}
                                         type="text"
                                         onChange={(e) => setData({ ...data, pincode: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Country</label>
-                                    <input
-                                        value="INDIA"
-                                        disabled
-                                        type="text"
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Country...'
-                                    />
-                                </div>
                             </div>
-                        </div>
-                    </MainArea>
-                    <br />
-                    <PageTitle>Business Details</PageTitle>
-                    <MainArea>
-                        <div className='flex flex-col w-full gap-1'>
+
+                            <PageTitle>Business Details</PageTitle>
+                            <hr />
                             <div className='flex gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>GST</label>
+                                    {/* <label className='text-xs uppercase'>GST</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='GST...'
+                                        placeholder='GSTIN'
                                         value={data.gst}
                                         type="text"
                                         onChange={(e) => setData({ ...data, gst: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>PAN</label>
+                                    {/* <label className='text-xs uppercase'>PAN</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='PAN...'
+                                        placeholder='PAN No'
                                         value={data.pan}
                                         type="text"
                                         onChange={(e) => setData({ ...data, pan: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Trade Licence</label>
+                                    {/* <label className='text-xs uppercase'>Trade Licence</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Trade Licence...'
+                                        placeholder='Trade Licence'
                                         value={data.trade_licence}
                                         type="text"
                                         onChange={(e) => setData({ ...data, trade_licence: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                             </div>
+
+                            <PageTitle>Payment Details</PageTitle>
                             <hr />
                             <div className='flex gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Bank Name</label>
+                                    {/* <label className='text-xs uppercase'>Bank Name</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Bank Name...'
+                                        placeholder='Bank Name'
                                         value={data.bank}
                                         type="text"
                                         onChange={(e) => setData({ ...data, bank: (e.target.value).toLowerCase() })}
@@ -290,34 +286,122 @@ const CreateParty = () => {
                             </div>
                             <div className='flex gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Branch</label>
+                                    {/* <label className='text-xs uppercase'>Branch</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Branch...'
+                                        placeholder='Branch'
                                         value={data.branch}
                                         type="text"
                                         onChange={(e) => setData({ ...data, branch: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>IFSE Code</label>
+                                    {/* <label className='text-xs uppercase'>IFSE Code</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='IFSE Code...'
+                                        placeholder='IFSE Code'
                                         value={data.ifse}
                                         type="tel"
                                         onChange={(e) => setData({ ...data, ifse: (e.target.value).toLowerCase() })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Account No</label>
+                                    {/* <label className='text-xs uppercase'>Account No</label> */}
                                     <input
                                         className='p-1 rounded-md w-full capitalize text-slate-900'
-                                        placeholder='Account No...'
+                                        placeholder='Account No'
                                         value={data.account_no}
                                         type="tel"
                                         onChange={(e) => setData({ ...data, account_no: (e.target.value).toLowerCase() })}
                                     />
+                                </div>
+                            </div>
+                        </div>
+                    </MainArea>
+                    <MainArea>
+                        <div className='flex flex-col w-full'>
+                            <PageTitle>Preview</PageTitle>
+                            <div className='flex w-full p-1'>
+                                <AiOutlineIdcard className='text-9xl' />
+                                <div className='p-2 flex flex-col justify-center'>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>Company Name : </span>
+                                        <p className='text-slate-400'>{(data.company_name).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>Name : </span>
+                                        <p className='text-slate-400'>{(data.owner).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>Email : </span>
+                                        <p className='text-slate-400'>{(data.email).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>Mobile : </span>
+                                        <p className='text-slate-400'>{(data.mobile).toUpperCase()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div className='flex w-full p-1'>
+                                <div className='flex flex-col justify-center w-[60%]'>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>Address/ Street/ Road : </span>
+                                        <p className='text-slate-400'>{(data.address_1).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>Flat No./ Builing Name/ Floor : </span>
+                                        <p className='text-slate-400'>{(data.address_2).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>City : </span>
+                                        <p className='text-slate-400'>{(data.city).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>State : </span>
+                                        <p className='text-slate-400'>{(data.state).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>District : </span>
+                                        <p className='text-slate-400'>{(data.district).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>Pincode : </span>
+                                        <p className='text-slate-400'>{(data.pincode).toUpperCase()}</p>
+                                    </div>
+                                </div>
+                                <div className='flex flex-col justify-start w-[40%]'>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>GSTIN : </span>
+                                        <p className='text-slate-400'>{(data.gst).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>PAN No : </span>
+                                        <p className='text-slate-400'>{(data.pan).toUpperCase()}</p>
+                                    </div>
+                                    <div className='flex gap-1'>
+                                        <span className='font-bold'>Trade Licence : </span>
+                                        <p className='text-slate-400'>{(data.trade_licence).toUpperCase()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div className='flex w-full p-1 flex-col'>
+                                <div className='flex gap-1'>
+                                    <span className='font-bold'>Account No : </span>
+                                    <p className='text-slate-400'>{(data.account_no).toUpperCase()}</p>
+                                </div>
+                                <div className='flex gap-1'>
+                                    <span className='font-bold'>Branch : </span>
+                                    <p className='text-slate-400'>{(data.address_2).toUpperCase()}</p>
+                                </div>
+                                <div className='flex gap-1'>
+                                    <span className='font-bold'>IFSE Code : </span>
+                                    <p className='text-slate-400'>{(data.city).toUpperCase()}</p>
+                                </div>
+                                <div className='flex gap-1'>
+                                    <span className='font-bold'>Bank Name : </span>
+                                    <p className='text-slate-400'>{(data.bank).toUpperCase()}</p>
                                 </div>
                             </div>
                         </div>
