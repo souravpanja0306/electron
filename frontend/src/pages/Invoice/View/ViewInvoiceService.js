@@ -1,8 +1,27 @@
+import axios from "axios";
+
+export const handleGetAllInvoice = async ({
+
+}) => {
+    try {
+        let result = await axios({
+            method: 'get',
+            maxBodyLength: Infinity,
+            url: 'http://localhost:3001/api/v1/invoice/invoice-list',
+            headers: {}
+        });
+        if (result.data.status === 200) {
+            return result.data.body;
+        };
+    } catch (error) {
+        console.log(error);
+    };
+};
+
 export const handleGetParty = async ({
 
 }) => {
     try {
-
     } catch (error) {
         console.log(`Something went wrong : handleGetParty : ${error}`)
     }

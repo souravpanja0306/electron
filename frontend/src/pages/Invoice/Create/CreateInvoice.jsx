@@ -19,9 +19,10 @@ import { Link, NavLink } from "react-router-dom";
 
 
 // Functions...
-import { handleSubmit, handleGetParty } from "./CreateInvoiceService"
+import { handleSubmit, handleGetParty, handleGenerateInvoiceNo } from "./CreateInvoiceService"
 
 const CreateInvoice = () => {
+  const navigate = useNavigate();
   let randomNumber = Math.floor(Math.random() * 10000000000);
 
   const [grandTotal, setGrandTotal] = useState({
@@ -29,8 +30,19 @@ const CreateInvoice = () => {
     total_value: 0,
     tax_amount: 0,
   });
+  const [invoiceNumber, setInvoiceNumber] = useState("")
   const [alart, setAlart] = useState({ show: false });
   const [party, setParty] = useState([]);
+  const [invoiceDetails, setInvoiceDetails] = useState({
+    type: "tax",
+    invoiceNo: "",
+    date: "",
+    transporter: "",
+    ewayBill: "",
+    billTo: "",
+    shipTo: "",
+    placeOfSupply: "",
+  });
   const [invoiceFields, setInvoiceFields] = useState([
     { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
     { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
@@ -43,8 +55,18 @@ const CreateInvoice = () => {
       setParty(result.body);
     };
   };
+  const getInvoiceNumber = async () => {
+    let result = await handleGenerateInvoiceNo();
+    setInvoiceNumber(result);
+    setInvoiceDetails(prev => ({
+      ...prev,
+      invoiceNo: result
+    }));
+  };
+
   useEffect(() => {
     getPartys();
+    getInvoiceNumber();
   }, []);
 
   const handleAddFields = (e) => {
@@ -109,12 +131,44 @@ const CreateInvoice = () => {
     });
   };
 
-  const navigate = useNavigate();
+  const handleSubmitForm = async ({
+    invoiceDetails,
+    invoiceFields
+  }) => {
+    try {
+      let finalData = {
+        ...invoiceDetails,
+        data: invoiceFields
+      };
+
+      let result = await handleSubmit(finalData);
+      if (result.status === 200) {
+        setInvoiceFields([
+          { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
+          { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
+          { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
+        ]);
+        setInvoiceDetails({
+          type: "tax", invoiceNo: "", date: "", transporter: "", ewayBill: "", billTo: "", shipTo: "", placeOfSupply: "",
+        });
+        getInvoiceNumber();
+        setAlart({ show: true, title: "Success", type: "success", message: result.message });
+      } else {
+        setAlart({ show: true, title: "Error", type: "error", message: result.message });
+      };
+    } catch (error) {
+      console.log(error);
+    };
+  };
+
   useEffect(() => {
     const onKey = (e) => {
       if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
-        handleSubmit(e, invoiceFields);
+        handleSubmitForm({
+          invoiceDetails: invoiceDetails,
+          invoiceFields: invoiceFields
+        });
       };
 
       if (e.ctrlKey && e.key === 'i') {
@@ -124,7 +178,7 @@ const CreateInvoice = () => {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [invoiceFields]);
+  }, [invoiceFields, invoiceDetails]);
 
 
 
@@ -134,13 +188,16 @@ const CreateInvoice = () => {
 
       <div className="flex flex-col gap-1">
         <ActionArea>
-          <div onClick={(e) => handleSubmit(e, invoiceFields)}>
+          <div onClick={(e) => handleSubmitForm({
+            invoiceDetails: invoiceDetails,
+            invoiceFields: invoiceFields
+          })}>
             <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
           </div>
           <Link to="/view-invoice">
             <CustomButton title={"View (Ctrl+I)"} color={"yellow"}><AiOutlineTable /></CustomButton>
           </Link>
-          <div onClick={(e) => handleSubmit(e, invoiceFields)}>
+          <div>
             <CustomButton title={"Print (Ctrl+P)"} color={"green"}><AiOutlinePrinter /></CustomButton>
           </div>
         </ActionArea>
@@ -155,25 +212,21 @@ const CreateInvoice = () => {
                   <div className='flex flex-col w-[250px] gap-1'>
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Bill To</label>
-                      <select className="p-1 rounded-md w-full uppercase text-slate-900">
-                        <option selected disabled>Please Select Party</option>
-                        {
-                          party && party.map(item => {
-                            return (
-                              <option value={item.id}>{item.company_name}</option>
-                            )
-                          })
-                        }
-                      </select>
-                    </div>
-                    <div className='flex flex-col w-full gap-1'>
-                      <label className='text-xs uppercase'>Date</label>
-                      <input
+                      <select
                         className="p-1 rounded-md w-full uppercase text-slate-900"
-                        placeholder="Date"
-                        type="date"
+                        value={invoiceDetails.billTo}
+                        onChange={(e) =>
+                          setInvoiceDetails({ ...invoiceDetails, billTo: e.target.value })
+                        }
                         required
-                      />
+                      >
+                        <option value="" disabled>Select Party</option>
+                        {party?.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.company_name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -184,6 +237,10 @@ const CreateInvoice = () => {
                         className="p-1 rounded-md w-full uppercase text-slate-900"
                         placeholder="Date"
                         type="date"
+                        value={invoiceDetails.date}
+                        onChange={(e) =>
+                          setInvoiceDetails({ ...invoiceDetails, date: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -193,8 +250,11 @@ const CreateInvoice = () => {
                         className="p-1 rounded-md w-full uppercase text-slate-900"
                         placeholder="Invoice"
                         type="text"
+                        value={invoiceNumber}
+                        readOnly
                         required
                       />
+
                     </div>
                   </div>
                 </div>
@@ -317,9 +377,48 @@ const CreateInvoice = () => {
 
               <div className='flex gap-1'>
                 <div className='w-3/4'>
-                  <PageTitle>Info</PageTitle>
+                  <PageTitle>Additonal Info</PageTitle>
                   <MainArea>
-                    <h>Hello</h>
+                    <div className='flex gap-1 justify-between w-full'>
+                      <div className='flex flex-col w-[250px] gap-1'>
+                        <div className='flex flex-col w-full gap-1'>
+                          <label className='text-xs uppercase'>E-Way Bill</label>
+                          <input
+                            className="p-1 rounded-md w-full uppercase text-slate-900"
+                            placeholder="E-Way Bill"
+                            type="text"
+                            value={invoiceDetails.ewayBill}
+                            onChange={(e) =>
+                              setInvoiceDetails({ ...invoiceDetails, ewayBill: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className='flex flex-col w-full gap-1'>
+                          <label className='text-xs uppercase'>Transporter</label>
+                          <input
+                            className="p-1 rounded-md w-full uppercase text-slate-900"
+                            placeholder="Transporter"
+                            type="text"
+                            value={invoiceDetails.transporter}
+                            onChange={(e) =>
+                              setInvoiceDetails({ ...invoiceDetails, transporter: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className='flex flex-col w-full gap-1'>
+                          <label className='text-xs uppercase'>Place of Supply</label>
+                          <input
+                            className="p-1 rounded-md w-full uppercase text-slate-900"
+                            placeholder="Place"
+                            value={invoiceDetails.placeOfSupply}
+                            onChange={(e) =>
+                              setInvoiceDetails({ ...invoiceDetails, placeOfSupply: e.target.value })
+                            }
+                            type="text"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </MainArea>
                 </div>
 

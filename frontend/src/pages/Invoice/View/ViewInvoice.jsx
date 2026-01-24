@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { AiOutlineFileAdd } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+
+
+// Icon...
+import { AiOutlineFileAdd, AiOutlineSync, AiOutlinePrinter, AiOutlineDownload  } from "react-icons/ai";
 
 // Components...
 import PageTitle from '../../../components/PageTitle';
@@ -11,67 +14,68 @@ import CustomButton from '../../../components/CustomButton';
 import Alert from '../../../components/Alert';
 
 // Service...
-import { handleGetParty } from "./ViewInvoiceService"
+import { handleGetParty, handleGetAllInvoice } from "./ViewInvoiceService"
 
 
 const ViewInvoices = () => {
+    const navigate = useNavigate();
     const [alart, setAlart] = useState({ show: false });
-    const [party, setParty] = useState([]);
+    const [invoices, setInvoices] = useState([]);
 
-    const loads = async () => {
-        let result = await handleGetParty({});
-        setParty(result);
+    const getAllInvoice = async () => {
+        let result = await handleGetAllInvoice({});
+        setInvoices(result);
     };
+
     useEffect(() => {
-        loads();
+        getAllInvoice();
     }, []);
 
     const [checkedIds, setCheckedIds] = useState([]);
     const handleChecked = (e, id) => {
-        setParty(prev =>
-            prev.map(item =>
-                item.id === id ? { ...item, is_selected: e.target.checked } : item
-            )
-        );
-        setCheckedIds(prev =>
-            e.target.checked ? [...prev, id] : prev.filter(itemId => itemId !== id)
-        );
+        // setParty(prev =>
+        //     prev.map(item =>
+        //         item.id === id ? { ...item, is_selected: e.target.checked } : item
+        //     )
+        // );
+        // setCheckedIds(prev =>
+        //     e.target.checked ? [...prev, id] : prev.filter(itemId => itemId !== id)
+        // );
     };
 
     const handleSelectAll = (e) => {
-        const checked = e.target.checked;
-        setParty(prev =>
-            prev.map(item => ({ ...item, is_selected: checked })),
-        );
-        setCheckedIds(checked ? party.map(item => item.id) : []);
+        // const checked = e.target.checked;
+        // setParty(prev =>
+        //     prev.map(item => ({ ...item, is_selected: checked })),
+        // );
+        // setCheckedIds(checked ? party.map(item => item.id) : []);
     };
 
     const handleDelete = async () => {
         try {
-            if (!checkedIds.length) {
-                setAlart({
-                    show: true,
-                    title: "Error",
-                    type: "error",
-                    message: "Please select data."
-                });
-            } else {
-                await window.api.deleteParty({ ids: checkedIds }).then((res) => {
-                    if (res.status === 200) {
-                        setCheckedIds([])
-                    };
-                });
-                await window.api.getParty({}).then((data) => {
-                    setParty(data.body);
-                });
+            // if (!checkedIds.length) {
+            //     setAlart({
+            //         show: true,
+            //         title: "Error",
+            //         type: "error",
+            //         message: "Please select data."
+            //     });
+            // } else {
+            //     await window.api.deleteParty({ ids: checkedIds }).then((res) => {
+            //         if (res.status === 200) {
+            //             setCheckedIds([])
+            //         };
+            //     });
+            //     await window.api.getParty({}).then((data) => {
+            //         setParty(data.body);
+            //     });
 
-            };
+            // };
         } catch (error) {
             console.log(error);
         };
     };
 
-    const navigate = useNavigate();
     useEffect(() => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 'n') {
@@ -90,61 +94,71 @@ const ViewInvoices = () => {
 
     return (
         <>
-            <PageTitle>View All Party</PageTitle>
+            <PageTitle>View All Invoice</PageTitle>
             <div className='flex flex-col gap-1'>
                 <ActionArea>
-                    <Link to="/create-invoice">
-                        <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
-                    </Link>
-                    <div onClick={(e) => handleDelete(e)}>
-                        <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
+                    <div className="flex justify-between w-full">
+                        <div className="flex gap-1">
+                            <Link to="/create-invoice">
+                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                            </Link>
+                            <div onClick={(e) => handleDelete(e)}>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
+                            </div>
+                            <div onClick={(e) => handleDelete(e)}>
+                                <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload  /></CustomButton>
+                            </div>
+                        </div>
+                        <div className="flex gap-1">
+                            <div onClick={(e) => getAllInvoice(e)}>
+                                <CustomButton title={"Refrash"} color={"green"}><AiOutlineSync /></CustomButton>
+                            </div>
+                        </div>
                     </div>
                 </ActionArea>
                 <MainArea>
                     <table className="table-fixed w-full">
                         <thead>
                             <tr className="border-b border-slate-600 p-1 ">
-                                <th className="p-1 w-4">
+                                <th className="p-1 text-start w-8">
                                     <input type="checkbox" onChange={(e) => handleSelectAll(e)} />
                                 </th>
-                                <th className="p-1">Company</th>
-                                <th className="p-1">Mobile</th>
-                                <th className="p-1">Email</th>
-                                <th className="p-1">Owner</th>
-                                <th className="p-1">Pan</th>
-                                <th className="p-1">GST</th>
-                                <th className="p-1">Trade Licence</th>
-                                <th className="p-1">Bank a/c No</th>
+                                <th className="p-1 text-start">Invoice No</th>
+                                <th className="p-1 text-start">Bill To</th>
+                                <th className="p-1 text-start">Date</th>
+                                <th className="p-1 text-start">Amount</th>
+                                <th className="p-1 text-start">Trasnporter</th>
+                                <th className="p-1 text-start w-8">#</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                party && party.length
+                                invoices && invoices.length
                                     ?
                                     <>
                                         {
-                                            party.map((item, index) => {
+                                            invoices.map((item, index) => {
                                                 return (
                                                     <tr key={item.id} className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
-                                                        <td className="p-1 text-center truncate capitalize">
+                                                        <td className="p-1 text-start truncate capitalize">
                                                             <input
                                                                 type="checkbox"
                                                                 onChange={(e) => handleChecked(e, item.id)}
                                                                 checked={item.is_selected}
                                                             />
                                                         </td>
-                                                        <td className="p-1 text-center truncate capitalize hover:underline hover:text-slate-300">
+                                                        <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">
                                                             <Link to={`/`}>
-                                                                {item.company_name ? item.company_name : "--"}
+                                                                {item.invoice_no ? item.invoice_no : "--"}
                                                             </Link>
                                                         </td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.mobile ? item.mobile : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.email ? item.email : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.owner ? item.owner : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.pan ? item.pan : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.gst ? item.gst : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.trade_licence ? item.trade_licence : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.account_no ? item.account_no : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.party_id ? item.party_id : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.invoice_date ? item.invoice_date : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.total_amount ? item.total_amount : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.transporter ? item.transporter : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize w-8 hover:text-green-500 active:text-red-500">
+                                                            <AiOutlinePrinter />
+                                                        </td>
                                                     </tr>
                                                 )
                                             })

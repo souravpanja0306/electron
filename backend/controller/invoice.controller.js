@@ -19,19 +19,28 @@ exports.generateInvoiceNo = async (req, res) => {
             response.body = [];
             return res.json(response).status(response.status);
         };
-
-        let invoiceCount = await InvoiceService.findInvoices({ count: true });
         let type = "";
         if (types == "proforma") type = "PRO";
         if (types == "invoice") type = "INV";
         const date = moment().format("DDMMYYYY");
 
-        let invoiceNumber = `${type}${(invoiceCount + 1).toString().padStart(6, "0")}${date}`;
-        let invoices = await InvoiceService.findInvoices({ invoice_no: invoiceNumber });
-        if (!invoices.length) {
+        const existsCheck = async ({
+            type = ""
+        }) => {
+            let count = await InvoiceService.findInvoices({ count: true });
+            while (true) {
+                const invoiceNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
+                const exists = await InvoiceService.findInvoices({ invoice_no: invoiceNo });
+                if (!exists.length) return invoiceNo;
+                count++;
+            };
+        };
+
+        let result = await existsCheck({ type: type });
+        if (result) {
             response.status = 200;
             response.message = "Invoice Number Generate Successfully.";
-            response.body = invoiceNumber;
+            response.body = result;
         };
     } catch (error) {
         console.log(`Something went wrong: controller: generateInvoiceNo: ${error}`);
@@ -46,19 +55,27 @@ exports.createInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { type, invoiceNo, date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, } = req.body;
+        let search_key = {};
+        if (invoiceNo) search_key["invoice_no"] = invoiceNo;
+        let isInvoiceNumberExist = await InvoiceService.findInvoices(search_key);
+        if (isInvoiceNumberExist.length) {
+            response.status = 409;
+            response.message = "Invoice Number Already Exists.";
+            response.body = [];
+            return res.json(response).status(response.status);
+        };
+
         let finalData = {
             type: type,
             invoice_no: invoiceNo,
             invoice_date: date,
             transporter: transporter,
             eway_bill: ewayBill,
-            party_id: 1,
-            party_id: shipTo,
+            party_id: billTo,
             placeOfSupply: placeOfSupply,
             data: JSON.stringify(data)
         };
         let result = await InvoiceService.insertInvoiceData(finalData);
-
 
         response.status = 200;
         response.message = "Data created successfully.";
@@ -84,12 +101,15 @@ exports.getAllInvoice = async (req, res) => {
         if (result.length) {
             let finalData = [];
             for (let item of result) {
+
+                let billTo = await PartyService.getParty({ id: item.party_id });
+                console.log("🚀 ~ billTo:", billTo)
                 let newData = {
                     id: item.id ? item.id : "",
                     type: item.type ? item.type : "",
                     invoice_no: item.invoice_no ? item.invoice_no : "",
                     eway_bill: item.eway_bill ? item.eway_bill : "",
-                    party_id: item.party_id ? item.party_id : "",
+                    party_id: billTo.length ? billTo[0].company_name : "",
                     transporter: item.transporter ? item.transporter : "",
                     placeOfSupply: item.placeOfSupply ? item.placeOfSupply : "",
                     data: item.data ? JSON.parse(item.data) : "",

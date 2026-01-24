@@ -4,8 +4,10 @@ import ActionArea from '../../../../components/ActionArea';
 import MainArea from '../../../../components/MainArea';
 import CustomButton from '../../../../components/CustomButton';
 import { Link, NavLink } from "react-router-dom";
-import { AiOutlineFileAdd } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+
+// Icon...
+import { AiOutlineFileAdd, AiOutlineSync , AiOutlineDownload } from "react-icons/ai";
 
 // Services...
 import { handleGetParty } from "./ViewPartyService"
@@ -87,28 +89,40 @@ const ViewParty = () => {
             <PageTitle>View All Party</PageTitle>
             <div className='flex flex-col gap-1'>
                 <ActionArea>
-                    <Link to="/add-party">
-                        <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
-                    </Link>
-                    <div onClick={(e) => handleDelete(e)}>
-                        <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
+                    <div className="flex justify-between w-full">
+                        <div className="flex gap-1">
+                            <Link to="/add-party">
+                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                            </Link>
+                            <div onClick={(e) => handleDelete(e)}>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
+                            </div>
+                            <div onClick={(e) => handleDelete(e)}>
+                                <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload  /></CustomButton>
+                            </div>
+                        </div>
+                        <div className="flex gap-1">
+                            <div onClick={(e) => getPartys(e)}>
+                                <CustomButton title={"Refrash"} color={"green"}><AiOutlineSync /></CustomButton>
+                            </div>
+                        </div>
                     </div>
                 </ActionArea>
                 <MainArea>
                     <table className="table-fixed w-full">
                         <thead>
                             <tr className="border-b border-slate-600 p-1 ">
-                                <th className="p-1 w-4">
+                                <th className="p-1 text-start w-8">
                                     <input type="checkbox" onChange={(e) => handleSelectAll(e)} />
                                 </th>
-                                <th className="p-1">Company</th>
-                                <th className="p-1">Mobile</th>
-                                <th className="p-1">Email</th>
-                                <th className="p-1">Owner</th>
-                                <th className="p-1">Pan</th>
-                                <th className="p-1">GST</th>
-                                <th className="p-1">Trade Licence</th>
-                                <th className="p-1">Bank a/c No</th>
+                                <th className="p-1 text-start">Company</th>
+                                <th className="p-1 text-start">Mobile</th>
+                                <th className="p-1 text-start">Email</th>
+                                <th className="p-1 text-start">Owner</th>
+                                <th className="p-1 text-start">Pan</th>
+                                <th className="p-1 text-start">GST</th>
+                                <th className="p-1 text-start">Trade Licence</th>
+                                <th className="p-1 text-start">Bank a/c No</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,25 +134,25 @@ const ViewParty = () => {
                                             party.map((item, index) => {
                                                 return (
                                                     <tr key={item.id} className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
-                                                        <td className="p-1 text-center truncate capitalize">
+                                                        <td className="p-1 text-start truncate capitalize">
                                                             <input
                                                                 type="checkbox"
                                                                 onChange={(e) => handleChecked(e, item.id)}
                                                                 checked={item.is_selected}
                                                             />
                                                         </td>
-                                                        <td className="p-1 text-center truncate capitalize hover:underline hover:text-slate-300">
+                                                        <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">
                                                             <Link to={`/`}>
                                                                 {item.company_name ? item.company_name : "--"}
                                                             </Link>
                                                         </td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.mobile ? item.mobile : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.email ? item.email : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.owner ? item.owner : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.pan ? item.pan : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.gst ? item.gst : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.trade_licence ? item.trade_licence : "--"}</td>
-                                                        <td className="p-1 text-center truncate capitalize">{item.account_no ? item.account_no : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.mobile ? item.mobile : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.email ? item.email : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.owner ? item.owner : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.pan ? item.pan : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.gst ? item.gst : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.trade_licence ? item.trade_licence : "--"}</td>
+                                                        <td className="p-1 text-start truncate capitalize">{item.account_no ? item.account_no : "--"}</td>
                                                     </tr>
                                                 )
                                             })
