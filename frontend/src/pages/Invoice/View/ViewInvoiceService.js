@@ -1,14 +1,21 @@
 import axios from "axios";
+const token = localStorage.getItem("token");
 
 export const handleGetAllInvoice = async ({
-
+    id = ""
 }) => {
     try {
+        let queries = `?`;
+        if (id) queries += `id=${id}`;
+
         let result = await axios({
             method: 'get',
             maxBodyLength: Infinity,
-            url: 'http://localhost:3001/api/v1/invoice/invoice-list',
-            headers: {}
+            url: `http://localhost:3001/api/v1/invoice/invoice-list${queries}`,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
         });
         if (result.data.status === 200) {
             return result.data.body;

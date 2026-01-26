@@ -1,20 +1,32 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PageTitle from '../../components/PageTitle';
 import CustomButton from '../../components/CustomButton';
 import { useState } from 'react';
 
+// Functions...
+import { handleSignin } from "./Service";
+
 const Signin = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState({
     username: "",
     password: ""
   });
 
-  const handleSubmit = async () => {
+  const handleSubmitSignin = async () => {
     try {
-      console.log(data)
-      await window.api.signin(data).then((res) => {
+      let result = await handleSignin({
+        username: data.username,
+        password: data.password,
+      });
+      if (result.status === 200) {
+        sessionStorage.setItem("token", result.body.token);
+        localStorage.setItem("token", result.body.token);
+        sessionStorage.setItem("user", JSON.stringify(result.body));
+        localStorage.setItem("user", JSON.stringify(result.body));
+        navigate("/");
+      };
 
-      })
     } catch (error) {
       console.log(error)
     };
@@ -26,12 +38,12 @@ const Signin = () => {
         <div className='w-[400px] bg-slate-900 rounded-md shadow-md shadow-slate-600 p-1'>
           <h1 className='text-white text-center text-xl'>Signin</h1>
 
-          <form className='flex flex-col justify-center items-center gap-2' onSubmit={() => handleSubmit()}>
+          <form className='flex flex-col justify-center items-center gap-2' onSubmit={() => handleSubmitSignin()}>
 
             <div className='flex flex-col w-full gap-1'>
               <label className='text-white text-xs uppercase'>Username</label>
               <input
-                className="p-1 rounded-md w-full uppercase text-slate-900"
+                className="p-1 rounded-md w-full text-slate-900"
                 placeholder="Username"
                 value={data.username}
                 type="text"
@@ -40,7 +52,7 @@ const Signin = () => {
               />
             </div>
             <div className='flex flex-col w-full gap-1'>
-              <label className='text-white text-xs uppercase'>Password</label>
+              <label className='text-white text-xs'>Password</label>
               <input
                 className="p-1 rounded-md w-full text-slate-900"
                 placeholder="Password"
@@ -50,6 +62,9 @@ const Signin = () => {
                 required
               />
             </div>
+            <button type="submit" className='border border-slate-600 p-1 w-full bg-blue-600 rounded-md' >
+              Signin
+            </button>
             <div className='flex w-full gap-1 justify-between'>
               <div className='text-start text-xs text-white'>Don't have an account?
                 <Link to="/" className='hover:text-slate-600'> click here</Link>
@@ -58,11 +73,7 @@ const Signin = () => {
                 <Link to="/forgot-password" className='hover:text-slate-600'>Forgot password</Link>
               </div>
             </div>
-            <button type="submit" className='border border-slate-600 p-1 w-full bg-blue-500 rounded-md' >
-              Signin
-            </button>
           </form>
-          <Link to="/" className='text-white'>Home</Link>
         </div>
       </div>
     </>

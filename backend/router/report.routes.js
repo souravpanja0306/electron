@@ -1,30 +1,29 @@
 // Package...
 const express = require("express");
-const router = express.Router();
+const router = express.Router()
 
 // Controllers...
-const PartyController = require("../controller/party.controller");
+const ReportController = require("../controller/report.controller");
 
 // Middleware...
 const middleware = require("../middleware/middleware");
 
-router.post(
-    "/party-create",
+router.get(
+    "/debtors",
     middleware.isAuthenticated,
-    PartyController.addParty
+    ReportController.debtors
 );
 
 router.get(
-    "/party-list",
+    "/creditors",
     middleware.isAuthenticated,
-    PartyController.listParty
+    ReportController.creditors
 );
 
-router.delete(
-    "/party-delete",
+router.get(
+    "/sales-report",
     middleware.isAuthenticated,
-    PartyController.removeParty
+    ReportController.salesReports
 );
-
 
 module.exports = router;

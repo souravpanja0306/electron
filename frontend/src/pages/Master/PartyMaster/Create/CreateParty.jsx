@@ -4,11 +4,20 @@ import ActionArea from '../../../../components/ActionArea';
 import MainArea from '../../../../components/MainArea';
 import CustomButton from '../../../../components/CustomButton';
 import { Link, NavLink } from "react-router-dom";
-import { AiOutlineFileAdd, AiOutlineIdcard } from "react-icons/ai";
+import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
 import Alert from "../../../../components/Alert";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+
+// Service...
+import { handleCreateParty } from "./CreatePartyService";
+
 
 const CreateParty = () => {
+    const [searchParams] = useSearchParams();
+    const back = searchParams.get("back");
+
+    const navigate = useNavigate();
+
     const [alart, setAlart] = useState({ show: false });
     const [data, setData] = useState({
         company_name: "",
@@ -42,48 +51,41 @@ const CreateParty = () => {
                 });
                 return;
             };
-            if (!window.api) return;
-            await window.api.createParty(data).then((res) => {
-                if (parseInt(res.status) === 200) {
-                    setData({
-                        company_name: "",
-                        email: "",
-                        mobile: "",
-                        owner: "",
-                        address_1: "",
-                        address_2: "",
-                        city: "",
-                        state: "",
-                        district: "",
-                        pincode: "",
-                        country: "INDIA",
-                        gst: "",
-                        pan: "",
-                        trade_licence: "",
-                        bank: "",
-                        ifse: "",
-                        branch: "",
-                        account_no: ""
-                    });
-                    setAlart({
-                        show: true,
-                        title: "Sccesss",
-                        type: "success",
-                        message: "Party Created Successfully..."
-                    });
-                };
-            });
+
+            let result = await handleCreateParty(data);
+            if ((result.status) === 200) {
+                setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
+                setData({
+                    company_name: "",
+                    email: "",
+                    mobile: "",
+                    owner: "",
+                    address_1: "",
+                    address_2: "",
+                    city: "",
+                    state: "",
+                    district: "",
+                    pincode: "",
+                    country: "INDIA",
+                    gst: "",
+                    pan: "",
+                    trade_licence: "",
+                    bank: "",
+                    ifse: "",
+                    branch: "",
+                    account_no: ""
+                });
+            };
         } catch (error) {
             console.log(error);
         };
     };
 
-    const navigate = useNavigate();
     useEffect(() => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                handleSubmit();
+                handleSubmit(e);
             };
 
             if (e.ctrlKey && e.key === 'i') {
@@ -102,6 +104,12 @@ const CreateParty = () => {
 
             <div className='flex flex-col gap-1'>
                 <ActionArea>
+                    {back ?
+                        <div onClick={() => navigate(-1)}>
+                            <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                        </div>
+                        : ""
+                    }
                     <div onClick={(e) => handleSubmit(e)}>
                         <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </div>
@@ -350,7 +358,7 @@ const CreateParty = () => {
                                         <p className='text-slate-400'>{(data.address_1).toUpperCase()}</p>
                                     </div>
                                     <div className='flex gap-1'>
-                                        <span className='font-bold'>Flat No./ Builing Name/ Floor : </span>
+                                        <span className='font-bold'>Flat No./ Builing/ Floor : </span>
                                         <p className='text-slate-400'>{(data.address_2).toUpperCase()}</p>
                                     </div>
                                     <div className='flex gap-1'>

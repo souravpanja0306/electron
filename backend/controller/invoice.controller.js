@@ -12,6 +12,7 @@ const InvoiceService = require("../service/invoice.service");
 exports.generateInvoiceNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
+        const { t_userId, t_mobile, t_username, t_name } = req.body;
         const { types } = req.query;
         if (!types) {
             response.status = 400;
@@ -54,7 +55,10 @@ exports.generateInvoiceNo = async (req, res) => {
 exports.createInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
-        const { type, invoiceNo, date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, } = req.body;
+        const { t_userId, t_mobile, t_username, t_name, type, invoiceNo,
+            date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply,
+        } = req.body;
+
         let search_key = {};
         if (invoiceNo) search_key["invoice_no"] = invoiceNo;
         let isInvoiceNumberExist = await InvoiceService.findInvoices(search_key);
@@ -65,6 +69,29 @@ exports.createInvoice = async (req, res) => {
             return res.json(response).status(response.status);
         };
 
+        let totalQty = 0;
+        let totalValue = 0;
+        let totalSGST = 0;
+        let totalCGST = 0;
+        let totalIGST = 0;
+        let totalRoundOff = 0;
+        let totalDiscoount = 0;
+        let totalAdvance = 0;
+        let grandTotal = 0;
+
+        if (data.length) {
+            for (let item of data) {
+                totalQty += parseInt(item.quantity);
+                totalValue += (item.quantity * item.rate);
+                // totalSGST +=
+                //     totalCGST +=
+                //     totalIGST +=
+                //     totalRoundOff +=
+                //     totalDiscoount +=
+                //     totalAdvance +=
+            };
+        };
+
         let finalData = {
             type: type,
             invoice_no: invoiceNo,
@@ -72,6 +99,9 @@ exports.createInvoice = async (req, res) => {
             transporter: transporter,
             eway_bill: ewayBill,
             party_id: billTo,
+            created_by: t_userId,
+            total_amount: totalValue,
+            total_quantity: totalQty,
             placeOfSupply: placeOfSupply,
             data: JSON.stringify(data)
         };
@@ -92,10 +122,12 @@ exports.createInvoice = async (req, res) => {
 exports.getAllInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
+        const { t_userId, t_mobile, t_username, t_name, } = req.body;
         const { id } = req.query;
 
         let search_key = {};
         if (id) search_key["id"] = id;
+        if (t_userId) search_key["created_by"] = t_userId.toString();
 
         let result = await InvoiceService.findInvoices(search_key);
         if (result.length) {
@@ -103,18 +135,21 @@ exports.getAllInvoice = async (req, res) => {
             for (let item of result) {
 
                 let billTo = await PartyService.getParty({ id: item.party_id });
-                console.log("🚀 ~ billTo:", billTo)
                 let newData = {
                     id: item.id ? item.id : "",
                     type: item.type ? item.type : "",
                     invoice_no: item.invoice_no ? item.invoice_no : "",
                     eway_bill: item.eway_bill ? item.eway_bill : "",
-                    party_id: billTo.length ? billTo[0].company_name : "",
+                    party_id: billTo.length ? billTo[0] : "",
                     transporter: item.transporter ? item.transporter : "",
                     placeOfSupply: item.placeOfSupply ? item.placeOfSupply : "",
                     data: item.data ? JSON.parse(item.data) : "",
                     invoice_date: item.invoice_date ? item.invoice_date : "",
                     total_amount: item.total_amount ? item.total_amount : "",
+                    total_quantity: item.total_quantity ? item.total_quantity : "",
+                    total_sgst: item.total_sgst ? item.total_sgst : "",
+                    total_cgst: item.total_cgst ? item.total_cgst : "",
+                    total_igst: item.total_igst ? item.total_igst : "",
                     created_by: item.created_by ? item.created_by : "",
                     created_at: item.created_at ? item.created_at : "",
                     is_active: item.is_active ? item.is_active : "",
@@ -146,7 +181,33 @@ exports.deleteInvoice = async (req, res) => {
     } catch (error) {
         console.log(`Something went wrong: controller: deleteInvoice: ${error}`);
         response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: getAllInvoice`;
+        response.message = error.message ? error.message : `Something went wrong: controller: deleteInvoice`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.json(response).status(response.status);
+};
+
+exports.invoiceExports = async (req, res) => {
+    let response = { ...contents.defaultResponse }
+    try {
+
+    } catch (error) {
+        console.log(`Something went wrong: controller: invoiceExports: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: invoiceExports`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.json(response).status(response.status);
+};
+
+exports.invoiceUpdate = async (req, res) => {
+    let response = { ...contents.defaultResponse }
+    try {
+
+    } catch (error) {
+        console.log(`Something went wrong: controller: invoiceUpdate: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: invoiceUpdate`;
         response.body = error.body ? error.body : "";
     };
     return res.json(response).status(response.status);

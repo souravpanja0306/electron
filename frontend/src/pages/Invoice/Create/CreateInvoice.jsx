@@ -11,17 +11,21 @@ import {
   AiOutlineFileAdd,
   AiOutlineMinusSquare,
   AiOutlinePrinter,
-  AiOutlineTable
+  AiOutlineTable,
+  AiOutlineRollback,
 } from "react-icons/ai";
 import Alert from '../../../components/Alert';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 
 
 // Functions...
-import { handleSubmit, handleGetParty, handleGenerateInvoiceNo } from "./CreateInvoiceService"
+import { handleSubmit, handleGetParty, handleGenerateInvoiceNo } from "./CreateInvoiceService";
 
 const CreateInvoice = () => {
+  const [searchParams] = useSearchParams();
+  const back = searchParams.get("back");
+
   const navigate = useNavigate();
   let randomNumber = Math.floor(Math.random() * 10000000000);
 
@@ -188,6 +192,13 @@ const CreateInvoice = () => {
 
       <div className="flex flex-col gap-1">
         <ActionArea>
+          {
+            back ?
+              <div onClick={() => navigate(-1)}>
+                <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+              </div>
+              : ""
+          }
           <div onClick={(e) => handleSubmitForm({
             invoiceDetails: invoiceDetails,
             invoiceFields: invoiceFields
@@ -195,10 +206,10 @@ const CreateInvoice = () => {
             <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
           </div>
           <Link to="/view-invoice">
-            <CustomButton title={"View (Ctrl+I)"} color={"yellow"}><AiOutlineTable /></CustomButton>
+            <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
           </Link>
           <div>
-            <CustomButton title={"Print (Ctrl+P)"} color={"green"}><AiOutlinePrinter /></CustomButton>
+            <CustomButton title={"Print (Ctrl+P)"} color={"blue"}><AiOutlinePrinter /></CustomButton>
           </div>
         </ActionArea>
         <br />
@@ -227,6 +238,16 @@ const CreateInvoice = () => {
                           </option>
                         ))}
                       </select>
+                      <span className='text-red-500 text-xs'>#Party not listed here?
+                        <Link to="/add-party?back=true" className='text-white hover:text-blue-600 underline'> Click to list.</Link>
+                      </span>
+                    </div>
+                    <div className='flex flex-col w-full gap-1'>
+                      <label className='text-xs uppercase'>Ship To</label>
+                      <textarea
+                        className="p-1 rounded-md w-full uppercase text-slate-900"
+                        type="text"
+                      />
                     </div>
                   </div>
 
@@ -254,7 +275,6 @@ const CreateInvoice = () => {
                         readOnly
                         required
                       />
-
                     </div>
                   </div>
                 </div>
@@ -385,7 +405,7 @@ const CreateInvoice = () => {
                           <label className='text-xs uppercase'>E-Way Bill</label>
                           <input
                             className="p-1 rounded-md w-full uppercase text-slate-900"
-                            placeholder="E-Way Bill"
+                            // placeholder="E-Way Bill"
                             type="text"
                             value={invoiceDetails.ewayBill}
                             onChange={(e) =>
@@ -397,7 +417,7 @@ const CreateInvoice = () => {
                           <label className='text-xs uppercase'>Transporter</label>
                           <input
                             className="p-1 rounded-md w-full uppercase text-slate-900"
-                            placeholder="Transporter"
+                            // placeholder="Transporter"
                             type="text"
                             value={invoiceDetails.transporter}
                             onChange={(e) =>
@@ -409,7 +429,7 @@ const CreateInvoice = () => {
                           <label className='text-xs uppercase'>Place of Supply</label>
                           <input
                             className="p-1 rounded-md w-full uppercase text-slate-900"
-                            placeholder="Place"
+                            // placeholder="Place"
                             value={invoiceDetails.placeOfSupply}
                             onChange={(e) =>
                               setInvoiceDetails({ ...invoiceDetails, placeOfSupply: e.target.value })

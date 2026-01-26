@@ -16,6 +16,7 @@ exports.insertInvoiceData = async (data) => {
 
 exports.findInvoices = async ({
     id = "",
+    created_by = "",
     invoice_no = "",
     mobile = "",
     email = "",
@@ -24,26 +25,31 @@ exports.findInvoices = async ({
     count = false,
 }) => {
     try {
-        let query = "SELECT * FROM invoice";
+        let query = "SELECT * FROM invoice WHERE 1=1";
         let params = [];
 
         if (id) {
-            query += " WHERE id = ?";
+            query += " AND id = ?";
             params.push(id);
         };
 
+        if (created_by) {
+            query += " AND created_by = ?";
+            params.push(created_by);
+        };
+
         if (invoice_no) {
-            query += " WHERE invoice_no = ?";
+            query += " AND invoice_no = ?";
             params.push(invoice_no);
         };
 
         if (mobile) {
-            query += " WHERE mobile = ?";
+            query += " AND mobile = ?";
             params.push(mobile);
         };
 
         if (email) {
-            query += " WHERE email = ?";
+            query += " AND email = ?";
             params.push(email);
         };
 

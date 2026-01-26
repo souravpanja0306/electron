@@ -56,6 +56,16 @@ const MenuMap = {
                 { title: "Add Vehicle", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
                 { title: "View Vehicles", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
             ]
+        },
+        {
+            type: "main",
+            title: "Vendor Expenses(Creditors)",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Add Invoice", url: "/create-creditors", icon: <AiOutlinePlusSquare /> },
+                { title: "View Invoice", url: "/view-all-creditors", icon: <AiOutlineFileSearch /> },
+            ]
         }
     ],
     "dashboard": [
@@ -68,8 +78,9 @@ const MenuMap = {
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [
-                { title: "Party Ladger", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
-                { title: "View Challans", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+                { title: "Party Ladger", url: "/sales-reports", icon: <AiOutlinePlusSquare /> },
+                { title: "Debtors", url: "/debtors", icon: <AiOutlineFileSearch /> },
+                { title: "Creditors", url: "/creditors", icon: <AiOutlineFileSearch /> },
             ],
         },
     ],

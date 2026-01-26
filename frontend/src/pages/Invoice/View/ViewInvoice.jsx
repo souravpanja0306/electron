@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 
 // Icon...
-import { AiOutlineFileAdd, AiOutlineSync, AiOutlinePrinter, AiOutlineDownload  } from "react-icons/ai";
+import { AiOutlineFileAdd, AiOutlineSync, AiOutlinePrinter, AiOutlineDownload } from "react-icons/ai";
 
 // Components...
 import PageTitle from '../../../components/PageTitle';
@@ -100,18 +100,18 @@ const ViewInvoices = () => {
                     <div className="flex justify-between w-full">
                         <div className="flex gap-1">
                             <Link to="/create-invoice">
-                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div onClick={(e) => handleDelete(e)}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
                             </div>
                             <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload  /></CustomButton>
+                                <CustomButton title={"Export (Ctrl+E)"} color={"blue"}><AiOutlineDownload /></CustomButton>
                             </div>
                         </div>
                         <div className="flex gap-1">
                             <div onClick={(e) => getAllInvoice(e)}>
-                                <CustomButton title={"Refrash"} color={"green"}><AiOutlineSync /></CustomButton>
+                                <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
                             </div>
                         </div>
                     </div>
@@ -126,52 +126,57 @@ const ViewInvoices = () => {
                                 <th className="p-1 text-start">Invoice No</th>
                                 <th className="p-1 text-start">Bill To</th>
                                 <th className="p-1 text-start">Date</th>
-                                <th className="p-1 text-start">Amount</th>
+                                <th className="p-1 text-start">Quantity</th>
+                                <th className="p-1 text-start">SGST</th>
+                                <th className="p-1 text-start">CGST</th>
+                                <th className="p-1 text-start">IGST</th>
+                                <th className="p-1 text-start">Total</th>
                                 <th className="p-1 text-start">Trasnporter</th>
                                 <th className="p-1 text-start w-8">#</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {
-                                invoices && invoices.length
-                                    ?
-                                    <>
-                                        {
-                                            invoices.map((item, index) => {
-                                                return (
-                                                    <tr key={item.id} className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
-                                                        <td className="p-1 text-start truncate capitalize">
-                                                            <input
-                                                                type="checkbox"
-                                                                onChange={(e) => handleChecked(e, item.id)}
-                                                                checked={item.is_selected}
-                                                            />
-                                                        </td>
-                                                        <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">
-                                                            <Link to={`/`}>
-                                                                {item.invoice_no ? item.invoice_no : "--"}
-                                                            </Link>
-                                                        </td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.party_id ? item.party_id : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.invoice_date ? item.invoice_date : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.total_amount ? item.total_amount : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.transporter ? item.transporter : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize w-8 hover:text-green-500 active:text-red-500">
-                                                            <AiOutlinePrinter />
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })
-                                        }
-                                    </>
-                                    :
-                                    <>
-                                        {
-                                            <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
-                                                <td className="p-1 text-center" colSpan={9}>No Data Found</td>
+                            {invoices && invoices.length
+                                ?
+                                <>
+                                    {invoices.map((item, index) => {
+                                        return (
+                                            <tr key={item.id} className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                                <td className="p-1 text-start truncate capitalize">
+                                                    <input
+                                                        type="checkbox"
+                                                        onChange={(e) => handleChecked(e, item.id)}
+                                                        checked={item.is_selected}
+                                                    />
+                                                </td>
+                                                <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">
+                                                    <Link to={`/view-invoice/details?id=${item.id}&back=true`}>
+                                                        {item.invoice_no ? item.invoice_no : "--"}
+                                                    </Link>
+                                                </td>
+                                                <td className="p-1 text-start truncate capitalize">{item.party_id ? item.party_id.company_name : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize">{item.invoice_date ? item.invoice_date : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize">{item.total_quantity ? item.total_quantity : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize">{item.total_sgst ? item.total_sgst : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize">{item.total_cgst ? item.total_cgst : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize">{item.total_igst ? item.total_igst : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize">{item.total_amount ? (parseFloat(item.total_amount)).toFixed(2) : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize">{item.transporter ? item.transporter : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize w-8 hover:text-green-500 active:text-red-500">
+                                                    <AiOutlinePrinter />
+                                                </td>
                                             </tr>
-                                        }
-                                    </>
+                                        )
+                                    })}
+                                </>
+                                :
+                                <>
+                                    {
+                                        <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                            <td className="p-1 text-center" colSpan={9}>No Data Found</td>
+                                        </tr>
+                                    }
+                                </>
                             }
                         </tbody>
                     </table>
