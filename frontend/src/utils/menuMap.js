@@ -118,15 +118,6 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "signin",
-            url: "#",
-            icon: <AiOutlineEdit />,
-            submenu: [
-                { title: "signin signin", url: "/signin", icon: <AiOutlineUsergroupAdd /> },
-            ]
-        },
-        {
-            type: "main",
             title: "HSN",
             url: "#",
             icon: <AiOutlineEdit />,
