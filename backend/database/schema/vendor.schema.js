@@ -1,5 +1,5 @@
 module.exports = `
-  CREATE TABLE IF NOT EXISTS company (
+  CREATE TABLE IF NOT EXISTS vendor (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company_name TEXT,
     email TEXT,
