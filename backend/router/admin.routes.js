@@ -13,5 +13,17 @@ router.get(
     AdminController.resetAllTable
 );
 
+// HSN Create...
+router.post(
+    "/create-hsn-code",
+    middleware.isAuthenticated,
+    AdminController.createHsnSac
+);
+
+router.post(
+    "/get-hsn-code",
+    middleware.isAuthenticated,
+    AdminController.createHsnSac
+);
 
 module.exports = router;

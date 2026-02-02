@@ -1,5 +1,7 @@
 // Package...
 const moment = require("moment");
+const fs = require('fs');
+const puppeteer = require("puppeteer");
 
 // Contents...
 const contents = require("../content/contents");
@@ -18,7 +20,7 @@ exports.generateInvoiceNo = async (req, res) => {
             response.status = 400;
             response.message = "Type required";
             response.body = [];
-            return res.json(response).status(response.status);
+            return res.status(response.status).json(response);
         };
         let type = "";
         if (types == "proforma") type = "PRO";
@@ -49,7 +51,7 @@ exports.generateInvoiceNo = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: generateInvoiceNo`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.createInvoice = async (req, res) => {
@@ -66,7 +68,7 @@ exports.createInvoice = async (req, res) => {
             response.status = 409;
             response.message = "Invoice Number Already Exists.";
             response.body = [];
-            return res.json(response).status(response.status);
+            return res.status(response.status).json(response);
         };
 
         let totalQty = 0;
@@ -116,7 +118,7 @@ exports.createInvoice = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: createInvoice`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.getAllInvoice = async (req, res) => {
@@ -161,7 +163,7 @@ exports.getAllInvoice = async (req, res) => {
             response.message = "Data fetched succesfully.";
             response.body = finalData;
         } else {
-            response.status = 204;
+            response.status = 202;
             response.message = "Data not found.";
             response.body = [];
         };
@@ -171,20 +173,31 @@ exports.getAllInvoice = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: getAllInvoice`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.deleteInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
+        const { t_userId, t_mobile, t_username, t_name, } = req.body;
+        const { id } = req.params;
 
+        let search_key = {};
+        if (id) search_key["id"] = id;
+        if (t_userId) search_key["created_by"] = t_userId.toString();
+
+        let result = await InvoiceService.findInvoices(search_key);
+        if (result.length) {
+            await InvoiceService.deleteInvoices(search_key);
+
+        };
     } catch (error) {
         console.log(`Something went wrong: controller: deleteInvoice: ${error}`);
         response.status = error.status ? error.status : 500;
         response.message = error.message ? error.message : `Something went wrong: controller: deleteInvoice`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.invoiceExports = async (req, res) => {
@@ -197,7 +210,7 @@ exports.invoiceExports = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: invoiceExports`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.invoiceUpdate = async (req, res) => {
@@ -210,5 +223,38 @@ exports.invoiceUpdate = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: invoiceUpdate`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
+};
+
+exports.generateInvoicePdf = async (req, res) => {
+    let response = { ...contents.defaultResponse }
+    try {
+        let createFolder = "./uploads/invoice_pdf/";
+        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+
+        let findInvoice = await InvoiceService.findInvoices({
+            invoice_no: invoiceNo
+        });
+        console.log("🚀 ~ findInvoice:", findInvoice)
+
+        dd
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+
+        await page.setContent(html, { waitUntil: "networkidle0" });
+        await page.pdf({
+            path: `./uploads/invoice_pdf/${invoiceNo}_${moment().format("DD-MM-YYYY")}.pdf`,
+            format: "A4",
+            printBackground: true
+        });
+
+        await browser.close();
+
+    } catch (error) {
+        console.log(`Something went wrong: controller: generateInvoicePdf: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: generateInvoicePdf`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.status(response.status).json(response);
 };

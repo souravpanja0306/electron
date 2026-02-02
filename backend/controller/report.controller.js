@@ -20,7 +20,7 @@ exports.debtors = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: debtors`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.creditors = async (req, res) => {
@@ -33,7 +33,7 @@ exports.creditors = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: creditors`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.salesReports = async (req, res) => {
@@ -46,5 +46,5 @@ exports.salesReports = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: salesReports`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };

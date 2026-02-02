@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import PageTitle from '../../../../components/PageTitle';
-import ActionArea from '../../../../components/ActionArea';
-import MainArea from '../../../../components/MainArea';
-import CustomButton from '../../../../components/CustomButton';
+import PageTitle from '../../../components/PageTitle';
+import ActionArea from '../../../components/ActionArea';
+import MainArea from '../../../components/MainArea';
+import CustomButton from '../../../components/CustomButton';
 import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 // Icon...
-import { AiOutlineFileAdd, AiOutlineSync , AiOutlineDownload } from "react-icons/ai";
+import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDownload } from "react-icons/ai";
 
 // Services...
-import { handleGetParty } from "./ViewPartyService"
+import { handleGetParty } from "./PartyService"
 
 const ViewParty = () => {
     const [party, setParty] = useState([]);
@@ -98,7 +98,7 @@ const ViewParty = () => {
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
                             </div>
                             <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload  /></CustomButton>
+                                <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload /></CustomButton>
                             </div>
                         </div>
                         <div className="flex gap-1">

@@ -3,6 +3,8 @@ db.exec(require("../database/schema/party.schema"));
 
 exports.createParty = async (data) => {
     try {
+        console.log(db)
+        
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO party (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)

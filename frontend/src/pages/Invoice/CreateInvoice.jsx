@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import PageTitle from '../../../components/PageTitle';
-import ActionArea from '../../../components/ActionArea';
-import MainArea from '../../../components/MainArea';
-import CustomButton from '../../../components/CustomButton';
-import { inrToWords } from '../../../utils/InWordConverter';
+import PageTitle from '../../components/PageTitle';
+import ActionArea from '../../components/ActionArea';
+import MainArea from '../../components/MainArea';
+import CustomButton from '../../components/CustomButton';
+import { inrToWords } from '../../utils/InWordConverter';
 
 // Icon...
 import {
@@ -14,13 +14,13 @@ import {
   AiOutlineTable,
   AiOutlineRollback,
 } from "react-icons/ai";
-import Alert from '../../../components/Alert';
+import Alert from '../../components/Alert';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 
 
 // Functions...
-import { handleSubmit, handleGetParty, handleGenerateInvoiceNo } from "./CreateInvoiceService";
+import { handleSubmit, handleGetParty, handleGenerateInvoiceNo, printInvoice } from "./InvoiceService";
 
 const CreateInvoice = () => {
   const [searchParams] = useSearchParams();
@@ -208,8 +208,8 @@ const CreateInvoice = () => {
           <Link to="/view-invoice">
             <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
           </Link>
-          <div>
-            <CustomButton title={"Print (Ctrl+P)"} color={"blue"}><AiOutlinePrinter /></CustomButton>
+          <div onClick={() => printInvoice()}>
+            <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
           </div>
         </ActionArea>
         <br />

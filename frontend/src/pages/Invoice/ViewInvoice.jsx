@@ -7,14 +7,14 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineFileAdd, AiOutlineSync, AiOutlinePrinter, AiOutlineDownload } from "react-icons/ai";
 
 // Components...
-import PageTitle from '../../../components/PageTitle';
-import ActionArea from '../../../components/ActionArea';
-import MainArea from '../../../components/MainArea';
-import CustomButton from '../../../components/CustomButton';
-import Alert from '../../../components/Alert';
+import PageTitle from '../../components/PageTitle';
+import ActionArea from '../../components/ActionArea';
+import MainArea from '../../components/MainArea';
+import CustomButton from '../../components/CustomButton';
+import Alert from '../../components/Alert';
 
 // Service...
-import { handleGetParty, handleGetAllInvoice } from "./ViewInvoiceService"
+import { handleGetParty, handleGetAllInvoice, printInvoice, generateInvoice } from "./InvoiceService"
 
 
 const ViewInvoices = () => {
@@ -117,7 +117,7 @@ const ViewInvoices = () => {
                     </div>
                 </ActionArea>
                 <MainArea>
-                    <table className="table-fixed w-full">
+                    <table className="table-fixed w-full overflow-auto">
                         <thead>
                             <tr className="border-b border-slate-600 p-1 ">
                                 <th className="p-1 text-start w-8">
@@ -132,7 +132,7 @@ const ViewInvoices = () => {
                                 <th className="p-1 text-start">IGST</th>
                                 <th className="p-1 text-start">Total</th>
                                 <th className="p-1 text-start">Trasnporter</th>
-                                <th className="p-1 text-start w-8">#</th>
+                                <th className="p-1 text-center w-16">#</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -162,8 +162,13 @@ const ViewInvoices = () => {
                                                 <td className="p-1 text-start truncate capitalize">{item.total_igst ? item.total_igst : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize">{item.total_amount ? (parseFloat(item.total_amount)).toFixed(2) : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize">{item.transporter ? item.transporter : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize w-8 hover:text-green-500 active:text-red-500">
-                                                    <AiOutlinePrinter />
+                                                <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
+                                                    <div onClick={() => printInvoice()} className="hover:text-green-500 active:text-green-700 text-xl">
+                                                        <AiOutlinePrinter />
+                                                    </div>
+                                                    <div onClick={() => generateInvoice()} className="hover:text-yellow-500 active:text-yellow-700 text-xl">
+                                                        <AiOutlineDownload />
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )

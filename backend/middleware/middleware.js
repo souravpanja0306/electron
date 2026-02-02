@@ -14,7 +14,7 @@ exports.isAuthenticated = async (req, res, next) => {
             response.status = 401;
             response.message = "Unauthorized";
             response.body = [];
-            return res.json(response).status(response.status);
+            return res.status(response.status).json(response);
         };
         const token = authHeader.split(" ")[1];
 
@@ -32,5 +32,5 @@ exports.isAuthenticated = async (req, res, next) => {
         response.message = error.message ? error.message : `Something went wrong: middleware: isAuthenticated`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };

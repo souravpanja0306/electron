@@ -68,3 +68,13 @@ exports.findInvoices = async ({
         console.log(error);
     };
 };
+
+module.exports.deleteInvoices = async ({
+
+}) => {
+    try {
+
+    } catch (error) {
+        console.log(error);
+    };
+};

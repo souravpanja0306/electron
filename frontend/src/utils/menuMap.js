@@ -10,6 +10,8 @@ import {
     AiOutlineUsergroupAdd,
     AiOutlineShopping,
     AiOutlineUserAdd,
+    AiOutlineDatabase,
+    AiOutlineFileAdd
 } from "react-icons/ai";
 
 const MenuMap = {
@@ -86,34 +88,25 @@ const MenuMap = {
     ],
     "notification": [],
     "profile": [
-        {
-            type: "main",
-            title: "Profile",
-            url: "#",
-            icon: <AiOutlineUser />,
-            submenu: [
-                { title: "Profile", url: "/profile", icon: <AiOutlineUsergroupAdd /> },
-                { title: "Edit Profile", url: "/edit-profile", icon: <AiOutlineEdit /> },
-            ]
-        },
+        { title: "Profile", url: "/profile", icon: <AiOutlineUser /> },
         {
             type: "main",
             title: "Party",
             url: "#",
-            icon: <AiOutlineUsergroupAdd />,
+            icon: <AiOutlineUser />,
             submenu: [
-                { title: "Create Party", url: "/add-party", icon: <AiOutlineUsergroupAdd /> },
-                { title: "View Parties", url: "/party", icon: <AiOutlineUser /> },
+                { title: "Create Party", url: "/add-party", icon: <AiOutlineFileAdd /> },
+                { title: "View Parties", url: "/party", icon: <AiOutlineDatabase /> },
             ]
         },
         {
             type: "main",
             title: "Company",
             url: "#",
-            icon: <AiOutlineEdit />,
+            icon: <AiOutlineBank />,
             submenu: [
-                { title: "Create Company", url: "/party", icon: <AiOutlineUsergroupAdd /> },
-                { title: "View Companies", url: "/company", icon: <AiOutlineBank /> },
+                { title: "Create Company", url: "/add-company", icon: <AiOutlineFileAdd /> },
+                { title: "View Companies", url: "/company", icon: <AiOutlineDatabase /> },
             ]
         },
         {

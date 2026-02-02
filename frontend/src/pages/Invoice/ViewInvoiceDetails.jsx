@@ -14,14 +14,14 @@ import {
 } from "react-icons/ai";
 
 // Components...
-import PageTitle from '../../../components/PageTitle';
-import ActionArea from '../../../components/ActionArea';
-import MainArea from '../../../components/MainArea';
-import CustomButton from '../../../components/CustomButton';
-import Alert from '../../../components/Alert';
+import PageTitle from '../../components/PageTitle';
+import ActionArea from '../../components/ActionArea';
+import MainArea from '../../components/MainArea';
+import CustomButton from '../../components/CustomButton';
+import Alert from '../../components/Alert';
 
 // Service...
-import { handleGetParty, handleGetAllInvoice } from "./ViewInvoiceService"
+import { handleGetParty, handleGetAllInvoice, printInvoice } from "./InvoiceService"
 
 
 const ViewInvoiceDetails = () => {
@@ -208,7 +208,7 @@ const ViewInvoiceDetails = () => {
 
               </div>
 
-              <MainArea>
+              <MainArea background={"bg-slate-700 text-slate-100"}>
                 <div className="flex flex-col w-full">
                   <table className="w-full text-sm rounded-md overflow-hidden">
                     <thead className="">

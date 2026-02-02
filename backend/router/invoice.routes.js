@@ -24,6 +24,12 @@ router.post(
     InvoiceController.createInvoice
 );
 
+router.post(
+    "/generate-invoice-pdf",
+    middleware.isAuthenticated,
+    InvoiceController.generateInvoicePdf
+);
+
 router.get(
     "/invoice-list",
     middleware.isAuthenticated,
@@ -43,7 +49,7 @@ router.put(
 );
 
 router.delete(
-    "/invoice-delete",
+    "/invoice-delete/:id",
     middleware.isAuthenticated,
     InvoiceController.deleteInvoice
 );

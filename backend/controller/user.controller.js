@@ -51,7 +51,7 @@ exports.addUser = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: addUser`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.listUsers = async (req, res) => {
@@ -64,7 +64,7 @@ exports.listUsers = async (req, res) => {
             response.message = "Data fetched succesfully.";
             response.body = result;
         } else {
-            response.status = 204;
+            response.status = 404;
             response.message = "Data not found.";
             response.body = [];
         };
@@ -74,7 +74,7 @@ exports.listUsers = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: listUsers`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.getUsers = async (req, res) => {
@@ -91,7 +91,7 @@ exports.getUsers = async (req, res) => {
             response.message = "Data fetched succesfully.";
             response.body = result;
         } else {
-            response.status = 204;
+            response.status = 404;
             response.message = "Data not found.";
             response.body = [];
         };
@@ -101,7 +101,7 @@ exports.getUsers = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: getUsers`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.removeUsers = async (req, res) => {
@@ -114,5 +114,5 @@ exports.removeUsers = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: removeUsers`;
         response.body = error.body ? error.body : "";
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };

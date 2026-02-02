@@ -1,6 +1,9 @@
 module.exports = `
   CREATE TABLE IF NOT EXISTS vendor (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    
+    company_id INTEGER,
+
     company_name TEXT,
     email TEXT,
     mobile TEXT,
@@ -19,6 +22,10 @@ module.exports = `
     ifse TEXT,
     branch TEXT,
     account_no TEXT,
+
+    created_by INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
     is_active INTEGER DEFAULT 1,
     is_deleted INTEGER DEFAULT 0
   );

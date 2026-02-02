@@ -20,13 +20,13 @@ exports.signin = async (req, res) => {
             response.status = 403;
             response.message = "Username Required.";
             response.body = result;
-            return res.json(response).status(response.status);
+            return res.status(response.status).json(response);
         };
         if (!password) {
             response.status = 403;
             response.message = "Username Required.";
             response.body = result;
-            return res.json(response).status(response.status);
+            return res.status(response.status).json(response);
         };
         let getUserDetails = await UserService.getUsers({
             password: password,
@@ -52,12 +52,12 @@ exports.signin = async (req, res) => {
             response.status = 403;
             response.message = "Incorrect Username Or Password! Please Contect to Adminitrator...";
             response.body = result;
-            return res.json(response).status(response.status);
+            return res.status(response.status).json(response);
         };
     } catch (error) {
         console.log(`Something went wrong: controller: signin: ${error}`);
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.forgotPassword = async (req, res) => {
@@ -67,7 +67,7 @@ exports.forgotPassword = async (req, res) => {
     } catch (error) {
         console.log(`Something went wrong: controller: forgotPassword: ${error}`);
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };
 
 exports.resetPassword = async (req, res) => {
@@ -77,5 +77,5 @@ exports.resetPassword = async (req, res) => {
     } catch (error) {
         console.log(`Something went wrong: controller: resetPassword: ${error}`);
     };
-    return res.json(response).status(response.status);
+    return res.status(response.status).json(response);
 };

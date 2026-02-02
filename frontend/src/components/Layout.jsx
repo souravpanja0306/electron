@@ -126,12 +126,13 @@ const Layout = ({ children }) => {
 
             {/* Middle Sidebar */}
             <div className={`${sideBar ? "min-w-[270px] p-1" : "max-w-0 p-0"} bg-slate-900 flex flex-col gap-1 select-none border-r border-slate-600`}>
+
                 {currentMenu.map((item, index) => (
                     item?.type === "main" ? (
                         <div key={index}>
                             <div
                                 onClick={() => setSubMenu({ index, active: subMenu.index !== index ? true : !subMenu.active })}
-                                className={`${subMenu.index === index && subMenu.active ? "bg-blue-600" : "border-b border-slate-600 hover:bg-slate-600"} text-xl w-full p-1 flex justify-between gap-1 items-center transition text-slate-300 cursor-pointer`}
+                                className={`${subMenu.index === index && subMenu.active ? "bg-blue-600" : "border border-slate-600 hover:bg-slate-600"} text-xl w-full p-1 flex justify-between gap-1 items-center transition text-slate-300 cursor-pointer rounded-md`}
                             >
                                 <div className="flex justify-center items-center gap-2">
                                     {item.icon}
@@ -139,7 +140,8 @@ const Layout = ({ children }) => {
                                 </div>
                                 {subMenu.index === index && subMenu.active ? <AiOutlineUpSquare /> : <AiOutlineDownSquare />}
                             </div>
-                            <div className={`${subMenu.index === index && subMenu.active ? "min-h-12" : "hidden"} p-1 rounded-b-md bg-slate-900 flex flex-col gap-1 transition-all duration-500 border border-blue-600`} >
+                            <div className={`${subMenu.index === index && subMenu.active ? "min-h-12" : "hidden"} p-1 rounded-md bg-slate-900 flex flex-col gap-1 transition-all duration-500 border border-blue-600`} >
+
                                 {item?.submenu?.map((sub, i) => (
                                     <NavLink
                                         key={i}
@@ -155,6 +157,7 @@ const Layout = ({ children }) => {
                                         <span className="text-xs">{sub.title}</span>
                                     </NavLink>
                                 ))}
+
                             </div>
                         </div>
                     ) : (
@@ -173,10 +176,11 @@ const Layout = ({ children }) => {
                         </NavLink>
                     )
                 ))}
+
             </div>
 
             {/* Main Content */}
-            <div className="h-screen w-full bg-slate-800 p-1 overflow-auto">
+            <div className="min-h-screen w-full bg-slate-800 p-1 overflow-auto">
                 {children}
             </div>
         </div>

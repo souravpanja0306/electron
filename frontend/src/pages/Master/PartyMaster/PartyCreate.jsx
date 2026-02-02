@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import PageTitle from '../../../../components/PageTitle';
-import ActionArea from '../../../../components/ActionArea';
-import MainArea from '../../../../components/MainArea';
-import CustomButton from '../../../../components/CustomButton';
+import PageTitle from '../../../components/PageTitle';
+import ActionArea from '../../../components/ActionArea';
+import MainArea from '../../../components/MainArea';
+import CustomButton from '../../../components/CustomButton';
 import { Link, NavLink } from "react-router-dom";
 import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
-import Alert from "../../../../components/Alert";
+import Alert from "../../../components/Alert";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
 // Service...
-import { handleCreateParty } from "./CreatePartyService";
+import { handleCreateParty } from "./PartyService";
 
 
-const CreateParty = () => {
+const PartyCreate = () => {
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
 
@@ -427,4 +427,4 @@ const CreateParty = () => {
     )
 }
 
-export default CreateParty
+export default PartyCreate
