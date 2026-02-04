@@ -31,12 +31,12 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Recipts",
+            title: "Money Recipts",
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [
-                { title: "Create Recipts", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
-                { title: "View Recipts", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+                { title: "Create Money Recipts", url: "/create-moeny-receipts", icon: <AiOutlinePlusSquare /> },
+                { title: "View Money Recipts", url: "/view-money-receipts", icon: <AiOutlineFileSearch /> },
             ],
         },
         {

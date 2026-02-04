@@ -25,6 +25,8 @@ import ForgotPassword from './pages/Auth/ForgotPassword';
 import Debtors from './pages/Reports/Debtors';
 import Error from './pages/Error';
 import Creditors from './pages/Reports/Creditors';
+import CreateMoneyReceipts from './pages/Receipts/MoneyReceipts';
+import ViewMoneyReceipts from './pages/Receipts/ViewMoneyReceipts';
 
 import { Middleware } from './middleware/middleware';
 
@@ -35,6 +37,8 @@ const router = createHashRouter([
   { path: "/view-invoice", element: <Middleware><Layout><ViewInvoice /></Layout></Middleware> },
   { path: "/view-invoice/details", element: <Middleware><Layout><ViewInvoiceDetails /></Layout></Middleware> },
   { path: "/create-creditors", element: <Middleware><Layout><CreateInvoice /></Layout></Middleware> },
+  { path: "/create-moeny-receipts", element: <Middleware><Layout><CreateMoneyReceipts /></Layout></Middleware> },
+  { path: "/view-money-receipts", element: <Middleware><Layout><ViewMoneyReceipts /></Layout></Middleware> },
   { path: "/view-all-creditors", element: <Middleware><Layout><ViewInvoice /></Layout></Middleware> },
   { path: "/dashboard", element: <Middleware><Layout><Dashboard /></Layout></Middleware> },
   { path: "/sales-reports", element: <Middleware><Layout><SalesReport /></Layout></Middleware> },

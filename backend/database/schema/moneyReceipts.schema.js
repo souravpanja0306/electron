@@ -7,9 +7,8 @@ module.exports = `
 
     receipt_no TEXT UNIQUE,
     receipt_date TEXT,
-    amount REAL NOT NULL,
-    payment_mode TEXT,     
-    reference_no TEXT,    
+    data TEXT,
+    reference_no TEXT,
     remarks TEXT,
 
     created_by INTEGER,

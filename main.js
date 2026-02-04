@@ -4,10 +4,10 @@ require("./server.js");
 
 function createWindow() {
     const win = new BrowserWindow({
-        width: 1200,
-        height: 800,
-        minWidth: 1000,
-        minHeight: 600,
+        width: 1,
+        height: 1,
+        minWidth: 1,
+        minHeight: 1,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             contextIsolation: true,

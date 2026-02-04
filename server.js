@@ -18,6 +18,7 @@ app.use(`/api/${VERSION}/auth/`, require("./backend/router/auth.routes"));
 app.use(`/api/${VERSION}/user/`, require("./backend/router/user.routes"));
 app.use(`/api/${VERSION}/admin/`, require("./backend/router/admin.routes"));
 app.use(`/api/${VERSION}/report/`, require("./backend/router/report.routes"));
+app.use(`/api/${VERSION}/money-receipt/`, require("./backend/router/moneyReceipts.routes"));
 
 app.get("/", (req, res) => {
     return res.json({
