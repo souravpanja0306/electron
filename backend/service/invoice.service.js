@@ -1,8 +1,8 @@
 const db = require("../database/connection");
-db.exec(require("../database/schema/invoice.schema"));
 
 exports.insertInvoiceData = async (data) => {
     try {
+        db.exec(require("../database/schema/invoice.schema"));
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO invoice (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -25,6 +25,7 @@ exports.findInvoices = async ({
     count = false,
 }) => {
     try {
+        db.exec(require("../database/schema/invoice.schema"));
         let query = "SELECT * FROM invoice WHERE 1=1";
         let params = [];
 
@@ -73,6 +74,7 @@ module.exports.deleteInvoices = async ({
 
 }) => {
     try {
+        db.exec(require("../database/schema/invoice.schema"));
 
     } catch (error) {
         console.log(error);

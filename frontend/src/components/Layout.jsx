@@ -183,7 +183,7 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Main Content */}
-            <div className="min-h-screen w-full bg-slate-800 p-1 overflow-auto">
+            <div className="max-h-screen w-full bg-slate-800 p-1 overflow-auto">
                 {children}
             </div>
         </div>

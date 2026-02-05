@@ -1,13 +1,20 @@
 import { Link, useNavigate } from 'react-router-dom';
 import PageTitle from '../../components/PageTitle';
 import CustomButton from '../../components/CustomButton';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Functions...
 import { handleSignin } from "./Service";
 
 const Signin = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAuth = localStorage.getItem("token");
+    if (isAuth) navigate("/");
+    console.log("hello");
+  }, [])
+
   const [data, setData] = useState({
     username: "",
     password: ""

@@ -1,10 +1,8 @@
 const db = require("../database/connection");
-db.exec(require("../database/schema/party.schema"));
 
 exports.createParty = async (data) => {
     try {
-        console.log(db)
-        
+        db.exec(require("../database/schema/party.schema"));
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO party (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -24,6 +22,7 @@ exports.getParty = async ({
     skip = "",
 }) => {
     try {
+        db.exec(require("../database/schema/party.schema"));
         let query = "SELECT * FROM party";
         let search_key = [];
         let params = [];

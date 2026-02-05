@@ -27,22 +27,39 @@ const MoneyReceipts = () => {
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
     const [party, setParty] = useState([]);
+    const [moneyReceiptNo, setMoneyReciptNo] = useState("");
 
+    const getPartys = async () => {
+        let result = await handleGetParty();
+        if (result.body.length) {
+            setParty(result.body);
+        };
+    };
+
+    const getMoneyReceiptNo = async () => {
+        let result = await handleGenerateMoneyReceiptNo();
+        setMoneyReciptNo(result);
+    };
+
+    useEffect(() => {
+        getMoneyReceiptNo();
+        getPartys();
+    }, []);
+
+    const [data, setData] = useState([
+        { sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
+        { sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
+        { sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
+    ]);
     const [form, setForm] = useState({
         company_id: "",
         party_id: "",
         receipt_no: "",
         receipt_date: "",
-        data: [
-            { sl_no: "", },
-            { sl_no: "", },
-            { sl_no: "", },
-        ],
-        payment_mode: "",
-        reference_no: "",
+        data: data,
         remarks: "",
     });
-    
+
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -52,20 +69,41 @@ const MoneyReceipts = () => {
         e.preventDefault();
         console.log(form);
     };
+
     const printInvoice = (e) => {
         e.preventDefault();
         console.log(form);
     };
-    const handleAddFields = (e) => {
-        e.preventDefault();
-        console.log(form);
-    };
-    const handleRemoveFields = (e) => {
-        e.preventDefault();
-        console.log(form);
+
+    const handleAddFields = () => {
+        setData([...data, { sl_no: "", payment_mode: "", description: "", amount: "", reference: "" }]);
     };
 
-
+    const handleRemoveFields = (id) => {
+        let datas = data.find(item => item.id == id);
+        console.log("🚀 ~ handleRemoveFields ~ datas:", datas)
+        if (datas) {
+            if (datas.description != "") {
+                // setAlart({
+                //     show: true,
+                //     title: "Error",
+                //     type: "error",
+                //     message: "You can’t delete this field because it contains datas."
+                // });
+                return;
+            };
+            if (datas.amount != "") {
+                // setAlart({
+                //     show: true,
+                //     title: "Error",
+                //     type: "error",
+                //     message: "You can’t delete this field because it contains datas."
+                // });
+                return;
+            };
+        };
+        setData(data.filter(item => item.id !== id));
+    };
 
     return (
         <>
@@ -91,7 +129,7 @@ const MoneyReceipts = () => {
 
                         <div className='flex flex-col w-[250px] gap-1'>
                             <div className='flex flex-col w-full gap-1'>
-                                <label className='text-xs uppercase'>Bill To</label>
+                                <label className='text-xs uppercase'>Receipt Name</label>
                                 <select
                                     className="p-1 rounded-md w-full uppercase text-slate-900"
                                     // value={invoiceDetails.billTo}
@@ -100,14 +138,14 @@ const MoneyReceipts = () => {
                                     // }
                                     required
                                 >
-                                    <option value="" disabled>Select Party</option>
+                                    <option value="" disabled selected>Select Receipt</option>
                                     {party?.map(item => (
                                         <option key={item.id} value={item.id}>
                                             {item.company_name}
                                         </option>
                                     ))}
                                 </select>
-                                <span className='text-red-500 text-xs'>#Party not listed here?
+                                <span className='text-red-500 text-xs'>#Receipt not listed here?
                                     <Link to="/add-party?back=true" className='text-white hover:text-blue-600 underline'> Click to list.</Link>
                                 </span>
                             </div>
@@ -119,6 +157,7 @@ const MoneyReceipts = () => {
                                 <input
                                     className="p-1 rounded-md w-full uppercase text-slate-900"
                                     type="text"
+                                    value={moneyReceiptNo}
                                     readOnly
                                     required
                                 />
@@ -136,44 +175,8 @@ const MoneyReceipts = () => {
                             </div>
                         </div>
                     </div>
-                    {/* <form
-                        onSubmit={handleSubmitForm}
-                        className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow space-y-4"
-                    >
-                        <h2 className="text-xl font-semibold">Money Receipt</h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input name="company_id" placeholder="Company ID" className="input" onChange={handleChange} />
-                            <input name="party_id" placeholder="Party ID" className="input" onChange={handleChange} />
-
-                            <input name="receipt_no" placeholder="Receipt No" className="input" onChange={handleChange} />
-                            <input type="date" name="receipt_date" className="input" onChange={handleChange} />
-
-                            <input type="number" name="amount" placeholder="Amount" required className="input" onChange={handleChange} />
-
-                            <select name="payment_mode" className="input" onChange={handleChange}>
-                                <option value="">Payment Mode</option>
-                                <option>Cash</option>
-                                <option>UPI</option>
-                                <option>Card</option>
-                                <option>Bank Transfer</option>
-                            </select>
-
-                            <input name="reference_no" placeholder="Reference No" className="input" onChange={handleChange} />
-                        </div>
-
-                        <textarea
-                            name="remarks"
-                            placeholder="Remarks"
-                            className="input h-20"
-                            onChange={handleChange}
-                        />
-
-                        <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-                            Save Receipt
-                        </button>
-                    </form> */}
                 </MainArea>
+
                 <br />
 
                 <PageTitle>Information</PageTitle>
@@ -184,14 +187,15 @@ const MoneyReceipts = () => {
                                 <th className='w-12'>Sl. No.</th>
                                 <th className=''>Description</th>
                                 <th className='w-36'>Payment Type</th>
+                                <th className='w-24'>Reference No</th>
                                 <th className='w-24'>Amount</th>
                                 <th className='w-12'>#</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                form && form.data.map((item, index) => {
-                                    const isLast = index === form.data.length - 1;
+                                data && data.map((item, index) => {
+                                    const isLast = index === data.length - 1;
                                     return (
                                         <tr key={item.id} className='items-center text-black'>
                                             <td className=''>
@@ -205,7 +209,7 @@ const MoneyReceipts = () => {
                                                 <input
                                                     className="w-full p-1 rounded-md border border-slate-600 capitalize"
                                                     value={item.description}
-                                                    onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "description" })}
+                                                    onChange={(e) => handleChange({ value: e.target.value, id: item.id })}
                                                     type="text"
                                                 />
                                             </td>
@@ -214,7 +218,8 @@ const MoneyReceipts = () => {
                                                     <select
                                                         className="w-full p-1 rounded-md border border-slate-600 uppercase"
                                                         defaultValue=""
-                                                        onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "hsn" })}
+                                                        name="payment_mode"
+                                                        onChange={(e) => handleChange({ value: e.target.value, id: item.id })}
                                                     >
                                                         <option selected disabled>Select Payment Type</option>
                                                         <option>Cash</option>
@@ -229,7 +234,16 @@ const MoneyReceipts = () => {
                                                     className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                                     value={item.quantity}
                                                     name=""
-                                                    onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "quantity" })}
+                                                    onChange={(e) => handleChange({ value: e.target.value, id: item.id })}
+                                                    type='number'
+                                                />
+                                            </td>
+                                            <td className=''>
+                                                <input
+                                                    className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                    value={item.quantity}
+                                                    name=""
+                                                    onChange={(e) => handleChange({ value: e.target.value, id: item.id })}
                                                     type='number'
                                                 />
                                             </td>

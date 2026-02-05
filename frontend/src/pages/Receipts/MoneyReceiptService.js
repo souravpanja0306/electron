@@ -20,3 +20,15 @@ export const handleGenerateMoneyReceiptNo = async () => {
         console.log(error);
     };
 };
+
+export const handleGetParty = async () => {
+    let result = await axios({
+        method: "get",
+        url: `${baseURL.party}party-list`,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    return result.data;
+};

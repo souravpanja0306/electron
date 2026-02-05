@@ -1,5 +1,18 @@
 const db = require("../database/connection");
-db.exec(require("../database/schema/moneyReceipts.schema"));
+
+exports.insertMoneyReceipts = async (data) => {
+    try {
+        db.exec(require("../database/schema/moneyReceipts.schema"));
+        const keys = Object.keys(data);
+        const result = db
+            .prepare(`INSERT INTO money_receipts (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
+            .run(data);
+
+        return result;
+    } catch (error) {
+        console.log(error);
+    };
+};
 
 
 exports.findMoneyReceipts = async ({
@@ -11,6 +24,7 @@ exports.findMoneyReceipts = async ({
     count = false,
 }) => {
     try {
+        db.exec(require("../database/schema/moneyReceipts.schema"));
         let query = "SELECT * FROM money_receipts WHERE 1=1";
         let params = [];
 
@@ -42,5 +56,22 @@ exports.findMoneyReceipts = async ({
         return result;
     } catch (error) {
         console.log(error);
+    };
+};
+
+module.exports.deleteMoneyReceipt = async ({
+    id = "",
+}) => {
+    try {
+        db.exec(require("../database/schema/invoice.schema"));
+        if (!id) throw new Error("ID is required");
+
+        let query = "DELETE FROM money_receipts WHERE id = ?";
+        let result = db.prepare(query).run(id);
+
+        return { success: true, deleted: result.changes };
+    } catch (error) {
+        console.log(error);
+        return { success: false, deleted: "" }
     };
 };

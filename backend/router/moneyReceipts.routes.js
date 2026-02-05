@@ -18,4 +18,28 @@ router.get(
     MoneyReceiptController.generateMoneyReceiptNo
 );
 
+router.post(
+    "/create-money-receipt",
+    middleware.isAuthenticated,
+    MoneyReceiptController.createMoneyReceipt
+);
+
+router.get(
+    "/get-money-receipt",
+    middleware.isAuthenticated,
+    MoneyReceiptController.getMoneyReceipt
+);
+
+router.get(
+    "/generate-money-receipt-pdf/:id",
+    middleware.isAuthenticated,
+    MoneyReceiptController.generateMoneyReceiptPdf
+);
+
+router.delete(
+    "/delete-money-receipt/:id",
+    middleware.isAuthenticated,
+    MoneyReceiptController.deleteMoneyReceipt
+);
+
 module.exports = router;

@@ -8,8 +8,9 @@ module.exports = `
     receipt_no TEXT UNIQUE,
     receipt_date TEXT,
     data TEXT,
-    reference_no TEXT,
     remarks TEXT,
+
+    total_value TEXT,
 
     created_by INTEGER,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,

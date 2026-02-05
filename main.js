@@ -4,15 +4,16 @@ require("./server.js");
 
 function createWindow() {
     const win = new BrowserWindow({
-        width: 1,
-        height: 1,
-        minWidth: 1,
-        minHeight: 1,
+        width: 800,
+        height: 800,
+        minWidth: 800,
+        minHeight: 800,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             contextIsolation: true,
             nodeIntegration: false
-        }
+        },
+        icon: path.join(__dirname, "./public/icon/icon.ico")
     });
     win.loadURL("http://localhost:3000");
 };
