@@ -128,11 +128,11 @@ const PartyCreate = () => {
                                     <div className='flex flex-col w-full gap-1'>
                                         {/* <label className='text-xs uppercase'>Company Name : <span className='text-red-600'>*</span></label> */}
                                         <input
-                                            className="p-1 rounded-md w-full capitalize text-slate-900"
+                                            className="p-1 rounded-md w-full text-slate-900"
                                             placeholder="Company Name"
                                             value={data.company_name}
                                             type="text"
-                                            onChange={(e) => setData({ ...data, company_name: (e.target.value).toLowerCase() })}
+                                            onChange={(e) => setData({ ...data, company_name: e.target.value })}
                                             required
                                             autoCapitalize='true'
                                         />
@@ -140,11 +140,11 @@ const PartyCreate = () => {
                                     <div className='flex flex-col w-full gap-1'>
                                         {/* <label className='text-xs uppercase'>Director/Proprietor/Owner</label> */}
                                         <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            className='p-1 rounded-md w-full text-slate-900'
                                             placeholder='Director/ Proprietor/ Owner'
                                             value={data.owner}
                                             type="text"
-                                            onChange={(e) => setData({ ...data, owner: (e.target.value).toLowerCase() })}
+                                            onChange={(e) => setData({ ...data, owner: e.target.value })}
                                             required
                                         />
                                     </div>
@@ -153,18 +153,18 @@ const PartyCreate = () => {
                                     <div className='flex flex-col w-full gap-1'>
                                         {/* <label className='text-xs uppercase'>Email <span className='text-red-600'>*</span></label> */}
                                         <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            className='p-1 rounded-md w-full text-slate-900'
                                             placeholder='Email'
                                             value={data.email}
                                             type="email"
-                                            onChange={(e) => setData({ ...data, email: (e.target.value).toLowerCase() })}
+                                            onChange={(e) => setData({ ...data, email: e.target.value })}
                                             required
                                         />
                                     </div>
                                     <div className='flex flex-col w-full gap-1'>
                                         {/* <label className='text-xs uppercase'>Mobile <span className='text-red-600'>*</span></label> */}
                                         <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            className='p-1 rounded-md w-full text-slate-900'
                                             placeholder='Mobile'
                                             value={data.mobile}
                                             maxLength={10}
@@ -182,21 +182,21 @@ const PartyCreate = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Address 1:</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='Address/ Street/ Road'
                                         value={data.address_1}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, address_1: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, address_1: e.target.value })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Address 2:</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='Flat No./ Builing Name/ Floor'
                                         value={data.address_2}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, address_2: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, address_2: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -204,41 +204,41 @@ const PartyCreate = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>City</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='City'
                                         value={data.city}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, city: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, city: e.target.value })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>State</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='State'
                                         value={data.state}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, state: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, state: e.target.value })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>District</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='District'
                                         value={data.district}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, district: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, district: e.target.value })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1 min-w-48'>
                                     {/* <label className='text-xs uppercase'>Pincode</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='Pincode'
                                         value={data.pincode}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, pincode: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, pincode: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -249,31 +249,31 @@ const PartyCreate = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>GST</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='GSTIN'
                                         value={data.gst}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, gst: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, gst: e.target.value })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>PAN</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='PAN No'
                                         value={data.pan}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, pan: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, pan: e.target.value })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Trade Licence</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full text-slate-900'
                                         placeholder='Trade Licence'
                                         value={data.trade_licence}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, trade_licence: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, trade_licence: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -288,7 +288,7 @@ const PartyCreate = () => {
                                         placeholder='Bank Name'
                                         value={data.bank}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, bank: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, bank: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -300,7 +300,7 @@ const PartyCreate = () => {
                                         placeholder='Branch'
                                         value={data.branch}
                                         type="text"
-                                        onChange={(e) => setData({ ...data, branch: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, branch: e.target.value })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
@@ -310,7 +310,7 @@ const PartyCreate = () => {
                                         placeholder='IFSE Code'
                                         value={data.ifse}
                                         type="tel"
-                                        onChange={(e) => setData({ ...data, ifse: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, ifse: e.target.value })}
                                     />
                                 </div>
                                 <div className='flex flex-col w-full gap-1'>
@@ -320,7 +320,7 @@ const PartyCreate = () => {
                                         placeholder='Account No'
                                         value={data.account_no}
                                         type="tel"
-                                        onChange={(e) => setData({ ...data, account_no: (e.target.value).toLowerCase() })}
+                                        onChange={(e) => setData({ ...data, account_no: e.target.value })}
                                     />
                                 </div>
                             </div>

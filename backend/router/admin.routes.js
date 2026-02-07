@@ -20,10 +20,23 @@ router.post(
     AdminController.createHsnSac
 );
 
-router.post(
+router.get(
     "/get-hsn-code",
     middleware.isAuthenticated,
-    AdminController.createHsnSac
+    AdminController.getHsnSac
+);
+
+// GST setup
+router.post(
+    "/create-gst",
+    middleware.isAuthenticated,
+    AdminController.createGST
+);
+
+router.get(
+    "/get-all-gst",
+    middleware.isAuthenticated,
+    AdminController.getGST
 );
 
 module.exports = router;

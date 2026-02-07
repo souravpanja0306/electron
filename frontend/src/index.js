@@ -27,6 +27,10 @@ import Error from './pages/Error';
 import Creditors from './pages/Reports/Creditors';
 import CreateMoneyReceipts from './pages/Receipts/MoneyReceipts';
 import ViewMoneyReceipts from './pages/Receipts/ViewMoneyReceipts';
+import CreateHsnSac from './pages/Master/HsnMaster/CreateHsnSac';
+import ViewHsnSac from './pages/Master/HsnMaster/ViewHsnSac';
+import CreateGst from './pages/Master/GstMaster/CreateGst';
+import ViewGst from './pages/Master/GstMaster/ViewGst'; 
 
 import { Middleware } from './middleware/middleware';
 
@@ -56,6 +60,16 @@ const router = createHashRouter([
   { path: "/about", element: <Middleware><Layout><About /></Layout></Middleware> },
   { path: "/settings", element: <Middleware><Layout><Setting /></Layout></Middleware> },
   { path: "/change-password", element: <Middleware><Layout><Setting /></Layout></Middleware> },
+
+  // GST
+  { path: "/create-gst", element: <Middleware><Layout><CreateGst /></Layout></Middleware> },
+  { path: "/view-gst", element: <Middleware><Layout><ViewGst /></Layout></Middleware> },
+  
+  // HSN and SAC
+  { path: "/create-hsn-sac", element: <Middleware><Layout><CreateHsnSac /></Layout></Middleware> },
+  { path: "/view-hsn-sac", element: <Middleware><Layout><ViewHsnSac /></Layout></Middleware> },
+
+
   { path: "/signin", element: <Signin /> },
   { path: "/forgot-password", element: <ForgotPassword /> },
 ]);

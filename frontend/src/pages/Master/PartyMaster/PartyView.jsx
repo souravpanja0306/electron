@@ -7,7 +7,7 @@ import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 // Icon...
-import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDownload } from "react-icons/ai";
+import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDownload, AiOutlineDelete } from "react-icons/ai";
 
 // Services...
 import { handleGetParty } from "./PartyService"
@@ -95,7 +95,7 @@ const ViewParty = () => {
                                 <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                             </div>
                             <div onClick={(e) => handleDelete(e)}>
                                 <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload /></CustomButton>

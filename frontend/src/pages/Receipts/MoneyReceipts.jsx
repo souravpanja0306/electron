@@ -4,6 +4,8 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import { inrToWords } from '../../utils/InWordConverter';
+import useMoneyReceiptStore from '../../store/MoneyReceiptStore';
+import usePartyStore from '../../store/PartyStore';
 
 // Icon...
 import {
@@ -18,56 +20,40 @@ import Alert from '../../components/Alert';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 
-
-// Functions...
-import { handleSubmit, handleGetParty, handleGenerateMoneyReceiptNo, printInvoice } from "./MoneyReceiptService";
-
-
 const MoneyReceipts = () => {
-    const [searchParams] = useSearchParams();
-    const back = searchParams.get("back");
-    const [party, setParty] = useState([]);
-    const [moneyReceiptNo, setMoneyReciptNo] = useState("");
-
-    const getPartys = async () => {
-        let result = await handleGetParty();
-        if (result.body.length) {
-            setParty(result.body);
-        };
-    };
-
-    const getMoneyReceiptNo = async () => {
-        let result = await handleGenerateMoneyReceiptNo();
-        setMoneyReciptNo(result);
-    };
+    const isAuth = localStorage.getItem("token");
+    const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore(); // Store...
+    const { parties, getAllParty } = usePartyStore(); // Store...
 
     useEffect(() => {
-        getMoneyReceiptNo();
-        getPartys();
+        generateMoneyReceiptNo(isAuth);
+        getAllParty(isAuth);
     }, []);
 
     const [data, setData] = useState([
-        { sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
-        { sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
-        { sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
+        { id: Math.floor(Math.random() * 10000000000), sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
+        { id: Math.floor(Math.random() * 10000000000), sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
+        { id: Math.floor(Math.random() * 10000000000), sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
     ]);
-    const [form, setForm] = useState({
-        company_id: "",
-        party_id: "",
-        receipt_no: "",
-        receipt_date: "",
-        data: data,
-        remarks: "",
-    });
-
+    const [form, setForm] = useState(
+        { company_id: "", party_id: "", receipt_no: "", receipt_date: "", data: data, remarks: "" }
+    );
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        setForm({ ...form, receipt_no: moneyReceiptNo, [e.target.name]: e.target.value });
+    };
+    const handleChangeData = (e) => {
+        setData((prev) =>
+            prev.map((row) =>
+                row.id == e.target.id ? { ...row, [e.target.name]: e.target.value } : row
+            ),
+        );
+        setForm({ ...form, data: data, });
     };
 
-    const handleSubmitForm = (e) => {
+    const handleSubmitForm = async (e) => {
         e.preventDefault();
-        console.log(form);
+        let result = await createMoneyReceipts(form, isAuth);
     };
 
     const printInvoice = (e) => {
@@ -76,12 +62,18 @@ const MoneyReceipts = () => {
     };
 
     const handleAddFields = () => {
-        setData([...data, { sl_no: "", payment_mode: "", description: "", amount: "", reference: "" }]);
+        setData([...data, {
+            id: Math.floor(Math.random() * 10000000000),
+            sl_no: "",
+            payment_mode: "",
+            description: "",
+            amount: "",
+            reference: ""
+        }]);
     };
 
     const handleRemoveFields = (id) => {
         let datas = data.find(item => item.id == id);
-        console.log("🚀 ~ handleRemoveFields ~ datas:", datas)
         if (datas) {
             if (datas.description != "") {
                 // setAlart({
@@ -111,7 +103,7 @@ const MoneyReceipts = () => {
 
             <div className="flex flex-col gap-1">
                 <ActionArea>
-                    <div>
+                    <div onClick={(e) => handleSubmitForm(e)}>
                         <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </div>
                     <Link to="/view-money-receipts">
@@ -129,17 +121,31 @@ const MoneyReceipts = () => {
 
                         <div className='flex flex-col w-[250px] gap-1'>
                             <div className='flex flex-col w-full gap-1'>
+                                <label className='text-xs uppercase'>Company</label>
+                                <select
+                                    className="p-1 rounded-md w-full uppercase text-slate-900"
+                                    name="company_id"
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="" disabled selected>Select Company</option>
+                                    {parties?.body?.map(item => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.company_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Receipt Name</label>
                                 <select
                                     className="p-1 rounded-md w-full uppercase text-slate-900"
-                                    // value={invoiceDetails.billTo}
-                                    // onChange={(e) =>
-                                    //     setInvoiceDetails({ ...invoiceDetails, billTo: e.target.value })
-                                    // }
+                                    name="party_id"
+                                    onChange={handleChange}
                                     required
                                 >
                                     <option value="" disabled selected>Select Receipt</option>
-                                    {party?.map(item => (
+                                    {parties?.body?.map(item => (
                                         <option key={item.id} value={item.id}>
                                             {item.company_name}
                                         </option>
@@ -157,7 +163,9 @@ const MoneyReceipts = () => {
                                 <input
                                     className="p-1 rounded-md w-full uppercase text-slate-900"
                                     type="text"
+                                    name="receipt_no"
                                     value={moneyReceiptNo}
+                                    onChange={handleChange}
                                     readOnly
                                     required
                                 />
@@ -168,7 +176,7 @@ const MoneyReceipts = () => {
                                     className="p-1 rounded-md w-full uppercase text-slate-900"
                                     placeholder="Date"
                                     type="date"
-                                    name="date"
+                                    name="receipt_date"
                                     onChange={handleChange}
                                     required
                                 />
@@ -201,7 +209,10 @@ const MoneyReceipts = () => {
                                             <td className=''>
                                                 <input
                                                     className="w-full p-1 rounded-md border border-slate-600 text-center"
+                                                    name="sl_no"
+                                                    id={item.id}
                                                     value={index + 1}
+                                                    onChange={(e) => handleChangeData(e)}
                                                     disabled
                                                 />
                                             </td>
@@ -209,7 +220,9 @@ const MoneyReceipts = () => {
                                                 <input
                                                     className="w-full p-1 rounded-md border border-slate-600 capitalize"
                                                     value={item.description}
-                                                    onChange={(e) => handleChange({ value: e.target.value, id: item.id })}
+                                                    id={item.id}
+                                                    name="description"
+                                                    onChange={(e) => handleChangeData(e)}
                                                     type="text"
                                                 />
                                             </td>
@@ -217,11 +230,12 @@ const MoneyReceipts = () => {
                                                 <div className='flex flex-col w-full gap-1'>
                                                     <select
                                                         className="w-full p-1 rounded-md border border-slate-600 uppercase"
-                                                        defaultValue=""
+                                                        value={item.payment_mode}
+                                                        id={item.id}
                                                         name="payment_mode"
-                                                        onChange={(e) => handleChange({ value: e.target.value, id: item.id })}
+                                                        onChange={(e) => handleChangeData(e)}
                                                     >
-                                                        <option selected disabled>Select Payment Type</option>
+                                                        <option selected disabled>Payment Type</option>
                                                         <option>Cash</option>
                                                         <option>UPI</option>
                                                         <option>Card</option>
@@ -232,18 +246,20 @@ const MoneyReceipts = () => {
                                             <td className=''>
                                                 <input
                                                     className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                                    value={item.quantity}
-                                                    name=""
-                                                    onChange={(e) => handleChange({ value: e.target.value, id: item.id })}
+                                                    value={item.reference}
+                                                    id={item.id}
+                                                    name="reference"
+                                                    onChange={(e) => handleChangeData(e)}
                                                     type='number'
                                                 />
                                             </td>
                                             <td className=''>
                                                 <input
                                                     className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                                    value={item.quantity}
-                                                    name=""
-                                                    onChange={(e) => handleChange({ value: e.target.value, id: item.id })}
+                                                    value={item.amount}
+                                                    id={item.id}
+                                                    name="amount"
+                                                    onChange={(e) => handleChangeData(e)}
                                                     type='number'
                                                 />
                                             </td>
@@ -266,6 +282,45 @@ const MoneyReceipts = () => {
                         </tbody>
                     </table>
                 </MainArea>
+
+                <div className='flex gap-1'>
+                    <div className='w-3/4'>
+                        <PageTitle>Additonal Info</PageTitle>
+                        <MainArea>
+                            <div className='flex gap-1 justify-between w-full'>
+                                <div className='flex flex-col w-[250px] gap-1'>
+                                    <div className='flex flex-col w-full gap-1'>
+                                        <label className='text-xs uppercase'>Remarks</label>
+                                        <textarea
+                                            className="p-1 rounded-md w-full text-slate-900"
+                                            placeholder="Remarks"
+                                            type="text"
+                                            name="remarks"
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </MainArea>
+                    </div>
+
+                    <div className='w-1/4'>
+                        <PageTitle>Summary</PageTitle>
+                        <MainArea>
+                            <div className='flex flex-col justify-end gap-1 w-full'>
+                                <div className='flex flex-col w-full gap-1'>
+                                    <label className='text-xs uppercase'>Total Value</label>
+                                    <input
+                                        className="p-1 rounded-md w-full uppercase text-slate-900 text-end font-bold"
+                                        type="number"
+                                        // value={parseFloat(grandTotal.total_value).toFixed(2)}
+                                        readOnly
+                                    />
+                                </div>
+                            </div>
+                        </MainArea>
+                    </div>
+                </div>
             </div>
         </>
     )

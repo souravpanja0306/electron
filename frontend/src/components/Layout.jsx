@@ -128,56 +128,58 @@ const Layout = ({ children }) => {
             <div className={`${sideBar ? "min-w-[270px] p-1" : "max-w-0 p-0"} bg-slate-900 flex flex-col gap-1 select-none border-r border-slate-600`}>
 
                 {currentMenu.map((item, index) => (
-                    item?.type === "main" ? (
-                        <div key={index}>
-                            <div
-                                onClick={() => setSubMenu({ index, active: subMenu.index !== index ? true : !subMenu.active })}
-                                className={`text-xl w-full p-1 flex justify-between gap-1 items-center transition  cursor-pointer ${subMenu.index === index && subMenu.active
-                                    ? "border-b border-blue-600 bg-blue-600 text-slate-300"
-                                    : "border-b border-slate-500 hover:text-slate-300 text-slate-500"}`
+                    item?.type === "main"
+                        ? (
+                            <div key={index}>
+                                <div
+                                    onClick={() => setSubMenu({ index, active: subMenu.index !== index ? true : !subMenu.active })}
+                                    className={`text-xl w-full p-1 flex justify-between gap-1 items-center transition  cursor-pointer ${subMenu.index === index && subMenu.active
+                                        ? "border-b border-blue-600 bg-blue-600 text-slate-300"
+                                        : "border-b border-slate-500 hover:text-slate-300 text-slate-500"}`
+                                    }
+                                >
+                                    <div className="flex justify-center items-center gap-2">
+                                        {item.icon}
+                                        <span className="text-xs">{item.title}</span>
+                                    </div>
+                                    {subMenu.index === index && subMenu.active ? <AiOutlineUpSquare /> : <AiOutlineDownSquare />}
+                                </div>
+                                <div className={`${subMenu.index === index && subMenu.active ? "min-h-12" : "hidden"} p-1 bg-slate-900 flex flex-col gap-1 transition-all duration-500 border border-blue-600`} >
+
+                                    {item?.submenu?.map((sub, i) => (
+                                        <NavLink
+                                            key={i}
+                                            to={sub.url}
+                                            className={({ isActive }) =>
+                                                `text-xl w-full p-1 flex gap-1 items-center transition ${isActive
+                                                    ? "border border-blue-600 bg-blue-600 text-slate-300"
+                                                    : "border border-slate-600 hover:border hover:border-slate-300 hover:text-slate-300 text-slate-500"
+                                                }`
+                                            }
+                                        >
+                                            {sub.icon}
+                                            <span className="text-xs">{sub.title}</span>
+                                        </NavLink>
+                                    ))}
+
+                                </div>
+                            </div>
+                        )
+                        : (
+                            <NavLink
+                                key={index}
+                                to={item.url}
+                                className={({ isActive }) =>
+                                    `text-xl w-full p-1 flex gap-1  items-center transition ${isActive
+                                        ? "border-b border-blue-600 bg-blue-600 text-slate-300"
+                                        : "border-b border-slate-500 hover:text-slate-300 text-slate-500"
+                                    }`
                                 }
                             >
-                                <div className="flex justify-center items-center gap-2">
-                                    {item.icon}
-                                    <span className="text-xs">{item.title}</span>
-                                </div>
-                                {subMenu.index === index && subMenu.active ? <AiOutlineUpSquare /> : <AiOutlineDownSquare />}
-                            </div>
-                            <div className={`${subMenu.index === index && subMenu.active ? "min-h-12" : "hidden"} p-1 bg-slate-900 flex flex-col gap-1 transition-all duration-500 border border-blue-600`} >
-
-                                {item?.submenu?.map((sub, i) => (
-                                    <NavLink
-                                        key={i}
-                                        to={sub.url}
-                                        className={({ isActive }) =>
-                                            `text-xl w-full p-1 flex gap-1 border border-blue-600 items-center transition ${isActive
-                                                ? "bg-blue-600 text-slate-300"
-                                                : "bg-slate-900 hover:bg-blue-600 text-slate-300"
-                                            }`
-                                        }
-                                    >
-                                        {sub.icon}
-                                        <span className="text-xs">{sub.title}</span>
-                                    </NavLink>
-                                ))}
-
-                            </div>
-                        </div>
-                    ) : (
-                        <NavLink
-                            key={index}
-                            to={item.url}
-                            className={({ isActive }) =>
-                                `text-xl w-full p-1 rounded-md flex gap-1 border border-slate-600 items-center transition ${isActive
-                                    ? "bg-blue-600 text-slate-300"
-                                    : "bg-slate-900 hover:bg-slate-600 text-slate-500"
-                                }`
-                            }
-                        >
-                            {item.icon}
-                            <span className="text-xs">{item.title}</span>
-                        </NavLink>
-                    )
+                                {item.icon}
+                                <span className="text-xs">{item.title}</span>
+                            </NavLink>
+                        )
                 ))}
 
             </div>

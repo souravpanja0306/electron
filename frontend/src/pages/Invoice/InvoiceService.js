@@ -51,6 +51,30 @@ export const handleGetParty = async () => {
     return result.data;
 };
 
+export const handleGetGST = async () => {
+    let result = await axios({
+        method: "get",
+        url: "http://localhost:3001/api/v1/admin/get-all-gst",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    return result.data;
+};
+
+export const handleGetHsnSac = async () => {
+    let result = await axios({
+        method: "get",
+        url: "http://localhost:3001/api/v1/admin/get-hsn-code",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    return result.data;
+};
+
 export const handleGetAllInvoice = async ({
     id = ""
 }) => {

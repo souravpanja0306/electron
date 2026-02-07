@@ -11,6 +11,10 @@ const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
 
+const errorHandler = (res, status, message) => {
+    return res.status(status).json({ status, message, body: [] });
+};
+
 exports.generateInvoiceNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
@@ -57,19 +61,17 @@ exports.generateInvoiceNo = async (req, res) => {
 exports.createInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
-        const { t_userId, t_mobile, t_username, t_name, type, invoiceNo,
+        const { t_userId, t_mobile, t_username, t_name, company, type, invoiceNo,
             date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply,
         } = req.body;
 
+        if (!billTo) return errorHandler(res, 400, "Please select Party.");
+
         let search_key = {};
         if (invoiceNo) search_key["invoice_no"] = invoiceNo;
+
         let isInvoiceNumberExist = await InvoiceService.findInvoices(search_key);
-        if (isInvoiceNumberExist.length) {
-            response.status = 409;
-            response.message = "Invoice Number Already Exists.";
-            response.body = [];
-            return res.status(response.status).json(response);
-        };
+        if (isInvoiceNumberExist.length) return errorHandler(res, 409, "Invoice Number Already Exists.");
 
         let totalQty = 0;
         let totalValue = 0;

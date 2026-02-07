@@ -11,7 +11,8 @@ import {
     AiOutlineShopping,
     AiOutlineUserAdd,
     AiOutlineDatabase,
-    AiOutlineFileAdd
+    AiOutlineFileAdd,
+    AiOutlinePercentage
 } from "react-icons/ai";
 
 const MenuMap = {
@@ -41,7 +42,7 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Invoices",
+            title: "Tax/Proforma Invoices",
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [
@@ -88,10 +89,9 @@ const MenuMap = {
     ],
     "notification": [],
     "profile": [
-        { title: "Profile", url: "/profile", icon: <AiOutlineUser /> },
         {
             type: "main",
-            title: "Party",
+            title: "Create/Update Party",
             url: "#",
             icon: <AiOutlineUser />,
             submenu: [
@@ -101,7 +101,7 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Company",
+            title: "Create/Update Company",
             url: "#",
             icon: <AiOutlineBank />,
             submenu: [
@@ -111,15 +111,27 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "HSN",
+            title: "Create/ Update HSN-SAC",
             url: "#",
             icon: <AiOutlineEdit />,
             submenu: [
-                { title: "signin signin", url: "/signin", icon: <AiOutlineUsergroupAdd /> },
+                { title: "Create HSN/SAC", url: "/create-hsn-sac", icon: <AiOutlineUsergroupAdd /> },
+                { title: "View HSN/SAC", url: "/view-hsn-sac", icon: <AiOutlineUsergroupAdd /> },
+            ]
+        },
+        {
+            type: "main",
+            title: "Create/Update GST",
+            url: "#",
+            icon: <AiOutlinePercentage />,
+            submenu: [
+                { title: "Create GST", url: "/create-gst", icon: <AiOutlinePercentage /> },
+                { title: "View All GST", url: "/view-gst", icon: <AiOutlinePercentage /> },
             ]
         },
     ],
     "settings": [
+        { title: "Profile", url: "/profile", icon: <AiOutlineUser /> },
         { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
         { title: "Forgot Password", url: "/forgot-password", icon: <AiOutlineUnlock /> }
     ],

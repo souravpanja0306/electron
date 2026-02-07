@@ -9,6 +9,9 @@ const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
 
+const errorHandler = (res, status, message) => {
+    return res.status(status).json({ status, message, body: [] });
+};
 
 exports.debtors = async (req, res) => {
     let response = { ...contents.defaultResponse }

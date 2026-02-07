@@ -12,6 +12,10 @@ const AuthService = require("../service/auth.service");
 const InvoiceService = require("../service/invoice.service");
 const MoneyReceiptService = require("../service/moneyReceipt.service");
 
+const errorHandler = (res, status, message) => {
+    return res.status(status).json({ status, message, body: [] });
+};
+
 exports.generateMoneyReceiptNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {

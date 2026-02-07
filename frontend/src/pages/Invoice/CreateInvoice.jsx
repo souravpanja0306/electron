@@ -4,6 +4,7 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import { inrToWords } from '../../utils/InWordConverter';
+import CustomToggle from '../../components/CustomToggle';
 
 // Icon...
 import {
@@ -23,6 +24,7 @@ import { Link, NavLink } from "react-router-dom";
 import { handleSubmit, handleGetParty, handleGenerateInvoiceNo, printInvoice } from "./InvoiceService";
 
 const CreateInvoice = () => {
+  const [isProforma, setIsProforma] = useState(true);
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
 
@@ -221,6 +223,15 @@ const CreateInvoice = () => {
                 <div className='flex gap-1 justify-between w-full'>
 
                   <div className='flex flex-col w-[250px] gap-1'>
+                    <div className='flex flex-col w-full gap-1'>
+                      <CustomToggle
+                        activeColor="green"
+                        inactiveColor="blue"
+                        option={["Tax", "Proforma"]}
+                        value={true}
+                        onChange={setIsProforma}
+                      />
+                    </div>
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Bill To</label>
                       <select

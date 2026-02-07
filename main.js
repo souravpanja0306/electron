@@ -16,6 +16,7 @@ function createWindow() {
         icon: path.join(__dirname, "./public/icon/icon.ico")
     });
     win.loadURL("http://localhost:3000");
+    // win.loadFile(path.join(__dirname, "frontend/build/index.html"));
 };
 
 app.whenReady().then(() => {
