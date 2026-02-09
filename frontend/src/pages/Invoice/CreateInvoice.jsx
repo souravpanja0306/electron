@@ -295,7 +295,7 @@ const CreateInvoice = () => {
               <MainArea>
                 <table className='w-full select-none'>
                   <thead>
-                    <tr className='text-white text-sm font-semibold text-center'>
+                    <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
                       <th className='w-12'>Sl. No.</th>
                       <th className=''>Description</th>
                       <th className=''>HSN</th>

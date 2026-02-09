@@ -41,48 +41,70 @@ const Signin = () => {
 
   return (
     <>
-      <div className='min-h-screen w-full bg-slate-900 flex justify-center items-center select-none'>
-        <div className='w-[400px] bg-slate-900 rounded-md shadow-md shadow-slate-600 p-1'>
-          <h1 className='text-white text-center text-xl'>Signin</h1>
+      <div className="min-h-screen w-full bg-slate-900 flex justify-center items-center select-none">
+        <div className="w-[380px] bg-slate-800 rounded-xl shadow-lg shadow-black/40 p-6">
 
-          <form className='flex flex-col justify-center items-center gap-2' onSubmit={() => handleSubmitSignin()}>
+          <h1 className="text-white text-center text-2xl font-semibold mb-4">
+            Sign in
+          </h1>
 
-            <div className='flex flex-col w-full gap-1'>
-              <label className='text-white text-xs uppercase'>Username</label>
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmitSignin}
+          >
+            <div className="flex flex-col gap-1">
+              <label className="text-slate-400 text-xs uppercase">
+                Username
+              </label>
               <input
-                className="p-1 rounded-md w-full text-slate-900"
-                placeholder="Username"
+                className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white 
+                     focus:outline-none focus:ring-2 focus:ring-blue-600"
+                placeholder="Enter username"
                 value={data.username}
                 type="text"
                 onChange={(e) => setData({ ...data, username: e.target.value })}
                 required
               />
             </div>
-            <div className='flex flex-col w-full gap-1'>
-              <label className='text-white text-xs'>Password</label>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-slate-400 text-xs uppercase">
+                Password
+              </label>
               <input
-                className="p-1 rounded-md w-full text-slate-900"
-                placeholder="Password"
+                className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white 
+                     focus:outline-none focus:ring-2 focus:ring-blue-600"
+                placeholder="Enter password"
                 value={data.password}
                 type="password"
                 onChange={(e) => setData({ ...data, password: e.target.value })}
                 required
               />
             </div>
-            <button type="submit" className='border border-slate-600 p-1 w-full bg-blue-600 rounded-md' >
-              Signin
+
+            <button
+              type="submit"
+              className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition-all"
+            >
+              Sign in
             </button>
-            <div className='flex w-full gap-1 justify-between'>
-              <div className='text-start text-xs text-white'>Don't have an account?
-                <Link to="/" className='hover:text-slate-600'> click here</Link>
-              </div>
-              <div className='text-start text-xs text-white'>
-                <Link to="/forgot-password" className='hover:text-slate-600'>Forgot password</Link>
-              </div>
+
+            <div className="flex justify-between text-xs text-slate-400 mt-1">
+              <span>
+                Don’t have an account?
+                <Link to="/" className="ml-1 text-blue-400 hover:underline">
+                  Register
+                </Link>
+              </span>
+
+              <Link to="/forgot-password" className="text-blue-400 hover:underline">
+                Forgot password?
+              </Link>
             </div>
           </form>
         </div>
       </div>
+
     </>
   )
 }

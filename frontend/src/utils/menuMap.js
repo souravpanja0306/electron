@@ -12,7 +12,8 @@ import {
     AiOutlineUserAdd,
     AiOutlineDatabase,
     AiOutlineFileAdd,
-    AiOutlinePercentage
+    AiOutlinePercentage,
+    AiOutlineAppstoreAdd,
 } from "react-icons/ai";
 
 const MenuMap = {
@@ -32,12 +33,12 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Money Recipts",
+            title: "Money Receipts",
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [
-                { title: "Create Money Recipts", url: "/create-moeny-receipts", icon: <AiOutlinePlusSquare /> },
-                { title: "View Money Recipts", url: "/view-money-receipts", icon: <AiOutlineFileSearch /> },
+                { title: "Create Money Receipts", url: "/create-moeny-receipts", icon: <AiOutlinePlusSquare /> },
+                { title: "View Money Receipts", url: "/view-money-receipts", icon: <AiOutlineFileSearch /> },
             ],
         },
         {
@@ -48,16 +49,6 @@ const MenuMap = {
             submenu: [
                 { title: "Create Invoice", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
                 { title: "View Invoices", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
-            ]
-        },
-        {
-            type: "main",
-            title: "Vehicle",
-            url: "#",
-            icon: <AiOutlineDiff />,
-            submenu: [
-                { title: "Add Vehicle", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
-                { title: "View Vehicles", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
             ]
         },
         {
@@ -88,10 +79,10 @@ const MenuMap = {
         },
     ],
     "notification": [],
-    "profile": [
+    "master": [
         {
             type: "main",
-            title: "Create/Update Party",
+            title: "Party",
             url: "#",
             icon: <AiOutlineUser />,
             submenu: [
@@ -101,7 +92,7 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Create/Update Company",
+            title: "Company",
             url: "#",
             icon: <AiOutlineBank />,
             submenu: [
@@ -111,7 +102,7 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Create/ Update HSN-SAC",
+            title: "HSN-SAC",
             url: "#",
             icon: <AiOutlineEdit />,
             submenu: [
@@ -121,7 +112,7 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Create/Update GST",
+            title: "GST",
             url: "#",
             icon: <AiOutlinePercentage />,
             submenu: [
@@ -129,10 +120,20 @@ const MenuMap = {
                 { title: "View All GST", url: "/view-gst", icon: <AiOutlinePercentage /> },
             ]
         },
+        {
+            type: "main",
+            title: "Vehicle",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Add Vehicle", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
+                { title: "View Vehicles", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+            ]
+        },
     ],
     "settings": [
-        { title: "Setting", url: "/settings", icon: <AiOutlineUser /> },
         { title: "Profile", url: "/profile", icon: <AiOutlineUser /> },
+        { title: "Setting", url: "/settings", icon: <AiOutlineUser /> },
         { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
         { title: "Forgot Password", url: "/forgot-password", icon: <AiOutlineUnlock /> }
     ],

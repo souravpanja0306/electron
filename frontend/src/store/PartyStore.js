@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import axios from "axios";
+let token = localStorage.getItem("token");
 
 const usePartyStore = create((set) => ({
     parties: [],
     moneyReceiptNo: "",
     loading: false,
 
-    generateMoneyReceiptNo: async (token) => {
+    generateMoneyReceiptNo: async () => {
         try {
             set({ loading: true });
             const result = await axios({
@@ -25,7 +26,7 @@ const usePartyStore = create((set) => ({
         };
     },
 
-    getAllParty: async (token) => {
+    getAllParty: async () => {
         try {
             set({ loading: true });
             const result = await axios({
@@ -44,7 +45,7 @@ const usePartyStore = create((set) => ({
         };
     },
 
-    createGst: async (payload, token) => {
+    createGst: async (payload) => {
         try {
             set({ loading: true });
             const res = await axios({
@@ -56,10 +57,7 @@ const usePartyStore = create((set) => ({
                 },
                 data: payload,
             });
-            set((state) => ({
-                gstData: [...state.gstData, res.data],
-                loading: false,
-            }));
+            set((state) => ({ gstData: [], loading: false }));
             return res.data;
         } catch (error) {
             set({ loading: false });

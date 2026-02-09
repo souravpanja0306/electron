@@ -8,10 +8,6 @@ import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icon
 import Alert from "../../../components/Alert";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-// Service...
-import { handleCreateParty } from "./CompanyService";
-
-
 const CreateParty = () => {
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -40,52 +36,52 @@ const CreateParty = () => {
         account_no: ""
     });
 
-    const handleSubmit = async () => {
-        try {
-            if (!data.company_name && data.company_name == "") {
-                setAlart({
-                    show: true,
-                    title: "Field required",
-                    type: "warning",
-                    message: "Company Name Required."
-                });
-                return;
-            };
+    // const handleSubmit = async () => {
+    //     try {
+    //         if (!data.company_name && data.company_name == "") {
+    //             setAlart({
+    //                 show: true,
+    //                 title: "Field required",
+    //                 type: "warning",
+    //                 message: "Company Name Required."
+    //             });
+    //             return;
+    //         };
 
-            let result = await handleCreateParty(data);
-            if ((result.status) === 200) {
-                setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
-                setData({
-                    company_name: "",
-                    email: "",
-                    mobile: "",
-                    owner: "",
-                    address_1: "",
-                    address_2: "",
-                    city: "",
-                    state: "",
-                    district: "",
-                    pincode: "",
-                    country: "INDIA",
-                    gst: "",
-                    pan: "",
-                    trade_licence: "",
-                    bank: "",
-                    ifse: "",
-                    branch: "",
-                    account_no: ""
-                });
-            };
-        } catch (error) {
-            console.log(error);
-        };
-    };
+    //         let result = await handleCreateParty(data);
+    //         if ((result.status) === 200) {
+    //             setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
+    //             setData({
+    //                 company_name: "",
+    //                 email: "",
+    //                 mobile: "",
+    //                 owner: "",
+    //                 address_1: "",
+    //                 address_2: "",
+    //                 city: "",
+    //                 state: "",
+    //                 district: "",
+    //                 pincode: "",
+    //                 country: "INDIA",
+    //                 gst: "",
+    //                 pan: "",
+    //                 trade_licence: "",
+    //                 bank: "",
+    //                 ifse: "",
+    //                 branch: "",
+    //                 account_no: ""
+    //             });
+    //         };
+    //     } catch (error) {
+    //         console.log(error);
+    //     };
+    // };
 
     useEffect(() => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                handleSubmit(e);
+                // handleSubmit(e);
             };
 
             if (e.ctrlKey && e.key === 'i') {
@@ -110,7 +106,7 @@ const CreateParty = () => {
                         </div>
                         : ""
                     }
-                    <div onClick={(e) => handleSubmit(e)}>
+                    <div>
                         <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </div>
                     <Link to="/party">
@@ -128,7 +124,7 @@ const CreateParty = () => {
                                     <div className='flex flex-col w-full gap-1'>
                                         {/* <label className='text-xs uppercase'>Company Name : <span className='text-red-600'>*</span></label> */}
                                         <input
-                                            className="p-1 rounded-md w-full capitalize text-slate-900"
+                                            className="p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600"
                                             placeholder="Company Name"
                                             value={data.company_name}
                                             type="text"
@@ -140,7 +136,7 @@ const CreateParty = () => {
                                     <div className='flex flex-col w-full gap-1'>
                                         {/* <label className='text-xs uppercase'>Director/Proprietor/Owner</label> */}
                                         <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                             placeholder='Director/ Proprietor/ Owner'
                                             value={data.owner}
                                             type="text"
@@ -153,7 +149,7 @@ const CreateParty = () => {
                                     <div className='flex flex-col w-full gap-1'>
                                         {/* <label className='text-xs uppercase'>Email <span className='text-red-600'>*</span></label> */}
                                         <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                             placeholder='Email'
                                             value={data.email}
                                             type="email"
@@ -164,7 +160,7 @@ const CreateParty = () => {
                                     <div className='flex flex-col w-full gap-1'>
                                         {/* <label className='text-xs uppercase'>Mobile <span className='text-red-600'>*</span></label> */}
                                         <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900'
+                                            className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                             placeholder='Mobile'
                                             value={data.mobile}
                                             maxLength={10}
@@ -182,7 +178,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Address 1:</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='Address/ Street/ Road'
                                         value={data.address_1}
                                         type="text"
@@ -192,7 +188,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Address 2:</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='Flat No./ Builing Name/ Floor'
                                         value={data.address_2}
                                         type="text"
@@ -204,7 +200,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>City</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='City'
                                         value={data.city}
                                         type="text"
@@ -214,7 +210,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>State</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='State'
                                         value={data.state}
                                         type="text"
@@ -224,7 +220,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>District</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='District'
                                         value={data.district}
                                         type="text"
@@ -234,7 +230,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1 min-w-48'>
                                     {/* <label className='text-xs uppercase'>Pincode</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='Pincode'
                                         value={data.pincode}
                                         type="text"
@@ -249,7 +245,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>GST</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='GSTIN'
                                         value={data.gst}
                                         type="text"
@@ -259,7 +255,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>PAN</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='PAN No'
                                         value={data.pan}
                                         type="text"
@@ -269,7 +265,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Trade Licence</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='Trade Licence'
                                         value={data.trade_licence}
                                         type="text"
@@ -284,7 +280,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Bank Name</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='Bank Name'
                                         value={data.bank}
                                         type="text"
@@ -296,7 +292,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Branch</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='Branch'
                                         value={data.branch}
                                         type="text"
@@ -306,7 +302,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>IFSE Code</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='IFSE Code'
                                         value={data.ifse}
                                         type="tel"
@@ -316,7 +312,7 @@ const CreateParty = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     {/* <label className='text-xs uppercase'>Account No</label> */}
                                     <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900'
+                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
                                         placeholder='Account No'
                                         value={data.account_no}
                                         type="tel"

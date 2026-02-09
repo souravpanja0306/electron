@@ -119,7 +119,7 @@ const ViewInvoices = () => {
                 <MainArea>
                     <table className="table-fixed w-full overflow-auto">
                         <thead>
-                            <tr className="border-b border-slate-600 p-1 ">
+                            <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
                                 <th className="p-1 text-start w-8">
                                     <input type="checkbox" onChange={(e) => handleSelectAll(e)} />
                                 </th>
@@ -141,7 +141,7 @@ const ViewInvoices = () => {
                                 <>
                                     {invoices.map((item, index) => {
                                         return (
-                                            <tr key={item.id} className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                            <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                                 <td className="p-1 text-start truncate capitalize">
                                                     <input
                                                         type="checkbox"
@@ -149,7 +149,7 @@ const ViewInvoices = () => {
                                                         checked={item.is_selected}
                                                     />
                                                 </td>
-                                                <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">
+                                                <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-600 dark:hover:text-slate-300">
                                                     <Link to={`/view-invoice/details?id=${item.id}&back=true`}>
                                                         {item.invoice_no ? item.invoice_no : "--"}
                                                     </Link>
@@ -163,12 +163,12 @@ const ViewInvoices = () => {
                                                 <td className="p-1 text-start truncate capitalize">{item.total_amount ? (parseFloat(item.total_amount)).toFixed(2) : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize">{item.transporter ? item.transporter : "--"}</td>
                                                 <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
-                                                    <div onClick={() => printInvoice()} className="hover:text-green-500 active:text-green-700 text-xl">
+                                                    <button
+                                                        className="p-1 rounded-md text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
+                                                        title="Download"
+                                                    >
                                                         <AiOutlinePrinter />
-                                                    </div>
-                                                    <div onClick={() => generateInvoice()} className="hover:text-yellow-500 active:text-yellow-700 text-xl">
-                                                        <AiOutlineDownload />
-                                                    </div>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         )

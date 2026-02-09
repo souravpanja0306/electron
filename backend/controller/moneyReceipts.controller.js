@@ -109,11 +109,17 @@ module.exports.getMoneyReceipt = async (req, res) => {
         if (result.length) {
             let finalData = [];
             for (let item of result) {
+                let party = await PartyService.getParty({ id: item.party_id });
 
                 let newData = {
                     id: item.id,
                     company_id: item.company_id,
-                    party_id: item.party_id,
+                    party_id: party.length ? {
+                        id: party[0].id ? party[0].id : "",
+                        name: party[0].company_name ? party[0].company_name : "",
+                        mobile: party[0].mobile ? party[0].mobile : "",
+                        email: party[0].email ? party[0].email : "",
+                    } : "",
                     receipt_no: item.receipt_no,
                     receipt_date: item.receipt_date,
                     data: JSON.parse(item.data),
@@ -153,14 +159,15 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
         if (t_userId) search_key["created_by"] = t_userId.toString();
 
         let result = await MoneyReceiptService.findMoneyReceipts(search_key);
-        if (result.length) {
-            let createFolder = "./uploads/money_receipt_pdf/";
-            if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+        if (!result.length) return errorHandler(res, 400, "No Data Found");
 
-            const browser = await puppeteer.launch();
-            const page = await browser.newPage();
+        let createFolder = "./uploads/money_receipt_pdf/";
+        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
 
-            await page.setContent(`
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+
+        await page.setContent(`
                 <body style="font-family:Arial;font-size:12px">
                     <div style="width:700px;margin:auto;border:1px solid #000;padding:10px">
 
@@ -243,21 +250,20 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
                     </div>
                 </body>
                     `,
-                { waitUntil: "networkidle0" }
-            );
+            { waitUntil: "networkidle0" }
+        );
 
-            await page.pdf({
-                path: `./uploads/money_receipt_pdf/${result[0].receipt_no}_${moment().format("DD-MM-YYYY")}.pdf`,
-                format: "A4",
-                printBackground: true
-            });
-            await browser.close();
+        await page.pdf({
+            path: `./uploads/money_receipt_pdf/${result[0].receipt_no}_${moment().format("DD-MM-YYYY")}.pdf`,
+            format: "A4",
+            printBackground: true
+        });
+        await browser.close();
 
-            response.status = 200;
-            response.message = "Money Receipt Downloaded Successfully.";
-            response.body = {
-                downloadLink: `http://localhost:3001/uploads/money_receipt_pdf/${result[0].receipt_no}_${moment().format("DD-MM-YYYY")}.pdf`
-            };
+        response.status = 200;
+        response.message = "Money Receipt Downloaded Successfully.";
+        response.body = {
+            downloadLink: `http://localhost:3001/uploads/money_receipt_pdf/${result[0].receipt_no}_${moment().format("DD-MM-YYYY")}.pdf`
         };
     } catch (error) {
         console.log(`Something went wrong: controller: generateMoneyReceiptPdf: ${error}`);

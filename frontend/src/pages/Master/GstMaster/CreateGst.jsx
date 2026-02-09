@@ -29,7 +29,7 @@ const CreateGst = () => {
   const back = searchParams.get("back");
 
   const navigate = useNavigate();
-  
+
   const [gst, setGst] = useState({
     title: "",
     total_rate: 0,
@@ -42,7 +42,7 @@ const CreateGst = () => {
 
   return (
     <>
-      <PageTitle>Create Tax Invoice</PageTitle>
+      <PageTitle>Add GST Details</PageTitle>
       <div className="flex flex-col gap-1">
         <ActionArea>
           {
@@ -58,41 +58,36 @@ const CreateGst = () => {
           <Link to="/view-gst">
             <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
           </Link>
-          <div>
-            <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
-          </div>
         </ActionArea>
         <br />
 
-        <PageTitle>Party Information</PageTitle>
+        <PageTitle>GST Information</PageTitle>
         <MainArea>
-          <div className="flex gap-1 justify-between w-full">
-            <div className="flex flex-col w-[250px] gap-1">
+          <div className="flex gap-1 justify-start w-full">
 
+            <div className="flex flex-col w-[250px] gap-1">
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase">GST Title</label>
                 <input
-                  className="p-1 rounded-md w-full uppercase text-slate-900"
+                  className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                   placeholder="18% GST"
                   value={gst.title}
                   onChange={e => setGst({ ...gst, title: e.target.value })}
                 />
               </div>
-
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase">Total Rate (%)</label>
                 <input
-                  className="p-1 rounded-md w-full text-slate-900"
+                  className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                   type="number"
                   value={gst.total_rate}
                   onChange={e => setGst({ ...gst, total_rate: e.target.value })}
                 />
               </div>
-
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase">Type</label>
                 <select
-                  className="p-1 rounded-md w-full text-slate-900 uppercase"
+                  className="p-1 rounded-md w-full text-slate-900 uppercase border border-slate-300 dark:border-slate-600"
                   value={gst.type}
                   onChange={e => setGst({ ...gst, type: e.target.value })}
                 >
@@ -100,41 +95,36 @@ const CreateGst = () => {
                   <option value="fixed">Fixed</option>
                 </select>
               </div>
-
             </div>
 
             <div className="flex flex-col w-[250px] gap-1">
-
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase">CGST (%)</label>
                 <input
-                  className="p-1 rounded-md w-full text-slate-900"
+                  className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                   type="number"
                   value={gst.cgst}
                   onChange={e => setGst({ ...gst, cgst: e.target.value })}
                 />
               </div>
-
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase">SGST (%)</label>
                 <input
-                  className="p-1 rounded-md w-full text-slate-900"
+                  className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                   type="number"
                   value={gst.sgst}
                   onChange={e => setGst({ ...gst, sgst: e.target.value })}
                 />
               </div>
-
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase">IGST (%)</label>
                 <input
-                  className="p-1 rounded-md w-full text-slate-900"
+                  className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                   type="number"
                   value={gst.igst}
                   onChange={e => setGst({ ...gst, igst: e.target.value })}
                 />
               </div>
-
             </div>
           </div>
         </MainArea>

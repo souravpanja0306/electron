@@ -9,21 +9,18 @@ import { useNavigate } from "react-router-dom";
 // Icon...
 import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDownload } from "react-icons/ai";
 
-// Services...
-import { handleGetParty } from "./CompanyService"
-
 const ViewCompany = () => {
     const [party, setParty] = useState([]);
 
-    const getPartys = async () => {
-        let result = await handleGetParty();
-        if (result.body.length) {
-            result.body.map(item => item.is_selected = false)
-            setParty(result.body);
-        };
-    };
+    // const getPartys = async () => {
+    //     let result = await handleGetParty();
+    //     if (result.body.length) {
+    //         result.body.map(item => item.is_selected = false)
+    //         setParty(result.body);
+    //     };
+    // };
     useEffect(() => {
-        getPartys();
+        // getPartys();
     }, []);
 
     const [checkedIds, setCheckedIds] = useState([]);
@@ -94,15 +91,15 @@ const ViewCompany = () => {
                             <Link to="/add-party">
                                 <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
-                            <div onClick={(e) => handleDelete(e)}>
+                            <div>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
                             </div>
-                            <div onClick={(e) => handleDelete(e)}>
+                            <div >
                                 <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload /></CustomButton>
                             </div>
                         </div>
                         <div className="flex gap-1">
-                            <div onClick={(e) => getPartys(e)}>
+                            <div>
                                 <CustomButton title={"Refrash"} color={"green"}><AiOutlineSync /></CustomButton>
                             </div>
                         </div>

@@ -4,11 +4,7 @@ import PageTitle from '../components/PageTitle'
 const Home = () => {
   return (
     <>
-      <PageTitle>
-        <Link to="/signin">
-          singin
-        </Link>
-      </PageTitle>
+      <PageTitle>Home</PageTitle>
     </>
   );
 };

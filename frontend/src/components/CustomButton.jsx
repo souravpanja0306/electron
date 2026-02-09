@@ -14,15 +14,17 @@ const CustomButton = ({
     };
 
     return (
-        <div className={`min-w-16 p-1 cursor-pointer rounded-md text-xs flex gap-1 items-center 
-        justify-center select-none ${COLORS[color]}`}>
-            <div className='text-lg'>
+        <div
+            className={`min-w-16 px-3 py-1.5 cursor-pointer rounded-md text-xs flex gap-2 items-center justify-center select-none font-medium transition-all hover:scale-95 shadow-sm ${COLORS[color]}`}
+        >
+            <span className="text-base">
                 {children}
-            </div>
-            <span className='uppercase'>
+            </span>
+            <span className="uppercase tracking-wide">
                 {title}
             </span>
         </div>
+
     )
 }
 

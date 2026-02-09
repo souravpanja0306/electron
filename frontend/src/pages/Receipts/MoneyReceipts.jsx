@@ -21,13 +21,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 
 const MoneyReceipts = () => {
-    const isAuth = localStorage.getItem("token");
     const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore(); // Store...
     const { parties, getAllParty } = usePartyStore(); // Store...
 
     useEffect(() => {
-        generateMoneyReceiptNo(isAuth);
-        getAllParty(isAuth);
+        generateMoneyReceiptNo();
+        getAllParty();
     }, []);
 
     const [data, setData] = useState([
@@ -53,7 +52,7 @@ const MoneyReceipts = () => {
 
     const handleSubmitForm = async (e) => {
         e.preventDefault();
-        let result = await createMoneyReceipts(form, isAuth);
+        await createMoneyReceipts(form);
     };
 
     const printInvoice = (e) => {
@@ -191,7 +190,7 @@ const MoneyReceipts = () => {
                 <MainArea>
                     <table className='w-full select-none'>
                         <thead>
-                            <tr className='text-white text-sm font-semibold text-center'>
+                            <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
                                 <th className='w-12'>Sl. No.</th>
                                 <th className=''>Description</th>
                                 <th className='w-36'>Payment Type</th>
