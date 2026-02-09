@@ -6,11 +6,11 @@ const CustomButton = ({
     color = "",
 }) => {
     const COLORS = {
-        blue: "bg-blue-600 hover:bg-blue-700 border-blue-600",
-        slate: "bg-slate-600 hover:bg-slate-700 border-slate-600",
-        red: "bg-red-600 hover:bg-red-700 border-red-600",
-        green: "bg-green-600 hover:bg-green-700 border-green-600",
-        yellow: "bg-yellow-600 hover:bg-yellow-700 border-yellow-600",
+        blue: "bg-blue-600 text-white hover:bg-blue-700 border-blue-600",
+        slate: "bg-slate-600 text-white hover:bg-slate-700 border-slate-600",
+        red: "bg-red-600 text-white hover:bg-red-700 border-red-600",
+        green: "bg-green-600 text-white hover:bg-green-700 border-green-600",
+        yellow: "bg-yellow-600 text-white hover:bg-yellow-700 border-yellow-600",
     };
 
     return (

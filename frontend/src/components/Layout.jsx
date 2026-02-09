@@ -41,22 +41,22 @@ const Layout = ({ children }) => {
     };
 
     return (
-        <div className="flex min-h-screen bg-slate-900 text-white w-full">
+        <div className="flex min-h-screen bg-slate-100 dark:bg-slate-900 w-full">
 
             {/* Left Sidebar */}
-            <div className="w-[70px] bg-slate-900 flex flex-col items-center gap-1 select-none border-r border-slate-600">
+            <div className="w-[70px] bg-slate-100 dark:bg-slate-900 flex flex-col items-center select-none border-r border-slate-300 dark:border-slate-600">
 
                 {/* Top Menu */}
                 <div
                     onClick={() => setSideBar(!sideBar)}
-                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer hover:text-slate-200 text-slate-600`}
+                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer hover:text-slate-900 hover:dark:text-slate-300 text-slate-500`}
                     title="Home"
                 >
                     {sideBar ? <AiOutlineMenuFold /> : <AiOutlineMenu />}
                 </div>
                 <div
                     onClick={() => changeMenu({ menu: "home" })}
-                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "home" ? "bg-blue-600 text-white" : "hover:text-slate-200 text-slate-600"}`}
+                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "home" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
                     title="Home"
                 >
                     <AiOutlineHome />
@@ -64,7 +64,7 @@ const Layout = ({ children }) => {
                 </div>
                 <div
                     onClick={() => changeMenu({ menu: "work" })}
-                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "work" ? "bg-blue-600 text-white" : "hover:text-slate-200 text-slate-600"}`}
+                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "work" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
                     title="Work"
                 >
                     <AiOutlineFolder />
@@ -72,7 +72,7 @@ const Layout = ({ children }) => {
                 </div>
                 <div
                     onClick={() => changeMenu({ menu: "dashboard" })}
-                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "dashboard" ? "bg-blue-600 text-white" : "hover:text-slate-200 text-slate-600"}`}
+                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "dashboard" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
                     title="Dashboard"
                 >
                     <AiOutlineBarChart />
@@ -80,7 +80,7 @@ const Layout = ({ children }) => {
                 </div>
                 <div
                     onClick={() => changeMenu({ menu: "report" })}
-                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "report" ? "bg-blue-600 text-white" : "hover:text-slate-200 text-slate-600"}`}
+                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "report" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
                     title="Reports"
                 >
                     <AiOutlinePieChart />
@@ -88,10 +88,10 @@ const Layout = ({ children }) => {
                 </div>
 
                 {/* Push bottom section down */}
-                <div className="mt-auto p-1 flex flex-col items-center gap-1">
+                <div className="mt-auto p-1 flex flex-col items-center">
                     <div
                         onClick={() => changeMenu({ menu: "notification" })}
-                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "notification" ? "bg-blue-600 text-white" : "hover:text-slate-200 text-slate-600"}`}
+                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "notification" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
                         title="Notification"
                     >
                         <AiOutlineBell />
@@ -99,7 +99,7 @@ const Layout = ({ children }) => {
                     </div>
                     <div
                         onClick={() => changeMenu({ menu: "profile" })}
-                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "profile" ? "bg-blue-600 text-white" : "hover:text-slate-200 text-slate-600"}`}
+                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "profile" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
                         title="Profile"
                     >
                         <AiOutlineUser />
@@ -107,7 +107,7 @@ const Layout = ({ children }) => {
                     </div>
                     <div
                         onClick={() => changeMenu({ menu: "settings" })}
-                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "settings" ? "bg-blue-600 text-white" : "hover:text-slate-200 text-slate-600"}`}
+                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "settings" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
                         title="Settings"
                     >
                         <AiOutlineSetting />
@@ -115,7 +115,7 @@ const Layout = ({ children }) => {
                     </div>
                     <div
                         onClick={(e) => handleSignOut(e)}
-                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${"hover:bg-red-600 hover:text-slate-200 text-slate-600"}`}
+                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${"hover:bg-red-600 hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
                         title="Signout"
                     >
                         <AiOutlineLogout />
@@ -125,7 +125,7 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Middle Sidebar */}
-            <div className={`${sideBar ? "min-w-[270px] p-1" : "max-w-0 p-0"} bg-slate-900 flex flex-col gap-1 select-none border-r border-slate-600`}>
+            <div className={`${sideBar ? "min-w-[270px] p-1" : "max-w-0 p-0"} bg-slate-100 dark:bg-slate-900 flex flex-col select-none border-r border-slate-300 dark:border-slate-600`}>
 
                 {currentMenu.map((item, index) => (
                     item?.type === "main"
@@ -134,8 +134,8 @@ const Layout = ({ children }) => {
                                 <div
                                     onClick={() => setSubMenu({ index, active: subMenu.index !== index ? true : !subMenu.active })}
                                     className={`text-xl w-full p-1 flex justify-between gap-1 items-center transition  cursor-pointer ${subMenu.index === index && subMenu.active
-                                        ? "border-b border-blue-600 bg-blue-600 text-slate-300"
-                                        : "border-b border-slate-500 hover:text-slate-300 text-slate-500"}`
+                                        ? "border-b border-slate-300 dark:border-slate-600 bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-slate-300"
+                                        : "border-b border-slate-300 dark:border-slate-600 hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`
                                     }
                                 >
                                     <div className="flex justify-center items-center gap-2">
@@ -144,7 +144,7 @@ const Layout = ({ children }) => {
                                     </div>
                                     {subMenu.index === index && subMenu.active ? <AiOutlineUpSquare /> : <AiOutlineDownSquare />}
                                 </div>
-                                <div className={`${subMenu.index === index && subMenu.active ? "min-h-12" : "hidden"} p-1 bg-slate-900 flex flex-col gap-1 transition-all duration-500 border border-blue-600`} >
+                                <div className={`${subMenu.index === index && subMenu.active ? "min-h-12" : "hidden"} p-1 bg-slate-100 dark:bg-slate-900 flex flex-col gap-1 transition-all duration-500 border border-slate-300 dark:border-slate-600`} >
 
                                     {item?.submenu?.map((sub, i) => (
                                         <NavLink
@@ -152,8 +152,8 @@ const Layout = ({ children }) => {
                                             to={sub.url}
                                             className={({ isActive }) =>
                                                 `text-xl w-full p-1 flex gap-1 items-center transition ${isActive
-                                                    ? "border border-blue-600 bg-blue-600 text-slate-300"
-                                                    : "border border-slate-600 hover:border hover:border-slate-300 hover:text-slate-300 text-slate-500"
+                                                    ? "border border-slate-300 dark:border-slate-600 bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-slate-300"
+                                                    : "border border-slate-300 dark:border-slate-600 hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"
                                                 }`
                                             }
                                         >
@@ -171,8 +171,8 @@ const Layout = ({ children }) => {
                                 to={item.url}
                                 className={({ isActive }) =>
                                     `text-xl w-full p-1 flex gap-1  items-center transition ${isActive
-                                        ? "border-b border-blue-600 bg-blue-600 text-slate-300"
-                                        : "border-b border-slate-500 hover:text-slate-300 text-slate-500"
+                                        ? "border-b border-slate-300 dark:border-slate-600 bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-slate-300"
+                                        : "border-b border-slate-300 dark:border-slate-600 hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"
                                     }`
                                 }
                             >
@@ -185,7 +185,7 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Main Content */}
-            <div className="max-h-screen w-full bg-slate-800 p-1 overflow-auto">
+            <div className="max-h-screen w-full bg-white dark:bg-slate-800 p-1 overflow-auto">
                 {children}
             </div>
         </div>

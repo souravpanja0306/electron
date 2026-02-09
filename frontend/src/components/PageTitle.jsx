@@ -3,7 +3,7 @@ import React from 'react'
 const PageTitle = ({ children }) => {
     return (
         <div className='select-none cursor-not-allowed p-1'>
-            <p className='capitalize font-semibold text-lg'>
+            <p className='capitalize font-semibold text-lg text-slate-800 dark:text-white'>
                 {children}
             </p>
         </div>

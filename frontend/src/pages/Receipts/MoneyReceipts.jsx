@@ -123,7 +123,7 @@ const MoneyReceipts = () => {
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Company</label>
                                 <select
-                                    className="p-1 rounded-md w-full uppercase text-slate-900"
+                                    className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                                     name="company_id"
                                     onChange={handleChange}
                                     required
@@ -139,7 +139,7 @@ const MoneyReceipts = () => {
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Receipt Name</label>
                                 <select
-                                    className="p-1 rounded-md w-full uppercase text-slate-900"
+                                    className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                                     name="party_id"
                                     onChange={handleChange}
                                     required
@@ -152,7 +152,7 @@ const MoneyReceipts = () => {
                                     ))}
                                 </select>
                                 <span className='text-red-500 text-xs'>#Receipt not listed here?
-                                    <Link to="/add-party?back=true" className='text-white hover:text-blue-600 underline'> Click to list.</Link>
+                                    <Link to="/add-party?back=true" className='text-slate-800 dark:text-slate-100 hover:text-blue-600 underline'> Click to list.</Link>
                                 </span>
                             </div>
                         </div>
@@ -161,7 +161,7 @@ const MoneyReceipts = () => {
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Receipt Number</label>
                                 <input
-                                    className="p-1 rounded-md w-full uppercase text-slate-900"
+                                    className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                                     type="text"
                                     name="receipt_no"
                                     value={moneyReceiptNo}
@@ -173,7 +173,7 @@ const MoneyReceipts = () => {
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Date</label>
                                 <input
-                                    className="p-1 rounded-md w-full uppercase text-slate-900"
+                                    className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                                     placeholder="Date"
                                     type="date"
                                     name="receipt_date"
@@ -208,7 +208,7 @@ const MoneyReceipts = () => {
                                         <tr key={item.id} className='items-center text-black'>
                                             <td className=''>
                                                 <input
-                                                    className="w-full p-1 rounded-md border border-slate-600 text-center"
+                                                    className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-center"
                                                     name="sl_no"
                                                     id={item.id}
                                                     value={index + 1}
@@ -218,7 +218,7 @@ const MoneyReceipts = () => {
                                             </td>
                                             <td className=''>
                                                 <input
-                                                    className="w-full p-1 rounded-md border border-slate-600 capitalize"
+                                                    className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 capitalize"
                                                     value={item.description}
                                                     id={item.id}
                                                     name="description"
@@ -229,7 +229,7 @@ const MoneyReceipts = () => {
                                             <td className=''>
                                                 <div className='flex flex-col w-full gap-1'>
                                                     <select
-                                                        className="w-full p-1 rounded-md border border-slate-600 uppercase"
+                                                        className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 uppercase"
                                                         value={item.payment_mode}
                                                         id={item.id}
                                                         name="payment_mode"
@@ -245,7 +245,7 @@ const MoneyReceipts = () => {
                                             </td>
                                             <td className=''>
                                                 <input
-                                                    className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                    className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                                     value={item.reference}
                                                     id={item.id}
                                                     name="reference"
@@ -255,7 +255,7 @@ const MoneyReceipts = () => {
                                             </td>
                                             <td className=''>
                                                 <input
-                                                    className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                    className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                                     value={item.amount}
                                                     id={item.id}
                                                     name="amount"
@@ -292,7 +292,7 @@ const MoneyReceipts = () => {
                                     <div className='flex flex-col w-full gap-1'>
                                         <label className='text-xs uppercase'>Remarks</label>
                                         <textarea
-                                            className="p-1 rounded-md w-full text-slate-900"
+                                            className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                                             placeholder="Remarks"
                                             type="text"
                                             name="remarks"
@@ -311,7 +311,7 @@ const MoneyReceipts = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Total Value</label>
                                     <input
-                                        className="p-1 rounded-md w-full uppercase text-slate-900 text-end font-bold"
+                                        className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
                                         type="number"
                                         // value={parseFloat(grandTotal.total_value).toFixed(2)}
                                         readOnly

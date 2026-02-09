@@ -131,6 +131,7 @@ const MenuMap = {
         },
     ],
     "settings": [
+        { title: "Setting", url: "/settings", icon: <AiOutlineUser /> },
         { title: "Profile", url: "/profile", icon: <AiOutlineUser /> },
         { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
         { title: "Forgot Password", url: "/forgot-password", icon: <AiOutlineUnlock /> }

@@ -235,7 +235,7 @@ const CreateInvoice = () => {
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Bill To</label>
                       <select
-                        className="p-1 rounded-md w-full uppercase text-slate-900"
+                        className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                         value={invoiceDetails.billTo}
                         onChange={(e) =>
                           setInvoiceDetails({ ...invoiceDetails, billTo: e.target.value })
@@ -250,13 +250,13 @@ const CreateInvoice = () => {
                         ))}
                       </select>
                       <span className='text-red-500 text-xs'>#Party not listed here?
-                        <Link to="/add-party?back=true" className='text-white hover:text-blue-600 underline'> Click to list.</Link>
+                        <Link to="/add-party?back=true" className='text-slate-800 dark:text-slate-100 hover:text-blue-600 underline'> Click to list.</Link>
                       </span>
                     </div>
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Ship To</label>
                       <textarea
-                        className="p-1 rounded-md w-full uppercase text-slate-900"
+                        className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                         type="text"
                       />
                     </div>
@@ -266,7 +266,7 @@ const CreateInvoice = () => {
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Date</label>
                       <input
-                        className="p-1 rounded-md w-full uppercase text-slate-900"
+                        className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                         placeholder="Date"
                         type="date"
                         value={invoiceDetails.date}
@@ -279,7 +279,7 @@ const CreateInvoice = () => {
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Invoice</label>
                       <input
-                        className="p-1 rounded-md w-full uppercase text-slate-900"
+                        className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                         placeholder="Invoice"
                         type="text"
                         value={invoiceNumber}
@@ -315,14 +315,14 @@ const CreateInvoice = () => {
                           <tr key={item.id} className='items-center text-black'>
                             <td className=''>
                               <input
-                                className="w-full p-1 rounded-md border border-slate-600 text-center"
+                                className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-center"
                                 value={index + 1}
                                 disabled
                               />
                             </td>
                             <td className=''>
                               <input
-                                className="w-full p-1 rounded-md border border-slate-600 capitalize"
+                                className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 capitalize"
                                 value={item.description}
                                 onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "description" })}
                                 type="text"
@@ -331,7 +331,7 @@ const CreateInvoice = () => {
                             <td className=''>
                               <div className='flex flex-col w-full gap-1'>
                                 <select
-                                  className="w-full p-1 rounded-md border border-slate-600 uppercase"
+                                  className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 uppercase"
                                   defaultValue=""
                                   onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "hsn" })}
                                 >
@@ -346,7 +346,7 @@ const CreateInvoice = () => {
                             </td>
                             <td className=''>
                               <input
-                                className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 value={item.quantity}
                                 onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "quantity" })}
                                 type='number'
@@ -355,7 +355,7 @@ const CreateInvoice = () => {
                             </td>
                             <td className=''>
                               <input
-                                className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 value={item.rate}
                                 onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "rate" })}
                                 type='number'
@@ -364,7 +364,7 @@ const CreateInvoice = () => {
                             </td>
                             <td className=''>
                               <input
-                                className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                                className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
                                 value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
                                 type='number'
                                 readOnly
@@ -372,7 +372,7 @@ const CreateInvoice = () => {
                             </td>
                             <td className=''>
                               <input
-                                className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                                className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
                                 value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
                                 type='number'
                                 readOnly
@@ -380,7 +380,7 @@ const CreateInvoice = () => {
                             </td>
                             <td className=''>
                               <input
-                                className="w-full p-1 rounded-md border border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                                className="w-full p-1 rounded-md border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
                                 value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
                                 type='number'
                                 readOnly
@@ -415,7 +415,7 @@ const CreateInvoice = () => {
                         <div className='flex flex-col w-full gap-1'>
                           <label className='text-xs uppercase'>E-Way Bill</label>
                           <input
-                            className="p-1 rounded-md w-full uppercase text-slate-900"
+                            className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                             // placeholder="E-Way Bill"
                             type="text"
                             value={invoiceDetails.ewayBill}
@@ -427,7 +427,7 @@ const CreateInvoice = () => {
                         <div className='flex flex-col w-full gap-1'>
                           <label className='text-xs uppercase'>Transporter</label>
                           <input
-                            className="p-1 rounded-md w-full uppercase text-slate-900"
+                            className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                             // placeholder="Transporter"
                             type="text"
                             value={invoiceDetails.transporter}
@@ -439,7 +439,7 @@ const CreateInvoice = () => {
                         <div className='flex flex-col w-full gap-1'>
                           <label className='text-xs uppercase'>Place of Supply</label>
                           <input
-                            className="p-1 rounded-md w-full uppercase text-slate-900"
+                            className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
                             // placeholder="Place"
                             value={invoiceDetails.placeOfSupply}
                             onChange={(e) =>
@@ -461,7 +461,7 @@ const CreateInvoice = () => {
                       <div className='w-full gap-1'>
                         <label className='text-xs uppercase'>Total Quantity</label>
                         <input
-                          className="p-1 rounded-md w-full uppercase text-slate-900 text-end font-bold"
+                          className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
                           type="number"
                           value={parseFloat(grandTotal.total_quantity).toFixed()}
                           readOnly
@@ -470,7 +470,7 @@ const CreateInvoice = () => {
                       <div className='w-full gap-1'>
                         <label className='text-xs uppercase'>Total Value</label>
                         <input
-                          className="p-1 rounded-md w-full uppercase text-slate-900 text-end font-bold"
+                          className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
                           type="number"
                           value={parseFloat(grandTotal.total_value).toFixed(2)}
                           readOnly

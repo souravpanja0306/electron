@@ -1,5 +1,5 @@
 import React from "react";
-import PageTitle from '../../components/PageTitle';
+import PageTitle from "../../components/PageTitle";
 
 const Profile = () => {
   const subscription = {
@@ -18,72 +18,64 @@ const Profile = () => {
 
   return (
     <>
-      <PageTitle>Update Profile</PageTitle>
+      <PageTitle>Profile</PageTitle>
 
-      <div className="w-full h-full p-4">
-
-        {/* Title */}
-        <h1 className="text-2xl font-semibold mb-4">Profile</h1>
-
-        {/* Profile card */}
-        <div className="bg-slate-900 p-4 rounded-md flex gap-4 items-center">
+      <div className="w-full max-w-5xl mx-auto p-4 space-y-6">
+        <div className="flex items-center gap-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
           <img
-            src="https://via.placeholder.com/80"
+            src="https://via.placeholder.com/96"
             alt="profile"
-            className="w-20 h-20 rounded-full border border-slate-600"
+            className="w-24 h-24 rounded-full border"
           />
-
           <div>
-            <h2 className="text-xl font-medium">Sourav Panja</h2>
-            <p className="text-slate-600 text-sm">Software Engineer</p>
+            <h2 className="text-xl font-semibold text-slate-800 dark:text-white">
+              Sourav Panja
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Software Engineer
+            </p>
           </div>
         </div>
-
-        {/* Account */}
-        <div className="mt-4 bg-slate-900 p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Account Details</h3>
-
-          <div className="space-y-2 text-sm text-slate-300">
-            <p>Email: sourav@example.com</p>
-            <p>Phone: +91 9876543210</p>
-            <p>City: Kolkata, India</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 uppercase">
+              Account Details
+            </h3>
+            <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+              <p>Email: sourav@example.com</p>
+              <p>Phone: +91 9876543210</p>
+              <p>City: Kolkata, India</p>
+            </div>
           </div>
-        </div>
-
-        {/* Subscription */}
-        <div className="mt-4 bg-slate-900 p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-3">Subscription</h3>
-
-          <div className="flex justify-between items-center">
+          <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center">
             <div>
-              <p className="text-slate-300 text-sm">Current Plan:</p>
-              <p className="text-xl font-medium">{subscription.plan}</p>
-
-              <p className="text-slate-600 text-sm mt-1">Price: {subscription.price}</p>
-              <p className="text-slate-600 text-sm">
-                Remaining Days:{" "}
-                <span className="text-green-400 font-semibold">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase">
+                Subscription
+              </h3>
+              <p className="text-xl font-bold mt-1">{subscription.plan}</p>
+              <p className="text-xs text-slate-500">{subscription.price}</p>
+              <p className="text-xs text-slate-500 mt-1">
+                Days left:{" "}
+                <span className="text-green-500 font-semibold">
                   {subscription.daysLeft}
                 </span>
               </p>
             </div>
-
-            <button className="bg-slate-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium">
-              Upgrade Plan
+            <button className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm">
+              Upgrade
             </button>
           </div>
         </div>
-
-        {/* Business Details */}
-        <div className="mt-4 bg-slate-900 p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-3">Business Details</h3>
-
-          <div className="space-y-2 text-sm text-slate-300">
-            <p>GST Number: <span className="text-white">{businessDetails.gst}</span></p>
-            <p>PAN: <span className="text-white">{businessDetails.pan}</span></p>
-            <p>Trade License No.: <span className="text-white">{businessDetails.tradeLicense}</span></p>
-            <p>Bank Account: <span className="text-white">{businessDetails.bankAccount}</span></p>
-            <p>IFSC Code: <span className="text-white">{businessDetails.bankIFSC}</span></p>
+        <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4 uppercase">
+            Business Details
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-400">
+            <p>GST: <span className="text-slate-800 dark:text-white">{businessDetails.gst}</span></p>
+            <p>PAN: <span className="text-slate-800 dark:text-white">{businessDetails.pan}</span></p>
+            <p>Trade License: <span className="text-slate-800 dark:text-white">{businessDetails.tradeLicense}</span></p>
+            <p>Bank A/C: <span className="text-slate-800 dark:text-white">{businessDetails.bankAccount}</span></p>
+            <p>IFSC: <span className="text-slate-800 dark:text-white">{businessDetails.bankIFSC}</span></p>
           </div>
         </div>
       </div>

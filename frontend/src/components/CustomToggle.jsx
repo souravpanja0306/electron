@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const ToggleButton = ({
+const CustomToggle = ({
     onChange = "",
     option = [],
     value = false,
@@ -8,6 +8,7 @@ const ToggleButton = ({
     inactiveColor = "blue",
 }) => {
     const [on, setOn] = useState(value);
+    useEffect(() => setOn(value), [value]);
 
     const COLORS = {
         blue: "bg-blue-600",
@@ -35,4 +36,4 @@ const ToggleButton = ({
     );
 };
 
-export default ToggleButton;
+export default CustomToggle;
