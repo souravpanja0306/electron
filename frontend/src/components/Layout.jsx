@@ -138,7 +138,7 @@ const Layout = ({ children }) => {
                             <div key={index}>
                                 <div
                                     onClick={() => changeSubMenu(index)}
-                                    className={`relative text-sm w-full px-3 py-2 flex justify-between items-center cursor-pointer transition-all ${subMenu.index === index && subMenu.active
+                                    className={`text-sm w-full px-3 py-2 flex justify-between items-center cursor-pointer transition-all ${subMenu.index === index && subMenu.active
                                         ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-l-4 border-blue-600"
                                         : "border-b border-slate-300 text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                                         }`}
@@ -155,7 +155,7 @@ const Layout = ({ children }) => {
                                             key={i}
                                             to={sub.url}
                                             className={({ isActive }) =>
-                                                `relative text-sm w-full px-3 py-2 flex gap-2 items-center transition-all ${isActive
+                                                `text-sm w-full px-3 py-2 flex gap-2 items-center transition-all ${isActive
                                                     ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-l-4 border-blue-600"
                                                     : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                                                 }`
@@ -173,7 +173,7 @@ const Layout = ({ children }) => {
                                 key={index}
                                 to={item.url}
                                 className={({ isActive }) =>
-                                    `relative text-sm w-full px-3 py-2 flex gap-2 items-center transition-all ${isActive
+                                    `text-sm w-full px-3 py-2 flex gap-2 items-center transition-all ${isActive
                                         ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-l-4 border-blue-600"
                                         : "border-b border-slate-300 text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                                     }`

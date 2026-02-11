@@ -159,12 +159,32 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
         if (t_userId) search_key["created_by"] = t_userId.toString();
 
         let result = await MoneyReceiptService.findMoneyReceipts(search_key);
+        console.log("🚀 ~ result:", result)
         if (!result.length) return errorHandler(res, 400, "No Data Found");
+
+        let party = await PartyService.getParty({ id: result[0].party_id });
+        if (!party.length) return errorHandler(res, 400, "Party Data Not Found");
+
+        let descriptionTemplete = ``;
+        let descriptions = JSON.parse(result[0].data);
+        for (let item of descriptions) {
+            descriptionTemplete += `
+            <tr>
+              <td style="border:1px solid #000;padding:4px">${item.sl_no}</td>
+              <td style="border:1px solid #000;padding:4px">${item.description}</td>
+              <td style="border:1px solid #000;padding:4px;text-align:right">${item.amount}</td>
+            </tr>
+            `
+        };
+        console.log(descriptions, "descriptionsdescriptions")
 
         let createFolder = "./uploads/money_receipt_pdf/";
         if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
 
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            headless: "new",
+            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        });
         const page = await browser.newPage();
 
         await page.setContent(`
@@ -184,8 +204,8 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
                           </td>
 
                           <td style="width:40%;vertical-align:top;text-align:right">
-                            Receipt No: MR-001<br>
-                            Date: 01-02-2026
+                            Receipt No: ${result[0].receipt_no}<br>
+                            Date: ${result[0].receipt_date}
                           </td>
                         </tr>
                       </table>
@@ -194,9 +214,10 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
                         <tr>
                           <td style="width:50%;border:1px solid #000;padding:6px;vertical-align:top">
                             <b>Received From:</b><br>
-                            Party Name<br>
-                            Party Address<br>
-                            GSTIN: 33BBBBB1111B2Z6
+                            ${party.length && party[0].company_name ? party[0].company_name : ""}<br>
+                            ${party.length && party[0].address_1 ? party[0].address_1 : ""}<br>
+                            ${party.length && party[0].address_2 ? party[0].address_2 : ""}<br>
+                            GSTIN: ${party.length && party[0].gst ? party[0].gst : "NA"}
                           </td>
 
                           <td style="width:50%;border:1px solid #000;padding:6px;vertical-align:top">
@@ -215,11 +236,7 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
                           <th style="border:1px solid #000;padding:4px">Particulars</th>
                           <th style="border:1px solid #000;padding:4px;text-align:right">Amount</th>
                         </tr>
-                        <tr>
-                          <td style="border:1px solid #000;padding:4px">1</td>
-                          <td style="border:1px solid #000;padding:4px">Payment against Invoice INV-001</td>
-                          <td style="border:1px solid #000;padding:4px;text-align:right">1180</td>
-                        </tr>
+                       ${descriptionTemplete}
                       </table>
 
                       <table style="width:100%;margin-top:5px">
