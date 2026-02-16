@@ -123,16 +123,16 @@ const ViewInvoices = () => {
                                 <th className="p-1 text-start w-8">
                                     <input type="checkbox" onChange={(e) => handleSelectAll(e)} />
                                 </th>
-                                <th className="p-1 text-start">Invoice No</th>
-                                <th className="p-1 text-start">Bill To</th>
-                                <th className="p-1 text-start">Date</th>
-                                <th className="p-1 text-start">Quantity</th>
-                                <th className="p-1 text-start">SGST</th>
-                                <th className="p-1 text-start">CGST</th>
-                                <th className="p-1 text-start">IGST</th>
-                                <th className="p-1 text-start">Total</th>
-                                <th className="p-1 text-start">Trasnporter</th>
-                                <th className="p-1 text-center w-16">#</th>
+                                <th className="p-1 text-start text-slate-500">Invoice No</th>
+                                <th className="p-1 text-start text-slate-500">Bill To</th>
+                                <th className="p-1 text-start text-slate-500">Date</th>
+                                <th className="p-1 text-start text-slate-500">Quantity</th>
+                                <th className="p-1 text-start text-slate-500">SGST</th>
+                                <th className="p-1 text-start text-slate-500">CGST</th>
+                                <th className="p-1 text-start text-slate-500">IGST</th>
+                                <th className="p-1 text-start text-slate-500">Total</th>
+                                <th className="p-1 text-start text-slate-500">Trasnporter</th>
+                                <th className="p-1 text-center w-16 text-slate-500">#</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -149,19 +149,19 @@ const ViewInvoices = () => {
                                                         checked={item.is_selected}
                                                     />
                                                 </td>
-                                                <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-600 dark:hover:text-slate-300">
+                                                <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
                                                     <Link to={`/view-invoice/details?id=${item.id}&back=true`}>
                                                         {item.invoice_no ? item.invoice_no : "--"}
                                                     </Link>
                                                 </td>
-                                                <td className="p-1 text-start truncate capitalize">{item.party_id ? item.party_id.company_name : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.invoice_date ? item.invoice_date : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.total_quantity ? item.total_quantity : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.total_sgst ? item.total_sgst : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.total_cgst ? item.total_cgst : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.total_igst ? item.total_igst : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.total_amount ? (parseFloat(item.total_amount)).toFixed(2) : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.transporter ? item.transporter : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.party_id ? item.party_id.company_name : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.invoice_date ? item.invoice_date : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_quantity ? item.total_quantity : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_sgst ? item.total_sgst : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_cgst ? item.total_cgst : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_igst ? item.total_igst : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_amount ? (parseFloat(item.total_amount)).toFixed(2) : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.transporter ? item.transporter : "--"}</td>
                                                 <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
                                                     <button
                                                         className="p-1 rounded-md text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
@@ -178,7 +178,7 @@ const ViewInvoices = () => {
                                 <>
                                     {
                                         <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
-                                            <td className="p-1 text-center" colSpan={9}>No Data Found</td>
+                                            <td className="p-1 text-center" colSpan={11}>No Data Found</td>
                                         </tr>
                                     }
                                 </>

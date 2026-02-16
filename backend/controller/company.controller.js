@@ -6,23 +6,24 @@ const contents = require("../content/contents");
 
 // Services...
 const PartyService = require("../service/party.service");
-const AuthService = require("../service/auth.service")
+const AuthService = require("../service/auth.service");
+const CompanyService = require("../service/company.service")
 const InvoiceService = require("../service/invoice.service");
 
 const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.addParty = async (req, res) => {
+exports.addCompany = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
 
-        let isMobileExist = await PartyService.getParty({ mobile: req.body.mobile });
+        let isMobileExist = await CompanyService.getCompany({ mobile: req.body.mobile });
         if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
 
-        let isEmailExist = await PartyService.getParty({ mobile: req.body.email });
-        if (isEmailExist.length) return errorHandler(res, 409, "Email already registered.");
+        let isEmailExist = await CompanyService.getCompany({ mobile: req.body.email });
+        if (isEmailExist.length) return errorHandler(res, 409, "Email Id already registered.");
 
         let finalData = {
             company_name: req.body.company_name,
@@ -46,19 +47,21 @@ exports.addParty = async (req, res) => {
             created_by: t_userId,
         };
 
-        let result = await PartyService.createParty(finalData);
+        let result = await CompanyService.createCompany(finalData);
 
         response.status = 200;
         response.message = "Data created successfully.";
         response.body = result;
     } catch (error) {
-        console.log(error)
+        console.log(`Something went wrong: controller: addCompany: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: addCompany`;
+        response.body = error.body ? error.body : "";
     };
-    console.log(response.status)
     return res.status(response.status).json(response);
 };
 
-exports.listParty = async (req, res) => {
+exports.getCompany = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -68,7 +71,7 @@ exports.listParty = async (req, res) => {
         if (id) search_key["id"] = id;
         if (t_userId) search_key["created_by"] = t_userId;
 
-        let result = await PartyService.getParty(search_key);
+        let result = await CompanyService.getCompany(search_key);
 
         if (result.length) {
             response.status = 200;
@@ -80,7 +83,10 @@ exports.listParty = async (req, res) => {
             response.body = [];
         };
     } catch (error) {
-        console.log(error);
+        console.log(`Something went wrong: controller: getCompany: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: getCompany`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };
@@ -88,10 +94,16 @@ exports.listParty = async (req, res) => {
 exports.removeParty = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-        const { id } = req.params;
-        if (!id) return errorHandler(res, 400, "ID are required.");
+        const { ids } = req.body;
+        if (!ids) {
+            response.status = 400;
+            response.message = "IDs are required";
+            response.body = [];
+            return res.status(response.status).json(response);
+        };
 
-        let result = await PartyService.deleteParty({ ids: ids });
+        let result = await CompanyService.deleteParty({ ids: ids });
+
         if (result.length) {
             response.status = 200;
             response.message = "Data deleted succesfully.";
@@ -102,7 +114,10 @@ exports.removeParty = async (req, res) => {
             response.body = [];
         };
     } catch (error) {
-        console.log(error);
+        console.log(`Something went wrong: controller: getCompany: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: getCompany`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };

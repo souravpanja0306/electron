@@ -101,7 +101,7 @@ const ViewMoneyReceipts = () => {
                                 <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </div>
                         </div>
                         <div className="flex gap-1">
@@ -176,7 +176,7 @@ const ViewMoneyReceipts = () => {
                                 :
                                 <>
                                     {
-                                        <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                        <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                             <td className="p-1 text-center" colSpan={9}>No Data Found</td>
                                         </tr>
                                     }

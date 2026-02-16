@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PageTitle from '../components/PageTitle';
 import ActionArea from '../components/ActionArea';
+import MainArea from '../components/MainArea';
 import CustomToggle from '../components/CustomToggle';
 
 const Setting = () => {
@@ -25,7 +26,7 @@ const Setting = () => {
     return (
         <>
             <PageTitle>Settings</PageTitle>
-            <ActionArea>
+            <MainArea>
                 <div className="w-full max-w-xl space-y-6">
                     <div>
                         <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Appearance</h2>
@@ -48,7 +49,7 @@ const Setting = () => {
                         More settings coming soon…
                     </div>
                 </div>
-            </ActionArea>
+            </MainArea>
         </>
     )
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import moment from 'moment';
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
@@ -19,14 +20,17 @@ import {
 import Alert from '../../components/Alert';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
+import useCompanyStore from '../../store/CompnayStore';
 
 const MoneyReceipts = () => {
     const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore(); // Store...
     const { parties, getAllParty } = usePartyStore(); // Store...
+    const { companyData, getAllCompany } = useCompanyStore();
 
     useEffect(() => {
         generateMoneyReceiptNo();
         getAllParty();
+        getAllCompany();
     }, []);
 
     const [data, setData] = useState([
@@ -35,7 +39,7 @@ const MoneyReceipts = () => {
         { id: Math.floor(Math.random() * 10000000000), sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
     ]);
     const [form, setForm] = useState(
-        { company_id: "", party_id: "", receipt_no: "", receipt_date: "", data: data, remarks: "" }
+        { company_id: "", party_id: "", receipt_no: "", receipt_date: moment().format("YYYY-MM-DD"), data: data, remarks: "" }
     );
 
     const handleChange = (e) => {
@@ -127,9 +131,8 @@ const MoneyReceipts = () => {
                                     onChange={handleChange}
                                     required
                                 >
-                                    <option value="" disabled selected>Select Company</option>
-                                    {parties?.body?.map(item => (
-                                        <option key={item.id} value={item.id}>
+                                    {companyData?.body?.map((item, index) => (
+                                        <option key={item.id} value={item.id} selected={index == 0}>
                                             {item.company_name}
                                         </option>
                                     ))}
@@ -176,6 +179,7 @@ const MoneyReceipts = () => {
                                     placeholder="Date"
                                     type="date"
                                     name="receipt_date"
+                                    value={form.receipt_date}
                                     onChange={handleChange}
                                     required
                                 />

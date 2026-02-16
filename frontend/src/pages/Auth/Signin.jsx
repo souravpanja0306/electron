@@ -11,7 +11,7 @@ const Signin = () => {
 
   useEffect(() => {
     const isAuth = localStorage.getItem("token");
-    if (isAuth) navigate("/");
+    if (isAuth) navigate("/dashboard"); localStorage.setItem("currentMenu", "dashboard")
     console.log("hello");
   }, [])
 
@@ -92,7 +92,7 @@ const Signin = () => {
             <div className="flex justify-between text-xs text-slate-400 mt-1">
               <span>
                 Don’t have an account?
-                <Link to="/" className="ml-1 text-blue-400 hover:underline">
+                <Link to="/signup" className="ml-1 text-blue-400 hover:underline">
                   Register
                 </Link>
               </span>
@@ -104,7 +104,6 @@ const Signin = () => {
           </form>
         </div>
       </div>
-
     </>
   )
 }

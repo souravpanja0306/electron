@@ -61,71 +61,99 @@ const CreateGst = () => {
         </ActionArea>
         <br />
 
-        <PageTitle>GST Information</PageTitle>
         <MainArea>
-          <div className="flex gap-1 justify-start w-full">
+          <div className='flex flex-col w-full gap-1'>
+            <PageTitle>GST Information</PageTitle>
+            <table className="w-full border border-slate-300 dark:border-slate-600 text-sm">
+              <tbody>
+                <tr className="border border-slate-300 dark:border-slate-600">
+                  <td className="p-1 w-1/3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                    GST Title
+                  </td>
+                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                    <input
+                      className="w-full p-1 rounded-md uppercase text-slate-500 border border-slate-300 dark:border-slate-600"
+                      // placeholder="18% GST"
+                      value={gst.title}
+                      onChange={e => setGst({ ...gst, title: e.target.value })}
+                    />
+                  </td>
+                </tr>
 
-            <div className="flex flex-col w-[250px] gap-1">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase">GST Title</label>
-                <input
-                  className="p-1 rounded-md w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
-                  placeholder="18% GST"
-                  value={gst.title}
-                  onChange={e => setGst({ ...gst, title: e.target.value })}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase">Total Rate (%)</label>
-                <input
-                  className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                  type="number"
-                  value={gst.total_rate}
-                  onChange={e => setGst({ ...gst, total_rate: e.target.value })}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase">Type</label>
-                <select
-                  className="p-1 rounded-md w-full text-slate-900 uppercase border border-slate-300 dark:border-slate-600"
-                  value={gst.type}
-                  onChange={e => setGst({ ...gst, type: e.target.value })}
-                >
-                  <option value="percentage">Percentage</option>
-                  <option value="fixed">Fixed</option>
-                </select>
-              </div>
-            </div>
+                <tr className="border border-slate-300 dark:border-slate-600">
+                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                    Total Rate (%)
+                  </td>
+                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                    <input
+                      className="w-full p-1 rounded-md text-slate-500 border border-slate-300 dark:border-slate-600"
+                      type="number"
+                      value={gst.total_rate}
+                      onChange={e => setGst({ ...gst, total_rate: e.target.value })}
+                    />
+                  </td>
+                </tr>
 
-            <div className="flex flex-col w-[250px] gap-1">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase">CGST (%)</label>
-                <input
-                  className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                  type="number"
-                  value={gst.cgst}
-                  onChange={e => setGst({ ...gst, cgst: e.target.value })}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase">SGST (%)</label>
-                <input
-                  className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                  type="number"
-                  value={gst.sgst}
-                  onChange={e => setGst({ ...gst, sgst: e.target.value })}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase">IGST (%)</label>
-                <input
-                  className="p-1 rounded-md w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                  type="number"
-                  value={gst.igst}
-                  onChange={e => setGst({ ...gst, igst: e.target.value })}
-                />
-              </div>
-            </div>
+                <tr className="border border-slate-300 dark:border-slate-600">
+                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                    Type
+                  </td>
+                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                    <select
+                      className="w-full p-1 rounded-md uppercase text-slate-500 border border-slate-300 dark:border-slate-600"
+                      value={gst.type}
+                      onChange={e => setGst({ ...gst, type: e.target.value })}
+                    >
+                      <option value="percentage">Percentage</option>
+                      <option value="fixed">Fixed</option>
+                    </select>
+                  </td>
+                </tr>
+
+                <tr className="border border-slate-300 dark:border-slate-600">
+                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                    CGST (%)
+                  </td>
+                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                    <input
+                      className="w-full p-1 rounded-md text-slate-500 border border-slate-300 dark:border-slate-600"
+                      type="number"
+                      value={gst.cgst}
+                      onChange={e => setGst({ ...gst, cgst: e.target.value })}
+                    />
+                  </td>
+                </tr>
+
+                <tr className="border border-slate-300 dark:border-slate-600">
+                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                    SGST (%)
+                  </td>
+                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                    <input
+                      className="w-full p-1 rounded-md text-slate-500 border border-slate-300 dark:border-slate-600"
+                      type="number"
+                      value={gst.sgst}
+                      onChange={e => setGst({ ...gst, sgst: e.target.value })}
+                    />
+                  </td>
+                </tr>
+
+                <tr className="border border-slate-300 dark:border-slate-600">
+                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                    IGST (%)
+                  </td>
+                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                    <input
+                      className="w-full p-1 rounded-md text-slate-500 border border-slate-300 dark:border-slate-600"
+                      type="number"
+                      value={gst.igst}
+                      onChange={e => setGst({ ...gst, igst: e.target.value })}
+                    />
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
           </div>
         </MainArea>
       </div>

@@ -13,6 +13,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 5
 app.use(bodyParser.json({ limit: "50mb" }));
 
 app.use(`/api/${VERSION}/party/`, require("./backend/router/party.routes"));
+app.use(`/api/${VERSION}/company/`, require("./backend/router/company.routes"));
 app.use(`/api/${VERSION}/invoice/`, require("./backend/router/invoice.routes"));
 app.use(`/api/${VERSION}/auth/`, require("./backend/router/auth.routes"));
 app.use(`/api/${VERSION}/user/`, require("./backend/router/user.routes"));

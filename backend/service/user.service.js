@@ -14,7 +14,7 @@ exports.insertUsers = async (data) => {
     };
 };
 
-exports.getUsers = ({
+exports.getUsers = async ({
     id = "",
     mobile = "",
     username = "",
@@ -31,6 +31,14 @@ exports.getUsers = ({
         if (id) {
             params.push(id);
             search_key.push(`id = ?`);
+        };
+        if (mobile) {
+            params.push(mobile);
+            search_key.push(`mobile = ?`);
+        };
+        if (email) {
+            params.push(email);
+            search_key.push(`email = ?`);
         };
         if (username) {
             params.push(username);

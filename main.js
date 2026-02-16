@@ -2,7 +2,7 @@ const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
 require("./server.js");
 
-function createWindow() {
+app.whenReady().then(() => {
     const win = new BrowserWindow({
         width: 800,
         height: 800,
@@ -17,47 +17,57 @@ function createWindow() {
     });
     win.loadURL("http://localhost:3000");
     // win.loadFile(path.join(__dirname, "frontend/build/index.html"));
-};
 
-app.whenReady().then(() => {
+
     const template = [
-        { label: "File", submenu: [{ role: "quit" }] },
         {
-            label: "Edit", submenu: [
-                { role: "undo" }, { role: "redo" }, { type: "separator" },
-                { role: "cut" }, { role: "copy" }, { role: "paste" },
-                { role: "selectAll" }
+            label: "File", submenu: [
+                {
+                    label: "Dashboard",
+                    click: () => {
+                        console.log("hello world")
+                        win.webContents.send("navigate", "/dashboard");
+                    }
+                },
+                { type: "separator" },
+                { role: "quit" }
             ]
         },
+        // {
+        //     label: "Edit", submenu: [
+        //         { role: "undo" }, { role: "redo" }, { type: "separator" },
+        //         { role: "cut" }, { role: "copy" }, { role: "paste" },
+        //         { role: "selectAll" }
+        //     ]
+        // },
         {
             label: "View", submenu: [
                 { role: "reload" },
                 { role: "forceReload" },
                 { role: "toggleDevTools" },
-                { type: "separator" },
-                { role: "resetZoom" },
-                { role: "zoomIn" },
-                { role: "zoomOut" },
-                { role: "togglefullscreen" }
+                // { type: "separator" },
+                // { role: "resetZoom" },
+                // { role: "zoomIn" },
+                // { role: "zoomOut" },
+                // { role: "togglefullscreen" }
             ]
         },
-        {
-            label: "Window", submenu: [
-                { role: "minimize" },
-                { role: "close" }
-            ]
-        },
-        {
-            label: "Help", submenu: [
-                { role: "about" }
-            ]
-        },
-        { type: "separator" },
-        {
-            label: "[Sourav Panja]",
-        },
+        // {
+        //     label: "Window", submenu: [
+        //         { role: "minimize" },
+        //         { role: "close" }
+        //     ]
+        // },
+        // {
+        //     label: "Help", submenu: [
+        //         { role: "about" }
+        //     ]
+        // },
+        // { type: "separator" },
+        // {
+        //     label: "[Sourav Panja]",
+        // },
     ];
 
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-    createWindow();
+    // Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 });

@@ -106,33 +106,33 @@ module.exports.getMoneyReceipt = async (req, res) => {
         if (t_userId) search_key["created_by"] = t_userId.toString();
 
         let result = await MoneyReceiptService.findMoneyReceipts(search_key);
-        if (result.length) {
-            let finalData = [];
-            for (let item of result) {
-                let party = await PartyService.getParty({ id: item.party_id });
+        if (!result.length) return errorHandler(res, 202, "No money receipts created yet.")
 
-                let newData = {
-                    id: item.id,
-                    company_id: item.company_id,
-                    party_id: party.length ? {
-                        id: party[0].id ? party[0].id : "",
-                        name: party[0].company_name ? party[0].company_name : "",
-                        mobile: party[0].mobile ? party[0].mobile : "",
-                        email: party[0].email ? party[0].email : "",
-                    } : "",
-                    receipt_no: item.receipt_no,
-                    receipt_date: item.receipt_date,
-                    data: JSON.parse(item.data),
-                    remarks: item.remarks,
-                    total_value: item.total_value,
-                    created_by: item.t_userId,
-                };
-                finalData.push(newData);
+        let finalData = [];
+        for (let item of result) {
+            let party = await PartyService.getParty({ id: item.party_id });
+
+            let newData = {
+                id: item.id,
+                company_id: item.company_id,
+                party_id: party.length ? {
+                    id: party[0].id ? party[0].id : "",
+                    name: party[0].company_name ? party[0].company_name : "",
+                    mobile: party[0].mobile ? party[0].mobile : "",
+                    email: party[0].email ? party[0].email : "",
+                } : "",
+                receipt_no: item.receipt_no,
+                receipt_date: item.receipt_date,
+                data: JSON.parse(item.data),
+                remarks: item.remarks,
+                total_value: item.total_value,
+                created_by: item.t_userId,
             };
-            response.status = 200;
-            response.message = "Get Money Receipt All Successfully.";
-            response.body = finalData;
+            finalData.push(newData);
         };
+        response.status = 200;
+        response.message = "Get Money Receipt All Successfully.";
+        response.body = finalData;
     } catch (error) {
         console.log(`Something went wrong: controller: getMoneyReceipt: ${error}`);
         response.status = error.status ? error.status : 500;
@@ -159,7 +159,6 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
         if (t_userId) search_key["created_by"] = t_userId.toString();
 
         let result = await MoneyReceiptService.findMoneyReceipts(search_key);
-        console.log("🚀 ~ result:", result)
         if (!result.length) return errorHandler(res, 400, "No Data Found");
 
         let party = await PartyService.getParty({ id: result[0].party_id });

@@ -17,15 +17,18 @@ const Alert = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className={`w-[320px] bg-slate-900 border rounded-lg p-4 ${colors[type]}`}>
-                <h2 className="text-sm font-semibold mb-1">{title}</h2>
-                <p className="text-xs text-slate-300">{message}</p>
-
-                <div className="flex justify-end mt-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <div className="w-[340px] bg-slate-800 border border-slate-700 rounded-xl shadow-lg shadow-black/40 p-5">
+                <h2 className="text-white text-sm font-semibold mb-2">
+                    {title}
+                </h2>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                    {message}
+                </p>
+                <div className="flex justify-end mt-5">
                     <button
                         onClick={onClose}
-                        className="px-3 py-1 text-xs rounded bg-slate-900 hover:bg-slate-600"
+                        className="px-4 py-1.5 text-xs rounded-md bg-blue-600 hover:bg-blue-700 text-white transition"
                     >
                         OK
                     </button>

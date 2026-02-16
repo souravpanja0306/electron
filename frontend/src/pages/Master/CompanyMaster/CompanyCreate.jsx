@@ -109,8 +109,8 @@ const CreateParty = () => {
                     <div>
                         <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </div>
-                    <Link to="/party">
-                        <CustomButton title={"View (Ctrl+I)"} color={"yellow"}><AiOutlineFileAdd /></CustomButton>
+                    <Link to="/comapny">
+                        <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </Link>
                 </ActionArea>
 
@@ -118,208 +118,312 @@ const CreateParty = () => {
                     <MainArea>
                         <div className='flex flex-col w-full gap-1'>
                             <PageTitle>Personal Details</PageTitle>
-                            <hr />
-                            <div className='flex flex-col gap-1 w-full'>
-                                <div className='flex gap-1 w-full'>
-                                    <div className='flex flex-col w-full gap-1'>
-                                        {/* <label className='text-xs uppercase'>Company Name : <span className='text-red-600'>*</span></label> */}
-                                        <input
-                                            className="p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600"
-                                            placeholder="Company Name"
-                                            value={data.company_name}
-                                            type="text"
-                                            onChange={(e) => setData({ ...data, company_name: (e.target.value).toLowerCase() })}
-                                            required
-                                            autoCapitalize='true'
-                                        />
-                                    </div>
-                                    <div className='flex flex-col w-full gap-1'>
-                                        {/* <label className='text-xs uppercase'>Director/Proprietor/Owner</label> */}
-                                        <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                            placeholder='Director/ Proprietor/ Owner'
-                                            value={data.owner}
-                                            type="text"
-                                            onChange={(e) => setData({ ...data, owner: (e.target.value).toLowerCase() })}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                <div className='flex gap-1 w-full'>
-                                    <div className='flex flex-col w-full gap-1'>
-                                        {/* <label className='text-xs uppercase'>Email <span className='text-red-600'>*</span></label> */}
-                                        <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                            placeholder='Email'
-                                            value={data.email}
-                                            type="email"
-                                            onChange={(e) => setData({ ...data, email: (e.target.value).toLowerCase() })}
-                                            required
-                                        />
-                                    </div>
-                                    <div className='flex flex-col w-full gap-1'>
-                                        {/* <label className='text-xs uppercase'>Mobile <span className='text-red-600'>*</span></label> */}
-                                        <input
-                                            className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                            placeholder='Mobile'
-                                            value={data.mobile}
-                                            maxLength={10}
-                                            type="tel"
-                                            onChange={(e) => setData({ ...data, mobile: e.target.value.replace(/\D/g, '') })}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+
+                            <table className="w-full border border-slate-300 dark:border-slate-600 text-sm">
+                                <tbody>
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 w-1/3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Company Name
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.company_name}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, company_name: e.target.value.toLowerCase() })
+                                                }
+                                                required
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Owner
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.owner}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, owner: e.target.value.toLowerCase() })
+                                                }
+                                                required
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Email
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.email}
+                                                type="email"
+                                                onChange={(e) =>
+                                                    setData({ ...data, email: e.target.value.toLowerCase() })
+                                                }
+                                                required
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Mobile
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.mobile}
+                                                maxLength={10}
+                                                type="tel"
+                                                onChange={(e) =>
+                                                    setData({
+                                                        ...data,
+                                                        mobile: e.target.value.replace(/\D/g, ""),
+                                                    })
+                                                }
+                                                required
+                                            />
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
 
                             <PageTitle>Address Details</PageTitle>
-                            <hr />
-                            <div className='flex flex-col gap-1 w-full'>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>Address 1:</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='Address/ Street/ Road'
-                                        value={data.address_1}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, address_1: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>Address 2:</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='Flat No./ Builing Name/ Floor'
-                                        value={data.address_2}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, address_2: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                            </div>
-                            <div className='flex gap-1 w-full'>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>City</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='City'
-                                        value={data.city}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, city: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>State</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='State'
-                                        value={data.state}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, state: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>District</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='District'
-                                        value={data.district}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, district: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1 min-w-48'>
-                                    {/* <label className='text-xs uppercase'>Pincode</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='Pincode'
-                                        value={data.pincode}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, pincode: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                            </div>
+                            <table className="w-full border border-slate-300 dark:border-slate-600 text-sm">
+                                <tbody>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 w-1/3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Address 1
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.address_1}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, address_1: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Address 2
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.address_2}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, address_2: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            City
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.city}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, city: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            State
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.state}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, state: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            District
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.district}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, district: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Pincode
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.pincode}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, pincode: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
 
                             <PageTitle>Business Details</PageTitle>
-                            <hr />
-                            <div className='flex gap-1 w-full'>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>GST</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='GSTIN'
-                                        value={data.gst}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, gst: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>PAN</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='PAN No'
-                                        value={data.pan}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, pan: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>Trade Licence</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='Trade Licence'
-                                        value={data.trade_licence}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, trade_licence: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                            </div>
+                            <table className="w-full border border-slate-300 dark:border-slate-600 text-sm">
+                                <tbody>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 w-1/3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            GST
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.gst}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, gst: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            PAN
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.pan}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, pan: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Trade Licence
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.trade_licence}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, trade_licence: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
 
                             <PageTitle>Payment Details</PageTitle>
-                            <hr />
-                            <div className='flex gap-1 w-full'>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>Bank Name</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='Bank Name'
-                                        value={data.bank}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, bank: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                            </div>
-                            <div className='flex gap-1 w-full'>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>Branch</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='Branch'
-                                        value={data.branch}
-                                        type="text"
-                                        onChange={(e) => setData({ ...data, branch: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>IFSE Code</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='IFSE Code'
-                                        value={data.ifse}
-                                        type="tel"
-                                        onChange={(e) => setData({ ...data, ifse: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                                <div className='flex flex-col w-full gap-1'>
-                                    {/* <label className='text-xs uppercase'>Account No</label> */}
-                                    <input
-                                        className='p-1 rounded-md w-full capitalize text-slate-900 border border-slate-300 dark:border-slate-600'
-                                        placeholder='Account No'
-                                        value={data.account_no}
-                                        type="tel"
-                                        onChange={(e) => setData({ ...data, account_no: (e.target.value).toLowerCase() })}
-                                    />
-                                </div>
-                            </div>
+                            <table className="w-full border border-slate-300 dark:border-slate-600 text-sm">
+                                <tbody>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 w-1/3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Bank Name
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.bank}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, bank: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Branch
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.branch}
+                                                type="text"
+                                                onChange={(e) =>
+                                                    setData({ ...data, branch: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            IFSE Code
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.ifse}
+                                                type="tel"
+                                                onChange={(e) =>
+                                                    setData({ ...data, ifse: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                    <tr className="border border-slate-300 dark:border-slate-600">
+                                        <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                                            Account No
+                                        </td>
+                                        <td className="p-1 border border-slate-300 dark:border-slate-600">
+                                            <input
+                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                value={data.account_no}
+                                                type="tel"
+                                                onChange={(e) =>
+                                                    setData({ ...data, account_no: e.target.value.toLowerCase() })
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
                         </div>
                     </MainArea>
                     <MainArea>
@@ -327,7 +431,7 @@ const CreateParty = () => {
                             <PageTitle>Preview</PageTitle>
                             <div className='flex w-full p-1'>
                                 <AiOutlineIdcard className='text-9xl' />
-                                <div className='p-2 flex flex-col justify-center'>
+                                <div className='p-1 flex flex-col justify-center'>
                                     <div className='flex gap-1'>
                                         <span className='font-bold'>Company Name : </span>
                                         <p className='text-slate-400'>{(data.company_name).toUpperCase()}</p>

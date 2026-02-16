@@ -69,7 +69,7 @@ const ViewCompany = () => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 'n') {
                 e.preventDefault();
-                navigate("/add-party");
+                navigate("/add-company");
             };
 
             if (e.ctrlKey && e.key === 'd') {
@@ -88,19 +88,16 @@ const ViewCompany = () => {
                 <ActionArea>
                     <div className="flex justify-between w-full">
                         <div className="flex gap-1">
-                            <Link to="/add-party">
-                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                            <Link to="/add-company">
+                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
-                            </div>
-                            <div >
-                                <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload /></CustomButton>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </div>
                         </div>
                         <div className="flex gap-1">
                             <div>
-                                <CustomButton title={"Refrash"} color={"green"}><AiOutlineSync /></CustomButton>
+                                <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
                             </div>
                         </div>
                     </div>

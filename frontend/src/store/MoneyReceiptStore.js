@@ -85,12 +85,12 @@ const useMoneyReceiptStore = create((set) => ({
         };
     },
 
-    downloadMoneyReceipts: async (id) => {
+    deleteMoneyReceipts: async (id) => {
         try {
             set({ downloadLoading: true });
             const result = await axios({
                 method: "get",
-                url: `http://localhost:3001/api/v1/money-receipt/generate-money-receipt-pdf/${id}`,
+                url: `http://localhost:3001/api/v1/money-receipt/delete-money-receipt/${id}`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,

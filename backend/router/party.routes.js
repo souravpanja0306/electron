@@ -21,7 +21,7 @@ router.get(
 );
 
 router.delete(
-    "/party-delete",
+    "/party-delete/:id",
     middleware.isAuthenticated,
     PartyController.removeParty
 );

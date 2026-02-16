@@ -21,6 +21,7 @@ import Company from './pages/Master/CompanyMaster/CompanyCreate';
 import ProductMaster from './pages/Master/ProductMaster/ProductMaster';
 import Product from './pages/Master/ProductMaster/Product';
 import Signin from './pages/Auth/Signin';
+import Signup from './pages/Auth/Signup';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import Debtors from './pages/Reports/Debtors';
 import Error from './pages/Error';
@@ -69,8 +70,13 @@ const router = createHashRouter([
   { path: "/create-hsn-sac", element: <Middleware><Layout><CreateHsnSac /></Layout></Middleware> },
   { path: "/view-hsn-sac", element: <Middleware><Layout><ViewHsnSac /></Layout></Middleware> },
 
+  // Vehicles
+  { path: "/create-hsn-sac", element: <Middleware><Layout><CreateHsnSac /></Layout></Middleware> },
+  { path: "/view-hsn-sac", element: <Middleware><Layout><ViewHsnSac /></Layout></Middleware> },
+
   // Auth
   { path: "/signin", element: <Signin /> },
+  { path: "/signup", element: <Signup /> },
   { path: "/change-password", element: <Middleware><ChangePassword /></Middleware> },
   { path: "/forgot-password", element: <ForgotPassword /> },
 ]);

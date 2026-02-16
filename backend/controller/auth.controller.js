@@ -16,22 +16,46 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
+exports.signup = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { name, mobile, email, username, password } = req.body;
+        let isEmailExist = await UserService.getUsers({ email: email });
+        if (isEmailExist.length) return errorHandler(res, 403, "Email is already registered with us.");
+
+        let isMobileExist = await UserService.getUsers({ mobile: mobile });
+        if (isMobileExist.length) return errorHandler(res, 403, "Mobile is already registered with us.");
+
+        let isUsernameExist = await UserService.getUsers({ username: username });
+        if (isUsernameExist.length) return errorHandler(res, 403, "Username already taken, try another.");
+
+        let newData = {
+            name: name,
+            mobile: mobile,
+            email: email,
+            username: username,
+            password: password
+        };
+        await UserService.insertUsers(newData);
+
+        console.log(req.body);
+
+    } catch (error) {
+        console.log(`Something went wrong: controller: signup: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: signup`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.status(response.status).json(response);
+};
+
 exports.signin = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { username, password } = req.body;
-        if (!username) {
-            response.status = 403;
-            response.message = "Username Required.";
-            response.body = result;
-            return res.status(response.status).json(response);
-        };
-        if (!password) {
-            response.status = 403;
-            response.message = "Username Required.";
-            response.body = result;
-            return res.status(response.status).json(response);
-        };
+        if (!username) return errorHandler(res, 403, "Username Required.");
+        if (!password) return errorHandler(res, 403, "Password Required.");
+
         let getUserDetails = await UserService.getUsers({
             password: password,
             username: username,
@@ -55,11 +79,13 @@ exports.signin = async (req, res) => {
         } else {
             response.status = 403;
             response.message = "Incorrect Username Or Password! Please Contect to Adminitrator...";
-            response.body = result;
-            return res.status(response.status).json(response);
+            response.body = {};
         };
     } catch (error) {
         console.log(`Something went wrong: controller: signin: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: signin`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };
@@ -70,6 +96,9 @@ exports.forgotPassword = async (req, res) => {
 
     } catch (error) {
         console.log(`Something went wrong: controller: forgotPassword: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: forgotPassword`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };
@@ -80,6 +109,9 @@ exports.resetPassword = async (req, res) => {
 
     } catch (error) {
         console.log(`Something went wrong: controller: resetPassword: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: resetPassword`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };
