@@ -4,9 +4,9 @@ require("./server.js");
 
 app.whenReady().then(() => {
     const win = new BrowserWindow({
-        width: 800,
+        width: 1400,
         height: 800,
-        minWidth: 800,
+        minWidth: 1400,
         minHeight: 800,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
@@ -20,54 +20,54 @@ app.whenReady().then(() => {
 
 
     const template = [
-        {
-            label: "File", submenu: [
-                {
-                    label: "Dashboard",
-                    click: () => {
-                        console.log("hello world")
-                        win.webContents.send("navigate", "/dashboard");
-                    }
-                },
-                { type: "separator" },
-                { role: "quit" }
-            ]
-        },
         // {
-        //     label: "Edit", submenu: [
-        //         { role: "undo" }, { role: "redo" }, { type: "separator" },
-        //         { role: "cut" }, { role: "copy" }, { role: "paste" },
-        //         { role: "selectAll" }
+        //     label: "File", submenu: [
+        //         {
+        //             label: "Dashboard",
+        //             click: () => {
+        //                 console.log("hello world")
+        //                 win.webContents.send("navigate", "/dashboard");
+        //             }
+        //         },
+        //         { type: "separator" },
+        //         { role: "quit" }
         //     ]
         // },
-        {
-            label: "View", submenu: [
-                { role: "reload" },
-                { role: "forceReload" },
-                { role: "toggleDevTools" },
-                // { type: "separator" },
-                // { role: "resetZoom" },
-                // { role: "zoomIn" },
-                // { role: "zoomOut" },
-                // { role: "togglefullscreen" }
-            ]
-        },
+        // // {
+        // //     label: "Edit", submenu: [
+        // //         { role: "undo" }, { role: "redo" }, { type: "separator" },
+        // //         { role: "cut" }, { role: "copy" }, { role: "paste" },
+        // //         { role: "selectAll" }
+        // //     ]
+        // // },
         // {
-        //     label: "Window", submenu: [
-        //         { role: "minimize" },
-        //         { role: "close" }
+        //     label: "View", submenu: [
+        //         { role: "reload" },
+        //         { role: "forceReload" },
+        //         { role: "toggleDevTools" },
+        //         // { type: "separator" },
+        //         // { role: "resetZoom" },
+        //         // { role: "zoomIn" },
+        //         // { role: "zoomOut" },
+        //         // { role: "togglefullscreen" }
         //     ]
         // },
-        // {
-        //     label: "Help", submenu: [
-        //         { role: "about" }
-        //     ]
-        // },
-        // { type: "separator" },
-        // {
-        //     label: "[Sourav Panja]",
-        // },
+        // // {
+        // //     label: "Window", submenu: [
+        // //         { role: "minimize" },
+        // //         { role: "close" }
+        // //     ]
+        // // },
+        // // {
+        // //     label: "Help", submenu: [
+        // //         { role: "about" }
+        // //     ]
+        // // },
+        // // { type: "separator" },
+        // // {
+        // //     label: "[Sourav Panja]",
+        // // },
     ];
 
-    // Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 });

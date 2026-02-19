@@ -36,10 +36,24 @@ exports.signup = async (req, res) => {
             username: username,
             password: password
         };
-        await UserService.insertUsers(newData);
+        let result = await UserService.insertUsers(newData);
+        if (result) {
+            let tokenData = {
+                TOKEN_UID: result.id,
+                TOKEN_MOBILE: result.mobile,
+                TONEN_USERNAME: result.username,
+                TONEN_NAME: result.name,
+            };
+            let token = jwt.sign(tokenData, "secretOrPrivateKey");
 
-        console.log(req.body);
-
+            response.status = 200;
+            response.message = "User Signup Succesfull";
+            response.body = {
+                name: result.name,
+                id: result.id,
+                token: token,
+            };
+        };
     } catch (error) {
         console.log(`Something went wrong: controller: signup: ${error}`);
         response.status = error.status ? error.status : 500;
@@ -78,7 +92,7 @@ exports.signin = async (req, res) => {
             };
         } else {
             response.status = 403;
-            response.message = "Incorrect Username Or Password! Please Contect to Adminitrator...";
+            response.message = "Incorrect Username Or Password! Please Contect to Adminitrator.";
             response.body = {};
         };
     } catch (error) {

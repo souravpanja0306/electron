@@ -2,11 +2,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import PageTitle from '../../components/PageTitle';
 import CustomButton from '../../components/CustomButton';
 import { useEffect, useState } from 'react';
-
-// Functions...
-import { handleSignin } from "./Service";
+import { ToastContainer, toast } from 'react-toastify';
+import useAuthStore from '../../store/AuthStore';
 
 const Signin = () => {
+  const { signinData, signin, createMoneyReceipts, generateMoneyReceiptNo, signinLoading } = useAuthStore(); // Store...
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,25 +15,17 @@ const Signin = () => {
     console.log("hello");
   }, [])
 
-  const [data, setData] = useState({
-    username: "",
-    password: ""
-  });
-
+  const [data, setData] = useState({ username: "", password: "" });
   const handleSubmitSignin = async () => {
     try {
-      let result = await handleSignin({
-        username: data.username,
-        password: data.password,
-      });
+      let result = await signin({ username: data.username, password: data.password });
       if (result.status === 200) {
-        sessionStorage.setItem("token", result.body.token);
         localStorage.setItem("token", result.body.token);
-        sessionStorage.setItem("user", JSON.stringify(result.body));
         localStorage.setItem("user", JSON.stringify(result.body));
         navigate("/");
+      } else {
+        toast(result.message, { theme: "dark" });
       };
-
     } catch (error) {
       console.log(error)
     };
@@ -50,7 +42,7 @@ const Signin = () => {
 
           <form
             className="flex flex-col gap-4"
-            onSubmit={handleSubmitSignin}
+            onSubmit={() => handleSubmitSignin()}
           >
             <div className="flex flex-col gap-1">
               <label className="text-slate-400 text-xs uppercase">
@@ -104,6 +96,7 @@ const Signin = () => {
           </form>
         </div>
       </div>
+      <ToastContainer />
     </>
   )
 }
