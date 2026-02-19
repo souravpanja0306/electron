@@ -129,3 +129,16 @@ exports.resetPassword = async (req, res) => {
     };
     return res.status(response.status).json(response);
 };
+
+exports.viewProfile = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+
+    } catch (error) {
+        console.log(`Something went wrong: controller: viewProfile: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: viewProfile`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.status(response.status).json(response);
+};

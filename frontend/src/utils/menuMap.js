@@ -27,8 +27,8 @@ const MenuMap = {
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [
-                { title: "Create Challan", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
-                { title: "View Challans", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+                { title: "Create Challan", url: "/create-challan", icon: <AiOutlinePlusSquare /> },
+                { title: "View Challans", url: "/view-challan", icon: <AiOutlineFileSearch /> },
             ],
         },
         {

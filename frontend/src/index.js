@@ -33,6 +33,8 @@ import ViewHsnSac from './pages/Master/HsnMaster/ViewHsnSac';
 import CreateGst from './pages/Master/GstMaster/CreateGst';
 import ViewGst from './pages/Master/GstMaster/ViewGst';
 import ChangePassword from './pages/Auth/ChangePassword';
+import CreateChallan from './pages/Challan/CreateChallan';
+import ViewChallan from './pages/Challan/ViewChallan';
 
 import { Middleware } from './middleware/middleware';
 
@@ -61,6 +63,10 @@ const router = createHashRouter([
   { path: "/product", element: <Middleware><Layout><Product /></Layout></Middleware> },
   { path: "/about", element: <Middleware><Layout><About /></Layout></Middleware> },
   { path: "/settings", element: <Middleware><Layout><Setting /></Layout></Middleware> },
+  
+  // Challans
+  { path: "/create-challan", element: <Middleware><Layout><CreateChallan /></Layout></Middleware> },
+  { path: "/view-challan", element: <Middleware><Layout><ViewChallan /></Layout></Middleware> },
 
   // GST
   { path: "/create-gst", element: <Middleware><Layout><CreateGst /></Layout></Middleware> },

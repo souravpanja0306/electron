@@ -105,7 +105,7 @@ const ViewCompany = () => {
                 <MainArea>
                     <table className="table-fixed w-full">
                         <thead>
-                            <tr className="border-b border-slate-600 p-1 ">
+                            <tr className="border-b border-slate-300 dark:border-slate-600 p-1 ">
                                 <th className="p-1 text-start w-8">
                                     <input type="checkbox" onChange={(e) => handleSelectAll(e)} />
                                 </th>
@@ -127,7 +127,7 @@ const ViewCompany = () => {
                                         {
                                             party.map((item, index) => {
                                                 return (
-                                                    <tr key={item.id} className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                                    <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                                         <td className="p-1 text-start truncate capitalize">
                                                             <input
                                                                 type="checkbox"
@@ -155,7 +155,7 @@ const ViewCompany = () => {
                                     :
                                     <>
                                         {
-                                            <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                            <tr className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                                 <td className="p-1 text-center" colSpan={9}>No Data Found</td>
                                             </tr>
                                         }

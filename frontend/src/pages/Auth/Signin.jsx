@@ -49,7 +49,7 @@ const Signin = () => {
                 Username
               </label>
               <input
-                className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white 
+                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white 
                      focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Enter username"
                 value={data.username}
@@ -64,7 +64,7 @@ const Signin = () => {
                 Password
               </label>
               <input
-                className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white 
+                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white 
                      focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Enter password"
                 value={data.password}
@@ -76,7 +76,7 @@ const Signin = () => {
 
             <button
               type="submit"
-              className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition-all"
+              className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition-all"
             >
               Sign in
             </button>

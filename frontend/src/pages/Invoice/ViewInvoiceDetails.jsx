@@ -209,7 +209,7 @@ const ViewInvoiceDetails = () => {
 
               <MainArea background={"bg-slate-700 text-slate-100"}>
                 <div className="flex flex-col w-full">
-                  <table className="w-full text-sm rounded-md overflow-hidden">
+                  <table className="w-full text-sm rounded overflow-hidden">
                     <thead className="">
                       <tr className="border-b border-slate-500">
                         <th className="p-2 text-left w-10">Sl</th>

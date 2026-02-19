@@ -103,7 +103,7 @@ const ViewInvoices = () => {
                                 <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </div>
                             <div onClick={(e) => handleDelete(e)}>
                                 <CustomButton title={"Export (Ctrl+E)"} color={"blue"}><AiOutlineDownload /></CustomButton>
@@ -164,7 +164,7 @@ const ViewInvoices = () => {
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.transporter ? item.transporter : "--"}</td>
                                                 <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
                                                     <button
-                                                        className="p-1 rounded-md text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
+                                                        className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
                                                         title="Download"
                                                     >
                                                         <AiOutlinePrinter />
@@ -177,7 +177,7 @@ const ViewInvoices = () => {
                                 :
                                 <>
                                     {
-                                        <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                        <tr className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                             <td className="p-1 text-center" colSpan={11}>No Data Found</td>
                                         </tr>
                                     }

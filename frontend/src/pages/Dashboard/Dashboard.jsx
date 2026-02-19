@@ -1,77 +1,77 @@
-import { useEffect, useState } from "react";
+import React from 'react'
+import PageTitle from '../../components/PageTitle'
 
 const Dashboard = () => {
-    const [users, setUsers] = useState([]);
-
-    useEffect(() => {
-        if (!window.api) return;
-        window.api.getUsers({}).then((data) => {
-            setUsers(data.body);
-        });
-    }, []);
-
-    const submitData = async (e) => {
-        if (!window.api) return;
-        await window.api.createUser({
-            name: "John",
-            email: "john@test.com"
-        }).then((res) => {
-            console.log(res)
-        });
-        const data = await window.api.getUsers({});
-        setUsers(data.body);
-    };
-
-    const submitDelete = async (id) => {
-        if (!window.api) return;
-
-        console.log("🚀 ~ submitDelete ~ e, id:", id)
-        await window.api.deleteUser({ id: id }).then((res) => {
-            console.log(res)
-        });
-        const data = await window.api.getUsers({ params: {} });
-        setUsers(data.body);
-    };
-
     return (
-        <div className="p-4">
-            <table className="min-w-full border border-slate-600 text-xs text-white">
-                <thead className="bg-slate-900">
-                    <tr>
-                        <th className="border border-slate-600 px-3 py-2">ID</th>
-                        <th className="border border-slate-600 px-3 py-2">Name</th>
-                        <th className="border border-slate-600 px-3 py-2">Email</th>
-                        <th className="border border-slate-600 px-3 py-2">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map(u => (
-                        <tr key={u.id} className="hover:bg-slate-600">
-                            <td className="border border-slate-600 px-3 py-2">{u.id}</td>
-                            <td className="border border-slate-600 px-3 py-2">{u.name}</td>
-                            <td className="border border-slate-600 px-3 py-2">{u.email}</td>
-                            <td className="border border-slate-600 px-3 py-2">
-                                <button
-                                    className="mb-4 px-3 py-1 bg-slate-600 rounded"
-                                    onClick={() => submitDelete(u.id)}
-                                >
-                                    Delete User
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+        <div className="flex flex-col w-full gap-4">
 
-            <button
-                className="mb-4 px-3 py-1 bg-slate-600 rounded"
-                onClick={(e) => submitData(e)}
-            >
-                Add User
-            </button>
+            <PageTitle>Dashboard</PageTitle>
 
-        </div >
-    );
-};
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                {/* Total Debtors */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-4">
+                    <p className="text-xs text-slate-400 uppercase">Total Debtors</p>
+                    <h2 className="text-2xl font-semibold text-blue-400 mt-1">
+                        ₹1,25,000
+                    </h2>
+                </div>
+
+                {/* Overdue Debtors */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-4">
+                    <p className="text-xs text-slate-400 uppercase">Overdue Debtors</p>
+                    <h2 className="text-2xl font-semibold text-red-400 mt-1">
+                        ₹35,000
+                    </h2>
+                </div>
+
+                {/* Total Creditors */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-4">
+                    <p className="text-xs text-slate-400 uppercase">Total Creditors</p>
+                    <h2 className="text-2xl font-semibold text-green-400 mt-1">
+                        ₹80,000
+                    </h2>
+                </div>
+
+                {/* Overdue Creditors */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-4">
+                    <p className="text-xs text-slate-400 uppercase">Overdue Creditors</p>
+                    <h2 className="text-2xl font-semibold text-yellow-400 mt-1">
+                        ₹20,000
+                    </h2>
+                </div>
+
+            </div>
+
+            {/* Summary Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* Aging Summary */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-4">
+                    <h3 className="text-slate-300 font-medium mb-3">Debtor Aging</h3>
+                    <ul className="text-sm text-slate-400 space-y-1">
+                        <li>0–30 Days: ₹40,000</li>
+                        <li>31–60 Days: ₹30,000</li>
+                        <li>61–90 Days: ₹20,000</li>
+                        <li>90+ Days: ₹35,000</li>
+                    </ul>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl p-4">
+                    <h3 className="text-slate-300 font-medium mb-3">Creditor Aging</h3>
+                    <ul className="text-sm text-slate-400 space-y-1">
+                        <li>0–30 Days: ₹25,000</li>
+                        <li>31–60 Days: ₹20,000</li>
+                        <li>61–90 Days: ₹15,000</li>
+                        <li>90+ Days: ₹20,000</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+    )
+}
 
 export default Dashboard

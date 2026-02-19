@@ -25,7 +25,7 @@ const ChangePassword = () => {
             <input
               type="password"
               placeholder="Enter current password"
-              className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white
+              className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white
                      focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </div>
@@ -37,7 +37,7 @@ const ChangePassword = () => {
             <input
               type="password"
               placeholder="Enter new password"
-              className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white
+              className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white
                      focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </div>
@@ -49,7 +49,7 @@ const ChangePassword = () => {
             <input
               type="password"
               placeholder="Re-enter new password"
-              className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white
+              className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white
                      focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </div>
@@ -57,7 +57,7 @@ const ChangePassword = () => {
           <button
             type="submit"
             className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium
-                   py-2 rounded-md transition-all"
+                   py-2 rounded transition-all"
           >
             Update Password
           </button>

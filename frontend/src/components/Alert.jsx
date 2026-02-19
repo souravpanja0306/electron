@@ -28,7 +28,7 @@ const Alert = ({
                 <div className="flex justify-end mt-5">
                     <button
                         onClick={onClose}
-                        className="px-4 py-1.5 text-xs rounded-md bg-blue-600 hover:bg-blue-700 text-white transition"
+                        className="px-4 py-1.5 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white transition"
                     >
                         OK
                     </button>

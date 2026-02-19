@@ -21,7 +21,7 @@ const Profile = () => {
       <PageTitle>Profile</PageTitle>
 
       <div className="w-full max-w-5xl mx-auto p-4 space-y-6">
-        <div className="flex items-center gap-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
+        <div className="flex items-center gap-4 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
           <img
             src="https://via.placeholder.com/96"
             alt="profile"
@@ -37,7 +37,7 @@ const Profile = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
+          <div className="rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3 uppercase">
               Account Details
             </h3>
@@ -47,7 +47,7 @@ const Profile = () => {
               <p>City: Kolkata, India</p>
             </div>
           </div>
-          <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center">
+          <div className="rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center">
             <div>
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase">
                 Subscription
@@ -61,12 +61,12 @@ const Profile = () => {
                 </span>
               </p>
             </div>
-            <button className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm">
+            <button className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm">
               Upgrade
             </button>
           </div>
         </div>
-        <div className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
+        <div className="rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4 uppercase">
             Business Details
           </h3>

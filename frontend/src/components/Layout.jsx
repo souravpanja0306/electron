@@ -48,43 +48,68 @@ const Layout = ({ children }) => {
     return (
         <div className="flex flex-col min-h-screen">
 
-            <div className="w-full h-10 bg-[#141d31] text-white flex items-center justify-between p-2 shadow-md">
+            <div className="border-b border-slate-300 dark:border-slate-600 w-full h-10 bg-slate-200 dark:bg-slate-900 text-slate-900 dark:text-white flex items-center justify-between p-2 shadow-md">
                 <div className="flex items-center gap-2">
-                    <div className="text-lg font-semibold tracking-wide">
+                    <div className="font-semibold tracking-wide">
                         <Link to="/">HelloWorld</Link>
                     </div>
                     <div className="flex text-sm">
                         {/* File */}
                         <div className="relative group">
-                            <button className="p-2 hover:bg-slate-800 hover:text-blue-400">File</button>
-
-                            <div className="absolute left-0 top-6 hidden group-hover:block bg-white text-black w-40 rounded shadow-lg py-1 z-50">
-                                <button className="block w-full text-left px-3 py-1 hover:bg-gray-200">New</button>
-                                <button className="block w-full text-left px-3 py-1 hover:bg-gray-200">Open</button>
-                                <button className="block w-full text-left px-3 py-1 hover:bg-gray-200">Save</button>
+                            <button className="p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">File</button>
+                            <div className="p-1 absolute left-0 top-8 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
+                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">New</button>
+                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Open</button>
+                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Save</button>
                                 <hr />
-                                <button className="block w-full text-left px-3 py-1 hover:bg-gray-200">Exit</button>
+                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Exit</button>
                             </div>
                         </div>
 
                         {/* Edit */}
                         <div className="relative group">
-                            <button className="p-2 hover:bg-slate-800 hover:text-blue-400">Edit</button>
+                            <button className="p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">Edit</button>
+                            <div className="p-1 absolute left-0 top-8 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
+                                <button
+                                    onClick={() => window.location.reload()}
+                                    className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                                >
+                                    Reload
+                                </button>
+                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Redo</button>
+                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Copy</button>
+                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Paste</button>
+                            </div>
+                        </div>
 
-                            <div className="absolute left-0 top-6 hidden group-hover:block bg-white text-black w-40 rounded shadow-lg py-1 z-50">
-                                <button className="block w-full text-left px-3 py-1 hover:bg-gray-200">Undo</button>
-                                <button className="block w-full text-left px-3 py-1 hover:bg-gray-200">Redo</button>
-                                <button className="block w-full text-left px-3 py-1 hover:bg-gray-200">Copy</button>
-                                <button className="block w-full text-left px-3 py-1 hover:bg-gray-200">Paste</button>
+                        {/* Work */}
+                        <div className="relative group">
+                            <button className="p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">Work</button>
+                            <div className="p-1 absolute left-0 top-8 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
+                                <Link to="/create-invoice" className="flex justify-between w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    <span>Create Invoice</span>
+                                    <span className="text-slate-500 text-xs">Ctrl+I</span>
+                                </Link>
+                                <Link to="" className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    Create Challan
+                                </Link>
+                                <Link to="" className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    Create Money Receipts
+                                </Link>
+                                <Link to="" className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    Create Invoice
+                                </Link>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-sm uppercase">
+                <div className="flex items-center gap-2 text-sm">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm text-white uppercase">
                         {JSON.parse(localStorage.getItem("user"))?.name[0]}
                     </div>
-                    <span className="hover:text-blue-400 capitalize">{JSON.parse(localStorage.getItem("user"))?.name}</span>
+                    <span className="hover:text-blue-600 cursor-default capitalize select-none">
+                        Welcome, {JSON.parse(localStorage.getItem("user"))?.name}
+                    </span>
                 </div>
             </div>
 
@@ -100,14 +125,6 @@ const Layout = ({ children }) => {
                     >
                         {sideBar ? <AiOutlineMenuFold /> : <AiOutlineMenu />}
                     </div>
-                    {/* <div
-                    onClick={() => changeMenu({ menu: "home" })}
-                    className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "home" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
-                    title="Home"
-                >
-                    <AiOutlineHome />
-                    <span className="text-xs">Home</span>
-                </div> */}
                     <div
                         onClick={() => changeMenu({ menu: "work" })}
                         className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "work" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
@@ -229,7 +246,7 @@ const Layout = ({ children }) => {
                 </div>
 
                 {/* Main Content */}
-                <div className="max-h-screen w-full bg-white dark:bg-slate-800 p-1 overflow-auto">
+                <div className="max-h-[calc(100vh-2.5rem)] w-full bg-white dark:bg-slate-800 p-1 overflow-auto">
                     {children}
                 </div>
             </div>

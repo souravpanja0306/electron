@@ -32,7 +32,7 @@ const Setting = () => {
                         <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Appearance</h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400">Customize how the app looks for you</p>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
+                    <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
                         <div>
                             <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Theme</p>
                             <p className="text-xs text-slate-500 dark:text-slate-400">Switch between light and dark mode</p>
@@ -45,7 +45,7 @@ const Setting = () => {
                             onChange={changeTheme}
                         />
                     </div>
-                    <div className="rounded-lg border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
+                    <div className="rounded border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
                         More settings coming soon…
                     </div>
                 </div>

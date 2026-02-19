@@ -29,15 +29,15 @@ const GstTable = () => {
           <div className="flex justify-between w-full">
             <div className="flex gap-1">
               <Link to="/create-gst">
-                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
               </Link>
               <div>
-                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineDelete /></CustomButton>
               </div>
             </div>
             <div className="flex gap-1">
               <div onClick={(e) => getAllGst(isAuth)}>
-                <CustomButton title={"Refrash"} color={"green"}><AiOutlineSync /></CustomButton>
+                <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
               </div>
             </div>
           </div>
@@ -45,7 +45,7 @@ const GstTable = () => {
         <MainArea>
           <table className="table-fixed w-full">
             <thead>
-              <tr className="border-b border-slate-600 p-1 ">
+              <tr className="border-b border-slate-300 dark:border-slate-600 p-1 ">
                 <th className="p-1 text-start w-8">#</th>
                 <th className="p-1 text-start">Title</th>
                 <th className="p-1 text-start">Total Percentage</th>
@@ -78,7 +78,7 @@ const GstTable = () => {
                     </tr>
                   ))
                   :
-                  <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                  <tr className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                     <td className="p-1 text-center" colSpan={9}>No Data Found</td>
                   </tr>
               }

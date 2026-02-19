@@ -34,7 +34,7 @@ const Signup = () => {
                     <div className="flex flex-col gap-1">
                         <label className="text-slate-400 text-xs uppercase">Name</label>
                         <input
-                            className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                             placeholder="Enter full name"
                             value={data.name}
                             type="text"
@@ -45,7 +45,7 @@ const Signup = () => {
                     <div className="flex flex-col gap-1">
                         <label className="text-slate-400 text-xs uppercase">Mobile</label>
                         <input
-                            className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                             placeholder="Enter mobile number"
                             value={data.mobile}
                             maxLength={10}
@@ -57,7 +57,7 @@ const Signup = () => {
                     <div className="flex flex-col gap-1">
                         <label className="text-slate-400 text-xs uppercase">Email</label>
                         <input
-                            className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                             placeholder="Enter email"
                             value={data.email}
                             type="email"
@@ -68,7 +68,7 @@ const Signup = () => {
                     <div className="flex flex-col gap-1">
                         <label className="text-slate-400 text-xs uppercase">Username</label>
                         <input
-                            className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                             placeholder="Choose username"
                             value={data.username}
                             type="text"
@@ -79,7 +79,7 @@ const Signup = () => {
                     <div className="flex flex-col gap-1">
                         <label className="text-slate-400 text-xs uppercase">Password</label>
                         <input
-                            className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                             placeholder="Create password"
                             value={data.password}
                             type="password"
@@ -88,7 +88,7 @@ const Signup = () => {
                         />
                     </div>
 
-                    <button type="submit" className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition-all">
+                    <button type="submit" className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition-all">
                         Sign up
                     </button>
 

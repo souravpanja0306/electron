@@ -153,7 +153,7 @@ const ViewMoneyReceipts = () => {
                                                     {
                                                         downloadLoading ?
                                                             <button
-                                                                className="p-1 rounded-md text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
+                                                                className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
                                                                 title="Loading"
                                                             >
                                                                 <AiOutlineMeh />
@@ -161,7 +161,7 @@ const ViewMoneyReceipts = () => {
                                                             :
                                                             <button
                                                                 onClick={() => importMoneyReceipts(item.id)}
-                                                                className="p-1 rounded-md text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
+                                                                className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
                                                                 title="Download"
                                                             >
                                                                 <AiOutlinePrinter />

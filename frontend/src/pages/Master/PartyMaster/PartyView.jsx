@@ -92,18 +92,18 @@ const ViewParty = () => {
                     <div className="flex justify-between w-full">
                         <div className="flex gap-1">
                             <Link to="/add-party">
-                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineDelete /></CustomButton>
                             </div>
                             <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Export (Ctrl+E)"} color={"green"}><AiOutlineDownload /></CustomButton>
+                                <CustomButton title={"Export (Ctrl+E)"} color={"blue"}><AiOutlineDownload /></CustomButton>
                             </div>
                         </div>
                         <div className="flex gap-1">
                             <div onClick={(e) => getPartys(e)}>
-                                <CustomButton title={"Refrash"} color={"green"}><AiOutlineSync /></CustomButton>
+                                <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
                             </div>
                         </div>
                     </div>
@@ -133,7 +133,7 @@ const ViewParty = () => {
                                         {
                                             party.map((item, index) => {
                                                 return (
-                                                    <tr key={item.id} className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                                    <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                                         <td className="p-1 text-start truncate capitalize">
                                                             <input
                                                                 type="checkbox"
@@ -161,7 +161,7 @@ const ViewParty = () => {
                                     :
                                     <>
                                         {
-                                            <tr className="border-b border-slate-600 p-1 hover:bg-slate-600 duration-200 cursor-pointer">
+                                            <tr className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                                 <td className="p-1 text-center" colSpan={9}>No Data Found</td>
                                             </tr>
                                         }

@@ -31,12 +31,12 @@ const ChangePassword = () => {
             <input
               type="text"
               placeholder="Enter email or username"
-              className="px-3 py-2 rounded-md bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
               required
             />
           </div>
 
-          <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition-all">
+          <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition-all">
             Send Reset Link
           </button>
 

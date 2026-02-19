@@ -72,8 +72,8 @@ const CreateGst = () => {
                   </td>
                   <td className="p-1 border border-slate-300 dark:border-slate-600">
                     <input
-                      className="w-full p-1 rounded-md uppercase text-slate-500 border border-slate-300 dark:border-slate-600"
-                      // placeholder="18% GST"
+                      className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
+                      placeholder="Example: 18% GST"
                       value={gst.title}
                       onChange={e => setGst({ ...gst, title: e.target.value })}
                     />
@@ -86,7 +86,7 @@ const CreateGst = () => {
                   </td>
                   <td className="p-1 border border-slate-300 dark:border-slate-600">
                     <input
-                      className="w-full p-1 rounded-md text-slate-500 border border-slate-300 dark:border-slate-600"
+                      className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
                       value={gst.total_rate}
                       onChange={e => setGst({ ...gst, total_rate: e.target.value })}
@@ -100,7 +100,7 @@ const CreateGst = () => {
                   </td>
                   <td className="p-1 border border-slate-300 dark:border-slate-600">
                     <select
-                      className="w-full p-1 rounded-md uppercase text-slate-500 border border-slate-300 dark:border-slate-600"
+                      className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       value={gst.type}
                       onChange={e => setGst({ ...gst, type: e.target.value })}
                     >
@@ -116,7 +116,7 @@ const CreateGst = () => {
                   </td>
                   <td className="p-1 border border-slate-300 dark:border-slate-600">
                     <input
-                      className="w-full p-1 rounded-md text-slate-500 border border-slate-300 dark:border-slate-600"
+                      className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
                       value={gst.cgst}
                       onChange={e => setGst({ ...gst, cgst: e.target.value })}
@@ -130,7 +130,7 @@ const CreateGst = () => {
                   </td>
                   <td className="p-1 border border-slate-300 dark:border-slate-600">
                     <input
-                      className="w-full p-1 rounded-md text-slate-500 border border-slate-300 dark:border-slate-600"
+                      className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
                       value={gst.sgst}
                       onChange={e => setGst({ ...gst, sgst: e.target.value })}
@@ -144,7 +144,7 @@ const CreateGst = () => {
                   </td>
                   <td className="p-1 border border-slate-300 dark:border-slate-600">
                     <input
-                      className="w-full p-1 rounded-md text-slate-500 border border-slate-300 dark:border-slate-600"
+                      className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
                       value={gst.igst}
                       onChange={e => setGst({ ...gst, igst: e.target.value })}
