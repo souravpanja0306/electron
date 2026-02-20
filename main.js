@@ -20,53 +20,13 @@ app.whenReady().then(() => {
 
 
     const template = [
-        // {
-        //     label: "File", submenu: [
-        //         {
-        //             label: "Dashboard",
-        //             click: () => {
-        //                 console.log("hello world")
-        //                 win.webContents.send("navigate", "/dashboard");
-        //             }
-        //         },
-        //         { type: "separator" },
-        //         { role: "quit" }
-        //     ]
-        // },
-        // // {
-        // //     label: "Edit", submenu: [
-        // //         { role: "undo" }, { role: "redo" }, { type: "separator" },
-        // //         { role: "cut" }, { role: "copy" }, { role: "paste" },
-        // //         { role: "selectAll" }
-        // //     ]
-        // // },
-        // {
-        //     label: "View", submenu: [
-        //         { role: "reload" },
-        //         { role: "forceReload" },
-        //         { role: "toggleDevTools" },
-        //         // { type: "separator" },
-        //         // { role: "resetZoom" },
-        //         // { role: "zoomIn" },
-        //         // { role: "zoomOut" },
-        //         // { role: "togglefullscreen" }
-        //     ]
-        // },
-        // // {
-        // //     label: "Window", submenu: [
-        // //         { role: "minimize" },
-        // //         { role: "close" }
-        // //     ]
-        // // },
-        // // {
-        // //     label: "Help", submenu: [
-        // //         { role: "about" }
-        // //     ]
-        // // },
-        // // { type: "separator" },
-        // // {
-        // //     label: "[Sourav Panja]",
-        // // },
+        {
+            label: "View", submenu: [
+                { role: "reload" },
+                { role: "forceReload" },
+                { role: "toggleDevTools" },
+            ]
+        },
     ];
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));

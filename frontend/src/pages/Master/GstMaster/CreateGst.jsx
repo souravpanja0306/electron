@@ -18,12 +18,11 @@ import {
 } from "react-icons/ai";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
-
-
-// Functions...
-// import { handleSubmit, handleGetParty, handleGenerateInvoiceNo, printInvoice } from "./InvoiceService";
+import useGstStore from '../../../store/GstStore';
 
 const CreateGst = () => {
+  const { gstData, getAllGst, createGst, loading } = useGstStore();
+
   const [isProforma, setIsProforma] = useState(true);
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
@@ -39,6 +38,12 @@ const CreateGst = () => {
     type: "percentage"
   });
 
+  const submitData = async (e) => {
+    let result = await createGst(gst);
+    if (result) {
+      console.log(result);
+    };
+  };
 
   return (
     <>
@@ -52,7 +57,7 @@ const CreateGst = () => {
               </div>
               : ""
           }
-          <div>
+          <div onClick={(e) => submitData(e)}>
             <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
           </div>
           <Link to="/view-gst">
@@ -76,20 +81,6 @@ const CreateGst = () => {
                       placeholder="Example: 18% GST"
                       value={gst.title}
                       onChange={e => setGst({ ...gst, title: e.target.value })}
-                    />
-                  </td>
-                </tr>
-
-                <tr className="border border-slate-300 dark:border-slate-600">
-                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
-                    Total Rate (%)
-                  </td>
-                  <td className="p-1 border border-slate-300 dark:border-slate-600">
-                    <input
-                      className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
-                      type="number"
-                      value={gst.total_rate}
-                      onChange={e => setGst({ ...gst, total_rate: e.target.value })}
                     />
                   </td>
                 </tr>
@@ -134,6 +125,20 @@ const CreateGst = () => {
                       type="number"
                       value={gst.sgst}
                       onChange={e => setGst({ ...gst, sgst: e.target.value })}
+                    />
+                  </td>
+                </tr>
+
+                <tr className="border border-slate-300 dark:border-slate-600">
+                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
+                    Total Rate (%)
+                  </td>
+                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                    <input
+                      className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
+                      type="number"
+                      value={parseFloat(gst.sgst) + parseFloat(gst.cgst)}
+                      disabled
                     />
                   </td>
                 </tr>
