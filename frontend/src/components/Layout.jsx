@@ -34,6 +34,7 @@ const Layout = ({ children }) => {
             setActiveManu(menu);
             setCurrentMenu(MenuMap[menu] || []);
             localStorage.setItem("currentMenu", menu);
+            setSubMenu({ index: 0, active: true });
         };
     };
 
@@ -61,11 +62,20 @@ const Layout = ({ children }) => {
                         <div className="relative group">
                             <button className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">File</button>
                             <div className="p-1 absolute left-0 top-7 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
-                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">New</button>
-                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Open</button>
-                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Save</button>
+                                <button
+                                    onClick={() => window.api?.openDevTools()}
+                                    className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    <div className="flex justify-between items-center">
+                                        <span>Open Dev Tools</span>
+                                        <span className="text-slate-500 text-xs">Ctrl+Shift+I</span>
+                                    </div>
+                                </button>
                                 <hr />
-                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Exit</button>
+                                <button
+                                    onClick={() => window.api?.close()}
+                                    className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-red-500 dark:hover:bg-red-500 hover:text-white">
+                                    Exit
+                                </button>
                             </div>
                         </div>
 
@@ -117,6 +127,7 @@ const Layout = ({ children }) => {
                         <div className="flex text-sm">
                             <div className="relative group">
                                 <button
+                                    title="Minimize"
                                     onClick={() => window.api?.minimize()}
                                     className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">
                                     <MdHorizontalRule />
@@ -124,6 +135,7 @@ const Layout = ({ children }) => {
                             </div>
                             <div className="relative group">
                                 <button
+                                    title="Restore"
                                     onClick={() => window.api?.maximize()}
                                     className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">
                                     <MdCropSquare />
@@ -131,6 +143,7 @@ const Layout = ({ children }) => {
                             </div>
                             <div className="relative group">
                                 <button
+                                    title="Close"
                                     onClick={() => window.api?.close()}
                                     className="btn p-2 hover:bg-red-500 dark:hover:bg-red-500 hover:rounded hover:text-white">
                                     <MdOutlineClose />

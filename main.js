@@ -9,8 +9,8 @@ app.whenReady().then(() => {
         titleBarStyle: "hidden",
         width: 1400,
         height: 800,
-        minWidth: 1400,
-        minHeight: 800,
+        minWidth: 600,
+        minHeight: 300,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             contextIsolation: true,
@@ -19,17 +19,19 @@ app.whenReady().then(() => {
         icon: path.join(__dirname, "./public/icon/icon.ico")
     });
     win.loadURL("http://localhost:3000");
-    // win.loadFile(path.join(__dirname, "frontend/build/index.html"));
+    // win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
 
 
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools(); // For Permanents for Developments.
     globalShortcut.register("Control+Shift+I", () => {
         win.webContents.openDevTools();
     });
     ipcMain.on("minimize", () => win.minimize());
     ipcMain.on("maximize", () => { win.isMaximized() ? win.unmaximize() : win.maximize() });
     ipcMain.on("close", () => {
-        console.log("IPC CLOSE RECEIVED");
         win.close()
+    });
+    ipcMain.on("openDevTools", () => {
+        win.webContents.openDevTools();
     });
 });
