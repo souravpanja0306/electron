@@ -1,9 +1,12 @@
-const { app, BrowserWindow, Menu } = require("electron");
+const { app, BrowserWindow, Menu, globalShortcut, ipcMain } = require("electron");
 const path = require("path");
 require("./server.js");
 
 app.whenReady().then(() => {
+
     const win = new BrowserWindow({
+        frame: false,
+        titleBarStyle: "hidden",
         width: 1400,
         height: 800,
         minWidth: 1400,
@@ -19,15 +22,14 @@ app.whenReady().then(() => {
     // win.loadFile(path.join(__dirname, "frontend/build/index.html"));
 
 
-    const template = [
-        {
-            label: "View", submenu: [
-                { role: "reload" },
-                { role: "forceReload" },
-                { role: "toggleDevTools" },
-            ]
-        },
-    ];
-
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+    win.webContents.openDevTools();
+    globalShortcut.register("Control+Shift+I", () => {
+        win.webContents.openDevTools();
+    });
+    ipcMain.on("minimize", () => win.minimize());
+    ipcMain.on("maximize", () => { win.isMaximized() ? win.unmaximize() : win.maximize() });
+    ipcMain.on("close", () => {
+        console.log("IPC CLOSE RECEIVED");
+        win.close()
+    });
 });

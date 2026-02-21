@@ -11,6 +11,8 @@ import {
     AiOutlineShopping,
     AiOutlineUserAdd,
     AiOutlineDatabase,
+    AiOutlineSetting,
+    AiOutlinePicture,
     AiOutlineFileAdd,
     AiOutlinePercentage,
     AiOutlineAppstoreAdd,
@@ -133,9 +135,17 @@ const MenuMap = {
     ],
     "settings": [
         { title: "Profile", url: "/profile", icon: <AiOutlineUser /> },
-        { title: "Setting", url: "/settings", icon: <AiOutlineUser /> },
-        { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
-        { title: "Forgot Password", url: "/forgot-password", icon: <AiOutlineUnlock /> }
+        {
+            type: "main",
+            title: "Setting",
+            url: "#",
+            icon: <AiOutlineSetting />,
+            submenu: [
+                { title: "Appearance", url: "/settings", icon: <AiOutlinePicture /> },
+                { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
+                { title: "Forgot Password", url: "/forgot-password", icon: <AiOutlineUnlock /> },
+            ]
+        },
     ],
 };
 

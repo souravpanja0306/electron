@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.titlebar {
+    -webkit-app-region: drag;
+}
+
+.btn,
+.group,
+a {
+    -webkit-app-region: no-drag;
+}

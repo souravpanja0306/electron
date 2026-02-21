@@ -13,9 +13,11 @@ import {
     AiOutlineMenuFold,
     AiOutlineAppstoreAdd,
 } from "react-icons/ai";
+import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import MenuMap from "../utils/menuMap";
 import { useState, useEffect } from "react";
+import "../index.css"
 
 
 const Layout = ({ children }) => {
@@ -48,55 +50,56 @@ const Layout = ({ children }) => {
     return (
         <div className="flex flex-col min-h-screen">
 
-            <div className="border-b border-slate-300 dark:border-slate-600 w-full h-10 bg-slate-200 dark:bg-slate-900 text-slate-900 dark:text-white flex items-center justify-between p-2 shadow-md">
+            {/* Custom Title Bar */}
+            <div className="titlebar border-b border-slate-300 dark:border-slate-600 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between p-2 shadow-md">
                 <div className="flex items-center gap-2">
                     <div className="font-semibold tracking-wide">
                         <Link to="/">HelloWorld</Link>
                     </div>
-                    <div className="flex text-sm">
+                    <div className="flex text-xs">
                         {/* File */}
                         <div className="relative group">
-                            <button className="p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">File</button>
-                            <div className="p-1 absolute left-0 top-8 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
-                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">New</button>
-                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Open</button>
-                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Save</button>
+                            <button className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">File</button>
+                            <div className="p-1 absolute left-0 top-7 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
+                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">New</button>
+                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Open</button>
+                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Save</button>
                                 <hr />
-                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Exit</button>
+                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Exit</button>
                             </div>
                         </div>
 
                         {/* Edit */}
                         <div className="relative group">
-                            <button className="p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">Edit</button>
-                            <div className="p-1 absolute left-0 top-8 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
+                            <button className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">Edit</button>
+                            <div className="p-1 absolute left-0 top-7 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
                                 <button
                                     onClick={() => window.location.reload()}
-                                    className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                                    className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700"
                                 >
                                     Reload
                                 </button>
-                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Redo</button>
-                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Copy</button>
-                                <button className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Paste</button>
+                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Redo</button>
+                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Copy</button>
+                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Paste</button>
                             </div>
                         </div>
 
                         {/* Work */}
                         <div className="relative group">
-                            <button className="p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">Work</button>
-                            <div className="p-1 absolute left-0 top-8 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
+                            <button className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">Work</button>
+                            <div className="p-1 absolute left-0 top-7 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-lg py-1 z-50">
                                 <Link to="/create-invoice" className="flex justify-between w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
                                     <span>Create Invoice</span>
                                     <span className="text-slate-500 text-xs">Ctrl+I</span>
                                 </Link>
-                                <Link to="" className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                <Link to="" className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
                                     Create Challan
                                 </Link>
-                                <Link to="" className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                <Link to="" className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
                                     Create Money Receipts
                                 </Link>
-                                <Link to="" className="block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                <Link to="" className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
                                     Create Invoice
                                 </Link>
                             </div>
@@ -104,12 +107,37 @@ const Layout = ({ children }) => {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm text-white uppercase">
+                    {/* <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm text-white uppercase">
                         {JSON.parse(localStorage.getItem("user"))?.name[0]}
-                    </div>
-                    <span className="hover:text-blue-600 cursor-default capitalize select-none">
+                    </div> */}
+                    <span className="text-xs text-slate-400 dark:text-slate-600 cursor-default capitalize select-none">
                         Welcome, {JSON.parse(localStorage.getItem("user"))?.name}
                     </span>
+                    <div className="flex items-center gap-2">
+                        <div className="flex text-sm">
+                            <div className="relative group">
+                                <button
+                                    onClick={() => window.api?.minimize()}
+                                    className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">
+                                    <MdHorizontalRule />
+                                </button>
+                            </div>
+                            <div className="relative group">
+                                <button
+                                    onClick={() => window.api?.maximize()}
+                                    className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">
+                                    <MdCropSquare />
+                                </button>
+                            </div>
+                            <div className="relative group">
+                                <button
+                                    onClick={() => window.api?.close()}
+                                    className="btn p-2 hover:bg-red-500 dark:hover:bg-red-500 hover:rounded hover:text-white">
+                                    <MdOutlineClose />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
