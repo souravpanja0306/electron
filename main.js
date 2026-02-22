@@ -32,6 +32,6 @@ app.whenReady().then(() => {
         win.close()
     });
     ipcMain.on("openDevTools", () => {
-        win.webContents.openDevTools();
+        win.webContents.isDevToolsOpened() ? win.webContents.closeDevTools() : win.webContents.openDevTools();
     });
 });

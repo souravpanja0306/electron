@@ -231,7 +231,7 @@ const CreateInvoice = () => {
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Bill To</label>
                       <select
-                        className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                         value={invoiceDetails.billTo}
                         onChange={(e) =>
                           setInvoiceDetails({ ...invoiceDetails, billTo: e.target.value })
@@ -252,7 +252,7 @@ const CreateInvoice = () => {
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Ship To</label>
                       <textarea
-                        className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                         type="text"
                       />
                     </div>
@@ -262,7 +262,7 @@ const CreateInvoice = () => {
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Date</label>
                       <input
-                        className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                         placeholder="Date"
                         type="date"
                         value={invoiceDetails.date}
@@ -275,7 +275,7 @@ const CreateInvoice = () => {
                     <div className='flex flex-col w-full gap-1'>
                       <label className='text-xs uppercase'>Invoice</label>
                       <input
-                        className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                         placeholder="Invoice"
                         type="text"
                         value={invoiceNumber}
@@ -411,7 +411,7 @@ const CreateInvoice = () => {
                         <div className='flex flex-col w-full gap-1'>
                           <label className='text-xs uppercase'>E-Way Bill</label>
                           <input
-                            className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                            className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                             // placeholder="E-Way Bill"
                             type="text"
                             value={invoiceDetails.ewayBill}
@@ -423,7 +423,7 @@ const CreateInvoice = () => {
                         <div className='flex flex-col w-full gap-1'>
                           <label className='text-xs uppercase'>Transporter</label>
                           <input
-                            className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                            className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                             // placeholder="Transporter"
                             type="text"
                             value={invoiceDetails.transporter}
@@ -435,7 +435,7 @@ const CreateInvoice = () => {
                         <div className='flex flex-col w-full gap-1'>
                           <label className='text-xs uppercase'>Place of Supply</label>
                           <input
-                            className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                            className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                             // placeholder="Place"
                             value={invoiceDetails.placeOfSupply}
                             onChange={(e) =>
@@ -457,7 +457,7 @@ const CreateInvoice = () => {
                       <div className='w-full gap-1'>
                         <label className='text-xs uppercase'>Total Quantity</label>
                         <input
-                          className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
+                          className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
                           type="number"
                           value={parseFloat(grandTotal.total_quantity).toFixed()}
                           readOnly
@@ -466,7 +466,7 @@ const CreateInvoice = () => {
                       <div className='w-full gap-1'>
                         <label className='text-xs uppercase'>Total Value</label>
                         <input
-                          className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
+                          className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
                           type="number"
                           value={parseFloat(grandTotal.total_value).toFixed(2)}
                           readOnly

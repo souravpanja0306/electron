@@ -89,9 +89,6 @@ const Layout = ({ children }) => {
                                 >
                                     Reload
                                 </button>
-                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Redo</button>
-                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Copy</button>
-                                <button className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">Paste</button>
                             </div>
                         </div>
 
@@ -165,6 +162,14 @@ const Layout = ({ children }) => {
                         title="Menu"
                     >
                         {sideBar ? <AiOutlineMenuFold /> : <AiOutlineMenu />}
+                    </div>
+                    <div
+                        onClick={() => changeMenu({ menu: "home" })}
+                        className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${activeMenu === "home" ? "bg-blue-600 text-white" : "hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
+                        title="home"
+                    >
+                        <AiOutlineHome />
+                        <span className="text-xs">Home</span>
                     </div>
                     <div
                         onClick={() => changeMenu({ menu: "work" })}

@@ -124,7 +124,7 @@ const MoneyReceipts = () => {
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Company</label>
                                 <select
-                                    className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                                    className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                                     name="company_id"
                                     onChange={handleChange}
                                     required
@@ -139,7 +139,7 @@ const MoneyReceipts = () => {
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Receipt Name</label>
                                 <select
-                                    className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                                    className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                                     name="party_id"
                                     onChange={handleChange}
                                     required
@@ -161,7 +161,7 @@ const MoneyReceipts = () => {
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Receipt Number</label>
                                 <input
-                                    className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                                    className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                                     type="text"
                                     name="receipt_no"
                                     value={moneyReceiptNo}
@@ -173,7 +173,7 @@ const MoneyReceipts = () => {
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Date</label>
                                 <input
-                                    className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600"
+                                    className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                                     placeholder="Date"
                                     type="date"
                                     name="receipt_date"
@@ -312,7 +312,7 @@ const MoneyReceipts = () => {
                                 <div className='flex flex-col w-full gap-1'>
                                     <label className='text-xs uppercase'>Total Value</label>
                                     <input
-                                        className="p-1 rounded w-full uppercase text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
+                                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
                                         type="number"
                                         // value={parseFloat(grandTotal.total_value).toFixed(2)}
                                         readOnly

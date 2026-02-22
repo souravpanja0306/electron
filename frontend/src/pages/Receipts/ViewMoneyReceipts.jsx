@@ -20,6 +20,7 @@ const ViewMoneyReceipts = () => {
 
     const navigate = useNavigate();
     const [alart, setAlart] = useState({ show: false });
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         getAllMoneyReceipts(isAuth);
@@ -89,10 +90,19 @@ const ViewMoneyReceipts = () => {
         return () => window.removeEventListener('keydown', onKey);
     }, []);
 
+
+
+    const limit = 10;
+    const total = moneyReceipts?.total || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    const start = (page - 1) * limit + 1;
+    const end = Math.min(page * limit, total);
+
     if (loading) return <CustomLoader />;
     return (
         <>
-            <PageTitle>View All Invoice</PageTitle>
+            <PageTitle>All Money Receipts</PageTitle>
             <div className='flex flex-col gap-1'>
                 <ActionArea>
                     <div className="flex justify-between w-full">
@@ -185,6 +195,33 @@ const ViewMoneyReceipts = () => {
                         </tbody>
                     </table>
                 </MainArea>
+
+                <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
+                    <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            disabled={page === 1}
+                            onClick={() => setPage(page - 1)}
+                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                            Prev
+                        </button>
+                        {[...Array(totalPages)].map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setPage(i + 1)}
+                                className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
+                                {i + 1}
+                            </button>
+                        ))}
+                        <button
+                            disabled={page === totalPages}
+                            onClick={() => setPage(page + 1)}
+                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                            Next
+                        </button>
+                    </div>
+                </div>
+
             </div >
 
             <Alert
