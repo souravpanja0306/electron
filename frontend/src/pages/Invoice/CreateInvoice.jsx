@@ -210,28 +210,27 @@ const CreateInvoice = () => {
             <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
           </div>
         </ActionArea>
-        <br />
-        <form className='flex flex-col text-sm'>
-          <div className='flex gap-1'>
-            <div className='w-3/4'>
-              <PageTitle>Party Information</PageTitle>
-              <MainArea>
-                <div className='flex gap-1 justify-between w-full'>
 
-                  <div className='flex flex-col w-[250px] gap-1'>
-                    <div className='flex flex-col w-full gap-1'>
-                      <CustomToggle
-                        activeColor="green"
-                        inactiveColor="blue"
-                        option={["Tax", "Proforma"]}
-                        value={true}
-                        onChange={setIsProforma}
-                      />
-                    </div>
-                    <div className='flex flex-col w-full gap-1'>
-                      <label className='text-xs uppercase'>Bill To</label>
+        <form className='flex flex-col text-sm'>
+          <div className=''>
+            <PageTitle>Party Information</PageTitle>
+            <MainArea>
+              <div className='grid sm:md:lg:xl:flex gap-1 w-full'>
+                <div className='flex flex-col w-full gap-1'>
+                  {/* <div className='flex flex-col w-full gap-1'>
+                    <CustomToggle
+                      activeColor="green"
+                      inactiveColor="blue"
+                      option={["Tax", "Proforma"]}
+                      value={true}
+                      onChange={setIsProforma}
+                    />
+                  </div> */}
+                  <div className='flex flex-col w-full gap-1'>
+                    <label className='text-xs uppercase'>Bill From/Company</label>
+                    <div className='flex items-center gap-1'>
                       <select
-                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                         value={invoiceDetails.billTo}
                         onChange={(e) =>
                           setInvoiceDetails({ ...invoiceDetails, billTo: e.target.value })
@@ -245,291 +244,295 @@ const CreateInvoice = () => {
                           </option>
                         ))}
                       </select>
-                      <span className='text-red-500 text-xs'>#Party not listed here?
-                        <Link to="/add-party?back=true" className='text-slate-800 dark:text-slate-100 hover:text-blue-600 underline'> Click to list.</Link>
-                      </span>
-                    </div>
-                    <div className='flex flex-col w-full gap-1'>
-                      <label className='text-xs uppercase'>Ship To</label>
-                      <textarea
-                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                        type="text"
-                      />
+                      <Link
+                        to="/add-company?back=true"
+                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                      >
+                        + Add New
+                      </Link>
                     </div>
                   </div>
-
-                  <div className='flex flex-col w-[250px] gap-1'>
-                    <div className='flex flex-col w-full gap-1'>
-                      <label className='text-xs uppercase'>Date</label>
-                      <input
-                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                        placeholder="Date"
-                        type="date"
-                        value={invoiceDetails.date}
+                </div>
+                <div className='flex flex-col w-full gap-1'>
+                  <div className='flex flex-col w-full gap-1'>
+                    <label className='text-xs uppercase'>Bill To/Party</label>
+                    <div className='flex items-center gap-1'>
+                      <select
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                        value={invoiceDetails.billTo}
                         onChange={(e) =>
-                          setInvoiceDetails({ ...invoiceDetails, date: e.target.value })
+                          setInvoiceDetails({ ...invoiceDetails, billTo: e.target.value })
                         }
                         required
-                      />
-                    </div>
-                    <div className='flex flex-col w-full gap-1'>
-                      <label className='text-xs uppercase'>Invoice</label>
-                      <input
-                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                        placeholder="Invoice"
-                        type="text"
-                        value={invoiceNumber}
-                        readOnly
-                        required
-                      />
+                      >
+                        <option value="" disabled>Select Party</option>
+                        {party?.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.company_name}
+                          </option>
+                        ))}
+                      </select>
+                      <Link
+                        to="/add-party?back=true"
+                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                      >
+                        + Add New
+                      </Link>
                     </div>
                   </div>
-                </div>
-              </MainArea>
-              <br />
-              <PageTitle>Invoice Details</PageTitle>
-              <MainArea>
-                <table className='w-full select-none'>
-                  <thead>
-                    <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
-                      <th className='w-12'>Sl. No.</th>
-                      <th className=''>Description</th>
-                      <th className=''>HSN</th>
-                      <th className='w-12'>Quantity</th>
-                      <th className='w-24'>Rate</th>
-                      <th className='w-24'>Subtotal</th>
-                      <th className='w-12'>Tax</th>
-                      <th className='w-24'>Grand Total</th>
-                      <th className='w-12'>#</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {
-                      invoiceFields && invoiceFields.map((item, index) => {
-                        const isLast = index === invoiceFields.length - 1;
-                        return (
-                          <tr key={item.id} className='items-center text-black'>
-                            <td className=''>
-                              <input
-                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-center"
-                                value={index + 1}
-                                disabled
-                              />
-                            </td>
-                            <td className=''>
-                              <input
-                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 capitalize"
-                                value={item.description}
-                                onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "description" })}
-                                type="text"
-                              />
-                            </td>
-                            <td className=''>
-                              <div className='flex flex-col w-full gap-1'>
-                                <select
-                                  className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 uppercase"
-                                  defaultValue=""
-                                  onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "hsn" })}
-                                >
-                                  <option selected disabled>HSN</option>
-                                  {
-                                    party && party.map((item, index) => (
-                                      <option>{150250 + index}</option>
-                                    ))
-                                  }
-                                </select>
-                              </div>
-                            </td>
-                            <td className=''>
-                              <input
-                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                value={item.quantity}
-                                onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "quantity" })}
-                                type='number'
-                                onFocus={(e) => e.target.select()}
-                              />
-                            </td>
-                            <td className=''>
-                              <input
-                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                value={item.rate}
-                                onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "rate" })}
-                                type='number'
-                                onFocus={(e) => e.target.select()}
-                              />
-                            </td>
-                            <td className=''>
-                              <input
-                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
-                                value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
-                                type='number'
-                                readOnly
-                              />
-                            </td>
-                            <td className=''>
-                              <input
-                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
-                                value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
-                                type='number'
-                                readOnly
-                              />
-                            </td>
-                            <td className=''>
-                              <input
-                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
-                                value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
-                                type='number'
-                                readOnly
-                              />
-                            </td>
-                            <td className=''>
-                              <div
-                                className="w-full flex justify-center text-2xl cursor-pointer transition"
-                                onClick={(e) => isLast ? handleAddFields(e) : handleRemoveFields(item.id)}
-                              >
-                                {isLast ? (
-                                  <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
-                                ) : (
-                                  <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })
-                    }
-                  </tbody>
-                </table>
-              </MainArea>
-
-              <div className='flex gap-1'>
-                <div className='w-3/4'>
-                  <PageTitle>Additonal Info</PageTitle>
-                  <MainArea>
-                    <div className='flex gap-1 justify-between w-full'>
-                      <div className='flex flex-col w-[250px] gap-1'>
-                        <div className='flex flex-col w-full gap-1'>
-                          <label className='text-xs uppercase'>E-Way Bill</label>
-                          <input
-                            className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                            // placeholder="E-Way Bill"
-                            type="text"
-                            value={invoiceDetails.ewayBill}
-                            onChange={(e) =>
-                              setInvoiceDetails({ ...invoiceDetails, ewayBill: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div className='flex flex-col w-full gap-1'>
-                          <label className='text-xs uppercase'>Transporter</label>
-                          <input
-                            className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                            // placeholder="Transporter"
-                            type="text"
-                            value={invoiceDetails.transporter}
-                            onChange={(e) =>
-                              setInvoiceDetails({ ...invoiceDetails, transporter: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div className='flex flex-col w-full gap-1'>
-                          <label className='text-xs uppercase'>Place of Supply</label>
-                          <input
-                            className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                            // placeholder="Place"
-                            value={invoiceDetails.placeOfSupply}
-                            onChange={(e) =>
-                              setInvoiceDetails({ ...invoiceDetails, placeOfSupply: e.target.value })
-                            }
-                            type="text"
-                          />
-                        </div>
+                  <div className='flex flex-col w-full gap-1'>
+                    <div className='flex gap-1 items-center'>
+                      <label className='text-xs uppercase'>Ship To</label>
+                      <div className='flex gap-1 items-center rounded bg-slate-200 dark:bg-slate-900 p-1'>
+                        <input type='checkbox' />
+                        <label className='text-xs'>Same as bill to</label>
                       </div>
                     </div>
-                  </MainArea>
+                    <textarea
+                      className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                      type="text"
+                    />
+                  </div>
                 </div>
-
-                <div className='w-1/4'>
-                  <PageTitle>Summary</PageTitle>
-                  <MainArea>
-                    <div className='flex flex-col justify-end gap-1 w-full'>
-
-                      <div className='w-full gap-1'>
-                        <label className='text-xs uppercase'>Total Quantity</label>
-                        <input
-                          className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
-                          type="number"
-                          value={parseFloat(grandTotal.total_quantity).toFixed()}
-                          readOnly
-                        />
-                      </div>
-                      <div className='w-full gap-1'>
-                        <label className='text-xs uppercase'>Total Value</label>
-                        <input
-                          className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
-                          type="number"
-                          value={parseFloat(grandTotal.total_value).toFixed(2)}
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                  </MainArea>
+                <div className='flex flex-col w-full gap-1'>
+                  <div className='flex flex-col w-full gap-1'>
+                    <label className='text-xs uppercase'>Date</label>
+                    <input
+                      className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                      placeholder="Date"
+                      type="date"
+                      value={invoiceDetails.date}
+                      onChange={(e) =>
+                        setInvoiceDetails({ ...invoiceDetails, date: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className='flex flex-col w-full gap-1'>
+                    <label className='text-xs uppercase'>Invoice</label>
+                    <input
+                      className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                      placeholder="Invoice"
+                      type="text"
+                      value={invoiceNumber}
+                      readOnly
+                      required
+                    />
+                  </div>
+                  <div className='flex flex-col w-full gap-1'>
+                    <label className='text-xs uppercase'>Place of Supply</label>
+                    <input
+                      className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                      // placeholder="Place"
+                      value={invoiceDetails.placeOfSupply}
+                      onChange={(e) =>
+                        setInvoiceDetails({ ...invoiceDetails, placeOfSupply: e.target.value })
+                      }
+                      type="text"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </MainArea>
+          </div>
 
-            <div className='w-1/4'>
-              <PageTitle>Summary</PageTitle>
-              <MainArea>
-                <div className='flex flex-col justify-end gap-1 w-full'>
+          <div className=''>
+            <PageTitle>Invoice Details</PageTitle>
+            <MainArea>
+              <table className='w-full select-none'>
+                <thead>
+                  <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
+                    <th className='w-12'>Sl. No.</th>
+                    <th className=''>Description</th>
+                    <th className=''>HSN</th>
+                    <th className='w-12'>Quantity</th>
+                    <th className='w-24'>Rate</th>
+                    <th className='w-24'>Subtotal</th>
+                    <th className='w-12'>Tax</th>
+                    <th className='w-24'>Grand Total</th>
+                    <th className='w-12'>#</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    invoiceFields && invoiceFields.map((item, index) => {
+                      const isLast = index === invoiceFields.length - 1;
+                      return (
+                        <tr key={item.id} className='items-center text-black'>
+                          <td className=''>
+                            <input
+                              className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-center"
+                              value={index + 1}
+                              disabled
+                            />
+                          </td>
+                          <td className=''>
+                            <input
+                              className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 capitalize"
+                              value={item.description}
+                              onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "description" })}
+                              type="text"
+                            />
+                          </td>
+                          <td className=''>
+                            <div className='flex flex-col w-full gap-1'>
+                              <select
+                                className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 uppercase"
+                                defaultValue=""
+                                onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "hsn" })}
+                              >
+                                <option selected disabled>HSN</option>
+                                {
+                                  party && party.map((item, index) => (
+                                    <option>{150250 + index}</option>
+                                  ))
+                                }
+                              </select>
+                            </div>
+                          </td>
+                          <td className=''>
+                            <input
+                              className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                              value={item.quantity}
+                              onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "quantity" })}
+                              type='number'
+                              onFocus={(e) => e.target.select()}
+                            />
+                          </td>
+                          <td className=''>
+                            <input
+                              className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                              value={item.rate}
+                              onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "rate" })}
+                              type='number'
+                              onFocus={(e) => e.target.select()}
+                            />
+                          </td>
+                          <td className=''>
+                            <input
+                              className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                              value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
+                              type='number'
+                              readOnly
+                            />
+                          </td>
+                          <td className=''>
+                            <input
+                              className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                              value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
+                              type='number'
+                              readOnly
+                            />
+                          </td>
+                          <td className=''>
+                            <input
+                              className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
+                              value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
+                              type='number'
+                              readOnly
+                            />
+                          </td>
+                          <td className=''>
+                            <div
+                              className="w-full flex justify-center text-2xl cursor-pointer transition"
+                              onClick={(e) => isLast ? handleAddFields(e) : handleRemoveFields(item.id)}
+                            >
+                              {isLast ? (
+                                <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
+                              ) : (
+                                <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })
+                  }
+                </tbody>
+              </table>
+            </MainArea>
 
-                  <div className='flex justify-between w-full gap-1 font-bold'>
-                    <span className='uppercase'>Total Quantity</span>
-                    <span className='uppercase'>{parseFloat(grandTotal.total_quantity).toFixed()}</span>
+            <div className='flex gap-1'>
+              <div className='w-3/4'>
+                <PageTitle>Additonal Info</PageTitle>
+                <MainArea>
+                  <div className='flex gap-1 justify-between w-full'>
+                    <div className='flex flex-col w-[250px] gap-1'>
+                      <div className='flex flex-col w-full gap-1'>
+                        <label className='text-xs uppercase'>E-Way Bill</label>
+                        <input
+                          className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                          // placeholder="E-Way Bill"
+                          type="text"
+                          value={invoiceDetails.ewayBill}
+                          onChange={(e) =>
+                            setInvoiceDetails({ ...invoiceDetails, ewayBill: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div className='flex flex-col w-full gap-1'>
+                        <label className='text-xs uppercase'>Transporter</label>
+                        <input
+                          className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                          // placeholder="Transporter"
+                          type="text"
+                          value={invoiceDetails.transporter}
+                          onChange={(e) =>
+                            setInvoiceDetails({ ...invoiceDetails, transporter: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <hr />
-                  <div className='flex justify-between w-full gap-1 font-bold'>
-                    <span className='uppercase'>Subtotal</span>
-                    <span className='uppercase'>{grandTotal.total_value.toLocaleString("en-IN")}</span>
+                </MainArea>
+              </div>
+              <div className='w-1/4'>
+                <PageTitle>Summary</PageTitle>
+                <MainArea>
+                  <div className='flex flex-col justify-end gap-1 w-full'>
+                    <div className='flex justify-between w-full gap-1 font-bold'>
+                      <span className='uppercase'>Total Quantity</span>
+                      <span className='uppercase'>{parseFloat(grandTotal.total_quantity).toFixed()}</span>
+                    </div>
+                    <hr />
+                    <div className='flex justify-between w-full gap-1 font-bold'>
+                      <span className='uppercase'>Subtotal</span>
+                      <span className='uppercase'>{grandTotal.total_value.toLocaleString("en-IN")}</span>
+                    </div>
+                    <hr />
+                    <div className='flex justify-between w-full gap-1'>
+                      <span className='uppercase'>SGST</span>
+                      <span className='uppercase'>0</span>
+                    </div>
+                    <hr />
+                    <div className='flex justify-between w-full gap-1'>
+                      <span className='uppercase'>CGST</span>
+                      <span className='uppercase'>0</span>
+                    </div>
+                    <hr />
+                    <div className='flex justify-between w-full gap-1'>
+                      <span className='uppercase'>IGST</span>
+                      <span className='uppercase'>0</span>
+                    </div>
+                    <hr />
+                    <div className='flex justify-between w-full gap-1'>
+                      <span className='uppercase'>Round-Off</span>
+                      <span className='uppercase'>0</span>
+                    </div>
+                    <hr />
+                    <div className='text-lg flex justify-between w-full gap-1 font-bold'>
+                      <span className='uppercase'>Grand Value</span>
+                      <span className='uppercase'>{grandTotal.total_value.toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className='bg-white flex flex-col justify-between w-full gap-1 text-black p-1 rounded'>
+                      <span className='uppercase font-bold'>In Rupess :</span>
+                      <span className=''>{grandTotal.inWord}</span>
+                    </div>
                   </div>
-                  <hr />
-                  <div className='flex justify-between w-full gap-1'>
-                    <span className='uppercase'>SGST</span>
-                    <span className='uppercase'>0</span>
-                  </div>
-                  <hr />
-                  <div className='flex justify-between w-full gap-1'>
-                    <span className='uppercase'>CGST</span>
-                    <span className='uppercase'>0</span>
-                  </div>
-                  <hr />
-                  <div className='flex justify-between w-full gap-1'>
-                    <span className='uppercase'>IGST</span>
-                    <span className='uppercase'>0</span>
-                  </div>
-                  <hr />
-                  <div className='flex justify-between w-full gap-1'>
-                    <span className='uppercase'>Round-Off</span>
-                    <span className='uppercase'>0</span>
-                  </div>
-                  <hr />
-                  <div className='text-lg flex justify-between w-full gap-1 font-bold'>
-                    <span className='uppercase'>Grand Value</span>
-                    <span className='uppercase'>{grandTotal.total_value.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className='bg-white flex flex-col justify-between w-full gap-1 text-black p-1 rounded'>
-                    <span className='uppercase font-bold'>In Rupess :</span>
-                    <span className=''>
-                      {
-                        grandTotal.inWord
-                      }
-                    </span>
-                  </div>
-                </div>
-              </MainArea>
+                </MainArea>
+              </div>
             </div>
           </div>
-          <br />
         </form>
       </div>
 

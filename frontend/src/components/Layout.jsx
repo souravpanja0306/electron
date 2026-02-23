@@ -70,7 +70,6 @@ const Layout = ({ children }) => {
                                         <span className="text-slate-500 text-xs">Ctrl+Shift+I</span>
                                     </div>
                                 </button>
-                                <hr />
                                 <button
                                     onClick={() => window.api?.close()}
                                     className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-red-500 dark:hover:bg-red-500 hover:text-white">

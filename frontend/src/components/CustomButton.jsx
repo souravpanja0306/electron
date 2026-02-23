@@ -15,7 +15,7 @@ const CustomButton = ({
 
     return (
         <div
-            className={`min-w-16 px-3 py-1.5 cursor-pointer rounded text-xs flex gap-2 items-center justify-center select-none font-medium transition-all hover:scale-95 shadow-sm ${COLORS[color]}`}
+            className={`min-w-16 px-3 py-1.5 cursor-pointer rounded text-xs flex gap-2 items-center justify-center select-none font-medium transition-all active:bg-slate-600 active:dark:bg-slate-900 shadow-sm ${COLORS[color]}`}
         >
             <span className="text-base">
                 {children}
@@ -24,7 +24,6 @@ const CustomButton = ({
                 {title}
             </span>
         </div>
-
     )
 }
 

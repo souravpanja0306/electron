@@ -177,7 +177,7 @@ const ViewInvoices = () => {
                                 :
                                 <>
                                     {
-                                        <tr className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
+                                        <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                             <td className="p-1 text-center" colSpan={11}>No Data Found</td>
                                         </tr>
                                     }

@@ -141,9 +141,8 @@ const MenuMap = {
             url: "#",
             icon: <AiOutlineSetting />,
             submenu: [
-                { title: "Appearance", url: "/settings", icon: <AiOutlinePicture /> },
+                { title: "General", url: "/settings", icon: <AiOutlinePicture /> },
                 { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
-                { title: "Forgot Password", url: "/forgot-password", icon: <AiOutlineUnlock /> },
             ]
         },
     ],

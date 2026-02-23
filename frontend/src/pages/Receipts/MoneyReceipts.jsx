@@ -135,6 +135,11 @@ const MoneyReceipts = () => {
                                         </option>
                                     ))}
                                 </select>
+                                <p className='text-red-500 text-xs'>#You can add 2 componies.
+                                    <Link to="/add-company?back=true" className='text-slate-800 dark:text-slate-100 hover:text-blue-600 hover:underline'>
+                                        Click to add.
+                                    </Link>
+                                </p>
                             </div>
                             <div className='flex flex-col w-full gap-1'>
                                 <label className='text-xs uppercase'>Receipt Name</label>
@@ -151,9 +156,11 @@ const MoneyReceipts = () => {
                                         </option>
                                     ))}
                                 </select>
-                                <span className='text-red-500 text-xs'>#Receipt not listed here?
-                                    <Link to="/add-party?back=true" className='text-slate-800 dark:text-slate-100 hover:text-blue-600 underline'> Click to list.</Link>
-                                </span>
+                                <p className='text-red-500 text-xs'>#Receipt not listed here?
+                                    <Link to="/add-party?back=true" className='text-slate-800 dark:text-slate-100 hover:text-blue-600 hover:underline'>
+                                        Click to list.
+                                    </Link>
+                                </p>
                             </div>
                         </div>
 

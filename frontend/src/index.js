@@ -57,13 +57,15 @@ const router = createHashRouter([
   { path: "/edit-profile", element: <Middleware><Layout><EditProfile /></Layout></Middleware> },
   { path: "/add-party", element: <Middleware><Layout><PartyCreate /></Layout></Middleware> },
   { path: "/party", element: <Middleware><Layout><PartyView /></Layout></Middleware> },
-  { path: "/add-company", element: <Middleware><Layout><Company /></Layout></Middleware> },
-  { path: "/company", element: <Middleware><Layout><CompanyMaster /></Layout></Middleware> },
   { path: "/add-product", element: <Middleware><Layout><ProductMaster /></Layout></Middleware> },
   { path: "/product", element: <Middleware><Layout><Product /></Layout></Middleware> },
   { path: "/about", element: <Middleware><Layout><About /></Layout></Middleware> },
   { path: "/settings", element: <Middleware><Layout><Setting /></Layout></Middleware> },
-  
+
+  // Add Company
+  { path: "/add-company", element: <Middleware><Layout><Company /></Layout></Middleware> },
+  { path: "/company", element: <Middleware><Layout><CompanyMaster /></Layout></Middleware> },
+
   // Challans
   { path: "/create-challan", element: <Middleware><Layout><CreateChallan /></Layout></Middleware> },
   { path: "/view-challan", element: <Middleware><Layout><ViewChallan /></Layout></Middleware> },
@@ -83,7 +85,7 @@ const router = createHashRouter([
   // Auth
   { path: "/signin", element: <Signin /> },
   { path: "/signup", element: <Signup /> },
-  { path: "/change-password", element: <Middleware><ChangePassword /></Middleware> },
+  { path: "/change-password", element: <Middleware><Layout><ChangePassword /></Layout></Middleware> },
   { path: "/forgot-password", element: <ForgotPassword /> },
 ]);
 

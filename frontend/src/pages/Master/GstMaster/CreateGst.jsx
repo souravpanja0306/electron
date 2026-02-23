@@ -67,15 +67,13 @@ const CreateGst = () => {
         <br />
 
         <MainArea>
-          <div className='flex flex-col w-full gap-1'>
+          <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
             <PageTitle>GST Information</PageTitle>
-            <table className="w-full border border-slate-300 dark:border-slate-600 text-sm">
+            <table className="w-full text-sm">
               <tbody>
-                <tr className="border border-slate-300 dark:border-slate-600">
-                  <td className="p-1 w-1/3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
-                    GST Title
-                  </td>
-                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                <tr className="dark:bg-slate-800">
+                  <td className="p-1">GST Title</td>
+                  <td className="p-1">
                     <input
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       placeholder="Example: 18% GST"
@@ -84,12 +82,9 @@ const CreateGst = () => {
                     />
                   </td>
                 </tr>
-
-                <tr className="border border-slate-300 dark:border-slate-600">
-                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
-                    Type
-                  </td>
-                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                <tr className="dark:bg-slate-800">
+                  <td className="p-1">Type</td>
+                  <td className="p-1">
                     <select
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       value={gst.type}
@@ -100,12 +95,9 @@ const CreateGst = () => {
                     </select>
                   </td>
                 </tr>
-
-                <tr className="border border-slate-300 dark:border-slate-600">
-                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
-                    CGST (%)
-                  </td>
-                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                <tr className="dark:bg-slate-800">
+                  <td className="p-1">CGST (%)</td>
+                  <td className="p-1">
                     <input
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
@@ -114,12 +106,9 @@ const CreateGst = () => {
                     />
                   </td>
                 </tr>
-
-                <tr className="border border-slate-300 dark:border-slate-600">
-                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
-                    SGST (%)
-                  </td>
-                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                <tr className="dark:bg-slate-800">
+                  <td className="p-1">SGST (%)</td>
+                  <td className="p-1">
                     <input
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
@@ -128,12 +117,9 @@ const CreateGst = () => {
                     />
                   </td>
                 </tr>
-
-                <tr className="border border-slate-300 dark:border-slate-600">
-                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
-                    Total Rate (%)
-                  </td>
-                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                <tr className="dark:bg-slate-800">
+                  <td className="p-1">Total Rate (%)</td>
+                  <td className="p-1">
                     <input
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
@@ -142,12 +128,9 @@ const CreateGst = () => {
                     />
                   </td>
                 </tr>
-
-                <tr className="border border-slate-300 dark:border-slate-600">
-                  <td className="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
-                    IGST (%)
-                  </td>
-                  <td className="p-1 border border-slate-300 dark:border-slate-600">
+                <tr className="dark:bg-slate-800">
+                  <td className="p-1">IGST (%)</td>
+                  <td className="p-1">
                     <input
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
@@ -156,7 +139,6 @@ const CreateGst = () => {
                     />
                   </td>
                 </tr>
-
               </tbody>
             </table>
           </div>

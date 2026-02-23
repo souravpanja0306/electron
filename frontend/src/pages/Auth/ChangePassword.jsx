@@ -1,70 +1,70 @@
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import { Link } from "react-router-dom";
-
+import MainArea from "../../components/MainArea";
+import PageTitle from "../../components/PageTitle";
+import CustomButton from '../../components/CustomButton';
+import { AiOutlineReload } from "react-icons/ai";
 
 const ChangePassword = () => {
   return (
-    <div className="min-h-screen w-full bg-slate-900 flex justify-center items-center">
-      <div className="w-[380px] bg-slate-800 rounded-xl shadow-lg shadow-black/40 p-6">
-        <Link
-          to={-1}
-          className="flex items-center gap-1 text-xs text-slate-400 hover:text-blue-400 mb-3"
-        >
-          <AiOutlineArrowLeft />
-          Back
-        </Link>
-        <h2 className="text-white text-xl font-semibold text-center mb-4">
-          Change Password
-        </h2>
-
-        <form className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-slate-400 text-xs uppercase">
-              Current Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter current password"
-              className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white
-                     focus:outline-none focus:ring-2 focus:ring-blue-600"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-slate-400 text-xs uppercase">
-              New Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter new password"
-              className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white
-                     focus:outline-none focus:ring-2 focus:ring-blue-600"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-slate-400 text-xs uppercase">
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              placeholder="Re-enter new password"
-              className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white
-                     focus:outline-none focus:ring-2 focus:ring-blue-600"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium
-                   py-2 rounded transition-all"
-          >
-            Update Password
-          </button>
-        </form>
-
+    <MainArea>
+      <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
+        <PageTitle>Change Password</PageTitle>
+        <hr />
+        <table className="w-full text-sm">
+          <tbody>
+            <tr className="dark:bg-slate-800">
+              <td className="p-1 min-w-36">Current Password</td>
+              <td className="p-1 min-w-36">
+                <input
+                  placeholder='Current Password'
+                  className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
+                  // value={data.gst}
+                  type="text"
+                // onChange={(e) =>
+                //   setData({ ...data, gst: e.target.value.toLowerCase() })
+                // }
+                />
+              </td>
+            </tr>
+            <tr className="dark:bg-slate-800">
+              <td className="p-1 min-w-36">New Password</td>
+              <td className="p-1 min-w-36">
+                <input
+                  placeholder='New Password'
+                  className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
+                  // value={data.pan}
+                  type="text"
+                // onChange={(e) =>
+                //   setData({ ...data, pan: e.target.value.toLowerCase() })
+                // }
+                />
+              </td>
+            </tr>
+            <tr className="dark:bg-slate-800">
+              <td className="p-1 min-w-36">Confirm New Password</td>
+              <td className="p-1 min-w-36">
+                <input
+                  placeholder='Confirm New Password'
+                  className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
+                  // value={data.trade_licence}
+                  type="text"
+                // onChange={(e) =>
+                //   setData({ ...data, trade_licence: e.target.value.toLowerCase() })
+                // }
+                />
+              </td>
+            </tr>
+            <tr className="dark:bg-slate-800">
+              <td className="p-1 min-w-36"></td>
+              <td className="p-1 min-w-36">
+                <CustomButton title={"Update"} color={"blue"}><AiOutlineReload /></CustomButton>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
+    </MainArea>
   )
 }
 
