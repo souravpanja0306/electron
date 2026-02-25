@@ -6,7 +6,16 @@ import useAuthStore from '../../store/AuthStore';
 const Signup = () => {
     const navigate = useNavigate();
     const { signinData, signup, signinLoading } = useAuthStore(); // Store...
-    const [data, setData] = useState({ name: "", mobile: "", mobile: "", username: "", password: "" });
+    const [data, setData] = useState({ name: "", mobile: "", mobile: "", username: "", password: "", machineId: "" });
+    console.log("🚀 ~ Signup ~ data:", data)
+
+    const getMachineIdFromLocal = async () => {
+        let MACHINE_ID = await window.api.getMachineId();
+        setData({ ...data, machineId: MACHINE_ID })
+    };
+    useEffect(() => {
+        getMachineIdFromLocal();
+    }, []);
 
     const handleSubmitSignup = async (e) => {
         try {

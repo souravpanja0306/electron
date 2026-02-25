@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain } = require("electron");
 const path = require("path");
 require("./server.js");
+const { machineIdSync } = require('node-machine-id');
 
 app.whenReady().then(() => {
 
@@ -34,4 +35,5 @@ app.whenReady().then(() => {
     ipcMain.on("openDevTools", () => {
         win.webContents.isDevToolsOpened() ? win.webContents.closeDevTools() : win.webContents.openDevTools();
     });
+    ipcMain.handle("get-machine-id", () => { return machineIdSync({ original: false }) });
 });

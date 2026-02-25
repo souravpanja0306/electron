@@ -5,4 +5,5 @@ contextBridge.exposeInMainWorld("api", {
     maximize: () => ipcRenderer.send("maximize"),
     close: () => ipcRenderer.send("close"),
     openDevTools: () => ipcRenderer.send("openDevTools"),
+    getMachineId: () => ipcRenderer.invoke("get-machine-id")
 });

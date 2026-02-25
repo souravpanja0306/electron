@@ -21,13 +21,13 @@ exports.signup = async (req, res) => {
     try {
         const { name, mobile, email, username, password } = req.body;
         let isEmailExist = await UserService.getUsers({ email: email });
-        if (isEmailExist.length) return errorHandler(res, 403, "Email is already registered with us.");
+        if (isEmailExist.length) return errorHandler(res, 409, "Email is already registered.");
 
         let isMobileExist = await UserService.getUsers({ mobile: mobile });
-        if (isMobileExist.length) return errorHandler(res, 403, "Mobile is already registered with us.");
+        if (isMobileExist.length) return errorHandler(res, 409, "Mobile is already registered.");
 
         let isUsernameExist = await UserService.getUsers({ username: username });
-        if (isUsernameExist.length) return errorHandler(res, 403, "Username already taken, try another.");
+        if (isUsernameExist.length) return errorHandler(res, 409, "Username already taken, try another.");
 
         let newData = {
             name: name,
@@ -47,7 +47,7 @@ exports.signup = async (req, res) => {
             let token = jwt.sign(tokenData, "secretOrPrivateKey");
 
             response.status = 200;
-            response.message = "User Signup Succesfull";
+            response.message = "Sign-up successful.";
             response.body = {
                 name: result.name,
                 id: result.id,
@@ -67,8 +67,8 @@ exports.signin = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { username, password } = req.body;
-        if (!username) return errorHandler(res, 403, "Username Required.");
-        if (!password) return errorHandler(res, 403, "Password Required.");
+        if (!username) return errorHandler(res, 400, "Username Required.");
+        if (!password) return errorHandler(res, 400, "Password Required.");
 
         let getUserDetails = await UserService.getUsers({
             password: password,
@@ -84,15 +84,15 @@ exports.signin = async (req, res) => {
             let token = jwt.sign(tokenData, "secretOrPrivateKey");
 
             response.status = 200;
-            response.message = "User Signin Succesfull";
+            response.message = "Authentication successful.";
             response.body = {
                 name: getUserDetails[0].name,
                 id: getUserDetails[0].id,
                 token: token,
             };
         } else {
-            response.status = 403;
-            response.message = "Incorrect Username Or Password! Please Contect to Adminitrator.";
+            response.status = 401;
+            response.message = "Incorrect username Or password.";
             response.body = {};
         };
     } catch (error) {
