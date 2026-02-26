@@ -129,6 +129,7 @@ const MoneyReceipts = () => {
                                     onChange={handleChange}
                                     required
                                 >
+                                    <option value="" disabled selected>Select Company</option>
                                     {companyData?.body?.map((item, index) => (
                                         <option key={item.id} value={item.id} selected={index == 0}>
                                             {item.company_name}
@@ -142,14 +143,14 @@ const MoneyReceipts = () => {
                                 </p>
                             </div>
                             <div className='flex flex-col w-full gap-1'>
-                                <label className='text-xs uppercase'>Receipt Name</label>
+                                <label className='text-xs uppercase'>Recipient Name</label>
                                 <select
                                     className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                                     name="party_id"
                                     onChange={handleChange}
                                     required
                                 >
-                                    <option value="" disabled selected>Select Receipt</option>
+                                    <option value="" disabled selected>Select Recipient</option>
                                     {parties?.body?.map(item => (
                                         <option key={item.id} value={item.id}>
                                             {item.company_name}

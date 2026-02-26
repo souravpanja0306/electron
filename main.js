@@ -1,10 +1,11 @@
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain } = require("electron");
 const path = require("path");
-require("./server.js");
 const { machineIdSync } = require('node-machine-id');
+const { validateLicense } = require("./licenseService.js")
 
+require("./server.js");
 app.whenReady().then(() => {
-
+    validateLicense();
     const win = new BrowserWindow({
         frame: false,
         titleBarStyle: "hidden",

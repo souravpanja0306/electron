@@ -113,9 +113,9 @@ const Layout = ({ children }) => {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                    {/* <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm text-white uppercase">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm text-white uppercase">
                         {JSON.parse(localStorage.getItem("user"))?.name[0]}
-                    </div> */}
+                    </div>
                     <span className="text-xs text-slate-400 dark:text-slate-600 cursor-default capitalize select-none">
                         Welcome, {JSON.parse(localStorage.getItem("user"))?.name}
                     </span>

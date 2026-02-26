@@ -119,7 +119,7 @@ const CreateParty = () => {
                     <div className='grid sm:md:lg:xl:flex w-full gap-1'>
                         <MainArea>
                             <div className='flex flex-col w-full gap-1'>
-                                <PageTitle>Personal Details</PageTitle>
+                                <PageTitle>Company Details</PageTitle>
                                 <hr />
                                 <table className="w-full text-sm">
                                     <tbody>
@@ -222,16 +222,16 @@ const CreateParty = () => {
                     <div className="flex border-slate-700">
                         <span
                             onClick={() => setActive(0)}
-                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 0 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
+                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 0 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white rounded-t" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
                         >Address Details</span>
                         <span
                             onClick={() => setActive(1)}
-                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 1 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
+                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 1 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white rounded-t" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
                         >Business Details
                         </span>
                         <span
                             onClick={() => setActive(2)}
-                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 2 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
+                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 2 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white rounded-t" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
                         >Payment Details</span>
                     </div>
                     <div className="">

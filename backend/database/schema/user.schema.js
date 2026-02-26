@@ -7,6 +7,7 @@ module.exports = `
     email TEXT,
     username TEXT UNIQUE,
     password TEXT,
+    machine_id TEXT,
 
     address_1 TEXT,
     address_2 TEXT,

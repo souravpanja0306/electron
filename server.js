@@ -2,7 +2,9 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const bodyParser = require('body-parser');
+const { connectMongo } = require("./backend/database/connection");
 
+connectMongo();
 const PORT = "3001";
 const VERSION = "v1"
 

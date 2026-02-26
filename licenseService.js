@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { machineIdSync } = require('node-machine-id');
 
-export const validateLicense = async () => {
+module.exports.validateLicense = async () => {
     try {
         let machine_id = await machineIdSync({ original: false });
         // const res = await axios.post("https://your-api.com/validate", {

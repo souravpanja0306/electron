@@ -1,4 +1,4 @@
-const db = require("../database/connection");
+const { db } = require("../database/connection");
 db.exec(require("../database/schema/user.schema"));
 
 exports.insertUsers = async (data) => {

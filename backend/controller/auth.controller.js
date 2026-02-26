@@ -1,6 +1,7 @@
 // Package...
 const moment = require("moment");
 const jwt = require("jsonwebtoken")
+const crypto = require("crypto");
 
 // Contents...
 const contents = require("../content/contents");
@@ -11,15 +12,22 @@ const AdminService = require("../service/admin.service")
 const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
+const LicenseService = require("../service/license.service");
 
 const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
+const generateLicenseKey = () => {
+    return crypto.randomBytes(16).toString("hex").match(/.{1,4}/g).join("-").toUpperCase();
+};
+
 exports.signup = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-        const { name, mobile, email, username, password } = req.body;
+        const { name, mobile, email, username, password, machineId } = req.body;
+        console.log("🚀 ~  req.body:", req.body)
+        dd
         let isEmailExist = await UserService.getUsers({ email: email });
         if (isEmailExist.length) return errorHandler(res, 409, "Email is already registered.");
 
@@ -34,10 +42,29 @@ exports.signup = async (req, res) => {
             mobile: mobile,
             email: email,
             username: username,
-            password: password
+            password: password,
+            machine_id: machineId,
         };
         let result = await UserService.insertUsers(newData);
         if (result) {
+
+            // Create FREE 1 year license
+            const startDate = new Date();
+            const expiryDate = new Date();
+            expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+            let newLicenseData = {
+                license_key: generateLicenseKey(),
+                machine_id: machineId,
+                user_id: result.id,
+                plan: "FREE",
+                max_devices: 1,
+                start_date: startDate,
+                expiry_date: expiryDate,
+                is_active: true
+            };
+            let licenseData = await LicenseService.createLicense(newLicenseData);
+
             let tokenData = {
                 TOKEN_UID: result.id,
                 TOKEN_MOBILE: result.mobile,
@@ -49,6 +76,7 @@ exports.signup = async (req, res) => {
             response.status = 200;
             response.message = "Sign-up successful.";
             response.body = {
+                license_key : licenseData.license_key,
                 name: result.name,
                 id: result.id,
                 token: token,

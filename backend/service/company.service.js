@@ -1,4 +1,4 @@
-const db = require("../database/connection");
+const {db} = require("../database/connection");
 
 exports.createCompany = async (data) => {
     try {
