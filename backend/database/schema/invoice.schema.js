@@ -5,11 +5,14 @@ module.exports = `
       company_id INTEGER,
       party_id INTEGER,
 
+      ship_to TEXT,
       type TEXT,
       invoice_no TEXT UNIQUE,
       invoice_date TEXT,
       eway_bill TEXT,
       transporter TEXT,
+      lorry_no TEXT,
+      lr_no TEXT
       placeOfSupply TEXT,
       data TEXT,
       total_amount INTEGER DEFAULT 0,

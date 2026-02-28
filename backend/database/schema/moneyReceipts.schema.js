@@ -9,6 +9,8 @@ module.exports = `
     receipt_date TEXT,
     data TEXT,
     remarks TEXT,
+    payment_mode TEXT,
+    reference TEXT,
 
     total_value TEXT,
 

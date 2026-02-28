@@ -4,6 +4,7 @@ import CustomButton from '../../components/CustomButton';
 import { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import useAuthStore from '../../store/AuthStore';
+import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 
 const Signin = () => {
   const { signinData, signin, createMoneyReceipts, generateMoneyReceiptNo, signinLoading } = useAuthStore(); // Store...
@@ -33,7 +34,47 @@ const Signin = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full bg-slate-900 flex justify-center items-center select-none">
+      {/* Custom Title Bar */}
+      <div className="titlebar border-b border-slate-300 dark:border-slate-600 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between p-2 shadow-md">
+        <div className="flex items-center gap-2">
+          <div className="font-semibold tracking-wide">
+            <Link to="#">HelloWorld</Link>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="flex text-sm">
+              <div className="relative group">
+                <button
+                  title="Minimize"
+                  onClick={() => window.api?.minimize()}
+                  className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">
+                  <MdHorizontalRule />
+                </button>
+              </div>
+              <div className="relative group">
+                <button
+                  title="Restore"
+                  onClick={() => window.api?.maximize()}
+                  className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">
+                  <MdCropSquare />
+                </button>
+              </div>
+              <div className="relative group">
+                <button
+                  title="Close"
+                  onClick={() => window.api?.close()}
+                  className="btn p-2 hover:bg-red-500 dark:hover:bg-red-500 hover:rounded hover:text-white">
+                  <MdOutlineClose />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Screen */}
+      <div className="min-h-[calc(100vh-2.5rem)] w-full bg-slate-900 flex justify-center items-center select-none">
         <div className="w-[380px] bg-slate-800 rounded-xl shadow-lg shadow-black/40 p-6">
 
           <h1 className="text-white text-center text-2xl font-semibold mb-4">

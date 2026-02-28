@@ -24,10 +24,10 @@ app.whenReady().then(() => {
     // win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
 
 
-    // win.webContents.openDevTools(); // For Permanents for Developments.
-    globalShortcut.register("Control+Shift+I", () => {
-        win.webContents.openDevTools();
-    });
+    win.webContents.openDevTools(); // For Permanents for Developments.
+    // globalShortcut.register("Control+Shift+I", () => {
+    //     win.webContents.openDevTools();
+    // });
     ipcMain.on("minimize", () => win.minimize());
     ipcMain.on("maximize", () => { win.isMaximized() ? win.unmaximize() : win.maximize() });
     ipcMain.on("close", () => {

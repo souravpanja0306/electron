@@ -1,14 +1,20 @@
 const { db } = require("../database/connection");
-db.exec(require("../database/schema/user.schema"));
 
 exports.insertUsers = async (data) => {
     try {
+        db.exec(require("../database/schema/user.schema"));
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO users (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
             .run(data);
 
-        return result;
+        if (result.lastInsertRowid) {
+            const insertedUser = db
+                .prepare("SELECT * FROM users WHERE id = ?")
+                .get(result.lastInsertRowid);
+
+            return insertedUser;
+        };
     } catch (error) {
         console.log(error)
     };
@@ -17,6 +23,7 @@ exports.insertUsers = async (data) => {
 exports.getUsers = async ({
     id = "",
     mobile = "",
+    machine_id = "",
     username = "",
     password = "",
     email = "",
@@ -24,6 +31,7 @@ exports.getUsers = async ({
     skip = "",
 }) => {
     try {
+        db.exec(require("../database/schema/user.schema"));
         let query = "SELECT * FROM users";
         let search_key = [];
         let params = [];
@@ -31,6 +39,10 @@ exports.getUsers = async ({
         if (id) {
             params.push(id);
             search_key.push(`id = ?`);
+        };
+        if (machine_id) {
+            params.push(machine_id);
+            search_key.push(`machine_id = ?`);
         };
         if (mobile) {
             params.push(mobile);

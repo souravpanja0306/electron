@@ -7,8 +7,12 @@ import { Link, NavLink } from "react-router-dom";
 import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
 import Alert from "../../../components/Alert";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import useCompanyStore from '../../../store/CompnayStore';
+
 
 const CreateParty = () => {
+    let token = localStorage.getItem("token");
+    const { companyData, createCompany, getAllCompany, companyLoading } = useCompanyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -37,46 +41,37 @@ const CreateParty = () => {
         account_no: ""
     });
 
-    // const handleSubmit = async () => {
-    //     try {
-    //         if (!data.company_name && data.company_name == "") {
-    //             setAlart({
-    //                 show: true,
-    //                 title: "Field required",
-    //                 type: "warning",
-    //                 message: "Company Name Required."
-    //             });
-    //             return;
-    //         };
-
-    //         let result = await handleCreateParty(data);
-    //         if ((result.status) === 200) {
-    //             setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
-    //             setData({
-    //                 company_name: "",
-    //                 email: "",
-    //                 mobile: "",
-    //                 owner: "",
-    //                 address_1: "",
-    //                 address_2: "",
-    //                 city: "",
-    //                 state: "",
-    //                 district: "",
-    //                 pincode: "",
-    //                 country: "INDIA",
-    //                 gst: "",
-    //                 pan: "",
-    //                 trade_licence: "",
-    //                 bank: "",
-    //                 ifse: "",
-    //                 branch: "",
-    //                 account_no: ""
-    //             });
-    //         };
-    //     } catch (error) {
-    //         console.log(error);
-    //     };
-    // };
+    const handleSubmit = async (e) => {
+        try {
+            e.preventDefault();
+            let result = await createCompany(data, token);
+            if ((result.status) === 200) {
+                setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
+                setData({
+                    company_name: "",
+                    email: "",
+                    mobile: "",
+                    owner: "",
+                    address_1: "",
+                    address_2: "",
+                    city: "",
+                    state: "",
+                    district: "",
+                    pincode: "",
+                    country: "INDIA",
+                    gst: "",
+                    pan: "",
+                    trade_licence: "",
+                    bank: "",
+                    ifse: "",
+                    branch: "",
+                    account_no: ""
+                });
+            };
+        } catch (error) {
+            console.log(error);
+        };
+    };
 
     useEffect(() => {
         const onKey = (e) => {
@@ -107,7 +102,7 @@ const CreateParty = () => {
                         </div>
                         : ""
                     }
-                    <div>
+                    <div onClick={(e) => handleSubmit(e)}>
                         <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </div>
                     <Link to="/comapny">

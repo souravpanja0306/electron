@@ -45,7 +45,7 @@ const MenuMap = {
         },
         {
             type: "main",
-            title: "Tax/Proforma Invoices",
+            title: "Tax Invoices",
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [

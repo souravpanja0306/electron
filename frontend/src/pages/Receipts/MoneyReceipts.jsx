@@ -23,21 +23,24 @@ import { Link, NavLink } from "react-router-dom";
 import useCompanyStore from '../../store/CompnayStore';
 
 const MoneyReceipts = () => {
-    const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore(); // Store...
-    const { parties, getAllParty } = usePartyStore(); // Store...
+    let token = localStorage.getItem("token");
+    const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
+    const { parties, getAllParty } = usePartyStore();
     const { companyData, getAllCompany } = useCompanyStore();
 
     useEffect(() => {
         generateMoneyReceiptNo();
         getAllParty();
-        getAllCompany();
+        getAllCompany(token);
     }, []);
 
     const [data, setData] = useState([
-        { id: Math.floor(Math.random() * 10000000000), sl_no: "", payment_mode: "", description: "", amount: "", reference: "" },
+        { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", amount: "", },
     ]);
     const [form, setForm] = useState(
-        { company_id: "", party_id: "", receipt_no: "", receipt_date: moment().format("YYYY-MM-DD"), data: data, remarks: "" }
+        { company_id: "", party_id: "", receipt_no: "", 
+            receipt_date: moment().format("YYYY-MM-DD"), data: data, 
+            remarks: "",  }
     );
 
     const handleChange = (e) => {
@@ -116,60 +119,68 @@ const MoneyReceipts = () => {
                 </ActionArea>
                 <br />
 
-                <PageTitle>Information</PageTitle>
+                <PageTitle>Recipient Details</PageTitle>
                 <MainArea>
                     <div className='flex gap-1 justify-between w-full'>
 
-                        <div className='flex flex-col w-[250px] gap-1'>
+                        <div className='flex flex-col w-full gap-1'>
                             <div className='flex flex-col w-full gap-1'>
-                                <label className='text-xs uppercase'>Company</label>
-                                <select
-                                    className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                                    name="company_id"
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="" disabled selected>Select Company</option>
-                                    {companyData?.body?.map((item, index) => (
-                                        <option key={item.id} value={item.id} selected={index == 0}>
-                                            {item.company_name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <p className='text-red-500 text-xs'>#You can add 2 componies.
-                                    <Link to="/add-company?back=true" className='text-slate-800 dark:text-slate-100 hover:text-blue-600 hover:underline'>
-                                        Click to add.
+                                <label className='text-xs'>Company</label>
+                                <div className='flex items-center gap-1'>
+
+                                    <select
+                                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        name="company_id"
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="" disabled>Select Company</option>
+                                        {companyData?.body?.map((item, index) => (
+                                            <option key={item.id} value={item.id} selected={index == 0}>
+                                                {item.company_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <Link
+                                        to="/add-party?back=true"
+                                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                                    >
+                                        + Add New
                                     </Link>
-                                </p>
-                            </div>
-                            <div className='flex flex-col w-full gap-1'>
-                                <label className='text-xs uppercase'>Recipient Name</label>
-                                <select
-                                    className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                                    name="party_id"
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="" disabled selected>Select Recipient</option>
-                                    {parties?.body?.map(item => (
-                                        <option key={item.id} value={item.id}>
-                                            {item.company_name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <p className='text-red-500 text-xs'>#Receipt not listed here?
-                                    <Link to="/add-party?back=true" className='text-slate-800 dark:text-slate-100 hover:text-blue-600 hover:underline'>
-                                        Click to list.
-                                    </Link>
-                                </p>
+                                </div>
                             </div>
                         </div>
-
-                        <div className='flex flex-col w-[250px] gap-1'>
+                        <div className='flex flex-col w-full gap-1'>
                             <div className='flex flex-col w-full gap-1'>
-                                <label className='text-xs uppercase'>Receipt Number</label>
+                                <label className='text-xs'>Recipient Name</label>
+                                <div className='flex items-center gap-1'>
+                                    <select
+                                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        name="party_id"
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="" disabled selected>Select Recipient</option>
+                                        {parties?.body?.map(item => (
+                                            <option key={item.id} value={item.id}>
+                                                {item.company_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <Link
+                                        to="/add-party?back=true"
+                                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                                    >
+                                        + Add New
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                        <div className='flex flex-col w-full gap-1'>
+                            <div className='flex flex-col w-full gap-1'>
+                                <label className='text-xs'>Receipt Number</label>
                                 <input
-                                    className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
                                     type="text"
                                     name="receipt_no"
                                     value={moneyReceiptNo}
@@ -179,9 +190,9 @@ const MoneyReceipts = () => {
                                 />
                             </div>
                             <div className='flex flex-col w-full gap-1'>
-                                <label className='text-xs uppercase'>Date</label>
+                                <label className='text-xs'>Date</label>
                                 <input
-                                    className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
                                     placeholder="Date"
                                     type="date"
                                     name="receipt_date"
@@ -203,8 +214,6 @@ const MoneyReceipts = () => {
                             <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
                                 <th className='w-12'>Sl. No.</th>
                                 <th className=''>Description</th>
-                                <th className='w-36'>Payment Type</th>
-                                <th className='w-24'>Reference No</th>
                                 <th className='w-24'>Amount</th>
                                 <th className='w-12'>#</th>
                             </tr>
@@ -217,7 +226,7 @@ const MoneyReceipts = () => {
                                         <tr key={item.id} className='items-center text-black'>
                                             <td className=''>
                                                 <input
-                                                    className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-center"
+                                                    className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-center"
                                                     name="sl_no"
                                                     id={item.id}
                                                     value={index + 1}
@@ -227,7 +236,7 @@ const MoneyReceipts = () => {
                                             </td>
                                             <td className=''>
                                                 <input
-                                                    className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 capitalize"
+                                                    className="w-full p-1 rounded border border-slate-400 dark:border-slate-600"
                                                     value={item.description}
                                                     id={item.id}
                                                     name="description"
@@ -236,35 +245,8 @@ const MoneyReceipts = () => {
                                                 />
                                             </td>
                                             <td className=''>
-                                                <div className='flex flex-col w-full gap-1'>
-                                                    <select
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 uppercase"
-                                                        value={item.payment_mode}
-                                                        id={item.id}
-                                                        name="payment_mode"
-                                                        onChange={(e) => handleChangeData(e)}
-                                                    >
-                                                        <option selected disabled>Payment Type</option>
-                                                        <option>Cash</option>
-                                                        <option>UPI</option>
-                                                        <option>Card</option>
-                                                        <option>Bank Transfer</option>
-                                                    </select>
-                                                </div>
-                                            </td>
-                                            <td className=''>
                                                 <input
-                                                    className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                                    value={item.reference}
-                                                    id={item.id}
-                                                    name="reference"
-                                                    onChange={(e) => handleChangeData(e)}
-                                                    type='number'
-                                                />
-                                            </td>
-                                            <td className=''>
-                                                <input
-                                                    className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                    className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                                     value={item.amount}
                                                     id={item.id}
                                                     name="amount"
@@ -296,18 +278,39 @@ const MoneyReceipts = () => {
                     <div className='w-3/4'>
                         <PageTitle>Additonal Info</PageTitle>
                         <MainArea>
-                            <div className='flex gap-1 justify-between w-full'>
-                                <div className='flex flex-col w-[250px] gap-1'>
-                                    <div className='flex flex-col w-full gap-1'>
-                                        <label className='text-xs uppercase'>Remarks or Note</label>
-                                        <textarea
-                                            className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                                            placeholder="Remarks"
-                                            type="text"
-                                            name="remarks"
-                                            onChange={handleChange}
-                                        />
-                                    </div>
+                            <div className='flex flex-col w-1/2 gap-1 justify-between'>
+                                <div className='flex flex-col w-full gap-1'>
+                                    <label className='text-xs'>Payment Type</label>
+                                    <textarea
+                                        className="p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        placeholder="Remarks"
+                                        type="text"
+                                        name="remarks"
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className='flex flex-col w-full gap-1'>
+                                    <label className='text-xs'>Payment Type</label>
+                                    <select
+                                        className="w-full p-1 rounded border border-slate-400 dark:border-slate-600"
+                                        name="payment_mode"
+                                        onChange={handleChange}
+                                    >
+                                        <option selected disabled>Payment Type</option>
+                                        <option>Cash</option>
+                                        <option>UPI</option>
+                                        <option>Card</option>
+                                        <option>Bank Transfer</option>
+                                    </select>
+                                </div>
+                                <div className='flex flex-col w-full gap-1'>
+                                    <label className='text-xs'>Reference No</label>
+                                    <input
+                                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        name="reference"
+                                        onChange={handleChange}
+                                        type='text'
+                                    />
                                 </div>
                             </div>
                         </MainArea>
@@ -318,9 +321,9 @@ const MoneyReceipts = () => {
                         <MainArea>
                             <div className='flex flex-col justify-end gap-1 w-full'>
                                 <div className='flex flex-col w-full gap-1'>
-                                    <label className='text-xs uppercase'>Total Value</label>
+                                    <label className='text-xs'>Total Value</label>
                                     <input
-                                        className="p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600 text-end font-bold"
+                                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600 text-end font-bold"
                                         type="number"
                                         // value={parseFloat(grandTotal.total_value).toFixed(2)}
                                         readOnly

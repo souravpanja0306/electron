@@ -1,4 +1,4 @@
-const {db} = require("../database/connection");
+const { db } = require("../database/connection");
 
 exports.insertInvoiceData = async (data) => {
     try {
@@ -71,11 +71,16 @@ exports.findInvoices = async ({
 };
 
 module.exports.deleteInvoices = async ({
-
+    id = "",
 }) => {
     try {
         db.exec(require("../database/schema/invoice.schema"));
-
+        if (id) {
+            const result = db
+                .prepare("DELETE FROM invoice WHERE id = ?")
+                .run(id);
+            return { deleted: result.changes };
+        };
     } catch (error) {
         console.log(error);
     };

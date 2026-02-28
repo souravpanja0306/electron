@@ -190,8 +190,20 @@ exports.deleteInvoice = async (req, res) => {
 
         let result = await InvoiceService.findInvoices(search_key);
         if (result.length) {
-            await InvoiceService.deleteInvoices(search_key);
-
+            let result = await InvoiceService.deleteInvoices({ id: id });
+            if (result.deleted) {
+                response.status = 200;
+                response.message = "Data deleted succesfully.";
+                response.body = [];
+            } else {
+                response.status = 202;
+                response.message = "Something went wrong!";
+                response.body = [];
+            };
+        } else {
+            response.status = 202;
+            response.message = "Data not found.";
+            response.body = [];
         };
     } catch (error) {
         console.log(`Something went wrong: controller: deleteInvoice: ${error}`);

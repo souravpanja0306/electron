@@ -5,7 +5,7 @@ let token = localStorage.getItem("token");
 const usePartyStore = create((set) => ({
     parties: [],
     moneyReceiptNo: "",
-    loading: false,
+    partyLoading: false,
 
     generateMoneyReceiptNo: async () => {
         try {

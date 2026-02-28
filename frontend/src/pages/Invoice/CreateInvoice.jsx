@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import { inrToWords } from '../../utils/InWordConverter';
-import CustomToggle from '../../components/CustomToggle';
 
 // Icon...
 import {
@@ -15,16 +15,23 @@ import {
   AiOutlineTable,
   AiOutlineRollback,
 } from "react-icons/ai";
-import Alert from '../../components/Alert';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 
 
-// Functions...
-import { handleSubmit, handleGetParty, handleGenerateInvoiceNo, printInvoice } from "./InvoiceService";
+// Stores...
+import useInvoiceStore from '../../store/InvoiceStore';
+import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
+import useCompanyStore from "../../store/CompnayStore";
+import usePartyStore from "../../store/PartyStore"
 
 const CreateInvoice = () => {
-  const [isProforma, setIsProforma] = useState(true);
+  let token = localStorage.getItem("token");
+  const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
+  const { invoiceData, createInvoice, generateInvoiceNo, invoiceNo, printInvoice, invoiceLoading } = useInvoiceStore();
+  const { companyData, getAllCompany } = useCompanyStore();
+  const { parties, getAllParty, partyLoading } = usePartyStore();
+
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
 
@@ -36,7 +43,6 @@ const CreateInvoice = () => {
     total_value: 0,
     tax_amount: 0,
   });
-  const [invoiceNumber, setInvoiceNumber] = useState("")
   const [alart, setAlart] = useState({ show: false });
   const [party, setParty] = useState([]);
   const [invoiceDetails, setInvoiceDetails] = useState({
@@ -45,6 +51,7 @@ const CreateInvoice = () => {
     date: "",
     transporter: "",
     ewayBill: "",
+    billFrom: "",
     billTo: "",
     shipTo: "",
     placeOfSupply: "",
@@ -54,23 +61,24 @@ const CreateInvoice = () => {
   ]);
 
   const getPartys = async () => {
-    let result = await handleGetParty();
-    if (result.body.length) {
-      setParty(result.body);
-    };
+    let result = await getAllParty(token);
+    if (result.body.length) setParty(result.body);
   };
-  const getInvoiceNumber = async () => {
-    let result = await handleGenerateInvoiceNo();
-    setInvoiceNumber(result);
-    setInvoiceDetails(prev => ({
-      ...prev,
-      invoiceNo: result
-    }));
+
+  const generateInvoiceNumber = async () => {
+    let result = await generateInvoiceNo(token);
+    if (result.status === 200) {
+      setInvoiceDetails(prev => ({
+        ...prev,
+        invoiceNo: result.body
+      }));
+    };
   };
 
   useEffect(() => {
     getPartys();
-    getInvoiceNumber();
+    generateInvoiceNumber()
+    getAllCompany(token);
   }, []);
 
   const handleAddFields = (e) => {
@@ -90,22 +98,8 @@ const CreateInvoice = () => {
   const handleRemoveFields = (id) => {
     let invoiceData = invoiceFields.find(item => item.id == id);
     if (invoiceData) {
-      if (invoiceData.description != "") {
-        setAlart({
-          show: true,
-          title: "Error",
-          type: "error",
-          message: "You can’t delete this field because it contains data."
-        });
-        return;
-      };
-      if (invoiceData.quantity != "") {
-        setAlart({
-          show: true,
-          title: "Error",
-          type: "error",
-          message: "You can’t delete this field because it contains data."
-        });
+      if (invoiceData.description != "" || invoiceData.quantity != "") {
+        toast("You can't delete this field because it contains data.", { theme: "dark" });
         return;
       };
     };
@@ -118,11 +112,9 @@ const CreateInvoice = () => {
     value = ""
   }) => {
     setInvoiceFields(prev => {
-
       let updatedData = prev.map(item =>
         item.id === id ? { ...item, [key]: value } : item
       );
-
       let finalQuantity = 0;
       let finalValue = 0;
       updatedData.map(item => {
@@ -130,7 +122,6 @@ const CreateInvoice = () => {
         finalValue += (parseFloat(item.quantity) * parseFloat(item.rate));
       });
       setGrandTotal({ total_quantity: finalQuantity, total_value: finalValue, inWord: inrToWords(finalValue) });
-
       return updatedData;
     });
   };
@@ -140,24 +131,18 @@ const CreateInvoice = () => {
     invoiceFields
   }) => {
     try {
-      let finalData = {
-        ...invoiceDetails,
-        data: invoiceFields
-      };
-
-      let result = await handleSubmit(finalData);
+      let finalData = { ...invoiceDetails, data: invoiceFields };
+      let result = await createInvoice(finalData, token);
       if (result.status === 200) {
         setInvoiceFields([
           { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
         ]);
         setInvoiceDetails({
-          type: "tax", invoiceNo: "", date: "", transporter: "", ewayBill: "", billTo: "", shipTo: "", placeOfSupply: "",
+          type: "tax", invoiceNo: invoiceNo, date: "", transporter: "", ewayBill: "", billTo: "", shipTo: "", placeOfSupply: "",
         });
-        getInvoiceNumber();
-        setAlart({ show: true, title: "Success", type: "success", message: result.message });
-      } else {
-        setAlart({ show: true, title: "Error", type: "error", message: result.message });
       };
+      toast(result.message, { theme: "dark" });
+      await generateInvoiceNumber();
     } catch (error) {
       console.log(error);
     };
@@ -181,8 +166,6 @@ const CreateInvoice = () => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [invoiceFields, invoiceDetails]);
-
-
 
   return (
     <>
@@ -227,19 +210,19 @@ const CreateInvoice = () => {
                     />
                   </div> */}
                   <div className='flex flex-col w-full gap-1'>
-                    <label className='text-xs uppercase'>Bill From/Company</label>
+                    <label className='text-xs '>Bill From</label>
                     <div className='flex items-center gap-1'>
                       <select
                         className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                        value={invoiceDetails.billTo}
+                        value={invoiceDetails.billFrom}
                         onChange={(e) =>
-                          setInvoiceDetails({ ...invoiceDetails, billTo: e.target.value })
+                          setInvoiceDetails({ ...invoiceDetails, billFrom: e.target.value })
                         }
                         required
                       >
-                        <option value="" disabled>Select Party</option>
-                        {party?.map(item => (
-                          <option key={item.id} value={item.id}>
+                        <option value="" disabled>Select Company</option>
+                        {companyData?.body?.map((item, index) => (
+                          <option key={item.id} value={item.id} selected={index == 1}>
                             {item.company_name}
                           </option>
                         ))}
@@ -255,7 +238,7 @@ const CreateInvoice = () => {
                 </div>
                 <div className='flex flex-col w-full gap-1'>
                   <div className='flex flex-col w-full gap-1'>
-                    <label className='text-xs uppercase'>Bill To/Party</label>
+                    <label className='text-xs '>Bill To</label>
                     <div className='flex items-center gap-1'>
                       <select
                         className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
@@ -282,7 +265,7 @@ const CreateInvoice = () => {
                   </div>
                   <div className='flex flex-col w-full gap-1'>
                     <div className='flex gap-1 items-center'>
-                      <label className='text-xs uppercase'>Ship To</label>
+                      <label className='text-xs '>Ship To</label>
                       <div className='flex gap-1 items-center rounded bg-slate-200 dark:bg-slate-900 p-1'>
                         <input type='checkbox' />
                         <label className='text-xs'>Same as bill to</label>
@@ -296,7 +279,7 @@ const CreateInvoice = () => {
                 </div>
                 <div className='flex flex-col w-full gap-1'>
                   <div className='flex flex-col w-full gap-1'>
-                    <label className='text-xs uppercase'>Date</label>
+                    <label className='text-xs '>Date</label>
                     <input
                       className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                       placeholder="Date"
@@ -309,22 +292,25 @@ const CreateInvoice = () => {
                     />
                   </div>
                   <div className='flex flex-col w-full gap-1'>
-                    <label className='text-xs uppercase'>Invoice</label>
+                    <label className='text-xs '>Invoice</label>
                     <input
                       className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                       placeholder="Invoice"
                       type="text"
-                      value={invoiceNumber}
+                      value={invoiceNo}
+                      onChange={(e) =>
+                        setInvoiceDetails({ ...invoiceDetails, invoiceNo: invoiceNo })
+                      }
                       readOnly
                       required
                     />
                   </div>
                   <div className='flex flex-col w-full gap-1'>
-                    <label className='text-xs uppercase'>Place of Supply</label>
+                    <label className='text-xs '>Place of Supply</label>
                     <input
                       className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
                       // placeholder="Place"
-                      value={invoiceDetails.placeOfSupply}
+                      value={invoiceDetails.placeOfSupply ? invoiceDetails.placeOfSupply : "Kolkata"}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, placeOfSupply: e.target.value })
                       }
@@ -377,14 +363,14 @@ const CreateInvoice = () => {
                           <td className=''>
                             <div className='flex flex-col w-full gap-1'>
                               <select
-                                className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 uppercase"
+                                className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 "
                                 defaultValue=""
                                 onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "hsn" })}
                               >
                                 <option selected disabled>HSN</option>
                                 {
                                   party && party.map((item, index) => (
-                                    <option>{150250 + index}</option>
+                                    <option key={item.id}>{150250 + index}</option>
                                   ))
                                 }
                               </select>
@@ -456,33 +442,56 @@ const CreateInvoice = () => {
               <div className='w-3/4'>
                 <PageTitle>Additonal Info</PageTitle>
                 <MainArea>
-                  <div className='flex gap-1 justify-between w-full'>
-                    <div className='flex flex-col w-[250px] gap-1'>
-                      <div className='flex flex-col w-full gap-1'>
-                        <label className='text-xs uppercase'>E-Way Bill</label>
-                        <input
-                          className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                          // placeholder="E-Way Bill"
-                          type="text"
-                          value={invoiceDetails.ewayBill}
-                          onChange={(e) =>
-                            setInvoiceDetails({ ...invoiceDetails, ewayBill: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div className='flex flex-col w-full gap-1'>
-                        <label className='text-xs uppercase'>Transporter</label>
-                        <input
-                          className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
-                          // placeholder="Transporter"
-                          type="text"
-                          value={invoiceDetails.transporter}
-                          onChange={(e) =>
-                            setInvoiceDetails({ ...invoiceDetails, transporter: e.target.value })
-                          }
-                        />
-                      </div>
+                  <div className='flex flex-col w-1/2 gap-1 justify-between'>
+                    <div className='flex flex-col w-full gap-1'>
+                      <label className='text-xs '>E-Way Bill</label>
+                      <input
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                        // placeholder="E-Way Bill"
+                        type="text"
+                        value={invoiceDetails.ewayBill}
+                        onChange={(e) =>
+                          setInvoiceDetails({ ...invoiceDetails, ewayBill: e.target.value })
+                        }
+                      />
                     </div>
+                    <div className='flex flex-col w-full gap-1'>
+                      <label className='text-xs '>Transporter</label>
+                      <input
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                        // placeholder="Transporter"
+                        type="text"
+                        value={invoiceDetails.transporter}
+                        onChange={(e) =>
+                          setInvoiceDetails({ ...invoiceDetails, transporter: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className='flex flex-col w-full gap-1'>
+                      <label className='text-xs '>Lorry No</label>
+                      <input
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                        // placeholder="Transporter"
+                        type="text"
+                        value={invoiceDetails.lorry_no}
+                        onChange={(e) =>
+                          setInvoiceDetails({ ...invoiceDetails, lorry_no: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className='flex flex-col w-full gap-1'>
+                      <label className='text-xs '>LR No</label>
+                      <input
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                        // placeholder="Transporter"
+                        type="text"
+                        value={invoiceDetails.lr_no}
+                        onChange={(e) =>
+                          setInvoiceDetails({ ...invoiceDetails, lr_no: e.target.value })
+                        }
+                      />
+                    </div>
+
                   </div>
                 </MainArea>
               </div>
@@ -491,41 +500,41 @@ const CreateInvoice = () => {
                 <MainArea>
                   <div className='flex flex-col justify-end gap-1 w-full'>
                     <div className='flex justify-between w-full gap-1 font-bold'>
-                      <span className='uppercase'>Total Quantity</span>
-                      <span className='uppercase'>{parseFloat(grandTotal.total_quantity).toFixed()}</span>
+                      <span className=''>Total Quantity</span>
+                      <span className=''>{parseFloat(grandTotal.total_quantity).toFixed()}</span>
                     </div>
                     <hr />
                     <div className='flex justify-between w-full gap-1 font-bold'>
-                      <span className='uppercase'>Subtotal</span>
-                      <span className='uppercase'>{grandTotal.total_value.toLocaleString("en-IN")}</span>
+                      <span className=''>Subtotal</span>
+                      <span className=''>{grandTotal.total_value.toLocaleString("en-IN")}</span>
                     </div>
                     <hr />
                     <div className='flex justify-between w-full gap-1'>
-                      <span className='uppercase'>SGST</span>
-                      <span className='uppercase'>0</span>
+                      <span className=''>SGST</span>
+                      <span className=''>0</span>
                     </div>
                     <hr />
                     <div className='flex justify-between w-full gap-1'>
-                      <span className='uppercase'>CGST</span>
-                      <span className='uppercase'>0</span>
+                      <span className=''>CGST</span>
+                      <span className=''>0</span>
                     </div>
                     <hr />
                     <div className='flex justify-between w-full gap-1'>
-                      <span className='uppercase'>IGST</span>
-                      <span className='uppercase'>0</span>
+                      <span className=''>IGST</span>
+                      <span className=''>0</span>
                     </div>
                     <hr />
                     <div className='flex justify-between w-full gap-1'>
-                      <span className='uppercase'>Round-Off</span>
-                      <span className='uppercase'>0</span>
+                      <span className=''>Round-Off</span>
+                      <span className=''>0</span>
                     </div>
                     <hr />
                     <div className='text-lg flex justify-between w-full gap-1 font-bold'>
-                      <span className='uppercase'>Grand Value</span>
-                      <span className='uppercase'>{grandTotal.total_value.toLocaleString("en-IN")}</span>
+                      <span className=''>Grand Value</span>
+                      <span className=''>{grandTotal.total_value.toLocaleString("en-IN")}</span>
                     </div>
                     <div className='bg-white flex flex-col justify-between w-full gap-1 text-black p-1 rounded'>
-                      <span className='uppercase font-bold'>In Rupess :</span>
+                      <span className=' font-bold'>In Rupess :</span>
                       <span className=''>{grandTotal.inWord}</span>
                     </div>
                   </div>
@@ -535,14 +544,7 @@ const CreateInvoice = () => {
           </div>
         </form>
       </div>
-
-      <Alert
-        open={alart.show}
-        type={alart.type}
-        title={alart.title}
-        message={alart.message}
-        onClose={() => setAlart({ ...alart, show: false })}
-      />
+      <ToastContainer />
     </>
   )
 }

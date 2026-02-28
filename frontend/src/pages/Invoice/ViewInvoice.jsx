@@ -1,76 +1,60 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
+import { ToastContainer, toast } from 'react-toastify';
 
 // Icon...
-import { AiOutlineFileAdd, AiOutlineSync, AiOutlinePrinter, AiOutlineDownload } from "react-icons/ai";
+import {
+    AiOutlineFileAdd,
+    AiOutlineSync,
+    AiOutlinePrinter,
+    AiOutlineDownload,
+    AiOutlineFilter,
+    AiOutlineDelete
+} from "react-icons/ai";
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
-import Alert from '../../components/Alert';
+import CustomLoader from "../../components/CustomLoader";
 
-// Service...
-import { handleGetParty, handleGetAllInvoice, printInvoice, generateInvoice } from "./InvoiceService"
+// Stores...
+import useInvoiceStore from '../../store/InvoiceStore';
+import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
+import useCompanyStore from "../../store/CompnayStore";
+import usePartyStore from "../../store/PartyStore"
 
 
 const ViewInvoices = () => {
+    let token = localStorage.getItem("token");
+    const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
+    const { invoiceData, getAllInvoice, deleteInvoice, printInvoice, invoiceLoading } = useInvoiceStore();
+    const { companyData, getAllCompany } = useCompanyStore();
+    const { parties, getAllParty, partyLoading } = usePartyStore();
+
     const navigate = useNavigate();
     const [alart, setAlart] = useState({ show: false });
-    const [invoices, setInvoices] = useState([]);
-
-    const getAllInvoice = async () => {
-        let result = await handleGetAllInvoice({});
-        setInvoices(result);
-    };
 
     useEffect(() => {
-        getAllInvoice();
+        getAllInvoice({ token: token });
     }, []);
 
-    const [checkedIds, setCheckedIds] = useState([]);
+    const [checkedIds, setCheckedIds] = useState(null);
     const handleChecked = (e, id) => {
-        // setParty(prev =>
-        //     prev.map(item =>
-        //         item.id === id ? { ...item, is_selected: e.target.checked } : item
-        //     )
-        // );
-        // setCheckedIds(prev =>
-        //     e.target.checked ? [...prev, id] : prev.filter(itemId => itemId !== id)
-        // );
-    };
-
-    const handleSelectAll = (e) => {
-        // const checked = e.target.checked;
-        // setParty(prev =>
-        //     prev.map(item => ({ ...item, is_selected: checked })),
-        // );
-        // setCheckedIds(checked ? party.map(item => item.id) : []);
+        setCheckedIds(null);
+        if (e.target.checked) setCheckedIds(id);
     };
 
     const handleDelete = async () => {
         try {
-            // if (!checkedIds.length) {
-            //     setAlart({
-            //         show: true,
-            //         title: "Error",
-            //         type: "error",
-            //         message: "Please select data."
-            //     });
-            // } else {
-            //     await window.api.deleteParty({ ids: checkedIds }).then((res) => {
-            //         if (res.status === 200) {
-            //             setCheckedIds([])
-            //         };
-            //     });
-            //     await window.api.getParty({}).then((data) => {
-            //         setParty(data.body);
-            //     });
-
-            // };
+            if (checkedIds == null) toast("Please select which one you want to delete.", { theme: "dark" });
+            let result = await deleteInvoice({ id: checkedIds, token: token });
+            if (result) {
+                getAllInvoice({ token: token });
+            };
+            toast(result.message, { theme: "dark" });
         } catch (error) {
             console.log(error);
         };
@@ -92,6 +76,7 @@ const ViewInvoices = () => {
         return () => window.removeEventListener('keydown', onKey);
     }, []);
 
+    if (invoiceLoading) return <CustomLoader />;
     return (
         <>
             <PageTitle>View All Invoice</PageTitle>
@@ -100,18 +85,21 @@ const ViewInvoices = () => {
                     <div className="flex justify-between w-full">
                         <div className="flex gap-1">
                             <Link to="/create-invoice">
-                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
-                            <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                            <div onClick={(e) => handleDelete(e)} className={`${!checkedIds ? "hidden" : "block"}`}>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                             </div>
                             <div onClick={(e) => handleDelete(e)}>
                                 <CustomButton title={"Export (Ctrl+E)"} color={"blue"}><AiOutlineDownload /></CustomButton>
                             </div>
                         </div>
                         <div className="flex gap-1">
-                            <div onClick={(e) => getAllInvoice(e)}>
+                            <div onClick={(e) => getAllInvoice({ token: token })}>
                                 <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
+                            </div>
+                            <div onClick={(e) => getAllInvoice({ token: token })}>
+                                <CustomButton title={"Filter"} color={"blue"}><AiOutlineFilter /></CustomButton>
                             </div>
                         </div>
                     </div>
@@ -120,9 +108,7 @@ const ViewInvoices = () => {
                     <table className="table-fixed w-full overflow-auto">
                         <thead>
                             <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
-                                <th className="p-1 text-start w-8">
-                                    <input type="checkbox" onChange={(e) => handleSelectAll(e)} />
-                                </th>
+                                <th className="p-1 text-start text-slate-500">Select</th>
                                 <th className="p-1 text-start text-slate-500">Invoice No</th>
                                 <th className="p-1 text-start text-slate-500">Bill To</th>
                                 <th className="p-1 text-start text-slate-500">Date</th>
@@ -136,17 +122,17 @@ const ViewInvoices = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {invoices && invoices.length
+                            {invoiceData.body && invoiceData.body.length
                                 ?
                                 <>
-                                    {invoices.map((item, index) => {
+                                    {invoiceData?.body?.map((item, index) => {
                                         return (
                                             <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                                 <td className="p-1 text-start truncate capitalize">
                                                     <input
                                                         type="checkbox"
+                                                        checked={checkedIds === item.id}
                                                         onChange={(e) => handleChecked(e, item.id)}
-                                                        checked={item.is_selected}
                                                     />
                                                 </td>
                                                 <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
@@ -187,14 +173,7 @@ const ViewInvoices = () => {
                     </table>
                 </MainArea>
             </div >
-
-            <Alert
-                open={alart.show}
-                type={alart.type}
-                title={alart.title}
-                message={alart.message}
-                onClose={() => setAlart({ ...alart, show: false })}
-            />
+            <ToastContainer />
         </>
     )
 }

@@ -26,8 +26,16 @@ exports.signup = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { name, mobile, email, username, password, machineId } = req.body;
-        console.log("🚀 ~  req.body:", req.body)
-        dd
+        if (!name) return errorHandler(res, 400, "name Required.");
+        if (!mobile) return errorHandler(res, 400, "mobile Required.");
+        if (!email) return errorHandler(res, 400, "email Required.");
+        if (!username) return errorHandler(res, 400, "username Required.");
+        if (!password) return errorHandler(res, 400, "Password Required.");
+        if (!machineId) return errorHandler(res, 400, "machineId Required.");
+
+        let isMachineIdExist = await UserService.getUsers({ machine_id: machineId });
+        if (isMachineIdExist.length) return errorHandler(res, 409, "This Machine is already registered.");
+
         let isEmailExist = await UserService.getUsers({ email: email });
         if (isEmailExist.length) return errorHandler(res, 409, "Email is already registered.");
 
@@ -55,8 +63,8 @@ exports.signup = async (req, res) => {
 
             let newLicenseData = {
                 license_key: generateLicenseKey(),
-                machine_id: machineId,
-                user_id: result.id,
+                machine_id: machineId ? machineId : "",
+                user_id: result.id ? result.id : "",
                 plan: "FREE",
                 max_devices: 1,
                 start_date: startDate,
@@ -76,7 +84,7 @@ exports.signup = async (req, res) => {
             response.status = 200;
             response.message = "Sign-up successful.";
             response.body = {
-                license_key : licenseData.license_key,
+                license_key: licenseData && licenseData.license_key ? licenseData.license_key : "",
                 name: result.name,
                 id: result.id,
                 token: token,

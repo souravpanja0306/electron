@@ -3,7 +3,7 @@ import axios from "axios";
 
 const useGstStore = create((set) => ({
     gstData: [],
-    loading: false,
+    gstLoading: false,
 
     getAllGst: async (token) => {
         try {

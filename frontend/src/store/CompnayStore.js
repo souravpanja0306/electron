@@ -1,12 +1,31 @@
 import { create } from "zustand";
 import axios from "axios";
-let token = localStorage.getItem("token");
 
 const useCompanyStore = create((set) => ({
     companyData: [],
     companyLoading: false,
 
-    getAllCompany: async () => {
+    createCompany: async (payload, token) => {
+        try {
+            set({ companyLoading: true });
+            const result = await axios({
+                method: "post",
+                url: "http://localhost:3001/api/v1/company/create-company",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: payload,
+            });
+            set({ companyData: result.data, companyLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ companyLoading: false });
+            throw error;
+        };
+    },
+
+    getAllCompany: async (token) => {
         try {
             set({ companyLoading: true });
             const result = await axios({
