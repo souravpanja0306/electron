@@ -92,7 +92,7 @@ const CreateParty = () => {
 
     return (
         <>
-            <PageTitle>Add/Update Company</PageTitle>
+            <PageTitle>Add New Company</PageTitle>
 
             <div className='flex flex-col gap-1'>
                 <ActionArea>
@@ -105,7 +105,7 @@ const CreateParty = () => {
                     <div onClick={(e) => handleSubmit(e)}>
                         <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </div>
-                    <Link to="/comapny">
+                    <Link to="/company">
                         <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </Link>
                 </ActionArea>

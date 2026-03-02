@@ -4,6 +4,7 @@ const router = express.Router()
 
 // Controllers...
 const ReportController = require("../controller/report.controller");
+const PartyController = require("../controller/party.controller");
 
 // Middleware...
 const middleware = require("../middleware/middleware");

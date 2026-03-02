@@ -12,7 +12,7 @@ module.exports = `
     payment_mode TEXT,
     reference TEXT,
 
-    total_value TEXT,
+    total_value INTEGER,
 
     created_by INTEGER,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,

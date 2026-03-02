@@ -1,4 +1,4 @@
-const {db} = require("../database/connection");
+const { db } = require("../database/connection");
 
 exports.insertMoneyReceipts = async (data) => {
     try {
@@ -63,7 +63,7 @@ module.exports.deleteMoneyReceipt = async ({
     id = "",
 }) => {
     try {
-        db.exec(require("../database/schema/invoice.schema"));
+        db.exec(require("../database/schema/moneyReceipts.schema"));
         if (!id) throw new Error("ID is required");
 
         let query = "DELETE FROM money_receipts WHERE id = ?";

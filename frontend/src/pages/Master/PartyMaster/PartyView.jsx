@@ -7,12 +7,19 @@ import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 // Icon...
-import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDownload, AiOutlineDelete } from "react-icons/ai";
+import {
+    AiOutlineFileAdd,
+    AiOutlineSync,
+    AiOutlineDownload,
+    AiOutlineDelete,
+    AiOutlineFilter
+} from "react-icons/ai";
 
 // Services...
 import { handleGetParty } from "./PartyService"
 
 const ViewParty = () => {
+    const [page, setPage] = useState(1);
     const [party, setParty] = useState([]);
 
     const getPartys = async () => {
@@ -26,24 +33,10 @@ const ViewParty = () => {
         getPartys();
     }, []);
 
-    const [checkedIds, setCheckedIds] = useState([]);
+    const [checkedIds, setCheckedIds] = useState(null);
     const handleChecked = (e, id) => {
-        setParty(prev =>
-            prev.map(item =>
-                item.id === id ? { ...item, is_selected: e.target.checked } : item
-            )
-        );
-        setCheckedIds(prev =>
-            e.target.checked ? [...prev, id] : prev.filter(itemId => itemId !== id)
-        );
-    };
-
-    const handleSelectAll = (e) => {
-        const checked = e.target.checked;
-        setParty(prev =>
-            prev.map(item => ({ ...item, is_selected: checked })),
-        );
-        setCheckedIds(checked ? party.map(item => item.id) : []);
+        setCheckedIds(null);
+        if (e.target.checked) setCheckedIds(id);
     };
 
     const handleDelete = async () => {
@@ -84,6 +77,13 @@ const ViewParty = () => {
         return () => window.removeEventListener('keydown', onKey);
     }, []);
 
+    const limit = 10;
+    const total = 0;
+    const totalPages = Math.ceil(total / limit);
+
+    const start = (page - 1) * limit + 1;
+    const end = Math.min(page * limit, total);
+
     return (
         <>
             <PageTitle>View All Party</PageTitle>
@@ -105,6 +105,9 @@ const ViewParty = () => {
                             <div onClick={(e) => getPartys(e)}>
                                 <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
                             </div>
+                            <div onClick={(e) => getPartys(e)}>
+                                <CustomButton title={"Filter"} color={"blue"}><AiOutlineFilter /></CustomButton>
+                            </div>
                         </div>
                     </div>
                 </ActionArea>
@@ -112,9 +115,7 @@ const ViewParty = () => {
                     <table className="table-fixed w-full">
                         <thead>
                             <tr className="border-b border-slate-600 p-1 ">
-                                <th className="p-1 text-start w-8">
-                                    <input type="checkbox" onChange={(e) => handleSelectAll(e)} />
-                                </th>
+                                <th className="p-1 text-start w-8">Select</th>
                                 <th className="p-1 text-start">Company</th>
                                 <th className="p-1 text-start">Mobile</th>
                                 <th className="p-1 text-start">Email</th>
@@ -138,7 +139,7 @@ const ViewParty = () => {
                                                             <input
                                                                 type="checkbox"
                                                                 onChange={(e) => handleChecked(e, item.id)}
-                                                                checked={item.is_selected}
+                                                                checked={checkedIds === item.id}
                                                             />
                                                         </td>
                                                         <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">
@@ -170,6 +171,31 @@ const ViewParty = () => {
                         </tbody>
                     </table>
                 </MainArea>
+                <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
+                    <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            disabled={page === 1}
+                            onClick={() => setPage(page - 1)}
+                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                            Prev
+                        </button>
+                        {[...Array(totalPages)].map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setPage(i + 1)}
+                                className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
+                                {i + 1}
+                            </button>
+                        ))}
+                        <button
+                            disabled={page === totalPages}
+                            onClick={() => setPage(page + 1)}
+                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                            Next
+                        </button>
+                    </div>
+                </div>
             </div >
         </>
     )

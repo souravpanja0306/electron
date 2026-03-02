@@ -100,7 +100,7 @@ const PartyCreate = () => {
 
     return (
         <>
-            <PageTitle>Add/Update Party</PageTitle>
+            <PageTitle>Add New Party</PageTitle>
 
             <div className='flex flex-col gap-1'>
                 <ActionArea>
@@ -114,7 +114,7 @@ const PartyCreate = () => {
                         <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </div>
                     <Link to="/party">
-                        <CustomButton title={"View (Ctrl+I)"} color={"yellow"}><AiOutlineFileAdd /></CustomButton>
+                        <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </Link>
                 </ActionArea>
 

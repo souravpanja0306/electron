@@ -1,3 +1,5 @@
+import { Link, NavLink } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import PageTitle from '../../components/PageTitle';
@@ -5,8 +7,6 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import { inrToWords } from '../../utils/InWordConverter';
-import useMoneyReceiptStore from '../../store/MoneyReceiptStore';
-import usePartyStore from '../../store/PartyStore';
 
 // Icon...
 import {
@@ -17,9 +17,9 @@ import {
     AiOutlineTable,
     AiOutlineRollback,
 } from "react-icons/ai";
-import Alert from '../../components/Alert';
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Link, NavLink } from "react-router-dom";
+
+import useMoneyReceiptStore from '../../store/MoneyReceiptStore';
+import usePartyStore from '../../store/PartyStore';
 import useCompanyStore from '../../store/CompnayStore';
 
 const MoneyReceipts = () => {
@@ -29,7 +29,7 @@ const MoneyReceipts = () => {
     const { companyData, getAllCompany } = useCompanyStore();
 
     useEffect(() => {
-        generateMoneyReceiptNo();
+        generateMoneyReceiptNo(token);
         getAllParty();
         getAllCompany(token);
     }, []);
@@ -38,9 +38,7 @@ const MoneyReceipts = () => {
         { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", amount: "", },
     ]);
     const [form, setForm] = useState(
-        { company_id: "", party_id: "", receipt_no: "", 
-            receipt_date: moment().format("YYYY-MM-DD"), data: data, 
-            remarks: "",  }
+        { company_id: "", party_id: "", receipt_no: "", receipt_date: moment().format("YYYY-MM-DD"), data: data, remarks: "" }
     );
 
     const handleChange = (e) => {
@@ -57,7 +55,7 @@ const MoneyReceipts = () => {
 
     const handleSubmitForm = async (e) => {
         e.preventDefault();
-        await createMoneyReceipts(form);
+        await createMoneyReceipts({ payload: form, token: token });
     };
 
     const printInvoice = (e) => {
@@ -117,7 +115,6 @@ const MoneyReceipts = () => {
                         <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
                     </div>
                 </ActionArea>
-                <br />
 
                 <PageTitle>Recipient Details</PageTitle>
                 <MainArea>
@@ -134,15 +131,15 @@ const MoneyReceipts = () => {
                                         onChange={handleChange}
                                         required
                                     >
-                                        <option value="" disabled>Select Company</option>
+                                        <option value="" disabled selected>Select Company</option>
                                         {companyData?.body?.map((item, index) => (
-                                            <option key={item.id} value={item.id} selected={index == 0}>
+                                            <option key={item.id} value={item.id}>
                                                 {item.company_name}
                                             </option>
                                         ))}
                                     </select>
                                     <Link
-                                        to="/add-party?back=true"
+                                        to="/add-company?back=true"
                                         className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
                                     >
                                         + Add New
@@ -204,8 +201,6 @@ const MoneyReceipts = () => {
                         </div>
                     </div>
                 </MainArea>
-
-                <br />
 
                 <PageTitle>Information</PageTitle>
                 <MainArea>

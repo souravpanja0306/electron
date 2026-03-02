@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from "axios";
-let token = localStorage.getItem("token");
 
 const useMoneyReceiptStore = create((set) => ({
     moneyReceipts: [],
@@ -8,7 +7,7 @@ const useMoneyReceiptStore = create((set) => ({
     loading: false,
     downloadLoading: false,
 
-    generateMoneyReceiptNo: async () => {
+    generateMoneyReceiptNo: async (token) => {
         try {
             set({ loading: true });
             const result = await axios({
@@ -27,7 +26,7 @@ const useMoneyReceiptStore = create((set) => ({
         };
     },
 
-    getAllMoneyReceipts: async () => {
+    getAllMoneyReceipts: async (token) => {
         try {
             set({ loading: true });
             const result = await axios({
@@ -46,7 +45,10 @@ const useMoneyReceiptStore = create((set) => ({
         };
     },
 
-    downloadMoneyReceipts: async (id) => {
+    downloadMoneyReceipts: async ({
+        id = "",
+        token = ""
+    }) => {
         try {
             set({ downloadLoading: true });
             const result = await axios({
@@ -65,7 +67,10 @@ const useMoneyReceiptStore = create((set) => ({
         };
     },
 
-    createMoneyReceipts: async (payload) => {
+    createMoneyReceipts: async ({
+        payload = "",
+        token = ""
+    }) => {
         try {
             set({ loading: true });
             const res = await axios({
@@ -85,7 +90,10 @@ const useMoneyReceiptStore = create((set) => ({
         };
     },
 
-    deleteMoneyReceipts: async (id) => {
+    deleteMoneyReceipts: async ({
+        id = "",
+        token = ""
+    }) => {
         try {
             set({ downloadLoading: true });
             const result = await axios({

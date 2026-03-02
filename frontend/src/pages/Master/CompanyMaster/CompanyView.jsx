@@ -7,9 +7,15 @@ import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 // Icon...
-import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDownload } from "react-icons/ai";
+import {
+    AiOutlineFileAdd,
+    AiOutlineSync,
+    AiOutlineDownload,
+    AiOutlineFilter
+} from "react-icons/ai";
 
 const ViewCompany = () => {
+    const [page, setPage] = useState(1);
     const [party, setParty] = useState([]);
 
     // const getPartys = async () => {
@@ -23,7 +29,7 @@ const ViewCompany = () => {
         // getPartys();
     }, []);
 
-    const [checkedIds, setCheckedIds] = useState([]);
+    const [checkedIds, setCheckedIds] = useState(null);
     const handleChecked = (e, id) => {
         setParty(prev =>
             prev.map(item =>
@@ -81,6 +87,13 @@ const ViewCompany = () => {
         return () => window.removeEventListener('keydown', onKey);
     }, []);
 
+    const limit = 10;
+    const total = 0;
+    const totalPages = Math.ceil(total / limit);
+
+    const start = (page - 1) * limit + 1;
+    const end = Math.min(page * limit, total);
+
     return (
         <>
             <PageTitle>View All Company</PageTitle>
@@ -89,15 +102,18 @@ const ViewCompany = () => {
                     <div className="flex justify-between w-full">
                         <div className="flex gap-1">
                             <Link to="/add-company">
-                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
-                            <div>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                            <div onClick={(e) => handleDelete(e)} className={`${!checkedIds ? "hidden" : "block"}`}>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
                             </div>
                         </div>
                         <div className="flex gap-1">
                             <div>
                                 <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
+                            </div>
+                            <div>
+                                <CustomButton title={"Filter"} color={"blue"}><AiOutlineFilter /></CustomButton>
                             </div>
                         </div>
                     </div>
@@ -106,17 +122,15 @@ const ViewCompany = () => {
                     <table className="table-fixed w-full">
                         <thead>
                             <tr className="border-b border-slate-300 dark:border-slate-600 p-1 ">
-                                <th className="p-1 text-start w-8">
-                                    <input type="checkbox" onChange={(e) => handleSelectAll(e)} />
-                                </th>
-                                <th className="p-1 text-start">Company</th>
-                                <th className="p-1 text-start">Mobile</th>
-                                <th className="p-1 text-start">Email</th>
-                                <th className="p-1 text-start">Owner</th>
-                                <th className="p-1 text-start">Pan</th>
-                                <th className="p-1 text-start">GST</th>
-                                <th className="p-1 text-start">Trade Licence</th>
-                                <th className="p-1 text-start">Bank a/c No</th>
+                                <th className="p-1 text-start truncate">Select</th>
+                                <th className="p-1 text-start truncate">Company</th>
+                                <th className="p-1 text-start truncate">Mobile</th>
+                                <th className="p-1 text-start truncate">Email</th>
+                                <th className="p-1 text-start truncate">Owner</th>
+                                <th className="p-1 text-start truncate">Pan</th>
+                                <th className="p-1 text-start truncate">GST</th>
+                                <th className="p-1 text-start truncate">Trade Licence</th>
+                                <th className="p-1 text-start truncate">Bank a/c No</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -132,7 +146,7 @@ const ViewCompany = () => {
                                                             <input
                                                                 type="checkbox"
                                                                 onChange={(e) => handleChecked(e, item.id)}
-                                                                checked={item.is_selected}
+                                                                checked={checkedIds === item.id}
                                                             />
                                                         </td>
                                                         <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">

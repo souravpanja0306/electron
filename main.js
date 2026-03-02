@@ -9,8 +9,8 @@ app.whenReady().then(() => {
     const win = new BrowserWindow({
         frame: false,
         titleBarStyle: "hidden",
-        width: 1400,
-        height: 800,
+        width: 1000,
+        height: 500,
         minWidth: 600,
         minHeight: 300,
         webPreferences: {
@@ -25,9 +25,9 @@ app.whenReady().then(() => {
 
 
     win.webContents.openDevTools(); // For Permanents for Developments.
-    // globalShortcut.register("Control+Shift+I", () => {
-    //     win.webContents.openDevTools();
-    // });
+    globalShortcut.register("Control+Shift+I", () => {
+        win.webContents.openDevTools();
+    });
     ipcMain.on("minimize", () => win.minimize());
     ipcMain.on("maximize", () => { win.isMaximized() ? win.unmaximize() : win.maximize() });
     ipcMain.on("close", () => {

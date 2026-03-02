@@ -5,6 +5,7 @@ const moment = require("moment");
 const contents = require("../content/contents");
 
 // Services...
+const ReportService = require("../service/report.service");
 const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
@@ -16,7 +17,13 @@ const errorHandler = (res, status, message) => {
 exports.debtors = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
+        const { party_id } = req.query;
 
+        const result = await ReportService.getDebtors({ party_id: party_id });
+
+        response.status = 200;
+        response.message = "Ledger fetched successfully";
+        response.body = result;
     } catch (error) {
         console.log(`Something went wrong: controller: debtors: ${error}`);
         response.status = error.status ? error.status : 500;
