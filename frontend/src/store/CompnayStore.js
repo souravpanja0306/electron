@@ -17,7 +17,9 @@ const useCompanyStore = create((set) => ({
                 },
                 data: payload,
             });
-            set({ companyData: result.data, companyLoading: false });
+            if (result.data.status === 200) {
+                set({ companyData: result.data.body, companyLoading: false });
+            };
             return result.data;
         } catch (error) {
             set({ companyLoading: false });
@@ -36,7 +38,9 @@ const useCompanyStore = create((set) => ({
                     Authorization: `Bearer ${token}`,
                 },
             });
-            set({ companyData: result.data, companyLoading: false });
+            if (result.data.status === 200) {
+                set({ companyData: result.data.body, companyLoading: false });
+            };
             return result.data;
         } catch (error) {
             set({ companyLoading: false });

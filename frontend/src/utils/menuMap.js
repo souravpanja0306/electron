@@ -74,7 +74,7 @@ const MenuMap = {
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [
-                { title: "Party Ladger", url: "/sales-reports", icon: <AiOutlinePlusSquare /> },
+                // { title: "Party Ladger", url: "/sales-reports", icon: <AiOutlinePlusSquare /> },
                 { title: "Debtors", url: "/debtors", icon: <AiOutlineFileSearch /> },
                 { title: "Creditors", url: "/creditors", icon: <AiOutlineFileSearch /> },
             ],

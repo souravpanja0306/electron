@@ -62,7 +62,7 @@ exports.createInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId, t_mobile, t_username, t_name, company, type, invoiceNo,
-            date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply,
+            date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, gst
         } = req.body;
 
         if (!billTo) return errorHandler(res, 400, "Please select Party.");

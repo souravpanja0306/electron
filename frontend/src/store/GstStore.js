@@ -7,7 +7,7 @@ const useGstStore = create((set) => ({
 
     getAllGst: async (token) => {
         try {
-            set({ loading: true });
+            set({ gstLoading: true });
             const result = await axios({
                 method: "get",
                 url: "http://localhost:3001/api/v1/admin/get-all-gst",
@@ -15,18 +15,24 @@ const useGstStore = create((set) => ({
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
+                validateStatus: (status) => status < 500,
             });
-            set({ gstData: result.data, loading: false });
+            if (result.data.status === 200) {
+                set({ gstData: result.data.body, gstLoading: false });
+            };
             return result.data;
         } catch (error) {
-            set({ loading: false });
+            set({ gstLoading: false });
             throw error;
         };
     },
 
-    createGst: async (payload, token) => {
+    createGst: async ({
+        data = "",
+        token = ""
+    }) => {
         try {
-            set({ loading: true });
+            set({ gstLoading: true });
             const res = await axios({
                 method: "post",
                 url: "http://localhost:3001/api/v1/admin/create-gst",
@@ -34,15 +40,15 @@ const useGstStore = create((set) => ({
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                data: payload,
+                data: data,
             });
             set((state) => ({
                 gstData: [...state.gstData, res.data],
-                loading: false,
+                gstLoading: false,
             }));
             return res.data;
         } catch (error) {
-            set({ loading: false });
+            set({ gstLoading: false });
             throw error;
         };
     },

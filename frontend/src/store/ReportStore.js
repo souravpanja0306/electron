@@ -19,7 +19,9 @@ const useReportStore = create((set) => ({
                     Authorization: `Bearer ${token}`,
                 },
             });
-            set({ reportData: result.data, reportLoading: false });
+            if (result.data.status === 200) {
+                set({ reportData: result.data.body, reportLoading: false });
+            };
             return result.data;
         } catch (error) {
             set({ reportLoading: false });

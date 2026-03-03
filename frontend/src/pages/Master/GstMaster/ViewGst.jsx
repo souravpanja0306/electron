@@ -58,8 +58,8 @@ const GstTable = () => {
             </thead>
             <tbody>
               {
-                gstData?.body?.length ?
-                  gstData?.body?.map((item) => (
+                gstData?.length ?
+                  gstData?.map((item) => (
                     <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                       <td className="p-1 text-start truncate capitalize">
                         <input

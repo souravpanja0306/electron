@@ -108,7 +108,7 @@ const ViewMoneyReceipts = () => {
                     <table className="table-fixed w-full overflow-auto">
                         <thead>
                             <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
-                                <th className="p-1 text-start truncate">Select</th>
+                                <th className="p-1 text-start truncate w-24">Select</th>
                                 <th className="p-1 text-start truncate">Receipt No</th>
                                 <th className="p-1 text-start truncate">Receipt Date</th>
                                 <th className="p-1 text-start truncate">Party</th>

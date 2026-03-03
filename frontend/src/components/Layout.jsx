@@ -223,7 +223,7 @@ const Layout = ({ children }) => {
                         </div>
                         <div
                             onClick={(e) => handleSignOut(e)}
-                            className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${"hover:bg-red-600 hover:text-slate-900 hover:dark:text-slate-300 text-slate-500"}`}
+                            className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${"hover:bg-red-600 hover:text-white hover:dark:text-slate-300 text-slate-500"}`}
                             title="Signout"
                         >
                             <AiOutlineLogout />

@@ -5,6 +5,7 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import { inrToWords } from '../../utils/InWordConverter';
+import moment from 'moment';
 
 // Icon...
 import {
@@ -23,7 +24,8 @@ import { Link, NavLink } from "react-router-dom";
 import useInvoiceStore from '../../store/InvoiceStore';
 import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
 import useCompanyStore from "../../store/CompnayStore";
-import usePartyStore from "../../store/PartyStore"
+import usePartyStore from "../../store/PartyStore";
+import useGstStore from "../../store/GstStore";
 
 const CreateInvoice = () => {
   let token = localStorage.getItem("token");
@@ -31,6 +33,7 @@ const CreateInvoice = () => {
   const { invoiceData, createInvoice, generateInvoiceNo, invoiceNo, printInvoice, invoiceLoading } = useInvoiceStore();
   const { companyData, getAllCompany } = useCompanyStore();
   const { parties, getAllParty, partyLoading } = usePartyStore();
+  const { gstData, getAllGst, gstLoading } = useGstStore();
 
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
@@ -48,7 +51,7 @@ const CreateInvoice = () => {
   const [invoiceDetails, setInvoiceDetails] = useState({
     type: "tax",
     invoiceNo: "",
-    date: "",
+    date: moment().format("YYYY-MM-DD"),
     transporter: "",
     ewayBill: "",
     billFrom: "",
@@ -57,7 +60,7 @@ const CreateInvoice = () => {
     placeOfSupply: "",
   });
   const [invoiceFields, setInvoiceFields] = useState([
-    { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
+    { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0, gst: 0 },
   ]);
 
   const getPartys = async () => {
@@ -79,6 +82,7 @@ const CreateInvoice = () => {
     getPartys();
     generateInvoiceNumber()
     getAllCompany(token);
+    getAllGst(token)
   }, []);
 
   const handleAddFields = (e) => {
@@ -135,10 +139,10 @@ const CreateInvoice = () => {
       let result = await createInvoice(finalData, token);
       if (result.status === 200) {
         setInvoiceFields([
-          { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0 },
+          { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0, gst: 0 },
         ]);
         setInvoiceDetails({
-          type: "tax", invoiceNo: invoiceNo, date: "", transporter: "", ewayBill: "", billTo: "", shipTo: "", placeOfSupply: "",
+          type: "tax", invoiceNo: invoiceNo, date: moment().format("YYYY-MM-DD"), transporter: "", ewayBill: "", billTo: "", shipTo: "", placeOfSupply: "",
         });
       };
       toast(result.message, { theme: "dark" });
@@ -221,7 +225,7 @@ const CreateInvoice = () => {
                         required
                       >
                         <option value="" disabled>Select Company</option>
-                        {companyData?.body?.map((item, index) => (
+                        {companyData?.map((item, index) => (
                           <option key={item.id} value={item.id} selected={index == 1}>
                             {item.company_name}
                           </option>
@@ -330,11 +334,11 @@ const CreateInvoice = () => {
                   <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
                     <th className='w-12'>Sl. No.</th>
                     <th className=''>Description</th>
-                    <th className=''>HSN</th>
-                    <th className='w-12'>Quantity</th>
+                    <th className='w-24'>HSN</th>
+                    <th className='w-24'>Quantity</th>
                     <th className='w-24'>Rate</th>
                     <th className='w-24'>Subtotal</th>
-                    <th className='w-12'>Tax</th>
+                    <th className='w-24'>Tax</th>
                     <th className='w-24'>Grand Total</th>
                     <th className='w-12'>#</th>
                   </tr>
@@ -403,12 +407,28 @@ const CreateInvoice = () => {
                             />
                           </td>
                           <td className=''>
-                            <input
-                              className="w-full h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
-                              value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
-                              type='number'
-                              readOnly
-                            />
+                            <div className='flex flex-col w-full gap-1'>
+                              {
+                                gstData && gstData.length ?
+                                  <select
+                                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-300 dark:border-slate-600"
+                                    onChange={(e) => { handleChange({ value: e.target.value, id: item.id, key: "gst" }); }}
+                                    required
+                                  >
+                                    <option value="" disabled>Select GST</option>
+                                    {gstData?.map((g, i) => (
+                                      <option key={g.id} value={g.total_rate} selected={(i === 0)}>
+                                        {g.title}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  : <Link
+                                    to="/create-gst?back=true"
+                                    className="text-center h-8 p-1 rounded w-full text-slate-900 border hover:bg-blue-600 hover:text-white border-slate-300 dark:border-slate-600">
+                                    Create New
+                                  </Link>
+                              }
+                            </div>
                           </td>
                           <td className=''>
                             <input

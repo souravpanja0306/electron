@@ -132,7 +132,7 @@ const MoneyReceipts = () => {
                                         required
                                     >
                                         <option value="" disabled selected>Select Company</option>
-                                        {companyData?.body?.map((item, index) => (
+                                        {companyData?.map((item, index) => (
                                             <option key={item.id} value={item.id}>
                                                 {item.company_name}
                                             </option>

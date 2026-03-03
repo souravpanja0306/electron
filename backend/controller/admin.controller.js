@@ -52,7 +52,7 @@ module.exports.createHsnSac = async (req, res) => {
         if (type) search_key["type"] = type;
 
         let isExits = await AdminService.findHSNSAC(search_key);
-        if (isExits.length) return errorHandler(res, 400, "This Data is Allready Created.");
+        if (isExits.length) return errorHandler(res, 409, "This Data is Allready Created.");
 
         let finalData = {
             code: code,
@@ -138,7 +138,7 @@ module.exports.createGST = async (req, res) => {
         if (total_rate) search_key["total_rate"] = total_rate;
 
         let isExits = await AdminService.findGST(search_key);
-        if (isExits.length) return errorHandler(res, 400, "This Data is Allready Created.");
+        if (isExits.length) return errorHandler(res, 409, "This Data is Allready Created.");
 
         let finalData = {
             title: title,

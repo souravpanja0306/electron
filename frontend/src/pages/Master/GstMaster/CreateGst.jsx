@@ -5,7 +5,6 @@ import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
 import { inrToWords } from '../../../utils/InWordConverter';
 import CustomToggle from '../../../components/CustomToggle';
-import Alert from '../../../components/Alert';
 
 // Icon...
 import {
@@ -21,6 +20,7 @@ import { Link, NavLink } from "react-router-dom";
 import useGstStore from '../../../store/GstStore';
 
 const CreateGst = () => {
+  let token = localStorage.getItem("token");
   const { gstData, getAllGst, createGst, loading } = useGstStore();
 
   const [isProforma, setIsProforma] = useState(true);
@@ -31,15 +31,20 @@ const CreateGst = () => {
 
   const [gst, setGst] = useState({
     title: "",
-    total_rate: 0,
-    cgst: 0,
-    sgst: 0,
-    igst: 0,
+    total_rate: "",
+    cgst: "",
+    sgst: "",
+    igst: "",
     type: "percentage"
   });
 
   const submitData = async (e) => {
-    let result = await createGst(gst);
+    e.preventDefault();
+
+    const total = parseFloat(gst.sgst) + parseFloat(gst.cgst);
+    const updatedGst = { ...gst, total_rate: total, igst: total };
+
+    let result = await createGst({ data: updatedGst, token: token });
     if (result) {
       console.log(result);
     };
@@ -57,9 +62,9 @@ const CreateGst = () => {
               </div>
               : ""
           }
-          <div onClick={(e) => submitData(e)}>
+          <button type="submit" form="gst-form">
             <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
-          </div>
+          </button>
           <Link to="/view-gst">
             <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
           </Link>
@@ -67,7 +72,7 @@ const CreateGst = () => {
         <br />
 
         <MainArea>
-          <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
+          <form className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1' id="gst-form" onSubmit={(e) => submitData(e)}>
             <PageTitle>GST Information</PageTitle>
             <table className="w-full text-sm">
               <tbody>
@@ -78,6 +83,7 @@ const CreateGst = () => {
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       placeholder="Example: 18% GST"
                       value={gst.title}
+                      required
                       onChange={e => setGst({ ...gst, title: e.target.value })}
                     />
                   </td>
@@ -88,6 +94,7 @@ const CreateGst = () => {
                     <select
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       value={gst.type}
+                      required
                       onChange={e => setGst({ ...gst, type: e.target.value })}
                     >
                       <option value="percentage">Percentage</option>
@@ -101,6 +108,7 @@ const CreateGst = () => {
                     <input
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
+                      required
                       value={gst.cgst}
                       onChange={e => setGst({ ...gst, cgst: e.target.value })}
                     />
@@ -113,6 +121,7 @@ const CreateGst = () => {
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
                       value={gst.sgst}
+                      required
                       onChange={e => setGst({ ...gst, sgst: e.target.value })}
                     />
                   </td>
@@ -134,14 +143,14 @@ const CreateGst = () => {
                     <input
                       className="w-full p-1 rounded text-slate-500 border border-slate-300 dark:border-slate-600"
                       type="number"
-                      value={gst.igst}
-                      onChange={e => setGst({ ...gst, igst: e.target.value })}
+                      value={parseFloat(gst.sgst) + parseFloat(gst.cgst)}
+                      disabled
                     />
                   </td>
                 </tr>
               </tbody>
             </table>
-          </div>
+          </form>
         </MainArea>
       </div>
     </>

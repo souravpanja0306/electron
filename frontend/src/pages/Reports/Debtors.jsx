@@ -1,39 +1,44 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
-
-// Icon...
-import {
-  AiOutlineFileAdd,
-  AiOutlineSync,
-  AiOutlinePrinter,
-  AiOutlineDownload,
-  AiOutlineFilter,
-  AiOutlineDelete
-} from "react-icons/ai";
-
-// Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
-import CustomLoader from "../../components/CustomLoader";
+import CustomLoader from '../../components/CustomLoader';
+import { inrToWords } from '../../utils/InWordConverter';
+
+// Icon...
+import {
+  AiOutlinePlusSquare,
+  AiOutlineFileAdd,
+  AiOutlineMinusSquare,
+  AiOutlinePrinter,
+  AiOutlineTable,
+  AiOutlineRollback,
+} from "react-icons/ai";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+
 
 // Stores...
 import useInvoiceStore from '../../store/InvoiceStore';
 import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
 import useCompanyStore from "../../store/CompnayStore";
-import usePartyStore from "../../store/PartyStore";
+import usePartyStore from "../../store/PartyStore"
 import useReportStore from "../../store/ReportStore";
 
 
 const Debtors = () => {
   let token = localStorage.getItem("token");
-  const { reportData, getDebtors, reportLoading } = useReportStore();
+  const [searchParams] = useSearchParams();
+  const back = searchParams.get("back");
+  const navigate = useNavigate();
 
-  const [{ rows, totals }, setDebtors] = useState({
-    rows: [],
+  const { reportData, getDebtors, reportLoading } = useReportStore();
+  const { companyData, getAllCompany } = useCompanyStore();
+
+  const [{ ledger, totals }, setDebtors] = useState({
+    ledger: [],
     totals: {
       total_dr: 0,
       total_cr: 0,
@@ -42,73 +47,82 @@ const Debtors = () => {
   });
 
   const getDebtorsData = async () => {
-    let result = await getDebtors({ token: token, id: "1" });
+    let result = await getDebtors({ token: token, id: "4" });
     if (result.body) {
       setDebtors(result.body);
     };
   };
 
   useEffect(() => {
-    getDebtorsData();
+    getDebtorsData(token);
+    getAllCompany(token)
   }, []);
 
   if (reportLoading) return <CustomLoader />;
   return (
-    <div className="p-6 bg-white dark:bg-slate-800 min-h-full">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-white">
-          Debtor Ledger
-        </h2>
-        <div className="text-sm text-slate-600 dark:text-slate-300">
-          Balance:
-          <span className="ml-2 font-semibold text-red-600">
-            ₹ {totals.balance.toLocaleString()}
-          </span>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="border rounded overflow-hidden">
-        <table className="w-full text-sm border-collapse">
-          <thead className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white">
-            <tr>
-              <th className="p-3 text-left">Date</th>
-              <th className="p-3 text-left">Description</th>
-              <th className="p-3 text-right">Dr (₹)</th>
-              <th className="p-3 text-right">Cr (₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((item, index) => (
-              <tr key={index} className="border-t dark:border-slate-600">
-                <td className="p-3">{item.date}</td>
-                <td className="p-3">{item.description}</td>
-                <td className="p-3 text-right text-blue-600">
-                  {item.dr ? item.dr.toLocaleString() : "-"}
-                </td>
-                <td className="p-3 text-right text-green-600">
-                  {item.cr ? item.cr.toLocaleString() : "-"}
-                </td>
+    <>
+      <PageTitle>Debtors</PageTitle>
+      <div className="flex flex-col gap-1">
+        <ActionArea>
+          {
+            back ?
+              <div onClick={() => navigate(-1)}>
+                <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+              </div>
+              : ""
+          }
+          <div>
+            <CustomButton title={"Export"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
+          </div>
+        </ActionArea>
+        <MainArea>
+          <table className="table-fixed w-full overflow-auto">
+            <thead>
+              <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
+                <th className="p-1 text-start truncate" colSpan="3">
+                  <div className='flex gap-1 items-center h-8 min-w-16'>
+                    Select Company
+                    <select className="h-8 p-1 rounded text-slate-900 border border-slate-300 dark:border-slate-600">
+                      {companyData?.map((item, index) => (
+                        <option key={item.id} value={item.id} selected={index == 1} className='capitalize'>
+                          {item.company_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </th>
+                <th className="p-1 text-start truncate text-red-600">Balance: ₹{totals?.balance?.toLocaleString()}</th>
               </tr>
-            ))}
-          </tbody>
-
-          {/* Totals Row */}
-          <tfoot className="bg-slate-50 dark:bg-slate-700 font-semibold">
-            <tr className="border-t">
-              <td className="p-3" colSpan="2">Total</td>
-              <td className="p-3 text-right text-blue-700">
-                ₹ {totals.total_dr.toLocaleString()}
-              </td>
-              <td className="p-3 text-right text-green-700">
-                ₹ {totals.total_cr.toLocaleString()}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+            </thead>
+            <thead>
+              <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
+                <th className="p-1 text-start truncate">Date</th>
+                <th className="p-1 text-start truncate">Description</th>
+                <th className="p-1 text-start truncate">Dr (₹)</th>
+                <th className="p-1 text-start truncate">Cr (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ledger?.map((item, index) => (
+                <tr key={index} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
+                  <td className="p-1 text-start truncate capitalize">{item.date}</td>
+                  <td className="p-1 text-start truncate capitalize">{item.description}</td>
+                  <td className="p-1 text-start truncate capitalize">{item.dr ? item.dr.toLocaleString() : "-"}</td>
+                  <td className="p-1 text-start truncate capitalize">{item.cr ? item.cr.toLocaleString() : "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot className="bg-slate-50 dark:bg-slate-700 font-semibold">
+              <tr className="border-t">
+                <td className="p-1 text-start truncate capitalize" colSpan="2">Total</td>
+                <td className="p-1 text-start truncate capitalize">₹{totals.total_dr.toLocaleString()}</td>
+                <td className="p-1 text-start truncate capitalize">₹{totals.total_cr.toLocaleString()}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </MainArea>
       </div>
-    </div>
+    </>
   )
 }
 
