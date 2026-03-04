@@ -16,6 +16,12 @@ router.get(
 );
 
 router.get(
+    "/customer-ledger",
+    middleware.isAuthenticated,
+    ReportController.customerLedger
+);
+
+router.get(
     "/creditors",
     middleware.isAuthenticated,
     ReportController.creditors

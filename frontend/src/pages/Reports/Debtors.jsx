@@ -40,14 +40,14 @@ const Debtors = () => {
   const [{ ledger, totals }, setDebtors] = useState({
     ledger: [],
     totals: {
-      total_dr: 0,
-      total_cr: 0,
-      balance: 0
+      total_invoice: 0,
+      total_payment: 0,
+      total_due: 0
     }
   });
 
   const getDebtorsData = async () => {
-    let result = await getDebtors({ token: token, id: "4" });
+    let result = await getDebtors({ token: token });
     if (result.body) {
       setDebtors(result.body);
     };
@@ -80,9 +80,9 @@ const Debtors = () => {
             <thead>
               <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
                 <th className="p-1 text-start truncate" colSpan="3">
-                  <div className='flex gap-1 items-center h-8 min-w-16'>
+                  <div className='flex gap-1 items-center'>
                     Select Company
-                    <select className="h-8 p-1 rounded text-slate-900 border border-slate-300 dark:border-slate-600">
+                    <select className="min-w-36 h-8 p-1 rounded text-slate-900 border border-slate-300 dark:border-slate-600">
                       {companyData?.map((item, index) => (
                         <option key={item.id} value={item.id} selected={index == 1} className='capitalize'>
                           {item.company_name}
@@ -91,32 +91,61 @@ const Debtors = () => {
                     </select>
                   </div>
                 </th>
-                <th className="p-1 text-start truncate text-red-600">Balance: ₹{totals?.balance?.toLocaleString()}</th>
               </tr>
             </thead>
             <thead>
               <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
-                <th className="p-1 text-start truncate">Date</th>
-                <th className="p-1 text-start truncate">Description</th>
-                <th className="p-1 text-start truncate">Dr (₹)</th>
-                <th className="p-1 text-start truncate">Cr (₹)</th>
+                <th className="p-1 text-start truncate">Party Id</th>
+                <th className="p-1 text-start truncate">Party Name</th>
+                <th className="p-1 text-start truncate">Total Invoice (₹)</th>
+                <th className="p-1 text-start truncate">Total Payment (₹)</th>
+                <th className="p-1 text-start truncate">Total Due (₹)</th>
               </tr>
             </thead>
             <tbody>
               {ledger?.map((item, index) => (
                 <tr key={index} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                  <td className="p-1 text-start truncate capitalize">{item.date}</td>
-                  <td className="p-1 text-start truncate capitalize">{item.description}</td>
-                  <td className="p-1 text-start truncate capitalize">{item.dr ? item.dr.toLocaleString() : "-"}</td>
-                  <td className="p-1 text-start truncate capitalize">{item.cr ? item.cr.toLocaleString() : "-"}</td>
+                  <td className="p-1 text-start truncate capitalize">{item.party_id}</td>
+                  <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
+                    <Link to={`/debtors/details-debtors?id=${item.party_id}&back=true`}>
+                      {item.company_name ? item.company_name : "--"}
+                    </Link>
+                  </td>
+                  <td className="p-1 text-start truncate capitalize">{item.total_invoice ? item.total_invoice.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                  }) : "0.00"}</td>
+                  <td className="p-1 text-start truncate capitalize">{item.total_payment ? item.total_payment.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                  }) : "0.00"}</td>
+                  <td className="p-1 text-start truncate capitalize">{item.total_due ? item.total_due.toLocaleString("en-IN", {
+                    style: "currency",
+                    currency: "INR",
+                  }) : "0.00"}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot className="bg-slate-50 dark:bg-slate-700 font-semibold">
               <tr className="border-t">
                 <td className="p-1 text-start truncate capitalize" colSpan="2">Total</td>
-                <td className="p-1 text-start truncate capitalize">₹{totals.total_dr.toLocaleString()}</td>
-                <td className="p-1 text-start truncate capitalize">₹{totals.total_cr.toLocaleString()}</td>
+                <td className="p-1 text-start truncate capitalize">{totals?.total_invoice.toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                })}</td>
+                <td className="p-1 text-start truncate capitalize">{totals?.total_payment.toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                })}</td>
+                <td className="p-1 text-start truncate capitalize">{totals?.total_due.toLocaleString("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                })}</td>
+              </tr>
+              <tr className="border-t">
+                <td className="p-1 text-start truncate capitalize text-red-600" colSpan="5">
+                  In Words : {inrToWords(totals?.total_due)}.
+                </td>
               </tr>
             </tfoot>
           </table>

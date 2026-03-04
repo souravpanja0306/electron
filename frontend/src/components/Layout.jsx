@@ -49,7 +49,7 @@ const Layout = ({ children }) => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col h-screen">
 
             {/* Custom Title Bar */}
             <div className="titlebar border-b border-slate-300 dark:border-slate-600 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between p-2 shadow-md">
@@ -150,9 +150,9 @@ const Layout = ({ children }) => {
                 </div>
             </div>
 
-            <div className="flex min-h-[calc(100vh-2.5rem)] bg-slate-100 dark:bg-slate-900 w-full">
+            <div className="flex h-[calc(100vh-2.5rem)] bg-slate-100 dark:bg-slate-900 w-full overflow-hidden">
                 {/* Left Sidebar */}
-                <div className="w-[70px] bg-slate-100 dark:bg-slate-900 flex flex-col items-center select-none border-r border-slate-300 dark:border-slate-600">
+                <div className="min-w-[70px] bg-slate-100 dark:bg-slate-900 flex flex-col items-center select-none border-r border-slate-300 dark:border-slate-600 overflow-y-auto overflow-x-hidden">
 
                     {/* Top Menu */}
                     <div

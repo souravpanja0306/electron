@@ -71,16 +71,16 @@ const ViewInvoiceDetails = () => {
                 : ""
               }
               <Link to="/create-invoice">
-                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                <CustomButton title={"New"} color={"green"}><AiOutlineFileAdd /></CustomButton>
               </Link>
               <div onClick={(e) => handleDelete(e)}>
-                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                <CustomButton title={"Delete"} color={"red"}><AiOutlineDelete /></CustomButton>
               </div>
               <div>
-                <CustomButton title={"Print (Ctrl+P)"} color={"blue"}><AiOutlinePrinter /></CustomButton>
+                <CustomButton title={"Print"} color={"blue"}><AiOutlinePrinter /></CustomButton>
               </div>
               <div>
-                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineEdit /></CustomButton>
+                <CustomButton title={"Edit"} color={"blue"}><AiOutlineEdit /></CustomButton>
               </div>
             </div>
             <div className="flex gap-1">

@@ -24,6 +24,7 @@ import Signin from './pages/Auth/Signin';
 import Signup from './pages/Auth/Signup';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import Debtors from './pages/Reports/Debtors';
+import DebtorsDetails from './pages/Reports/DebtorsDetails';
 import Error from './pages/Error';
 import Creditors from './pages/Reports/Creditors';
 import CreateMoneyReceipts from './pages/Receipts/MoneyReceipts';
@@ -51,6 +52,7 @@ const router = createHashRouter([
   { path: "/dashboard", element: <Middleware><Layout><Dashboard /></Layout></Middleware> },
   { path: "/sales-reports", element: <Middleware><Layout><SalesReport /></Layout></Middleware> },
   { path: "/debtors", element: <Middleware><Layout><Debtors /></Layout></Middleware> },
+  { path: "/debtors/details-debtors", element: <Middleware><Layout><DebtorsDetails /></Layout></Middleware> },
   { path: "/creditors", element: <Middleware><Layout><Creditors /></Layout></Middleware> },
   { path: "/notification", element: <Middleware><Layout><Notification /></Layout></Middleware> },
   { path: "/profile", element: <Middleware><Layout><Profile /></Layout></Middleware> },

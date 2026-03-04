@@ -526,7 +526,10 @@ const CreateInvoice = () => {
                     <hr />
                     <div className='flex justify-between w-full gap-1 font-bold'>
                       <span className=''>Subtotal</span>
-                      <span className=''>{grandTotal.total_value.toLocaleString("en-IN")}</span>
+                      <span className=''>{grandTotal.total_value.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                      })}</span>
                     </div>
                     <hr />
                     <div className='flex justify-between w-full gap-1'>
@@ -540,18 +543,16 @@ const CreateInvoice = () => {
                     </div>
                     <hr />
                     <div className='flex justify-between w-full gap-1'>
-                      <span className=''>IGST</span>
-                      <span className=''>0</span>
-                    </div>
-                    <hr />
-                    <div className='flex justify-between w-full gap-1'>
                       <span className=''>Round-Off</span>
                       <span className=''>0</span>
                     </div>
                     <hr />
                     <div className='text-lg flex justify-between w-full gap-1 font-bold'>
                       <span className=''>Grand Value</span>
-                      <span className=''>{grandTotal.total_value.toLocaleString("en-IN")}</span>
+                      <span className=''>{grandTotal.total_value.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                      })}</span>
                     </div>
                     <div className='bg-white flex flex-col justify-between w-full gap-1 text-black p-1 rounded'>
                       <span className=' font-bold'>In Rupess :</span>

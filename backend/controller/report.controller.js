@@ -18,7 +18,6 @@ exports.debtors = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { party_id } = req.query;
-
         const result = await ReportService.getDebtors({ party_id: party_id });
 
         response.status = 200;
@@ -28,6 +27,25 @@ exports.debtors = async (req, res) => {
         console.log(`Something went wrong: controller: debtors: ${error}`);
         response.status = error.status ? error.status : 500;
         response.message = error.message ? error.message : `Something went wrong: controller: debtors`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.status(response.status).json(response);
+};
+
+exports.customerLedger = async (req, res) => {
+    let response = { ...contents.defaultResponse }
+    try {
+        const { party_id } = req.query;
+
+        const result = await ReportService.getDebtorsDetails({ party_id: party_id });
+
+        response.status = 200;
+        response.message = "Ledger fetched successfully";
+        response.body = result;
+    } catch (error) {
+        console.log(`Something went wrong: controller: customerLedger: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: customerLedger`;
         response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);

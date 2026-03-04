@@ -18,7 +18,17 @@ const useCompanyStore = create((set) => ({
                 data: payload,
             });
             if (result.data.status === 200) {
-                set({ companyData: result.data.body, companyLoading: false });
+                const result = await axios({
+                    method: "get",
+                    url: "http://localhost:3001/api/v1/company/get-company",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (result.data.status === 200) {
+                    set({ companyData: result.data.body, companyLoading: false });
+                };
             };
             return result.data;
         } catch (error) {
