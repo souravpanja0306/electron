@@ -29,7 +29,7 @@ import usePartyStore from "../../store/PartyStore"
 import useReportStore from "../../store/ReportStore";
 
 
-const Debtors = () => {
+const CustomerLedger = () => {
     let token = localStorage.getItem("token");
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -77,6 +77,9 @@ const Debtors = () => {
                     <div>
                         <CustomButton title={"Export"} color={"blue"} ><AiOutlineDownload /></CustomButton>
                     </div>
+                    <div>
+                        <CustomButton title={"Print"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
+                    </div>
                 </ActionArea>
                 <MainArea>
                     <table className="table-fixed w-full overflow-auto">
@@ -85,7 +88,7 @@ const Debtors = () => {
                                 <th className="p-1 text-start truncate" colSpan="3">
                                     Customer ledger of "{(party?.company_name)?.toUpperCase()}"
                                 </th>
-                                <th className="p-1 text-start truncate text-red-600">Total Due: {totals?.balance?.toLocaleString("en-IN", {
+                                <th className="p-1 text-start truncate text-red-600" colSpan="2">Total Due: {totals?.balance?.toLocaleString("en-IN", {
                                     style: "currency",
                                     currency: "INR",
                                 })}</th>
@@ -93,6 +96,7 @@ const Debtors = () => {
                         </thead>
                         <thead>
                             <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
+                                <th className="p-1 text-start truncate">Sl. No</th>
                                 <th className="p-1 text-start truncate">Date</th>
                                 <th className="p-1 text-start truncate">Description</th>
                                 <th className="p-1 text-start truncate">Dr (₹)</th>
@@ -102,6 +106,7 @@ const Debtors = () => {
                         <tbody>
                             {ledger?.map((item, index) => (
                                 <tr key={index} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
+                                    <td className="p-1 text-start truncate capitalize">{index + 1}</td>
                                     <td className="p-1 text-start truncate capitalize">{item?.date}</td>
                                     <td className="p-1 text-start truncate capitalize">
                                         <Link to={`/view-invoice/details?id=${(item?.description).split("#")[1]}&back=true`}>
@@ -121,7 +126,7 @@ const Debtors = () => {
                         </tbody>
                         <tfoot className="bg-slate-50 dark:bg-slate-700 font-semibold">
                             <tr className="border-t">
-                                <td className="p-1 text-start truncate capitalize" colSpan="2">Total</td>
+                                <td className="p-1 text-start truncate capitalize" colSpan="3">Total</td>
                                 <td className="p-1 text-start truncate capitalize">{totals.total_dr.toLocaleString("en-IN", {
                                     style: "currency",
                                     currency: "INR",
@@ -132,7 +137,7 @@ const Debtors = () => {
                                 })}</td>
                             </tr>
                             <tr className="border-t">
-                                <td className="p-1 text-start truncate capitalize text-red-600" colSpan="4">
+                                <td className="p-1 text-start truncate capitalize text-red-600" colSpan="5">
                                     In Words: {inrToWords(totals?.balance)}.
                                 </td>
                             </tr>
@@ -144,4 +149,4 @@ const Debtors = () => {
     )
 }
 
-export default Debtors
+export default CustomerLedger

@@ -113,13 +113,27 @@ const Layout = ({ children }) => {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm text-white uppercase">
-                        {JSON.parse(localStorage.getItem("user"))?.name[0]}
+                    <div className="flex text-xs">
+                        <div className="relative group">
+                            <button className="btn p-2 bg-blue-600 text-white hover:bg-blue-500 dark:hover:bg-slate-800 rounded uppercase">
+                                {JSON.parse(localStorage.getItem("user"))?.name[0]}
+                            </button>
+                            <div className="p-1 absolute right-0 top-7 hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-48 rounded shadow-lg py-1 z-50">
+                                <Link to="/profile" className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    Profile
+                                </Link>
+                                <button
+                                    onClick={(e) => handleSignOut(e)}
+                                    className="btn block w-full text-left px-3 py-1 hover:rounded hover:bg-red-500 dark:hover:bg-red-500 hover:text-white">
+                                    Signout
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <span className="text-xs text-slate-400 dark:text-slate-600 cursor-default capitalize select-none">
-                        Welcome, {JSON.parse(localStorage.getItem("user"))?.name}
+                        {JSON.parse(localStorage.getItem("user"))?.name}
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                         <div className="flex text-sm">
                             <div className="relative group">
                                 <button
@@ -221,14 +235,14 @@ const Layout = ({ children }) => {
                             <AiOutlineSetting />
                             <span className="text-xs">Settings</span>
                         </div>
-                        <div
+                        {/* <div
                             onClick={(e) => handleSignOut(e)}
                             className={`text-2xl w-full p-2 flex flex-col justify-center items-center transition cursor-pointer ${"hover:bg-red-600 hover:text-white hover:dark:text-slate-300 text-slate-500"}`}
                             title="Signout"
                         >
                             <AiOutlineLogout />
                             <span className="text-xs">Signout</span>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 

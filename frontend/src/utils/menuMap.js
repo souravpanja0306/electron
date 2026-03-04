@@ -70,7 +70,7 @@ const MenuMap = {
     "report": [
         {
             type: "main",
-            title: "Ladgers",
+            title: "Ledgers",
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [

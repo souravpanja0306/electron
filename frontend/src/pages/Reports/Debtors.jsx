@@ -12,6 +12,7 @@ import {
   AiOutlinePlusSquare,
   AiOutlineFileAdd,
   AiOutlineMinusSquare,
+  AiOutlineDownload,
   AiOutlinePrinter,
   AiOutlineTable,
   AiOutlineRollback,
@@ -72,7 +73,10 @@ const Debtors = () => {
               : ""
           }
           <div>
-            <CustomButton title={"Export"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
+            <CustomButton title={"Export"} color={"blue"} ><AiOutlineDownload /></CustomButton>
+          </div>
+          <div>
+            <CustomButton title={"Print"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
           </div>
         </ActionArea>
         <MainArea>
@@ -95,6 +99,7 @@ const Debtors = () => {
             </thead>
             <thead>
               <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
+                <th className="p-1 text-start truncate">Sl. No</th>
                 <th className="p-1 text-start truncate">Party Id</th>
                 <th className="p-1 text-start truncate">Party Name</th>
                 <th className="p-1 text-start truncate">Total Invoice (₹)</th>
@@ -105,6 +110,7 @@ const Debtors = () => {
             <tbody>
               {ledger?.map((item, index) => (
                 <tr key={index} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
+                  <td className="p-1 text-start truncate capitalize">{index + 1}</td>
                   <td className="p-1 text-start truncate capitalize">{item.party_id}</td>
                   <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
                     <Link to={`/debtors/details-debtors?id=${item.party_id}&back=true`}>
@@ -128,7 +134,7 @@ const Debtors = () => {
             </tbody>
             <tfoot className="bg-slate-50 dark:bg-slate-700 font-semibold">
               <tr className="border-t">
-                <td className="p-1 text-start truncate capitalize" colSpan="2">Total</td>
+                <td className="p-1 text-start truncate capitalize" colSpan="3">Total</td>
                 <td className="p-1 text-start truncate capitalize">{totals?.total_invoice.toLocaleString("en-IN", {
                   style: "currency",
                   currency: "INR",
@@ -143,7 +149,7 @@ const Debtors = () => {
                 })}</td>
               </tr>
               <tr className="border-t">
-                <td className="p-1 text-start truncate capitalize text-red-600" colSpan="5">
+                <td className="p-1 text-start truncate capitalize text-red-600" colSpan="6">
                   In Words : {inrToWords(totals?.total_due)}.
                 </td>
               </tr>
