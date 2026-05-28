@@ -53,16 +53,16 @@ const MenuMap = {
                 { title: "View Invoices", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
             ]
         },
-        {
-            type: "main",
-            title: "Vendor Expenses(Creditors)",
-            url: "#",
-            icon: <AiOutlineDiff />,
-            submenu: [
-                { title: "Add Invoice", url: "/create-creditors", icon: <AiOutlinePlusSquare /> },
-                { title: "View Invoice", url: "/view-all-creditors", icon: <AiOutlineFileSearch /> },
-            ]
-        }
+        // {
+        //     type: "main",
+        //     title: "Vendor Expenses(Creditors)",
+        //     url: "#",
+        //     icon: <AiOutlineDiff />,
+        //     submenu: [
+        //         { title: "Add Invoice", url: "/create-creditors", icon: <AiOutlinePlusSquare /> },
+        //         { title: "View Invoice", url: "/view-all-creditors", icon: <AiOutlineFileSearch /> },
+        //     ]
+        // }
     ],
     "dashboard": [
         { title: "Dashboard", url: "/dashboard", icon: <AiOutlineDiff /> },

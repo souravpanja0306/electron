@@ -10,6 +10,8 @@ const contents = require("../content/contents");
 const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
+const CompanyService = require("../service/company.service");
+const { generateInvoiceHtml } = require("../helper/generateInvoiceHtml");
 
 const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
@@ -243,32 +245,53 @@ exports.invoiceUpdate = async (req, res) => {
 exports.generateInvoicePdf = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
-        let createFolder = "./uploads/invoice_pdf/";
-        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+        const { id } = req.query;
+        if (!id) return errorHandler(res, 400, "Invoice ID is required.");
 
-        let findInvoice = await InvoiceService.findInvoices({
-            invoice_no: invoiceNo
+        let result = await InvoiceService.findInvoices({ id });
+        if (!result.length) return errorHandler(res, 404, "Invoice not found.");
+        let invoice = result[0];
+
+        // Hydrate relations
+        let party = await PartyService.getParty({ id: invoice.party_id });
+        invoice.party_id = party.length ? party[0] : null;
+        invoice.data = invoice.data ? JSON.parse(invoice.data) : [];
+
+        // Get company
+        let companies = await CompanyService.getCompany({});
+        let company = companies.length ? companies[0] : {};
+
+        const html = generateInvoiceHtml({ invoice, company });
+
+        let folder = "./uploads/invoice_pdf/";
+        if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+
+        const fileName = `INVOICE_${invoice.invoice_no || invoice.id}_${moment().format("DDMMYYYY")}.pdf`;
+        const filePath = `${folder}${fileName}`;
+
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
-        console.log("🚀 ~ findInvoice:", findInvoice)
-
-        dd
-        const browser = await puppeteer.launch();
         const page = await browser.newPage();
-
         await page.setContent(html, { waitUntil: "networkidle0" });
         await page.pdf({
-            path: `./uploads/invoice_pdf/${invoiceNo}_${moment().format("DD-MM-YYYY")}.pdf`,
+            path: filePath,
             format: "A4",
-            printBackground: true
+            printBackground: true,
+            margin: { top: '10px', bottom: '10px', left: '10px', right: '10px' }
         });
-
         await browser.close();
 
+        response.status = 200;
+        response.message = "PDF generated successfully.";
+        response.body = {
+            fileName: fileName,
+            url: `http://localhost:3001/uploads/invoice_pdf/${fileName}`
+        };
     } catch (error) {
         console.log(`Something went wrong: controller: generateInvoicePdf: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: generateInvoicePdf`;
-        response.body = error.body ? error.body : "";
+        response.status = 500;
+        response.message = error.message || "Something went wrong: controller: generateInvoicePdf";
     };
     return res.status(response.status).json(response);
 };

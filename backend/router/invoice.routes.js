@@ -24,7 +24,7 @@ router.post(
     InvoiceController.createInvoice
 );
 
-router.post(
+router.get(
     "/generate-invoice-pdf",
     middleware.isAuthenticated,
     InvoiceController.generateInvoicePdf

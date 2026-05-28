@@ -1,139 +1,159 @@
-// Package...
 const moment = require("moment");
-const fs = require('fs');
-const puppeteer = require("puppeteer");
+const { inrToWords } = require("./InWordConverter"); // Assuming this exists based on frontend/src/utils/InWordConverter.js
 
-// Contents...
-const contents = require("../content/contents");
+exports.generateInvoiceHtml = ({ invoice, company }) => {
+    const items = invoice.data || [];
+    
+    let itemsHtml = items.map((item, index) => `
+        <tr>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center;">${index + 1}</td>
+            <td style="border: 1px solid #000; padding: 4px;">${item.description || '--'}</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center;">${item.hsn || '--'}</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: right;">${item.quantity || '0'}</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: right;">${item.rate || '0.00'}</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: right;">${(item.quantity * item.rate).toFixed(2)}</td>
+        </tr>
+    `).join('');
 
-// Services...
-const PartyService = require("../service/party.service");
-const AuthService = require("../service/auth.service")
-const InvoiceService = require("../service/invoice.service");
+    // Fill empty rows to maintain height
+    const emptyRowsCount = Math.max(0, 8 - items.length);
+    for(let i=0; i<emptyRowsCount; i++) {
+        itemsHtml += `
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; height: 20px;"></td>
+                <td style="border: 1px solid #000; padding: 4px;"></td>
+                <td style="border: 1px solid #000; padding: 4px;"></td>
+                <td style="border: 1px solid #000; padding: 4px;"></td>
+                <td style="border: 1px solid #000; padding: 4px;"></td>
+                <td style="border: 1px solid #000; padding: 4px;"></td>
+            </tr>
+        `;
+    }
 
-exports.generateInvoicePdf = async ({
-    data = [],
-}) => {
-    let response = { ...contents.defaultResponse }
-    try {
-        let html = `
-                <body style="font-family:Arial;font-size:12px">
-                    <div style="width:700px;margin:auto;border:1px solid #000;padding:10px">
-                        <div style="text-align:center;font-weight:bold;margin-bottom:5px">TAX INVOICE</div>
-                        <table style="width:100%;border-collapse:collapse;margin-bottom:5px">
-                            <tr>
-                                <td style="width:50%;vertical-align:top">
-                                    <b>Company Name</b><br>
-                                    Address Line<br>
-                                    GSTIN: 22AAAAA0000A1Z5
-                                </td>
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 15px; }
+            .container { width: 100%; border: 1px solid #000; padding: 0; box-sizing: border-box; }
+            .header { text-align: center; border-bottom: 1px solid #000; padding: 10px; }
+            .company-name { font-size: 18px; font-weight: bold; text-transform: uppercase; }
+            .title { font-size: 14px; font-weight: bold; padding: 5px; background: #eee; border-bottom: 1px solid #000; text-align: center; }
+            .info-table { width: 100%; border-collapse: collapse; }
+            .info-table td { border: 1px solid #000; padding: 5px; vertical-align: top; width: 33.33%; }
+            .items-table { width: 100%; border-collapse: collapse; }
+            .items-table th { border: 1px solid #000; padding: 5px; background-color: #f2f2f2; }
+            .items-table td { border-left: 1px solid #000; border-right: 1px solid #000; }
+            .summary-table { width: 100%; border-collapse: collapse; }
+            .summary-table td { border: 1px solid #000; padding: 4px; }
+            .footer { padding: 10px; }
+            .bank-details { font-size: 10px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="company-name">${company.company_name || 'Your Company Name'}</div>
+                <div>${company.address_1 || ''}, ${company.address_2 || ''}</div>
+                <div>${company.city || ''}, ${company.state || ''} - ${company.pincode || ''}</div>
+                <div>Mobile: ${company.mobile || ''} | Email: ${company.email || ''}</div>
+                ${company.gst ? `<div>GSTIN: ${company.gst}</div>` : ''}
+            </div>
 
-                                <td style="width:20%;vertical-align:top">
-                                    <img src="logo.png" style="max-width:80px;max-height:80px">
-                                </td>
+            <div class="title">TAX INVOICE</div>
 
-                                <td style="width:30%;vertical-align:top;text-align:right">
-                                    Invoice No: INV-001<br>
-                                    Date: 01-02-2026
-                                </td>
-                            </tr>
-                        </table>
-                        <table style="width:100%;border-collapse:collapse;border:1px solid #000">
-                            <tr>
-                                <td style="width:33.33%;border:1px solid #000;padding:6px;vertical-align:top">
-                                    <b>Bill To:</b><br>
-                                    Party Name<br>
-                                    Party Address<br>
-                                    GSTIN: 33BBBBB1111B2Z6
-                                </td>
-                                <td style="width:33.33%;border:1px solid #000;padding:6px;vertical-align:top">
-                                    <b>Ship To:</b><br>
-                                    Party Name<br>
-                                    Party Address<br>
-                                    GSTIN: 33BBBBB1111B2Z6
-                                </td>
-                                <td style="width:33.33%;border:1px solid #000;padding:6px;vertical-align:top">
-                                    <b>Place of Supply:</b><br>
-                                    <b>Transporter:</b><br>
-                                    <b>Vehicle:</b><br>
-                                    <b>Ewaybill:</b><br>
-                                    <b>LR No and Date:</b><br>
-                                </td>
-                            </tr>
-                        </table>
-                        <table style="width:100%;border-collapse:collapse;margin-top:5px">
-                            <tr>
-                                <th style="border:1px solid #000;padding:4px">Sl</th>
-                                <th style="border:1px solid #000;padding:4px">Description</th>
-                                <th style="border:1px solid #000;padding:4px">HSN</th>
-                                <th style="border:1px solid #000;padding:4px;text-align:right">Qty</th>
-                                <th style="border:1px solid #000;padding:4px;text-align:right">Rate</th>
-                                <th style="border:1px solid #000;padding:4px;text-align:right">Amount</th>
-                            </tr>
-                            <tr>
-                                <td style="border:1px solid #000;padding:4px">1</td>
-                                <td style="border:1px solid #000;padding:4px">Product Name</td>
-                                <td style="border:1px solid #000;padding:4px">6109</td>
-                                <td style="border:1px solid #000;padding:4px;text-align:right">10</td>
-                                <td style="border:1px solid #000;padding:4px;text-align:right">100</td>
-                                <td style="border:1px solid #000;padding:4px;text-align:right">1000</td>
-                            </tr>
-                        </table>
-                        <table style="width:100%;margin-top:5px">
-                            <tr>
-                                <td style="text-align:right">Subtotal</td>
-                                <td style="text-align:right">1000</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right">CGST 9%</td>
-                                <td style="text-align:right">90</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right">SGST 9%</td>
-                                <td style="text-align:right">90</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right;font-weight:bold">Grand Total</td>
-                                <td style="text-align:right;font-weight:bold">1180</td>
-                            </tr>
-                        </table>
-                        <div style="margin-top:5px">
-                            <b>Amount in Words:</b> One Thousand One Hundred Eighty Only
-                        </div>
-                        <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-top:10px">
-                            <tr>
-                                <td style="width:70%;border:1px solid #000;padding:6px;vertical-align:top">
-                                    <b>Terms & Conditions:</b><br>
-                                    1. Goods once sold will not be taken back.<br>
-                                    2. Interest @18% p.a. will be charged on overdue bills.<br>
-                                    3. Subject to local jurisdiction only.
-                                </td>
+            <table class="info-table">
+                <tr>
+                    <td>
+                        <strong>Bill To:</strong><br/>
+                        ${invoice.party_id?.company_name || '--'}<br/>
+                        ${invoice.party_id?.address_1 || '--'}<br/>
+                        ${invoice.party_id?.city || ''} ${invoice.party_id?.pincode || ''}<br/>
+                        GSTIN: ${invoice.party_id?.gst || '--'}
+                    </td>
+                    <td>
+                        <strong>Ship To:</strong><br/>
+                        ${invoice.party_id?.company_name || '--'}<br/>
+                        ${invoice.party_id?.address_1 || '--'}<br/>
+                        ${invoice.party_id?.city || ''} ${invoice.party_id?.pincode || ''}<br/>
+                        GSTIN: ${invoice.party_id?.gst || '--'}
+                    </td>
+                    <td>
+                        Invoice No: <strong>${invoice.invoice_no || '--'}</strong><br/>
+                        Date: ${invoice.invoice_date || '--'}<br/>
+                        Place of Supply: ${invoice.placeOfSupply || '--'}<br/>
+                        Transporter: ${invoice.transporter || '--'}<br/>
+                        Vehicle No: ${invoice.lorry_no || '--'}
+                    </td>
+                </tr>
+            </table>
 
-                                <td style="width:30%;border:1px solid #000;padding:6px;vertical-align:top;text-align:right">
-                                    <b>For Company Name</b><br><br><br>
-                                    Authorised Signatory
-                                </td>
-                            </tr>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30px;">Sl</th>
+                        <th>Description of Goods</th>
+                        <th style="width: 60px;">HSN/SAC</th>
+                        <th style="width: 50px;">Qty</th>
+                        <th style="width: 70px;">Rate</th>
+                        <th style="width: 80px;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                    <tr style="border-top: 1px solid #000; font-weight: bold;">
+                        <td colspan="3" style="text-align: right; padding: 4px; border: 1px solid #000;">Total</td>
+                        <td style="text-align: right; padding: 4px; border: 1px solid #000;">${invoice.total_quantity || '0'}</td>
+                        <td style="border: 1px solid #000;"></td>
+                        <td style="text-align: right; padding: 4px; border: 1px solid #000;">${(invoice.total_amount || 0).toFixed(2)}</td>
+                    </tr>
+                </tbody>
+            </table>
 
-                            <tr>
-                                <td colspan="2" style="border:1px solid #000;padding:6px">
-                                    <b>Payment Details:</b><br>
-                                    Bank Name: ABC Bank<br>
-                                    A/C No: 1234567890<br>
-                                    IFSC: ABCD0123456<br>
-                                    UPI ID: company@upi
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </body>`
+            <table class="summary-table">
+                <tr>
+                    <td style="width: 60%;" rowspan="4">
+                        <strong>Amount in Words:</strong><br/>
+                        ${inrToWords(Math.round(invoice.total_amount + (invoice.total_cgst || 0) + (invoice.total_sgst || 0) + (invoice.total_igst || 0)))}
+                    </td>
+                    <td style="width: 25%; text-align: right;">Total Amount Before Tax</td>
+                    <td style="width: 15%; text-align: right;">${(invoice.total_amount || 0).toFixed(2)}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">Add: CGST</td>
+                    <td style="text-align: right;">${(invoice.total_cgst || 0).toFixed(2)}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right;">Add: SGST</td>
+                    <td style="text-align: right;">${(invoice.total_sgst || 0).toFixed(2)}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">Total Amount After Tax</td>
+                    <td style="text-align: right; font-weight: bold;">${(invoice.total_amount + (invoice.total_cgst || 0) + (invoice.total_sgst || 0)).toFixed(2)}</td>
+                </tr>
+            </table>
 
-       return html;
-    } catch (error) {
-        console.log(`Something went wrong: controller: generateInvoicePdf: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: generateInvoicePdf`;
-        response.body = error.body ? error.body : "";
-    };
-    return res.status(response.status).json(response);
+            <div class="footer">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 50%;" class="bank-details">
+                            <strong>Bank Details:</strong><br/>
+                            Bank: ${company.bank || '--'}<br/>
+                            A/c No: ${company.account_no || '--'}<br/>
+                            IFSC: ${company.ifse || '--'}<br/>
+                            Branch: ${company.branch || '--'}
+                        </td>
+                        <td style="width: 50%; text-align: right;">
+                            For <strong>${company.company_name || 'Your Company Name'}</strong>
+                            <br/><br/><br/>
+                            Authorised Signatory
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
 };

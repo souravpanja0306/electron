@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 // Icon...
 import {
@@ -57,6 +57,20 @@ const ViewInvoiceDetails = () => {
     };
   };
 
+  const handlePrint = async () => {
+    try {
+      if (!invoiceId) return toast("Please select which one you want to print.", { theme: "dark" });
+      let result = await printInvoice({ id: invoiceId, token: token });
+      if (result.status === 200) {
+        window.open(result.body.url, "_blank");
+      } else {
+        toast(result.message, { theme: "dark" });
+      };
+    } catch (error) {
+      console.log(error);
+    };
+  };
+
   return (
     <>
       <PageTitle>View Invoice Details</PageTitle>
@@ -76,7 +90,7 @@ const ViewInvoiceDetails = () => {
               <div onClick={(e) => handleDelete(e)}>
                 <CustomButton title={"Delete"} color={"red"}><AiOutlineDelete /></CustomButton>
               </div>
-              <div>
+              <div onClick={() => handlePrint()}>
                 <CustomButton title={"Print"} color={"blue"}><AiOutlinePrinter /></CustomButton>
               </div>
               <div>
@@ -239,7 +253,6 @@ const ViewInvoiceDetails = () => {
           }
         </MainArea>
       </div>
-      <ToastContainer />
     </>
   )
 }

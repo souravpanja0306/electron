@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
@@ -23,6 +23,7 @@ import { Link, NavLink } from "react-router-dom";
 // Stores...
 import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore"
+import useChallanStore from "../../store/ChallanStore";
 
 
 const CreateChallan = () => {
@@ -33,6 +34,7 @@ const CreateChallan = () => {
 
   const { parties, getAllParty } = usePartyStore();
   const { companyData, getAllCompany } = useCompanyStore();
+  const { createChallan, challanLoading } = useChallanStore();
 
   useEffect(() => {
     getAllParty();
@@ -54,6 +56,7 @@ const CreateChallan = () => {
     to_loc: "",
     truck_no: "",
     way_bill_no: "",
+    note: "",
     data: data,
   });
 
@@ -84,14 +87,34 @@ const CreateChallan = () => {
   };
 
   const handleSubmitForm = async (e) => {
-    e.preventDefault();
-    console.log(form);
-    toast.success("Challan Saved (Check Console)");
+    if (e) e.preventDefault();
+    try {
+      if (!form.consignor_id || !form.consignee_id) {
+        return toast.error("Consignor and Consignee are required.");
+      }
+
+      let payload = { ...form, data: data };
+      let result = await createChallan(payload, token);
+      if (result.status === 200) {
+        toast.success(result.message);
+        navigate("/view-challan");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong!");
+    }
   };
 
-  const printInvoice = (e) => {
+  const { printChallan } = useChallanStore();
+  const printInvoice = async (e) => {
     if (e) e.preventDefault();
-    console.log(form);
+    toast.info("Generating PDF, please wait...");
+    // Since we need an ID, we usually save first or print from View page.
+    // If printing from Create page, we'd need to save first or pass data directly to a temporary print route.
+    // For now, let's assume the user saves then prints from the view list.
+    toast.warning("Please save the challan first, then print from the View list.");
   };
 
   return (
@@ -118,146 +141,114 @@ const CreateChallan = () => {
           </div>
         </ActionArea>
 
-        <PageTitle>Challan Details</PageTitle>
-        <MainArea>
-          <div className='flex flex-col w-full gap-2 p-1'>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-2 w-full'>
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>Consignor</label>
-                <div className='flex items-center gap-1'>
-                  <select
-                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                    name="consignor_id"
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="" disabled selected>Select Consignor</option>
-                    {parties?.body?.map(item => (
-                      <option key={item.id} value={item.id}>
-                        {item.company_name}
-                      </option>
-                    ))}
-                  </select>
-                  <Link
-                    to="/add-party?back=true"
-                    className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
-                  >
-                    + New
-                  </Link>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-1'>
+          <div className='flex flex-col gap-1'>
+            <PageTitle>Consignor & Consignee</PageTitle>
+            <MainArea>
+              <div className='flex flex-col w-full gap-2 p-1'>
+                <div className='grid grid-cols-1 gap-2 w-full'>
+                  <div className='flex flex-col w-full gap-1'>
+                    <label className='text-xs'>Consignor</label>
+                    <div className='flex items-center gap-1'>
+                      <select
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                        name="consignor_id"
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="" disabled selected>Select Consignor</option>
+                        {parties?.body?.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.company_name}
+                          </option>
+                        ))}
+                      </select>
+                      <Link
+                        to="/add-party?back=true"
+                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                      >
+                        + New
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className='flex flex-col w-full gap-1'>
+                    <label className='text-xs'>Consignee</label>
+                    <div className='flex items-center gap-1'>
+                      <select
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                        name="consignee_id"
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="" disabled selected>Select Consignee</option>
+                        {parties?.body?.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.company_name}
+                          </option>
+                        ))}
+                      </select>
+                      <Link
+                        to="/add-party?back=true"
+                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                      >
+                        + New
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>Consignee</label>
-                <div className='flex items-center gap-1'>
-                  <select
-                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                    name="consignee_id"
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="" disabled selected>Select Consignee</option>
-                    {parties?.body?.map(item => (
-                      <option key={item.id} value={item.id}>
-                        {item.company_name}
-                      </option>
-                    ))}
-                  </select>
-                  <Link
-                    to="/add-party?back=true"
-                    className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
-                  >
-                    + New
-                  </Link>
-                </div>
-              </div>
-
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>CHA</label>
-                <input
-                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  type="text"
-                  name="cha"
-                  onChange={handleChange}
-                  placeholder="CHA"
-                />
-              </div>
-            </div>
-
-            <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 w-full'>
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>C/N No</label>
-                <input
-                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  type="text"
-                  name="cn_no"
-                  onChange={handleChange}
-                  placeholder="C/N No"
-                />
-              </div>
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>Date</label>
-                <input
-                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  type="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>Invoice No</label>
-                <input
-                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  type="text"
-                  name="invoice_no"
-                  onChange={handleChange}
-                  placeholder="Invoice No"
-                />
-              </div>
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>From</label>
-                <input
-                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  type="text"
-                  name="from_loc"
-                  onChange={handleChange}
-                  placeholder="From"
-                />
-              </div>
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>To</label>
-                <input
-                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  type="text"
-                  name="to_loc"
-                  onChange={handleChange}
-                  placeholder="To"
-                />
-              </div>
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>Truck No</label>
-                <input
-                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  type="text"
-                  name="truck_no"
-                  onChange={handleChange}
-                  placeholder="Truck No"
-                />
-              </div>
-              <div className='flex flex-col w-full gap-1'>
-                <label className='text-xs'>Way Bill No</label>
-                <input
-                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  type="text"
-                  name="way_bill_no"
-                  onChange={handleChange}
-                  placeholder="Way Bill No"
-                />
-              </div>
-            </div>
+            </MainArea>
           </div>
-        </MainArea>
+
+          <div className='flex flex-col gap-1'>
+            <PageTitle>Transport Details</PageTitle>
+            <MainArea>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-2 w-full p-1'>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs'>C/N No</label>
+                  <input
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="text"
+                    name="cn_no"
+                    onChange={handleChange}
+                    placeholder="C/N No"
+                  />
+                </div>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs'>Date</label>
+                  <input
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs'>From</label>
+                  <input
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="text"
+                    name="from_loc"
+                    onChange={handleChange}
+                    placeholder="From"
+                  />
+                </div>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs'>To</label>
+                  <input
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="text"
+                    name="to_loc"
+                    onChange={handleChange}
+                    placeholder="To"
+                  />
+                </div>
+              </div>
+            </MainArea>
+          </div>
+        </div>
 
         <PageTitle>Item Details</PageTitle>
         <MainArea>
@@ -334,8 +325,63 @@ const CreateChallan = () => {
           </table>
         </MainArea>
 
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-1'>
+          <div className='flex flex-col gap-1'>
+            <PageTitle>Document & Vehicle Info</PageTitle>
+            <MainArea>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-2 w-full p-1'>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs'>Invoice No</label>
+                  <input
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="text"
+                    name="invoice_no"
+                    onChange={handleChange}
+                    placeholder="Invoice No"
+                  />
+                </div>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs'>Way Bill No</label>
+                  <input
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="text"
+                    name="way_bill_no"
+                    onChange={handleChange}
+                    placeholder="Way Bill No"
+                  />
+                </div>
+                <div className='flex flex-col w-full gap-1'>
+                  <label className='text-xs'>Truck No</label>
+                  <input
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="text"
+                    name="truck_no"
+                    onChange={handleChange}
+                    placeholder="Truck No"
+                  />
+                </div>
+              </div>
+            </MainArea>
+          </div>
+
+          <div className='flex flex-col gap-1'>
+            <PageTitle>Additional Remarks</PageTitle>
+            <MainArea>
+              <div className='flex flex-col w-full gap-1 p-1'>
+                <label className='text-xs'>Note</label>
+                <textarea
+                  className="p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  name="note"
+                  rows="2"
+                  onChange={handleChange}
+                  placeholder="Note"
+                />
+              </div>
+            </MainArea>
+          </div>
+        </div>
+
       </div>
-      <ToastContainer />
     </>
   )
 }

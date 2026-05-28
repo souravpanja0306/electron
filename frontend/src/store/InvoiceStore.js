@@ -100,6 +100,26 @@ const useInvoiceStore = create((set) => ({
             throw error;
         };
     },
+
+    printInvoice: async ({ id = "", token = "" }) => {
+        try {
+            set({ invoiceLoading: true });
+            let result = await axios({
+                method: 'get',
+                url: `${baseURL.invoice}generate-invoice-pdf?id=${id}`,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                validateStatus: (status) => status < 500,
+            });
+            set({ invoiceLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ invoiceLoading: false });
+            throw error;
+        }
+    },
 }));
 
 export default useInvoiceStore;

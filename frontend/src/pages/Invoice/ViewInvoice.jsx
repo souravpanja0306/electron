@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 // Icon...
 import {
@@ -61,6 +61,26 @@ const ViewInvoices = () => {
         };
     };
 
+    const handleRefresh = () => {
+        getAllInvoice({ token: token });
+        toast.info("Refreshing data...");
+    };
+
+    const handlePrint = async (id) => {
+        try {
+            toast.info("Generating PDF...");
+            let result = await printInvoice({ id, token });
+            if (result.status === 200) {
+                window.open(result.body.url, "_blank");
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("Something went wrong!");
+        }
+    }
+
     useEffect(() => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 'n') {
@@ -75,13 +95,13 @@ const ViewInvoices = () => {
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, []);
+    }, [checkedIds]);
 
     const limit = 10;
-    const total = 0;
+    const total = invoiceData.body?.length || 0;
     const totalPages = Math.ceil(total / limit);
 
-    const start = (page - 1) * limit + 1;
+    const start = total === 0 ? 0 : (page - 1) * limit + 1;
     const end = Math.min(page * limit, total);
 
     if (invoiceLoading) return <CustomLoader />;
@@ -103,10 +123,10 @@ const ViewInvoices = () => {
                             </div>
                         </div>
                         <div className="flex gap-1">
-                            <div onClick={(e) => getAllInvoice({ token: token })}>
+                            <div onClick={handleRefresh}>
                                 <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
                             </div>
-                            <div onClick={(e) => getAllInvoice({ token: token })}>
+                            <div>
                                 <CustomButton title={"Filter"} color={"blue"}><AiOutlineFilter /></CustomButton>
                             </div>
                         </div>
@@ -158,6 +178,7 @@ const ViewInvoices = () => {
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.transporter ? item.transporter : "--"}</td>
                                                 <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
                                                     <button
+                                                        onClick={() => handlePrint(item.id)}
                                                         className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
                                                         title="Download"
                                                     >
@@ -185,12 +206,12 @@ const ViewInvoices = () => {
                     <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
                     <div className="flex items-center gap-1">
                         <button
-                            disabled={page === 1}
+                            disabled={page === 1 || total === 0}
                             onClick={() => setPage(page - 1)}
                             className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
                             Prev
                         </button>
-                        {[...Array(totalPages)].map((_, i) => (
+                        {totalPages > 0 && [...Array(totalPages)].map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => setPage(i + 1)}
@@ -199,7 +220,7 @@ const ViewInvoices = () => {
                             </button>
                         ))}
                         <button
-                            disabled={page === totalPages}
+                            disabled={page === totalPages || total === 0}
                             onClick={() => setPage(page + 1)}
                             className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
                             Next
@@ -208,7 +229,6 @@ const ViewInvoices = () => {
                 </div>
 
             </div >
-            <ToastContainer />
         </>
     )
 }

@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PageTitle from '../../components/PageTitle';
 import CustomButton from '../../components/CustomButton';
 import { useEffect, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import useAuthStore from '../../store/AuthStore';
 import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 
@@ -137,7 +137,6 @@ const Signin = () => {
           </form>
         </div>
       </div>
-      <ToastContainer />
     </>
   )
 }

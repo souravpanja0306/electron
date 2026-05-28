@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import useAuthStore from '../../store/AuthStore';
 import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 
@@ -152,7 +152,6 @@ const Signup = () => {
                         </div>
                     </form>
                 </div>
-                <ToastContainer />
             </div>
         </>
     )
