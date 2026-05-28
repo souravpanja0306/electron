@@ -15,7 +15,7 @@ import CustomLoader from "../../components/CustomLoader";
 
 // Stores...
 import useInvoiceStore from '../../store/InvoiceStore';
-import useCompanyStore from "../../store/CompnayStore";
+import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore"
 import useMoneyReceiptStore from '../../store/MoneyReceiptStore';
 

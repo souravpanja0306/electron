@@ -20,7 +20,7 @@ import {
 
 import useMoneyReceiptStore from '../../store/MoneyReceiptStore';
 import usePartyStore from '../../store/PartyStore';
-import useCompanyStore from '../../store/CompnayStore';
+import useCompanyStore from '../../store/CompanyStore';
 
 const MoneyReceipts = () => {
     let token = localStorage.getItem("token");

@@ -7,7 +7,7 @@ import { Link, NavLink } from "react-router-dom";
 import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
 import Alert from "../../../components/Alert";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import useCompanyStore from '../../../store/CompnayStore';
+import useCompanyStore from '../../../store/CompanyStore';
 
 
 const CreateParty = () => {

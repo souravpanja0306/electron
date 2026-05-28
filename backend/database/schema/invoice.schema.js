@@ -12,7 +12,7 @@ module.exports = `
       eway_bill TEXT,
       transporter TEXT,
       lorry_no TEXT,
-      lr_no TEXT
+      lr_no TEXT,
       placeOfSupply TEXT,
       data TEXT,
       total_amount INTEGER DEFAULT 0,

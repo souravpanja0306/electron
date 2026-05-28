@@ -98,7 +98,7 @@ module.exports.getHsnSac = async (req, res) => {
                     code: item.code,
                     type: item.type,
                     description: item.description,
-                    gst_rate: 12,
+                    gst_rate: item.gst_rate,
                     created_by: CreateBy.length ? {
                         id: CreateBy[0].id ? CreateBy[0].id : "",
                         name: CreateBy[0].company_name ? CreateBy[0].company_name : "",

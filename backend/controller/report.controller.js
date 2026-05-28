@@ -51,6 +51,23 @@ exports.customerLedger = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
+exports.dashboardStats = async (req, res) => {
+    let response = { ...contents.defaultResponse }
+    try {
+        const result = await ReportService.getDashboardStats();
+
+        response.status = 200;
+        response.message = "Dashboard statistics fetched successfully";
+        response.body = result;
+    } catch (error) {
+        console.log(`Something went wrong: controller: dashboardStats: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: dashboardStats`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.status(response.status).json(response);
+};
+
 exports.creditors = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {

@@ -24,7 +24,7 @@ import { Link, NavLink } from "react-router-dom";
 // Stores...
 import useInvoiceStore from '../../store/InvoiceStore';
 import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
-import useCompanyStore from "../../store/CompnayStore";
+import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore"
 import useReportStore from "../../store/ReportStore";
 

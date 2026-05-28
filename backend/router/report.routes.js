@@ -16,6 +16,12 @@ router.get(
 );
 
 router.get(
+    "/dashboard-stats",
+    middleware.isAuthenticated,
+    ReportController.dashboardStats
+);
+
+router.get(
     "/customer-ledger",
     middleware.isAuthenticated,
     ReportController.customerLedger

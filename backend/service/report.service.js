@@ -78,3 +78,71 @@ exports.getDebtorsDetails = async ({
         console.log("Something went wrong: Service: getDebtorsDetails", error);
     };
 };
+
+exports.getDashboardStats = async () => {
+    try {
+        db.exec(require("../database/schema/invoice.schema"));
+        db.exec(require("../database/schema/moneyReceipts.schema"));
+
+        // 1. Total Debtors
+        const debtorTotals = db.prepare(`
+            SELECT 
+                IFNULL(SUM(total_amount), 0) AS total_invoice,
+                IFNULL((SELECT SUM(total_value) FROM money_receipts), 0) AS total_payment
+            FROM invoice
+        `).get();
+
+        const totalDebtors = debtorTotals.total_invoice - debtorTotals.total_payment;
+
+        // 2. Debtor Aging
+        const today = new Date().toISOString().split('T')[0];
+        const agingQuery = (daysMin, daysMax = null) => {
+            let dateCondition = "";
+            if (daysMax) {
+                dateCondition = `invoice_date BETWEEN date('now', '-${daysMax} days') AND date('now', '-${daysMin} days')`;
+            } else {
+                dateCondition = `invoice_date <= date('now', '-${daysMin} days')`;
+            }
+
+            return db.prepare(`
+                SELECT IFNULL(SUM(total_amount), 0) as amount 
+                FROM invoice 
+                WHERE ${dateCondition}
+            `).get().amount;
+        };
+
+        // Simplified aging for now (just based on invoice date, not considering partial payments per invoice)
+        // In a real scenario, you'd track balance per invoice
+        const debtorAging = [
+            { label: "0–30 Days", value: agingQuery(0, 30) },
+            { label: "31–60 Days", value: agingQuery(31, 60) },
+            { label: "61–90 Days", value: agingQuery(61, 90) },
+            { label: "90+ Days", value: agingQuery(91) },
+        ];
+
+        // 3. Creditors (Placeholders since vendor invoices aren't implemented)
+        const totalCreditors = 0;
+        const creditorAging = [
+            { label: "0–30 Days", value: 0 },
+            { label: "31–60 Days", value: 0 },
+            { label: "61–90 Days", value: 0 },
+            { label: "90+ Days", value: 0 },
+        ];
+
+        return {
+            kpi: {
+                totalDebtors,
+                overdueDebtors: debtorAging[3].value, // 90+ days as overdue for now
+                totalCreditors,
+                overdueCreditors: 0
+            },
+            aging: {
+                debtors: debtorAging,
+                creditors: creditorAging
+            }
+        };
+    } catch (error) {
+        console.log("Something went wrong: Service: getDashboardStats", error);
+        throw error;
+    }
+}

@@ -5,6 +5,7 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import { inrToWords } from '../../utils/InWordConverter';
+import moment from 'moment';
 
 // Icon...
 import {
@@ -20,17 +21,78 @@ import { Link, NavLink } from "react-router-dom";
 
 
 // Stores...
-import useInvoiceStore from '../../store/InvoiceStore';
-import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
-import useCompanyStore from "../../store/CompnayStore";
+import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore"
 
 
 const CreateChallan = () => {
+  let token = localStorage.getItem("token");
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const navigate = useNavigate();
 
+  const { parties, getAllParty } = usePartyStore();
+  const { companyData, getAllCompany } = useCompanyStore();
+
+  useEffect(() => {
+    getAllParty();
+    getAllCompany(token);
+  }, []);
+
+  const [data, setData] = useState([
+    { id: Math.floor(Math.random() * 10000000000), packages: "", description: "", weight: "", },
+  ]);
+
+  const [form, setForm] = useState({
+    consignor_id: "",
+    consignee_id: "",
+    cha: "",
+    cn_no: "",
+    date: moment().format("YYYY-MM-DD"),
+    invoice_no: "",
+    from_loc: "",
+    to_loc: "",
+    truck_no: "",
+    way_bill_no: "",
+    data: data,
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleChangeData = (e) => {
+    setData((prev) =>
+      prev.map((row) =>
+        row.id == e.target.id ? { ...row, [e.target.name]: e.target.value } : row
+      ),
+    );
+    setForm({ ...form, data: data, });
+  };
+
+  const handleAddFields = () => {
+    setData([...data, {
+      id: Math.floor(Math.random() * 10000000000),
+      packages: "",
+      description: "",
+      weight: ""
+    }]);
+  };
+
+  const handleRemoveFields = (id) => {
+    setData(data.filter(item => item.id !== id));
+  };
+
+  const handleSubmitForm = async (e) => {
+    e.preventDefault();
+    console.log(form);
+    toast.success("Challan Saved (Check Console)");
+  };
+
+  const printInvoice = (e) => {
+    if (e) e.preventDefault();
+    console.log(form);
+  };
 
   return (
     <>
@@ -45,96 +107,235 @@ const CreateChallan = () => {
               </div>
               : ""
           }
-          <div>
+          <div onClick={handleSubmitForm}>
             <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
           </div>
-          <Link to="/view-invoice">
+          <Link to="/view-challan">
             <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
           </Link>
-          <div>
+          <div onClick={printInvoice}>
             <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
           </div>
         </ActionArea>
 
-
-        <div className="p-6 bg-white text-sm max-w-5xl mx-auto border border-slate-400">
-          {/* Header */}
-          <div className="text-center border-b pb-3">
-            <h1 className="text-xl font-bold">SRIVASTAV ENTERPRISE</h1>
-            <p>Contractor Transport Cargo Handling</p>
-            <p>36/6, HIDE ROAD, KOLKATA - 700043</p>
-            <p>GSTIN: 19DVZPS4753P1ZO</p>
-          </div>
-          {/* Top Section */}
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            {/* Left */}
-            <div className="col-span-2 space-y-3">
-              <div>
-                <label className="font-semibold">Consignor</label>
-                <textarea className="w-full border p-2 h-20"></textarea>
+        <PageTitle>Challan Details</PageTitle>
+        <MainArea>
+          <div className='flex flex-col w-full gap-2 p-1'>
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-2 w-full'>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>Consignor</label>
+                <div className='flex items-center gap-1'>
+                  <select
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    name="consignor_id"
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="" disabled selected>Select Consignor</option>
+                    {parties?.body?.map(item => (
+                      <option key={item.id} value={item.id}>
+                        {item.company_name}
+                      </option>
+                    ))}
+                  </select>
+                  <Link
+                    to="/add-party?back=true"
+                    className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                  >
+                    + New
+                  </Link>
+                </div>
               </div>
-              <div>
-                <label className="font-semibold">Consignee</label>
-                <textarea className="w-full border p-2 h-20"></textarea>
-              </div>
-              <div>
-                <label className="font-semibold">CHA</label>
-                <input className="w-full border p-2" />
-              </div>
-            </div>
-            {/* Right */}
-            <div className="space-y-3">
-              <input placeholder="C/N No" className="w-full border p-2" />
-              <input type="date" className="w-full border p-2" />
-              <input placeholder="Invoice No" className="w-full border p-2" />
-              <input placeholder="From" className="w-full border p-2" />
-              <input placeholder="To" className="w-full border p-2" />
-              <input placeholder="Truck No" className="w-full border p-2" />
-              <input placeholder="Way Bill No" className="w-full border p-2" />
-            </div>
-          </div>
-          {/* Items Table */}
-          <div className="mt-6 border">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-b bg-slate-100">
-                  <th className="border p-2">Sl No</th>
-                  <th className="border p-2">No. of Packages</th>
-                  <th className="border p-2">Particulars of Goods</th>
-                  <th className="border p-2">Weight (KG)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...Array(3)].map((_, i) => (
-                  <tr key={i}>
-                    <td className="border p-2 text-center">{i + 1}</td>
-                    <td className="border p-2"><input className="w-full outline-none" /></td>
-                    <td className="border p-2"><input className="w-full outline-none" /></td>
-                    <td className="border p-2"><input className="w-full outline-none" /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
 
-          {/* Footer */}
-          <div className="grid grid-cols-3 gap-4 mt-8 text-center">
-            <div>
-              <p>Consignee Signature</p>
-              <div className="h-16 border mt-2"></div>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>Consignee</label>
+                <div className='flex items-center gap-1'>
+                  <select
+                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    name="consignee_id"
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="" disabled selected>Select Consignee</option>
+                    {parties?.body?.map(item => (
+                      <option key={item.id} value={item.id}>
+                        {item.company_name}
+                      </option>
+                    ))}
+                  </select>
+                  <Link
+                    to="/add-party?back=true"
+                    className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                  >
+                    + New
+                  </Link>
+                </div>
+              </div>
+
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>CHA</label>
+                <input
+                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="cha"
+                  onChange={handleChange}
+                  placeholder="CHA"
+                />
+              </div>
             </div>
-            <div>
-              <p>Driver Signature</p>
-              <div className="h-16 border mt-2"></div>
-            </div>
-            <div>
-              <p>Authorised Signature</p>
-              <div className="h-16 border mt-2"></div>
+
+            <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 w-full'>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>C/N No</label>
+                <input
+                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="cn_no"
+                  onChange={handleChange}
+                  placeholder="C/N No"
+                />
+              </div>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>Date</label>
+                <input
+                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="date"
+                  name="date"
+                  value={form.date}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>Invoice No</label>
+                <input
+                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="invoice_no"
+                  onChange={handleChange}
+                  placeholder="Invoice No"
+                />
+              </div>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>From</label>
+                <input
+                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="from_loc"
+                  onChange={handleChange}
+                  placeholder="From"
+                />
+              </div>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>To</label>
+                <input
+                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="to_loc"
+                  onChange={handleChange}
+                  placeholder="To"
+                />
+              </div>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>Truck No</label>
+                <input
+                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="truck_no"
+                  onChange={handleChange}
+                  placeholder="Truck No"
+                />
+              </div>
+              <div className='flex flex-col w-full gap-1'>
+                <label className='text-xs'>Way Bill No</label>
+                <input
+                  className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="way_bill_no"
+                  onChange={handleChange}
+                  placeholder="Way Bill No"
+                />
+              </div>
             </div>
           </div>
+        </MainArea>
 
-        </div>
+        <PageTitle>Item Details</PageTitle>
+        <MainArea>
+          <table className='w-full select-none'>
+            <thead>
+              <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
+                <th className='w-12'>Sl. No.</th>
+                <th className='w-32'>No. of Packages</th>
+                <th className=''>Particulars of Goods</th>
+                <th className='w-32'>Weight (KG)</th>
+                <th className='w-12'>#</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                data && data.map((item, index) => {
+                  const isLast = index === data.length - 1;
+                  return (
+                    <tr key={item.id} className='items-center text-black'>
+                      <td className=''>
+                        <input
+                          className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-center"
+                          value={index + 1}
+                          disabled
+                        />
+                      </td>
+                      <td className=''>
+                        <input
+                          className="w-full p-1 rounded border border-slate-400 dark:border-slate-600"
+                          value={item.packages}
+                          id={item.id}
+                          name="packages"
+                          onChange={(e) => handleChangeData(e)}
+                          type="text"
+                        />
+                      </td>
+                      <td className=''>
+                        <input
+                          className="w-full p-1 rounded border border-slate-400 dark:border-slate-600"
+                          value={item.description}
+                          id={item.id}
+                          name="description"
+                          onChange={(e) => handleChangeData(e)}
+                          type="text"
+                        />
+                      </td>
+                      <td className=''>
+                        <input
+                          className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
+                          value={item.weight}
+                          id={item.id}
+                          name="weight"
+                          onChange={(e) => handleChangeData(e)}
+                          type='text'
+                        />
+                      </td>
+                      <td className=''>
+                        <div
+                          className="w-full flex justify-center text-2xl cursor-pointer transition"
+                          onClick={(e) => isLast ? handleAddFields(e) : handleRemoveFields(item.id)}
+                        >
+                          {isLast ? (
+                            <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
+                          ) : (
+                            <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              }
+            </tbody>
+          </table>
+        </MainArea>
+
       </div>
+      <ToastContainer />
     </>
   )
 }

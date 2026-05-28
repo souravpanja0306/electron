@@ -8,6 +8,32 @@ const useReportStore = create((set) => ({
     debtorDetails: [],
     debtorDetailsLoading: false,
 
+    dashboardStats: null,
+    dashboardStatsLoading: false,
+
+    getDashboardStats: async ({
+        token = ""
+    }) => {
+        try {
+            set({ dashboardStatsLoading: true });
+            const result = await axios({
+                method: "get",
+                url: `http://localhost:3001/api/v1/report/dashboard-stats`,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (result.data.status === 200) {
+                set({ dashboardStats: result.data.body, dashboardStatsLoading: false });
+            };
+            return result.data;
+        } catch (error) {
+            set({ dashboardStatsLoading: false });
+            throw error;
+        };
+    },
+
     getDebtors: async ({
         id = "",
         token = ""
