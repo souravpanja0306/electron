@@ -6,6 +6,7 @@ const { validateLicense } = require("./licenseService.js")
 require("./server.js");
 app.whenReady().then(() => {
     validateLicense();
+    const iconPath = path.join(__dirname, "./public/icon/truck.png");
     const win = new BrowserWindow({
         frame: false,
         titleBarStyle: "hidden",
@@ -18,13 +19,14 @@ app.whenReady().then(() => {
             contextIsolation: true,
             nodeIntegration: false
         },
-        icon: path.join(__dirname, "./public/icon/icon.ico")
+        icon: iconPath,
+        title: "Zero",
     });
     win.loadURL("http://localhost:3000");
     // win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
 
 
-    win.webContents.openDevTools(); // For Permanents for Developments.
+    // win.webContents.openDevTools(); // For Permanents for Developments.
     globalShortcut.register("Control+Shift+I", () => {
         win.webContents.openDevTools();
     });
