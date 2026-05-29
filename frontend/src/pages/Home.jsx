@@ -41,7 +41,7 @@ const Home = () => {
     <>
       <PageTitle>Home</PageTitle>
       <MainArea>
-        <div className="items-center justify-center p-6">
+        {/* <div className="items-center justify-center p-6">
 
           <div className="flex justify-between items-center mb-8">
             <div className="flex-1 text-center">
@@ -168,7 +168,8 @@ const Home = () => {
               </button>
             )}
           </div>
-        </div>
+        </div> */}
+        Hello
       </MainArea >
     </>
   );

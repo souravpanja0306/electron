@@ -20,10 +20,22 @@ router.get(
     CompanyController.getCompany
 );
 
+router.get(
+    "/company/:id",
+    middleware.isAuthenticated,
+    CompanyController.getCompanyById
+);
+
 router.delete(
     "/company-delete",
     middleware.isAuthenticated,
-    CompanyController.removeParty
+    CompanyController.removeCompany
+);
+
+router.put(
+    "/update-company/:id",
+    middleware.isAuthenticated,
+    CompanyController.updateCompany
 );
 
 

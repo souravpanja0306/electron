@@ -3,19 +3,20 @@ import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import { Link, NavLink } from "react-router-dom";
-import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
+import { Link, useParams } from "react-router-dom";
+import { AiOutlineFileAdd, AiOutlineRollback } from "react-icons/ai";
 import Alert from "../../../components/Alert";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import useCompanyStore from '../../../store/CompanyStore';
+import CustomLoader from '../../../components/CustomLoader';
 
-
-const CompanyCreate = () => {
+const CompanyEdit = () => {
     let token = localStorage.getItem("token");
-    const { companyData, createCompany, getAllCompany, companyLoading } = useCompanyStore();
+    const { getCompanyById, updateCompany, companyLoading } = useCompanyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
+    const { id } = useParams();
 
     const navigate = useNavigate();
 
@@ -41,35 +42,53 @@ const CompanyCreate = () => {
         account_no: ""
     });
 
+    useEffect(() => {
+        const fetchCompanyData = async () => {
+            if (id) {
+                const result = await getCompanyById(id, token);
+                if (result.status === 200 && result.body.length > 0) {
+                    const companyData = result.body[0];
+                    setData({
+                        company_name: companyData.company_name || "",
+                        email: companyData.email || "",
+                        mobile: companyData.mobile || "",
+                        owner: companyData.owner || "",
+                        address_1: companyData.address_1 || "",
+                        address_2: companyData.address_2 || "",
+                        city: companyData.city || "",
+                        state: companyData.state || "",
+                        district: companyData.district || "",
+                        pincode: companyData.pincode || "",
+                        country: companyData.country || "INDIA",
+                        gst: companyData.gst || "",
+                        pan: companyData.pan || "",
+                        trade_licence: companyData.trade_licence || "",
+                        bank: companyData.bank || "",
+                        ifse: companyData.ifse || "",
+                        branch: companyData.branch || "",
+                        account_no: companyData.account_no || ""
+                    });
+                } else {
+                    setAlart({ show: true, title: "Error", type: "error", message: result.message || "Company not found." });
+                }
+            }
+        };
+        fetchCompanyData();
+    }, [id, token]);
+
     const handleSubmit = async (e) => {
         try {
             e.preventDefault();
-            let result = await createCompany(data, token);
+            let result = await updateCompany(id, data, token);
             if ((result.status) === 200) {
-                setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
-                setData({
-                    company_name: "",
-                    email: "",
-                    mobile: "",
-                    owner: "",
-                    address_1: "",
-                    address_2: "",
-                    city: "",
-                    state: "",
-                    district: "",
-                    pincode: "",
-                    country: "INDIA",
-                    gst: "",
-                    pan: "",
-                    trade_licence: "",
-                    bank: "",
-                    ifse: "",
-                    branch: "",
-                    account_no: ""
-                });
-            };
+                setAlart({ show: true, title: "Success", type: "success", message: result.message });
+                setTimeout(() => navigate("/company"), 1500);
+            } else {
+                setAlart({ show: true, title: "Error", type: "error", message: result.message });
+            }
         } catch (error) {
             console.log(error);
+            setAlart({ show: true, title: "Error", type: "error", message: "Something went wrong!" });
         };
     };
 
@@ -77,26 +96,27 @@ const CompanyCreate = () => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                // handleSubmit(e);
+                handleSubmit(e);
             };
 
             if (e.ctrlKey && e.key === 'i') {
                 e.preventDefault();
-                navigate("/party");
+                navigate("/company");
             };
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, []);
+    }, [data, id]);
 
+    if (companyLoading) return <CustomLoader />;
 
     return (
         <>
-            <PageTitle>Add New Company</PageTitle>
+            <PageTitle>Edit Company</PageTitle>
 
             <div className='flex flex-col gap-1'>
                 <ActionArea>
-                    {back ?
+                    {id ?
                         <div onClick={() => navigate(-1)}>
                             <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
                         </div>
@@ -127,7 +147,7 @@ const CompanyCreate = () => {
                                                     value={data.company_name}
                                                     type="text"
                                                     onChange={(e) =>
-                                                        setData({ ...data, company_name: e.target.value.toLowerCase() })
+                                                        setData({ ...data, company_name: e.target.value })
                                                     }
                                                     required
                                                 />
@@ -142,7 +162,7 @@ const CompanyCreate = () => {
                                                     value={data.owner}
                                                     type="text"
                                                     onChange={(e) =>
-                                                        setData({ ...data, owner: e.target.value.toLowerCase() })
+                                                        setData({ ...data, owner: e.target.value })
                                                     }
                                                     required
                                                 />
@@ -157,7 +177,7 @@ const CompanyCreate = () => {
                                                     value={data.email}
                                                     type="email"
                                                     onChange={(e) =>
-                                                        setData({ ...data, email: e.target.value.toLowerCase() })
+                                                        setData({ ...data, email: e.target.value })
                                                     }
                                                     required
                                                 />
@@ -233,8 +253,6 @@ const CompanyCreate = () => {
                         {active === 0 &&
                             <MainArea>
                                 <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
-                                    {/* <PageTitle>Address Details</PageTitle>
-                                    <hr /> */}
                                     <table className="w-full text-sm">
                                         <tbody>
                                             <tr className="dark:bg-slate-800">
@@ -246,7 +264,7 @@ const CompanyCreate = () => {
                                                         value={data.address_1}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, address_1: e.target.value.toLowerCase() })
+                                                            setData({ ...data, address_1: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -260,7 +278,7 @@ const CompanyCreate = () => {
                                                         value={data.address_2}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, address_2: e.target.value.toLowerCase() })
+                                                            setData({ ...data, address_2: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -274,7 +292,7 @@ const CompanyCreate = () => {
                                                         value={data.city}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, city: e.target.value.toLowerCase() })
+                                                            setData({ ...data, city: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -290,7 +308,7 @@ const CompanyCreate = () => {
                                                         value={data.state}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, state: e.target.value.toLowerCase() })
+                                                            setData({ ...data, state: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -304,7 +322,7 @@ const CompanyCreate = () => {
                                                         value={data.district}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, district: e.target.value.toLowerCase() })
+                                                            setData({ ...data, district: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -318,7 +336,7 @@ const CompanyCreate = () => {
                                                         value={data.pincode}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, pincode: e.target.value.toLowerCase() })
+                                                            setData({ ...data, pincode: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -332,8 +350,6 @@ const CompanyCreate = () => {
                             active === 1 &&
                             <MainArea>
                                 <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
-                                    {/* <PageTitle>Business Details</PageTitle>
-                                    <hr /> */}
                                     <table className="w-full text-sm">
                                         <tbody>
                                             <tr className="dark:bg-slate-800">
@@ -345,7 +361,7 @@ const CompanyCreate = () => {
                                                         value={data.gst}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, gst: e.target.value.toLowerCase() })
+                                                            setData({ ...data, gst: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -359,7 +375,7 @@ const CompanyCreate = () => {
                                                         value={data.pan}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, pan: e.target.value.toLowerCase() })
+                                                            setData({ ...data, pan: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -373,7 +389,7 @@ const CompanyCreate = () => {
                                                         value={data.trade_licence}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, trade_licence: e.target.value.toLowerCase() })
+                                                            setData({ ...data, trade_licence: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -386,8 +402,6 @@ const CompanyCreate = () => {
                         {active === 2 &&
                             <MainArea>
                                 <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
-                                    {/* <PageTitle>Payment Details</PageTitle>
-                                    <hr /> */}
                                     <table className="w-full text-sm">
                                         <tbody>
                                             <tr className="dark:bg-slate-800">
@@ -399,7 +413,7 @@ const CompanyCreate = () => {
                                                         value={data.bank}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, bank: e.target.value.toLowerCase() })
+                                                            setData({ ...data, bank: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -413,7 +427,7 @@ const CompanyCreate = () => {
                                                         value={data.branch}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, branch: e.target.value.toLowerCase() })
+                                                            setData({ ...data, branch: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -427,7 +441,7 @@ const CompanyCreate = () => {
                                                         value={data.ifse}
                                                         type="tel"
                                                         onChange={(e) =>
-                                                            setData({ ...data, ifse: e.target.value.toLowerCase() })
+                                                            setData({ ...data, ifse: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -441,7 +455,7 @@ const CompanyCreate = () => {
                                                         value={data.account_no}
                                                         type="tel"
                                                         onChange={(e) =>
-                                                            setData({ ...data, account_no: e.target.value.toLowerCase() })
+                                                            setData({ ...data, account_no: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -465,4 +479,4 @@ const CompanyCreate = () => {
     )
 }
 
-export default CompanyCreate
+export default CompanyEdit

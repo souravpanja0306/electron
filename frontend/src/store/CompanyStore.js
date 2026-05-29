@@ -57,6 +57,65 @@ const useCompanyStore = create((set) => ({
             throw error;
         };
     },
+
+    deleteCompany: async ({ ids, token }) => {
+        try {
+            set({ companyLoading: true });
+            const result = await axios({
+                method: "delete",
+                url: "http://localhost:3001/api/v1/company/company-delete",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: { ids: ids },
+            });
+            set({ companyLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ companyLoading: false });
+            throw error;
+        }
+    },
+
+    getCompanyById: async (id, token) => {
+        try {
+            set({ companyLoading: true });
+            const result = await axios({
+                method: "get",
+                url: `http://localhost:3001/api/v1/company/get-company?id=${id}`,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            set({ companyData: result.data.body, companyLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ companyLoading: false });
+            throw error;
+        }
+    },
+
+    updateCompany: async (id, payload, token) => {
+        try {
+            set({ companyLoading: true });
+            const result = await axios({
+                method: "put",
+                url: `http://localhost:3001/api/v1/company/update-company/${id}`,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: payload,
+            });
+            set({ companyLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ companyLoading: false });
+            throw error;
+        }
+    },
 }));
 
 export default useCompanyStore;

@@ -63,15 +63,36 @@ exports.getCompany = async ({
     };
 };
 
-exports.deleteParty = async ({
+exports.deleteCompany = async ({
     ids = "",
 }) => {
     try {
         const placeholders = ids.map(() => "?").join(",");
 
-        let result = await db.prepare(`DELETE FROM party WHERE id IN (${placeholders})`).run(...ids);
+        let result = await db.prepare(`DELETE FROM company WHERE id IN (${placeholders})`).run(...ids);
         return result;
     } catch (error) {
         console.log(error)
+    };
+};
+
+exports.updateCompany = async (id, data) => {
+    try {
+        db.exec(require("../database/schema/company.schema"));
+        const keys = Object.keys(data).filter(key => key !== 'id'); // Exclude id from update fields
+        const setClause = keys.map(key => `${key} = @${key}`).join(", ");
+
+        if (!keys.length) {
+            return { changes: 0 }; // No fields to update
+        }
+
+        const result = db
+            .prepare(`UPDATE company SET ${setClause} WHERE id = @id`)
+            .run({ ...data, id });
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        throw error;
     };
 };

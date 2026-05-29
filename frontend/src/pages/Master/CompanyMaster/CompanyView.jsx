@@ -1,76 +1,82 @@
 import { useEffect, useState } from "react";
-import PageTitle from '../../../components/PageTitle';
-import ActionArea from '../../../components/ActionArea';
-import MainArea from '../../../components/MainArea';
-import CustomButton from '../../../components/CustomButton';
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 // Icon...
 import {
     AiOutlineFileAdd,
     AiOutlineSync,
-    AiOutlineDownload,
-    AiOutlineFilter
+    AiOutlineFilter,
+    AiOutlineDelete
 } from "react-icons/ai";
 
-const ViewCompany = () => {
-    const [page, setPage] = useState(1);
-    const [party, setParty] = useState([]);
+// Components...
+import PageTitle from '../../../components/PageTitle';
+import ActionArea from '../../../components/ActionArea';
+import MainArea from '../../../components/MainArea';
+import CustomButton from '../../../components/CustomButton';
+import CustomLoader from "../../../components/CustomLoader";
 
-    // const getPartys = async () => {
-    //     let result = await handleGetParty();
-    //     if (result.body.length) {
-    //         result.body.map(item => item.is_selected = false)
-    //         setParty(result.body);
-    //     };
-    // };
+// Stores...
+import useCompanyStore from "../../../store/CompanyStore";
+
+const ViewCompany = () => {
+    let token = localStorage.getItem("token");
+    const { companyData, getAllCompany, deleteCompany, companyLoading } = useCompanyStore();
+
+    const navigate = useNavigate();
+    const [page, setPage] = useState(1);
+    const [checkedIds, setCheckedIds] = useState([]);
+
     useEffect(() => {
-        // getPartys();
+        getAllCompany(token);
     }, []);
 
-    const [checkedIds, setCheckedIds] = useState(null);
     const handleChecked = (e, id) => {
-        setParty(prev =>
-            prev.map(item =>
-                item.id === id ? { ...item, is_selected: e.target.checked } : item
-            )
-        );
-        setCheckedIds(prev =>
-            e.target.checked ? [...prev, id] : prev.filter(itemId => itemId !== id)
-        );
+        if (e.target.checked) {
+            setCheckedIds([...checkedIds, id]);
+        } else {
+            setCheckedIds(checkedIds.filter(itemId => itemId !== id));
+        }
     };
 
     const handleSelectAll = (e) => {
-        const checked = e.target.checked;
-        setParty(prev =>
-            prev.map(item => ({ ...item, is_selected: checked })),
-        );
-        setCheckedIds(checked ? party.map(item => item.id) : []);
+        if (e.target.checked) {
+            const allIds = companyData.map(item => item.id);
+            setCheckedIds(allIds);
+        } else {
+            setCheckedIds([]);
+        }
     };
 
     const handleDelete = async () => {
         try {
             if (!checkedIds.length) {
-                window.alert("Please select an item, that you want to delete.")
-            } else {
-                await window.api.deleteParty({ ids: checkedIds }).then((res) => {
-                    console.log(res, "res")
-                    if (res.status === 200) {
-                        setCheckedIds([])
-                    };
-                });
-                await window.api.getParty({}).then((data) => {
-                    setParty(data.body);
-                });
-
-            };
+                toast.warning("Please select an item to delete.", { theme: "dark" });
+                return;
+            }
+            if (window.confirm("Are you sure you want to delete selected companies?")) {
+                let result = await deleteCompany({ ids: checkedIds, token: token });
+                if (result.status === 200) {
+                    toast.success(result.message, { theme: "dark" });
+                    setCheckedIds([]);
+                    getAllCompany(token);
+                } else {
+                    toast.error(result.message, { theme: "dark" });
+                }
+            }
         } catch (error) {
             console.log(error);
+            toast.error("Something went wrong!", { theme: "dark" });
         };
     };
 
-    const navigate = useNavigate();
+    const handleRefresh = () => {
+        getAllCompany(token);
+        toast.info("Refreshing data...", { theme: "dark" });
+    };
+
     useEffect(() => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 'n') {
@@ -85,14 +91,18 @@ const ViewCompany = () => {
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, []);
+    }, [checkedIds]);
 
     const limit = 10;
-    const total = 0;
+    const total = companyData?.length || 0;
     const totalPages = Math.ceil(total / limit);
 
-    const start = (page - 1) * limit + 1;
+    const start = total === 0 ? 0 : (page - 1) * limit + 1;
     const end = Math.min(page * limit, total);
+
+    const currentData = companyData?.slice((page - 1) * limit, page * limit) || [];
+
+    if (companyLoading) return <CustomLoader />;
 
     return (
         <>
@@ -102,15 +112,20 @@ const ViewCompany = () => {
                     <div className="flex justify-between w-full">
                         <div className="flex gap-1">
                             <Link to="/add-company">
-                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
-                            <div onClick={(e) => handleDelete(e)} className={`${!checkedIds ? "hidden" : "block"}`}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>
+                            <div onClick={handleDelete} className={`${!checkedIds.length ? "hidden" : "block"}`}>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                            </div>
+                            <div className={`${checkedIds.length === 1 ? "block" : "hidden"}`}>
+                                <Link to={`/edit-company/${checkedIds[0]}`}>
+                                    <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                                </Link>
                             </div>
                         </div>
                         <div className="flex gap-1">
-                            <div>
-                                <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
+                            <div onClick={handleRefresh}>
+                                <CustomButton title={"Refresh"} color={"blue"}><AiOutlineSync /></CustomButton>
                             </div>
                             <div>
                                 <CustomButton title={"Filter"} color={"blue"}><AiOutlineFilter /></CustomButton>
@@ -121,8 +136,14 @@ const ViewCompany = () => {
                 <MainArea>
                     <table className="table-fixed w-full">
                         <thead>
-                            <tr className="border-b border-slate-300 dark:border-slate-600 p-1 ">
-                                <th className="p-1 text-start truncate">Select</th>
+                            <tr className="border-b border-slate-300 dark:border-slate-600 p-1 text-slate-600 dark:text-white text-sm font-semibold">
+                                <th className="p-1 text-start truncate w-16">
+                                    <input
+                                        type="checkbox"
+                                        onChange={handleSelectAll}
+                                        checked={checkedIds.length === companyData.length && companyData.length > 0}
+                                    />
+                                </th>
                                 <th className="p-1 text-start truncate">Company</th>
                                 <th className="p-1 text-start truncate">Mobile</th>
                                 <th className="p-1 text-start truncate">Email</th>
@@ -131,36 +152,47 @@ const ViewCompany = () => {
                                 <th className="p-1 text-start truncate">GST</th>
                                 <th className="p-1 text-start truncate">Trade Licence</th>
                                 <th className="p-1 text-start truncate">Bank a/c No</th>
+                                <th className="p-1 text-center w-16 text-slate-500">#</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                party && party.length
+                                currentData && currentData.length
                                     ?
                                     <>
                                         {
-                                            party.map((item, index) => {
+                                            currentData.map((item, index) => {
                                                 return (
-                                                    <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                                        <td className="p-1 text-start truncate capitalize">
+                                                    <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer text-sm text-slate-500 dark:text-slate-300">
+                                                        <td className="p-1 text-start truncate">
                                                             <input
                                                                 type="checkbox"
                                                                 onChange={(e) => handleChecked(e, item.id)}
-                                                                checked={checkedIds === item.id}
+                                                                checked={checkedIds.includes(item.id)}
                                                             />
                                                         </td>
-                                                        <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">
-                                                            <Link to={`/`}>
+                                                        <td className="p-1 text-start truncate capitalize hover:underline hover:text-blue-500">
+                                                            <Link to={`/view-company-details/${item.id}?back=true`}>
                                                                 {item.company_name ? item.company_name : "--"}
                                                             </Link>
                                                         </td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.mobile ? item.mobile : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.email ? item.email : "--"}</td>
+                                                        <td className="p-1 text-start truncate">{item.mobile ? item.mobile : "--"}</td>
+                                                        <td className="p-1 text-start truncate">{item.email ? item.email : "--"}</td>
                                                         <td className="p-1 text-start truncate capitalize">{item.owner ? item.owner : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.pan ? item.pan : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.gst ? item.gst : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.trade_licence ? item.trade_licence : "--"}</td>
-                                                        <td className="p-1 text-start truncate capitalize">{item.account_no ? item.account_no : "--"}</td>
+                                                        <td className="p-1 text-start truncate uppercase">{item.pan ? item.pan : "--"}</td>
+                                                        <td className="p-1 text-start truncate uppercase">{item.gst ? item.gst : "--"}</td>
+                                                        <td className="p-1 text-start truncate uppercase">{item.trade_licence ? item.trade_licence : "--"}</td>
+                                                        <td className="p-1 text-start truncate">{item.account_no ? item.account_no : "--"}</td>
+                                                        <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
+                                                            <Link to={`/edit-company/${item.id}`}>
+                                                                <button
+                                                                    className="p-1 rounded text-xl text-slate-500 hover:text-amber-500 hover:bg-amber-500/10 active:text-amber-700 transition"
+                                                                    title="Edit"
+                                                                >
+                                                                    <AiOutlineFileAdd />
+                                                                </button>
+                                                            </Link>
+                                                        </td>
                                                     </tr>
                                                 )
                                             })
@@ -170,7 +202,7 @@ const ViewCompany = () => {
                                     <>
                                         {
                                             <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                                <td className="p-1 text-center" colSpan={9}>No Data Found</td>
+                                                <td className="p-1 text-center" colSpan={10}>No Data Found</td>
                                             </tr>
                                         }
                                     </>
@@ -178,6 +210,32 @@ const ViewCompany = () => {
                         </tbody>
                     </table>
                 </MainArea>
+
+                <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
+                    <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            disabled={page === 1 || total === 0}
+                            onClick={() => setPage(page - 1)}
+                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                            Prev
+                        </button>
+                        {totalPages > 0 && [...Array(totalPages)].map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setPage(i + 1)}
+                                className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
+                                {i + 1}
+                            </button>
+                        ))}
+                        <button
+                            disabled={page === totalPages || total === 0}
+                            onClick={() => setPage(page + 1)}
+                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                            Next
+                        </button>
+                    </div>
+                </div>
             </div >
         </>
     )
