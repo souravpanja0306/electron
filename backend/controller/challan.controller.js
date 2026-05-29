@@ -49,7 +49,7 @@ exports.generateChallanPdf = async (req, res) => {
             path: filePath,
             format: "A4",
             printBackground: true,
-            margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' }
+            margin: { top: '10px', bottom: '10px', left: '10px', right: '10px' }
         });
         await browser.close();
 
@@ -180,5 +180,47 @@ exports.deleteChallan = async (req, res) => {
         response.status = 500;
         response.message = error.message || "Something went wrong: controller: deleteChallan";
     }
+    return res.status(response.status).json(response);
+};
+
+exports.generateChallanNo = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { t_userId, t_mobile, t_username, t_name } = req.body;
+        const { types } = req.query;
+        if (!types) {
+            response.status = 400;
+            response.message = "Type required";
+            response.body = [];
+            return res.status(response.status).json(response);
+        };
+        let type = "";
+        if (types == "challan") type = "CHA";
+        const date = moment().format("DDMMYYYY");
+
+        const existsCheck = async ({
+            type = ""
+        }) => {
+            let count = await InvoiceService.findInvoices({ count: true });
+            while (true) {
+                const invoiceNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
+                const exists = await InvoiceService.findInvoices({ invoice_no: invoiceNo });
+                if (!exists.length) return invoiceNo;
+                count++;
+            };
+        };
+
+        let result = await existsCheck({ type: type });
+        if (result) {
+            response.status = 200;
+            response.message = "Invoice Number Generate Successfully.";
+            response.body = result;
+        };
+    } catch (error) {
+        console.log(`Something went wrong: controller: generateChallanNo: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: generateChallanNo`;
+        response.body = error.body ? error.body : "";
+    };
     return res.status(response.status).json(response);
 };

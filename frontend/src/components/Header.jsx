@@ -42,7 +42,7 @@ const Header = () => {
         <div className="titlebar border-b border-slate-300 dark:border-slate-700 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between px-3 shadow-sm z-50">
             <div className="flex items-center gap-4 no-drag">
                 <div className="font-bold tracking-tight text-blue-600 dark:text-blue-400">
-                    <Link to="/" className="hover:opacity-80">HelloWorld</Link>
+                    <Link to="/" className="hover:opacity-80">Zero® ERP</Link>
                 </div>
                 <div className="flex text-xs space-x-1">
                     {/* File */}
@@ -78,19 +78,29 @@ const Header = () => {
                         </div>
                     </div>
 
-                    {/* Work */}
+                    {/* Help */}
                     <div className="relative group">
-                        <button className="btn px-2 py-1 hover:bg-slate-300 dark:hover:bg-slate-800 rounded transition-colors">Work</button>
+                        <button className="btn px-2 py-1 hover:bg-slate-300 dark:hover:bg-slate-800 rounded transition-colors">Help</button>
                         <div className="p-1 absolute left-0 top-[20px] hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]">
-                            <Link to="/create-invoice" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
-                                <span>Create Invoice</span>
-                                <span className="text-slate-500 text-[10px] font-mono">Ctrl+I</span>
+                            <Link to="/welcome" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                                <span>Welcome</span>
+                                <span className="text-slate-500 text-[10px] font-mono"></span>
                             </Link>
-                            <Link to="" className="btn block w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
-                                Create Challan
+                            <Link to="/contact-us" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                                <span>Contact Us</span>
+                                <span className="text-slate-500 text-[10px] font-mono">Ctrl+Alt+C</span>
                             </Link>
-                            <Link to="" className="btn block w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
-                                Create Money Receipts
+                            <Link to="/documentation" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                                <span>Documentation</span>
+                                <span className="text-slate-500 text-[10px] font-mono"></span>
+                            </Link>
+                            <Link to="/updates" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                                <span>Check for Updates</span>
+                                <span className="text-slate-500 text-[10px] font-mono"></span>
+                            </Link>
+                            <Link to="/about" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                                <span>About</span>
+                                <span className="text-slate-500 text-[10px] font-mono"></span>
                             </Link>
                         </div>
                     </div>

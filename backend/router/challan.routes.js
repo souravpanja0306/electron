@@ -8,6 +8,12 @@ const ChallanController = require("../controller/challan.controller");
 // Middleware...
 const middleware = require("../middleware/middleware");
 
+router.get(
+    "/generate-challan-no",
+    middleware.isAuthenticated,
+    ChallanController.generateChallanNo
+);
+
 router.post(
     "/create",
     middleware.isAuthenticated,

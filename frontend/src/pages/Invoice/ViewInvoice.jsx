@@ -68,18 +68,18 @@ const ViewInvoices = () => {
 
     const handlePrint = async (id) => {
         try {
-            toast.info("Generating PDF...");
             let result = await printInvoice({ id, token });
             if (result.status === 200) {
                 window.open(result.body.url, "_blank");
+                toast.info("PDF generated.", { theme: "dark" });
             } else {
                 toast.error(result.message);
-            }
+            };
         } catch (error) {
             console.log(error);
             toast.error("Something went wrong!");
-        }
-    }
+        };
+    };
 
     useEffect(() => {
         const onKey = (e) => {
