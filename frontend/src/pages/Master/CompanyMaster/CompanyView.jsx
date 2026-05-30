@@ -133,6 +133,7 @@ const ViewCompany = () => {
                         </div>
                     </div>
                 </ActionArea>
+
                 <MainArea>
                     <table className="table-fixed w-full">
                         <thead>
@@ -152,7 +153,6 @@ const ViewCompany = () => {
                                 <th className="p-1 text-start truncate">GST</th>
                                 <th className="p-1 text-start truncate">Trade Licence</th>
                                 <th className="p-1 text-start truncate">Bank a/c No</th>
-                                <th className="p-1 text-center w-16 text-slate-500">#</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -183,16 +183,6 @@ const ViewCompany = () => {
                                                         <td className="p-1 text-start truncate uppercase">{item.gst ? item.gst : "--"}</td>
                                                         <td className="p-1 text-start truncate uppercase">{item.trade_licence ? item.trade_licence : "--"}</td>
                                                         <td className="p-1 text-start truncate">{item.account_no ? item.account_no : "--"}</td>
-                                                        <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
-                                                            <Link to={`/edit-company/${item.id}`}>
-                                                                <button
-                                                                    className="p-1 rounded text-xl text-slate-500 hover:text-amber-500 hover:bg-amber-500/10 active:text-amber-700 transition"
-                                                                    title="Edit"
-                                                                >
-                                                                    <AiOutlineFileAdd />
-                                                                </button>
-                                                            </Link>
-                                                        </td>
                                                     </tr>
                                                 )
                                             })
@@ -211,31 +201,33 @@ const ViewCompany = () => {
                     </table>
                 </MainArea>
 
-                <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
-                    <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
-                    <div className="flex items-center gap-1">
-                        <button
-                            disabled={page === 1 || total === 0}
-                            onClick={() => setPage(page - 1)}
-                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
-                            Prev
-                        </button>
-                        {totalPages > 0 && [...Array(totalPages)].map((_, i) => (
+                <MainArea>
+                    <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
+                        <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
+                        <div className="flex items-center gap-1">
                             <button
-                                key={i}
-                                onClick={() => setPage(i + 1)}
-                                className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
-                                {i + 1}
+                                disabled={page === 1 || total === 0}
+                                onClick={() => setPage(page - 1)}
+                                className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                                Prev
                             </button>
-                        ))}
-                        <button
-                            disabled={page === totalPages || total === 0}
-                            onClick={() => setPage(page + 1)}
-                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
-                            Next
-                        </button>
+                            {totalPages > 0 && [...Array(totalPages)].map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setPage(i + 1)}
+                                    className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
+                                    {i + 1}
+                                </button>
+                            ))}
+                            <button
+                                disabled={page === totalPages || total === 0}
+                                onClick={() => setPage(page + 1)}
+                                className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                                Next
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </MainArea>
             </div >
         </>
     )

@@ -25,6 +25,8 @@ import 'react-toastify/dist/ReactToastify.css';
 const Header = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState({ name: "User" });
+    const [activeMenu, setActiveMenu] = useState(null);
+
     useEffect(() => {
         try {
             const userData = JSON.parse(localStorage.getItem("user"));
@@ -33,11 +35,27 @@ const Header = () => {
             console.error("Error parsing user data:", error);
         }
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.menu-container')) {
+                setActiveMenu(null);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const toggleMenu = (menu) => {
+        setActiveMenu(activeMenu === menu ? null : menu);
+    };
+
     const handleSignOut = (e) => {
         localStorage.clear();
         sessionStorage.clear();
         navigate("/signin");
     };
+
     return (
         <div className="titlebar border-b border-slate-300 dark:border-slate-700 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between px-3 shadow-sm z-50">
             <div className="flex items-center gap-4 no-drag">
@@ -46,11 +64,15 @@ const Header = () => {
                 </div>
                 <div className="flex text-xs space-x-1">
                     {/* File */}
-                    <div className="relative group">
-                        <button className="btn px-2 py-1 hover:bg-slate-300 dark:hover:bg-slate-800 rounded transition-colors">File</button>
-                        <div className="p-1 absolute left-0 top-[20px] hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]">
+                    <div className="relative menu-container">
+                        <button 
+                            onClick={() => toggleMenu('file')}
+                            className={`btn px-2 py-1 rounded transition-colors ${activeMenu === 'file' ? 'bg-slate-300 dark:bg-slate-800' : 'hover:bg-slate-300 dark:hover:bg-slate-800'}`}>
+                            File
+                        </button>
+                        <div className={`p-1 absolute left-0 top-[28px] ${activeMenu === 'file' ? 'block' : 'hidden'} bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]`}>
                             <button
-                                onClick={() => window.api?.openDevTools()}
+                                onClick={() => { window.api?.openDevTools(); setActiveMenu(null); }}
                                 className="btn block w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                                 <div className="flex justify-between items-center">
                                     <span>Open Dev Tools</span>
@@ -58,7 +80,7 @@ const Header = () => {
                                 </div>
                             </button>
                             <button
-                                onClick={() => window.api?.close()}
+                                onClick={() => { window.api?.close(); setActiveMenu(null); }}
                                 className="btn block w-full text-left px-3 py-2 hover:rounded hover:bg-red-500 dark:hover:bg-red-600 hover:text-white transition-colors">
                                 Exit
                             </button>
@@ -66,11 +88,15 @@ const Header = () => {
                     </div>
 
                     {/* Edit */}
-                    <div className="relative group">
-                        <button className="btn px-2 py-1 hover:bg-slate-300 dark:hover:bg-slate-800 rounded transition-colors">Edit</button>
-                        <div className="p-1 absolute left-0 top-[20px] hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]">
+                    <div className="relative menu-container">
+                        <button 
+                            onClick={() => toggleMenu('edit')}
+                            className={`btn px-2 py-1 rounded transition-colors ${activeMenu === 'edit' ? 'bg-slate-300 dark:bg-slate-800' : 'hover:bg-slate-300 dark:hover:bg-slate-800'}`}>
+                            Edit
+                        </button>
+                        <div className={`p-1 absolute left-0 top-[28px] ${activeMenu === 'edit' ? 'block' : 'hidden'} bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]`}>
                             <button
-                                onClick={() => window.location.reload()}
+                                onClick={() => { window.location.reload(); setActiveMenu(null); }}
                                 className="btn block w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                             >
                                 Reload
@@ -79,26 +105,30 @@ const Header = () => {
                     </div>
 
                     {/* Help */}
-                    <div className="relative group">
-                        <button className="btn px-2 py-1 hover:bg-slate-300 dark:hover:bg-slate-800 rounded transition-colors">Help</button>
-                        <div className="p-1 absolute left-0 top-[20px] hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]">
-                            <Link to="/welcome" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                    <div className="relative menu-container">
+                        <button 
+                            onClick={() => toggleMenu('help')}
+                            className={`btn px-2 py-1 rounded transition-colors ${activeMenu === 'help' ? 'bg-slate-300 dark:bg-slate-800' : 'hover:bg-slate-300 dark:hover:bg-slate-800'}`}>
+                            Help
+                        </button>
+                        <div className={`p-1 absolute left-0 top-[28px] ${activeMenu === 'help' ? 'block' : 'hidden'} bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]`}>
+                            <Link to="/welcome" onClick={() => setActiveMenu(null)} className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                                 <span>Welcome</span>
                                 <span className="text-slate-500 text-[10px] font-mono"></span>
                             </Link>
-                            <Link to="/contact-us" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                            <Link to="/contact-us" onClick={() => setActiveMenu(null)} className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                                 <span>Contact Us</span>
                                 <span className="text-slate-500 text-[10px] font-mono">Ctrl+Alt+C</span>
                             </Link>
-                            <Link to="/documentation" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                            <Link to="/documentation" onClick={() => setActiveMenu(null)} className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                                 <span>Documentation</span>
                                 <span className="text-slate-500 text-[10px] font-mono"></span>
                             </Link>
-                            <Link to="/updates" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                            <Link to="/updates" onClick={() => setActiveMenu(null)} className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                                 <span>Check for Updates</span>
                                 <span className="text-slate-500 text-[10px] font-mono"></span>
                             </Link>
-                            <Link to="/about" className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                            <Link to="/about" onClick={() => setActiveMenu(null)} className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                                 <span>About</span>
                                 <span className="text-slate-500 text-[10px] font-mono"></span>
                             </Link>
@@ -109,20 +139,22 @@ const Header = () => {
 
             <div className="flex items-center gap-3 text-sm no-drag">
                 <div className="flex items-center gap-2 pr-2 border-r border-slate-300 dark:border-slate-700">
-                    <div className="relative group">
-                        <button className="btn w-7 h-7 flex items-center justify-center bg-blue-600 text-white hover:bg-blue-500 rounded-full text-[10px] font-bold uppercase shadow-sm">
+                    <div className="relative menu-container">
+                        <button 
+                            onClick={() => toggleMenu('user')}
+                            className="btn w-7 h-7 flex items-center justify-center bg-blue-600 text-white hover:bg-blue-500 rounded-full text-[10px] font-bold uppercase shadow-sm">
                             {user?.name?.[0] || "U"}
                         </button>
-                        <div className="p-1 absolute left-0 top-full hidden group-hover:block bg-white dark:bg-slate-800 text-black dark:text-white min-w-48 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]">
+                        <div className={`p-1 absolute left-0 top-full ${activeMenu === 'user' ? 'block' : 'hidden'} bg-white dark:bg-slate-800 text-black dark:text-white min-w-48 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]`}>
                             <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700 mb-1">
                                 <p className="text-xs font-semibold truncate">{user?.name}</p>
                                 <p className="text-[10px] text-slate-500 truncate">{user?.email || "User Profile"}</p>
                             </div>
-                            <Link to="/profile" className="btn block w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                            <Link to="/profile" onClick={() => setActiveMenu(null)} className="btn block w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                                 Profile
                             </Link>
                             <button
-                                onClick={(e) => handleSignOut(e)}
+                                onClick={(e) => { handleSignOut(e); setActiveMenu(null); }}
                                 className="btn block w-full text-left px-3 py-2 hover:rounded hover:bg-red-500 dark:hover:bg-red-600 hover:text-white transition-colors">
                                 Signout
                             </button>

@@ -32,3 +32,33 @@ export const handleGetParty = async () => {
     });
     return result.data;
 };
+
+export const handleGetPartyById = async (id) => {
+    let result = await axios({
+        method: "get",
+        url: `${baseURL.party}party-list?id=${id}`,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    return result.data;
+};
+
+export const handleUpdateParty = async (id, data) => {
+    try {
+        let result = await axios.request({
+            method: 'put',
+            maxBodyLength: Infinity,
+            url: `${baseURL.party}party-update/${id}`,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            data: data,
+        });
+        return result.data;
+    } catch (error) {
+        console.log(error);
+    };
+};

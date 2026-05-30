@@ -78,11 +78,13 @@ const ViewParty = () => {
     }, []);
 
     const limit = 10;
-    const total = 0;
+    const total = party?.length || 0;
     const totalPages = Math.ceil(total / limit);
 
-    const start = (page - 1) * limit + 1;
+    const start = total === 0 ? 0 : (page - 1) * limit + 1;
     const end = Math.min(page * limit, total);
+
+    const currentData = party?.slice((page - 1) * limit, page * limit) || [];
 
     return (
         <>
@@ -97,9 +99,11 @@ const ViewParty = () => {
                             <div onClick={(e) => handleDelete(e)}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineDelete /></CustomButton>
                             </div>
-                            <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Export (Ctrl+E)"} color={"blue"}><AiOutlineDownload /></CustomButton>
-                            </div>
+                            {checkedIds && (
+                                <Link to={`/edit-party/${checkedIds}`}>
+                                    <CustomButton title={"Edit"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                                </Link>
+                            )}
                         </div>
                         <div className="flex gap-1">
                             <div onClick={(e) => getPartys(e)}>
@@ -111,11 +115,14 @@ const ViewParty = () => {
                         </div>
                     </div>
                 </ActionArea>
+
                 <MainArea>
                     <table className="table-fixed w-full">
                         <thead>
                             <tr className="border-b border-slate-600 p-1 ">
-                                <th className="p-1 text-start w-8">Select</th>
+                                <th className="p-1 text-start truncate w-16">
+                                    <input type="checkbox" />
+                                </th>
                                 <th className="p-1 text-start">Company</th>
                                 <th className="p-1 text-start">Mobile</th>
                                 <th className="p-1 text-start">Email</th>
@@ -128,11 +135,11 @@ const ViewParty = () => {
                         </thead>
                         <tbody>
                             {
-                                party && party.length
+                                currentData && currentData.length
                                     ?
                                     <>
                                         {
-                                            party.map((item, index) => {
+                                            currentData.map((item, index) => {
                                                 return (
                                                     <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
                                                         <td className="p-1 text-start truncate capitalize">
@@ -142,8 +149,8 @@ const ViewParty = () => {
                                                                 checked={checkedIds === item.id}
                                                             />
                                                         </td>
-                                                        <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-300">
-                                                            <Link to={`/`}>
+                                                        <td className="p-1 text-start truncate capitalize hover:underline hover:text-blue-500">
+                                                            <Link to={`/edit-party/${item.id}`}>
                                                                 {item.company_name ? item.company_name : "--"}
                                                             </Link>
                                                         </td>
@@ -163,7 +170,7 @@ const ViewParty = () => {
                                     <>
                                         {
                                             <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                                <td className="p-1 text-center" colSpan={9}>No Data Found</td>
+                                                <td className="p-1 text-center" colSpan={10}>No Data Found</td>
                                             </tr>
                                         }
                                     </>
@@ -171,31 +178,34 @@ const ViewParty = () => {
                         </tbody>
                     </table>
                 </MainArea>
-                <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
-                    <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
-                    <div className="flex items-center gap-1">
-                        <button
-                            disabled={page === 1}
-                            onClick={() => setPage(page - 1)}
-                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
-                            Prev
-                        </button>
-                        {[...Array(totalPages)].map((_, i) => (
+
+                <MainArea>
+                    <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
+                        <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
+                        <div className="flex items-center gap-1">
                             <button
-                                key={i}
-                                onClick={() => setPage(i + 1)}
-                                className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
-                                {i + 1}
+                                disabled={page === 1 || total === 0}
+                                onClick={() => setPage(page - 1)}
+                                className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                                Prev
                             </button>
-                        ))}
-                        <button
-                            disabled={page === totalPages}
-                            onClick={() => setPage(page + 1)}
-                            className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
-                            Next
-                        </button>
+                            {totalPages > 0 && [...Array(totalPages)].map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setPage(i + 1)}
+                                    className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
+                                    {i + 1}
+                                </button>
+                            ))}
+                            <button
+                                disabled={page === totalPages || total === 0}
+                                onClick={() => setPage(page + 1)}
+                                className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
+                                Next
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </MainArea>
             </div >
         </>
     )

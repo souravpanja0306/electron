@@ -26,5 +26,11 @@ router.delete(
     PartyController.removeParty
 );
 
+router.put(
+    "/party-update/:id",
+    middleware.isAuthenticated,
+    PartyController.editParty
+);
+
 
 module.exports = router;

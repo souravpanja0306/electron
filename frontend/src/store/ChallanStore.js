@@ -5,6 +5,7 @@ import axios from "axios";
 const useChallanStore = create((set) => ({
     challanData: { body: [] },
     challanLoading: false,
+    challanNo: "",
 
     getAllChallan: async ({ id = "", token = "" }) => {
         try {
@@ -20,6 +21,30 @@ const useChallanStore = create((set) => ({
                 validateStatus: (status) => status < 500,
             });
             set({ challanData: result.data, challanLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ challanLoading: false });
+            throw error;
+        }
+    },
+
+    generateChallanNo: async (token) => {
+        try {
+            set({ challanLoading: true });
+            let result = await axios({
+                method: 'get',
+                url: `${baseURL.challan}generate-challan-no?types=challan`,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                validateStatus: (status) => status < 500,
+            });
+            if (result.data.status === 200) {
+                set({ challanNo: result.data.body, challanLoading: false });
+            } else {
+                set({ challanLoading: false });
+            }
             return result.data;
         } catch (error) {
             set({ challanLoading: false });

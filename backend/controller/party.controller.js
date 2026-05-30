@@ -106,3 +106,54 @@ exports.removeParty = async (req, res) => {
     };
     return res.status(response.status).json(response);
 };
+
+exports.editParty = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { id } = req.params;
+        const { t_userId } = req.body;
+
+        if (!id) return errorHandler(res, 400, "ID is required.");
+
+        let finalData = {
+            company_name: req.body.company_name,
+            email: req.body.email,
+            mobile: req.body.mobile,
+            owner: req.body.owner,
+            address_1: req.body.address_1,
+            address_2: req.body.address_2,
+            city: req.body.city,
+            state: req.body.state,
+            district: req.body.district,
+            pincode: req.body.pincode,
+            country: req.body.country,
+            gst: req.body.gst,
+            pan: req.body.pan,
+            trade_licence: req.body.trade_licence,
+            bank: req.body.bank,
+            ifse: req.body.ifse,
+            branch: req.body.branch,
+            account_no: req.body.account_no,
+            updated_at: moment().format("YYYY-MM-DD HH:mm:ss"),
+        };
+
+        // Remove undefined fields
+        Object.keys(finalData).forEach(key => finalData[key] === undefined && delete finalData[key]);
+
+        let result = await PartyService.updateParty(id, finalData);
+
+        if (result.changes > 0) {
+            response.status = 200;
+            response.message = "Data updated successfully.";
+            response.body = result;
+        } else {
+            response.status = 202;
+            response.message = "No changes made or party not found.";
+        }
+    } catch (error) {
+        console.log(error);
+        response.status = 500;
+        response.message = "Internal Server Error";
+    };
+    return res.status(response.status).json(response);
+};

@@ -45,6 +45,45 @@ const usePartyStore = create((set) => ({
         };
     },
 
+    getPartyById: async (id) => {
+        try {
+            set({ partyLoading: true });
+            const result = await axios({
+                method: "get",
+                url: `http://localhost:3001/api/v1/party/party-list?id=${id}`,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            set({ partyLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ partyLoading: false });
+            throw error;
+        }
+    },
+
+    updateParty: async (id, payload) => {
+        try {
+            set({ partyLoading: true });
+            const result = await axios({
+                method: "put",
+                url: `http://localhost:3001/api/v1/party/party-update/${id}`,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: payload,
+            });
+            set({ partyLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ partyLoading: false });
+            throw error;
+        }
+    },
+
     createGst: async (payload) => {
         try {
             set({ loading: true });

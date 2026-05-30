@@ -38,6 +38,7 @@ import CreateChallan from './pages/Challan/CreateChallan';
 import ViewChallan from './pages/Challan/ViewChallan';
 import CompanyEdit from './pages/Master/CompanyMaster/CompanyEdit';
 import CompanyDetails from './pages/Master/CompanyMaster/CompanyDetails';
+import PartyEdit from './pages/Master/PartyMaster/PartyEdit';
 
 import { Middleware } from './middleware/middleware';
 
@@ -61,6 +62,7 @@ const router = createHashRouter([
   { path: "/edit-profile", element: <Middleware><Layout><EditProfile /></Layout></Middleware> },
   { path: "/add-party", element: <Middleware><Layout><PartyCreate /></Layout></Middleware> },
   { path: "/party", element: <Middleware><Layout><PartyView /></Layout></Middleware> },
+  { path: "/edit-party/:id", element: <Middleware><Layout><PartyEdit /></Layout></Middleware> },
   { path: "/add-product", element: <Middleware><Layout><ProductMaster /></Layout></Middleware> },
   { path: "/product", element: <Middleware><Layout><Product /></Layout></Middleware> },
   { path: "/about", element: <Middleware><Layout><About /></Layout></Middleware> },

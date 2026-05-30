@@ -34,11 +34,19 @@ const CreateChallan = () => {
 
   const { parties, getAllParty } = usePartyStore();
   const { companyData, getAllCompany } = useCompanyStore();
-  const { createChallan, challanLoading } = useChallanStore();
+  const { createChallan, generateChallanNo, challanNo, challanLoading } = useChallanStore();
+
+  const getChallanNo = async () => {
+    let result = await generateChallanNo(token);
+    if (result.status === 200) {
+      setForm(prev => ({ ...prev, cn_no: result.body }));
+    }
+  };
 
   useEffect(() => {
     getAllParty();
     getAllCompany(token);
+    getChallanNo();
   }, []);
 
   const [data, setData] = useState([
@@ -211,8 +219,10 @@ const CreateChallan = () => {
                     className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
                     type="text"
                     name="cn_no"
+                    value={form.cn_no}
                     onChange={handleChange}
                     placeholder="C/N No"
+                    required
                   />
                 </div>
                 <div className='flex flex-col w-full gap-1'>

@@ -42,6 +42,7 @@ const GstTable = () => {
             </div>
           </div>
         </ActionArea>
+
         <MainArea>
           <table className="table-fixed w-full">
             <thead>

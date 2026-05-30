@@ -1,7 +1,7 @@
 // Package...
 const moment = require("moment");
 const fs = require('fs');
-const puppeteer = require("puppeteer");
+const { getBrowser } = require("../helper/puppeteer");
 
 // Contents...
 const contents = require("../content/contents");
@@ -180,10 +180,7 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
         let createFolder = "./uploads/money_receipt_pdf/";
         if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
 
-        const browser = await puppeteer.launch({
-            headless: "new",
-            args: ["--no-sandbox", "--disable-setuid-sandbox"]
-        });
+        const browser = await getBrowser();
         const page = await browser.newPage();
 
         await page.setContent(`
@@ -265,8 +262,7 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
 
                     </div>
                 </body>
-                    `,
-            { waitUntil: "networkidle0" }
+                    `
         );
 
         await page.pdf({
@@ -274,7 +270,7 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
             format: "A4",
             printBackground: true
         });
-        await browser.close();
+        await page.close();
 
         response.status = 200;
         response.message = "Money Receipt Downloaded Successfully.";

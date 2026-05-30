@@ -1,6 +1,5 @@
 const moment = require("moment");
 const fs = require('fs');
-const puppeteer = require("puppeteer");
 const contents = require("../content/contents");
 const ChallanService = require("../service/challan.service");
 const PartyService = require("../service/party.service");
@@ -34,30 +33,10 @@ exports.generateChallanPdf = async (req, res) => {
 
         const html = generateChallanHtml({ challan, company });
 
-        let folder = "./uploads/challan_pdf/";
-        if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
-
-        const fileName = `CHALLAN_${challan.cn_no || challan.id}_${moment().format("DDMMYYYY")}.pdf`;
-        const filePath = `${folder}${fileName}`;
-
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: "networkidle0" });
-        await page.pdf({
-            path: filePath,
-            format: "A4",
-            printBackground: true,
-            margin: { top: '10px', bottom: '10px', left: '10px', right: '10px' }
-        });
-        await browser.close();
-
         response.status = 200;
         response.message = "PDF generated successfully.";
         response.body = {
-            fileName: fileName,
-            url: `http://localhost:3001/uploads/challan_pdf/${fileName}`
+            html: html
         };
     } catch (error) {
         console.log(`Something went wrong: controller: generateChallanPdf: ${error}`);
@@ -186,7 +165,6 @@ exports.deleteChallan = async (req, res) => {
 exports.generateChallanNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-        const { t_userId, t_mobile, t_username, t_name } = req.body;
         const { types } = req.query;
         if (!types) {
             response.status = 400;
@@ -196,16 +174,15 @@ exports.generateChallanNo = async (req, res) => {
         };
         let type = "";
         if (types == "challan") type = "CHA";
-        const date = moment().format("DDMMYYYY");
 
         const existsCheck = async ({
             type = ""
         }) => {
-            let count = await InvoiceService.findInvoices({ count: true });
+            let count = await ChallanService.findChallans({ count: true });
             while (true) {
-                const invoiceNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
-                const exists = await InvoiceService.findInvoices({ invoice_no: invoiceNo });
-                if (!exists.length) return invoiceNo;
+                const challanNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
+                const exists = await ChallanService.findChallans({ cn_no: challanNo });
+                if (!exists.length) return challanNo;
                 count++;
             };
         };
@@ -213,14 +190,13 @@ exports.generateChallanNo = async (req, res) => {
         let result = await existsCheck({ type: type });
         if (result) {
             response.status = 200;
-            response.message = "Invoice Number Generate Successfully.";
+            response.message = "Challan Number Generated Successfully.";
             response.body = result;
         };
     } catch (error) {
         console.log(`Something went wrong: controller: generateChallanNo: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: generateChallanNo`;
-        response.body = error.body ? error.body : "";
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
     };
     return res.status(response.status).json(response);
 };

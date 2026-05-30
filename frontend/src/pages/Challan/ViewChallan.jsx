@@ -68,16 +68,17 @@ const ViewChallan = () => {
         try {
             let result = await printChallan({ id, token });
             if (result.status === 200) {
-                window.open(result.body.url, "_blank");
+                const newWindow = window.open();
+                newWindow.document.write(result.body.html);
                 toast.info("PDF generated.", { theme: "dark" });
             } else {
                 toast.error(result.message);
-            }
+            };
         } catch (error) {
             console.log(error);
             toast.error("Something went wrong!");
-        }
-    }
+        };
+    };
 
     useEffect(() => {
         const onKey = (e) => {
@@ -198,8 +199,9 @@ const ViewChallan = () => {
                     </table>
                 </MainArea>
 
+                {/* Pagination */}
                 <MainArea>
-                    <div className="w-full flex justify-between items-center mt-3 px-2 py-2 text-sm">
+                    <div className="w-full flex justify-between items-center text-sm">
                         <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
                         <div className="flex items-center gap-1">
                             <button

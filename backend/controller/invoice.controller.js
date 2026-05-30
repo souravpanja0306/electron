@@ -1,7 +1,6 @@
 // Package...
 const moment = require("moment");
 const fs = require('fs');
-const puppeteer = require("puppeteer");
 
 // Contents...
 const contents = require("../content/contents");
@@ -263,30 +262,10 @@ exports.generateInvoicePdf = async (req, res) => {
 
         const html = generateInvoiceHtml({ invoice, company });
 
-        let folder = "./uploads/invoice_pdf/";
-        if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
-
-        const fileName = `INVOICE_${invoice.invoice_no || invoice.id}_${moment().format("DDMMYYYY")}.pdf`;
-        const filePath = `${folder}${fileName}`;
-
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: "networkidle0" });
-        await page.pdf({
-            path: filePath,
-            format: "A4",
-            printBackground: true,
-            margin: { top: '10px', bottom: '10px', left: '10px', right: '10px' }
-        });
-        await browser.close();
-
         response.status = 200;
         response.message = "PDF generated successfully.";
         response.body = {
-            fileName: fileName,
-            url: `http://localhost:3001/uploads/invoice_pdf/${fileName}`
+            html: html,
         };
     } catch (error) {
         console.log(`Something went wrong: controller: generateInvoicePdf: ${error}`);
