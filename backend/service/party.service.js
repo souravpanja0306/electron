@@ -10,8 +10,9 @@ exports.createParty = async (data) => {
 
         return result;
     } catch (error) {
-        console.log(error)
-    };
+        console.log(error);
+        throw error;
+    }
 };
 
 exports.getParty = async ({
@@ -60,20 +61,22 @@ exports.getParty = async ({
         return result;
     } catch (error) {
         console.log(error);
-    };
+        throw error;
+    }
 };
 
 exports.deleteParty = async ({
-    ids = "",
+    ids = [],
 }) => {
     try {
         const placeholders = ids.map(() => "?").join(",");
 
-        let result = await db.prepare(`DELETE FROM party WHERE id IN (${placeholders})`).run(...ids);
+        let result = db.prepare(`DELETE FROM party WHERE id IN (${placeholders})`).run(...ids);
         return result;
     } catch (error) {
-        console.log(error)
-    };
+        console.log(error);
+        throw error;
+    }
 };
 
 exports.updateParty = async (id, data) => {
@@ -86,5 +89,6 @@ exports.updateParty = async (id, data) => {
         return result;
     } catch (error) {
         console.log(error);
-    };
+        throw error;
+    }
 };

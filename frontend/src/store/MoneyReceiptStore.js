@@ -111,6 +111,25 @@ const useMoneyReceiptStore = create((set) => ({
             throw error;
         };
     },
+
+    printMoneyReceipt: async ({ id, token }) => {
+        try {
+            set({ downloadLoading: true });
+            const result = await axios({
+                method: "get",
+                url: `http://localhost:3001/api/v1/money-receipt/print-money-receipt?id=${id}`,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            set({ downloadLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ downloadLoading: false });
+            throw error;
+        }
+    },
 }));
 
 export default useMoneyReceiptStore;

@@ -40,11 +40,12 @@ const PartyCreate = () => {
         branch: "",
         account_no: ""
     });
-
     const handleSubmit = async (e) => {
         try {
+            console.log("handleSubmit called", data);
             if (e) e.preventDefault();
-            if (!data.company_name && data.company_name == "") {
+            if (!data.company_name || data.company_name === "") {
+                console.log("Validation failed: Company Name Required");
                 setAlart({
                     show: true,
                     title: "Field required",
@@ -55,7 +56,8 @@ const PartyCreate = () => {
             };
 
             let result = await handleCreateParty(data);
-            if ((result.status) === 200) {
+            console.log("handleCreateParty result:", result);
+            if (result && (result.status) === 200) {
                 setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
                 setData({
                     company_name: "",
@@ -77,10 +79,23 @@ const PartyCreate = () => {
                     branch: "",
                     account_no: ""
                 });
-            };
+            } else {
+                setAlart({
+                    show: true,
+                    title: "Error",
+                    type: "error",
+                    message: result?.message || "Failed to create party"
+                });
+            }
         } catch (error) {
-            console.log(error);
-        };
+            console.log("handleSubmit error:", error);
+            setAlart({
+                show: true,
+                title: "Error",
+                type: "error",
+                message: "Something went wrong!"
+            });
+        }
     };
 
     useEffect(() => {

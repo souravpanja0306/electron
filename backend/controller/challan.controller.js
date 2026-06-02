@@ -28,7 +28,7 @@ exports.generateChallanPdf = async (req, res) => {
         challan.data = challan.data ? JSON.parse(challan.data) : [];
 
         // Get company
-        let companies = await CompanyService.getCompany({});
+        let companies = await CompanyService.getCompany({ id: challan.company_id });
         let company = companies.length ? companies[0] : {};
 
         const html = generateChallanHtml({ challan, company });
@@ -49,7 +49,7 @@ exports.generateChallanPdf = async (req, res) => {
 exports.createChallan = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-        const { t_userId, consignor_id, consignee_id, cn_no, date, from_loc, to_loc,
+        const { t_userId, company_id, consignor_id, consignee_id, cn_no, date, from_loc, to_loc,
             invoice_no, way_bill_no, truck_no, note, data
         } = req.body;
 
@@ -61,6 +61,7 @@ exports.createChallan = async (req, res) => {
         }
 
         let finalData = {
+            company_id,
             consignor_id,
             consignee_id,
             cn_no,
@@ -71,6 +72,7 @@ exports.createChallan = async (req, res) => {
             way_bill_no,
             truck_no,
             note,
+            total_amount: req.body.total_amount || 0,
             created_by: t_userId,
             data: JSON.stringify(data)
         };
@@ -105,9 +107,11 @@ exports.getAllChallans = async (req, res) => {
             for (let item of result) {
                 let consignor = await PartyService.getParty({ id: item.consignor_id });
                 let consignee = await PartyService.getParty({ id: item.consignee_id });
+                let company = await CompanyService.getCompany({ id: item.company_id });
 
                 let newData = {
                     id: item.id,
+                    company_id: company.length ? company[0] : null,
                     consignor_id: consignor.length ? consignor[0] : null,
                     consignee_id: consignee.length ? consignee[0] : null,
                     cn_no: item.cn_no || "--",
@@ -118,6 +122,7 @@ exports.getAllChallans = async (req, res) => {
                     way_bill_no: item.way_bill_no || "--",
                     truck_no: item.truck_no || "--",
                     note: item.note || "--",
+                    total_amount: item.total_amount || 0,
                     data: item.data ? JSON.parse(item.data) : [],
                     created_by: item.created_by,
                     created_at: item.created_at,

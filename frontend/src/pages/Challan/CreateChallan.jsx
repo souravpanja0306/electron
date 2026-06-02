@@ -50,10 +50,13 @@ const CreateChallan = () => {
   }, []);
 
   const [data, setData] = useState([
-    { id: Math.floor(Math.random() * 10000000000), packages: "", description: "", weight: "", },
+    { id: Math.floor(Math.random() * 10000000000), packages: "", description: "", weight: "", amount: "" },
+    { id: Math.floor(Math.random() * 10000000000), packages: "", description: "", weight: "", amount: "" },
+    { id: Math.floor(Math.random() * 10000000000), packages: "", description: "", weight: "", amount: "" },
   ]);
 
   const [form, setForm] = useState({
+    company_id: "",
     consignor_id: "",
     consignee_id: "",
     cha: "",
@@ -65,6 +68,7 @@ const CreateChallan = () => {
     truck_no: "",
     way_bill_no: "",
     note: "",
+    total_amount: 0,
     data: data,
   });
 
@@ -78,15 +82,21 @@ const CreateChallan = () => {
         row.id == e.target.id ? { ...row, [e.target.name]: e.target.value } : row
       ),
     );
-    setForm({ ...form, data: data, });
   };
+
+  useEffect(() => {
+    const total = data.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+    setForm(prev => ({ ...prev, data: data, total_amount: total }));
+  }, [data]);
+
 
   const handleAddFields = () => {
     setData([...data, {
       id: Math.floor(Math.random() * 10000000000),
       packages: "",
       description: "",
-      weight: ""
+      weight: "",
+      amount: ""
     }]);
   };
 
@@ -97,8 +107,8 @@ const CreateChallan = () => {
   const handleSubmitForm = async (e) => {
     if (e) e.preventDefault();
     try {
-      if (!form.consignor_id || !form.consignee_id) {
-        return toast.error("Consignor and Consignee are required.");
+      if (!form.company_id || !form.consignor_id || !form.consignee_id) {
+        return toast.error("Company, Consignor and Consignee are required.");
       }
 
       let payload = { ...form, data: data };
@@ -155,9 +165,28 @@ const CreateChallan = () => {
             <MainArea>
               <div className='flex flex-col w-full gap-2 p-1'>
                 <div className='grid grid-cols-1 gap-2 w-full'>
-                  <div className='flex flex-col w-full gap-1'>
-                    <label className='text-xs'>Consignor</label>
-                    <div className='flex items-center gap-1'>
+                  <div className='flex justify-between items-center w-full gap-1'>
+                    <label className='text-xs w-[20%]'>From Company</label>
+                    <div className='flex items-center gap-1 w-[80%]'>
+                      <select
+                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                        name="company_id"
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="" disabled selected>Select Company</option>
+                        {companyData?.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.company_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className='flex justify-between items-center w-full gap-1'>
+                    <label className='text-xs w-[20%]'>Consignor</label>
+                    <div className='flex items-center gap-1 w-[80%]'>
                       <select
                         className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
                         name="consignor_id"
@@ -180,9 +209,9 @@ const CreateChallan = () => {
                     </div>
                   </div>
 
-                  <div className='flex flex-col w-full gap-1'>
-                    <label className='text-xs'>Consignee</label>
-                    <div className='flex items-center gap-1'>
+                  <div className='flex justify-between items-center w-full gap-1'>
+                    <label className='text-xs w-[20%]'>Consignee</label>
+                    <div className='flex items-center gap-1 w-[80%]'>
                       <select
                         className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
                         name="consignee_id"
@@ -238,7 +267,7 @@ const CreateChallan = () => {
                 <div className='flex flex-col w-full gap-1'>
                   <label className='text-xs'>From</label>
                   <input
-                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    className="capitalize h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
                     type="text"
                     name="from_loc"
                     onChange={handleChange}
@@ -248,7 +277,7 @@ const CreateChallan = () => {
                 <div className='flex flex-col w-full gap-1'>
                   <label className='text-xs'>To</label>
                   <input
-                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    className="capitalize h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
                     type="text"
                     name="to_loc"
                     onChange={handleChange}
@@ -262,108 +291,130 @@ const CreateChallan = () => {
 
         <PageTitle>Item Details</PageTitle>
         <MainArea>
-          <table className='w-full select-none'>
-            <thead>
-              <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
-                <th className='w-12'>Sl. No.</th>
-                <th className='w-32'>No. of Packages</th>
-                <th className=''>Particulars of Goods</th>
-                <th className='w-32'>Weight (KG)</th>
-                <th className='w-12'>#</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                data && data.map((item, index) => {
-                  const isLast = index === data.length - 1;
-                  return (
-                    <tr key={item.id} className='items-center text-black'>
-                      <td className=''>
-                        <input
-                          className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-center"
-                          value={index + 1}
-                          disabled
-                        />
-                      </td>
-                      <td className=''>
-                        <input
-                          className="w-full p-1 rounded border border-slate-400 dark:border-slate-600"
-                          value={item.packages}
-                          id={item.id}
-                          name="packages"
-                          onChange={(e) => handleChangeData(e)}
-                          type="text"
-                        />
-                      </td>
-                      <td className=''>
-                        <input
-                          className="w-full p-1 rounded border border-slate-400 dark:border-slate-600"
-                          value={item.description}
-                          id={item.id}
-                          name="description"
-                          onChange={(e) => handleChangeData(e)}
-                          type="text"
-                        />
-                      </td>
-                      <td className=''>
-                        <input
-                          className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
-                          value={item.weight}
-                          id={item.id}
-                          name="weight"
-                          onChange={(e) => handleChangeData(e)}
-                          type='text'
-                        />
-                      </td>
-                      <td className=''>
-                        <div
-                          className="w-full flex justify-center text-2xl cursor-pointer transition"
-                          onClick={(e) => isLast ? handleAddFields(e) : handleRemoveFields(item.id)}
-                        >
-                          {isLast ? (
-                            <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
-                          ) : (
-                            <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })
-              }
-            </tbody>
-          </table>
+          <div className="flex flex-col w-full">
+            <table className='w-full select-none'>
+              <thead>
+                <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
+                  <th className='w-12'>Sl. No.</th>
+                  <th className='w-32'>No. of Packages</th>
+                  <th className=''>Particulars of Goods</th>
+                  <th className='w-32'>Weight (KG)</th>
+                  <th className='w-32'>Amount</th>
+                  <th className='w-12'>#</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  data && data.map((item, index) => {
+                    const isLast = index === data.length - 1;
+                    return (
+                      <tr key={item.id} className='items-center text-black'>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-center"
+                            value={index + 1}
+                            disabled
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded border border-slate-400 dark:border-slate-600"
+                            value={item.packages}
+                            id={item.id}
+                            name="packages"
+                            onChange={(e) => handleChangeData(e)}
+                            type="number"
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="capitalize w-full p-1 rounded border border-slate-400 dark:border-slate-600"
+                            value={item.description}
+                            id={item.id}
+                            name="description"
+                            onChange={(e) => handleChangeData(e)}
+                            type="text"
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
+                            value={item.weight}
+                            id={item.id}
+                            name="weight"
+                            onChange={(e) => handleChangeData(e)}
+                            type='number'
+                          />
+                        </td>
+                        <td className=''>
+                          <input
+                            className="w-full p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
+                            value={item.amount}
+                            id={item.id}
+                            name="amount"
+                            onChange={(e) => handleChangeData(e)}
+                            type='number'
+                          />
+                        </td>
+                        <td className=''>
+                          <div
+                            className="w-full flex justify-center text-2xl cursor-pointer transition"
+                            onClick={(e) => isLast ? handleAddFields(e) : handleRemoveFields(item.id)}
+                          >
+                            {isLast ? (
+                              <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
+                            ) : (
+                              <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
+                }
+              </tbody>
+            </table>
+            <div className='flex flex-col items-end w-full p-1 gap-1'>
+              <div className='flex items-center gap-2'>
+                <span className='text-sm font-semibold'>Total Amount:</span>
+                <span className='text-lg font-bold text-blue-600'>₹ {form.total_amount}</span>
+              </div>
+              <div className='text-xs italic text-slate-500'>
+                {inrToWords(form.total_amount)}
+              </div>
+            </div>
+          </div>
         </MainArea>
 
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-1'>
           <div className='flex flex-col gap-1'>
             <PageTitle>Document & Vehicle Info</PageTitle>
             <MainArea>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-2 w-full p-1'>
-                <div className='flex flex-col w-full gap-1'>
-                  <label className='text-xs'>Invoice No</label>
+              <div className='grid gap-2 w-full p-1'>
+                <div className='flex items-center justify-between w-full gap-1'>
+                  <label className='text-xs w-[20%]'>Invoice No</label>
                   <input
-                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     type="text"
                     name="invoice_no"
                     onChange={handleChange}
                     placeholder="Invoice No"
                   />
                 </div>
-                <div className='flex flex-col w-full gap-1'>
-                  <label className='text-xs'>Way Bill No</label>
+                <div className='flex items-center justify-between w-full gap-1'>
+                  <label className='text-xs w-[20%]'>Way Bill No</label>
                   <input
-                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                    type="text"
+                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="number"
                     name="way_bill_no"
                     onChange={handleChange}
                     placeholder="Way Bill No"
                   />
                 </div>
-                <div className='flex flex-col w-full gap-1'>
-                  <label className='text-xs'>Truck No</label>
+                <div className='flex items-center justify-between w-full gap-1'>
+                  <label className='text-xs w-[20%]'>Truck No</label>
                   <input
-                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     type="text"
                     name="truck_no"
                     onChange={handleChange}
@@ -378,7 +429,6 @@ const CreateChallan = () => {
             <PageTitle>Additional Remarks</PageTitle>
             <MainArea>
               <div className='flex flex-col w-full gap-1 p-1'>
-                <label className='text-xs'>Note</label>
                 <textarea
                   className="p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
                   name="note"

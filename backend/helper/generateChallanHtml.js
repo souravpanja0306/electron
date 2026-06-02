@@ -9,16 +9,18 @@ exports.generateChallanHtml = ({ challan, company }) => {
             <td style="text-align:center;">${item.packages || ''}</td>
             <td>${item.description || ''}</td>
             <td style="text-align:right;">${item.weight || ''}</td>
+            <td style="text-align:right;">${item.amount || ''}</td>
         </tr>
     `).join('');
 
     const emptyRowsCount = Math.max(0, 10 - items.length);
     for (let i = 0; i < emptyRowsCount; i++) {
-        itemsHtml += `<tr><td></td><td></td><td></td><td></td></tr>`;
+        itemsHtml += `<tr><td></td><td></td><td></td><td></td><td></td></tr>`;
     }
 
     const totalPackages = items.reduce((s, i) => s + (Number(i.packages) || 0), 0);
     const totalWeight   = items.reduce((s, i) => s + (Number(i.weight)   || 0), 0).toFixed(2);
+    const totalAmount   = challan.total_amount || 0;
 
     const formattedDate = challan.date
         ? moment(challan.date).format('DD MMM YYYY')
@@ -286,9 +288,10 @@ exports.generateChallanHtml = ({ challan, company }) => {
         <thead>
             <tr>
                 <th style="width:38px;">Sl.</th>
-                <th style="width:120px;">No. of Packages</th>
+                <th style="width:100px;">No. of Pkgs</th>
                 <th>Particulars of Goods</th>
-                <th style="width:110px; text-align:right;">Weight (KG)</th>
+                <th style="width:90px; text-align:right;">Weight (KG)</th>
+                <th style="width:100px; text-align:right;">Amount (₹)</th>
             </tr>
         </thead>
         <tbody>${itemsHtml}</tbody>
@@ -297,6 +300,7 @@ exports.generateChallanHtml = ({ challan, company }) => {
                 <td colspan="2" style="text-align:right; padding:5px 10px;">Total</td>
                 <td></td>
                 <td style="text-align:right; padding:5px 10px;">${totalWeight}</td>
+                <td style="text-align:right; padding:5px 10px;">${totalAmount.toFixed(2)}</td>
             </tr>
         </tfoot>
     </table>

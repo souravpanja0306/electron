@@ -1,10 +1,9 @@
 import axios from "axios";
 import { baseURL } from "../../../utils/baseUrl";
 
-const token = localStorage.getItem("token");
-
 export const handleCreateParty = async (data) => {
     try {
+        const token = localStorage.getItem("token");
         let result = await axios.request({
             method: 'post',
             maxBodyLength: Infinity,
@@ -15,13 +14,16 @@ export const handleCreateParty = async (data) => {
             },
             data: data,
         });
+        console.log("🚀 ~ handleCreateParty ~ result:", result)
         return result.data;
     } catch (error) {
         console.log(error);
+        return error?.response?.data || { status: 500, message: "Something went wrong!" };
     };
 };
 
 export const handleGetParty = async () => {
+    const token = localStorage.getItem("token");
     let result = await axios({
         method: "get",
         url: `${baseURL.party}party-list`,
@@ -34,6 +36,7 @@ export const handleGetParty = async () => {
 };
 
 export const handleGetPartyById = async (id) => {
+    const token = localStorage.getItem("token");
     let result = await axios({
         method: "get",
         url: `${baseURL.party}party-list?id=${id}`,
@@ -47,6 +50,7 @@ export const handleGetPartyById = async (id) => {
 
 export const handleUpdateParty = async (id, data) => {
     try {
+        const token = localStorage.getItem("token");
         let result = await axios.request({
             method: 'put',
             maxBodyLength: Infinity,
@@ -60,5 +64,6 @@ export const handleUpdateParty = async (id, data) => {
         return result.data;
     } catch (error) {
         console.log(error);
+        return error?.response?.data || { status: 500, message: "Something went wrong!" };
     };
 };

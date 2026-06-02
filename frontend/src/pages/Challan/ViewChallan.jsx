@@ -138,6 +138,7 @@ const ViewChallan = () => {
                         <thead>
                             <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
                                 <th className="p-1 text-start text-slate-500 w-16">Select</th>
+                                <th className="p-1 text-start text-slate-500">Company</th>
                                 <th className="p-1 text-start text-slate-500">C/N No</th>
                                 <th className="p-1 text-start text-slate-500">Consignor</th>
                                 <th className="p-1 text-start text-slate-500">Consignee</th>
@@ -145,6 +146,7 @@ const ViewChallan = () => {
                                 <th className="p-1 text-start text-slate-500">From</th>
                                 <th className="p-1 text-start text-slate-500">To</th>
                                 <th className="p-1 text-start text-slate-500">Truck No</th>
+                                <th className="p-1 text-start text-slate-500">Amount</th>
                                 <th className="p-1 text-center w-16 text-slate-500">#</th>
                             </tr>
                         </thead>
@@ -162,6 +164,7 @@ const ViewChallan = () => {
                                                         onChange={(e) => handleChecked(e, item.id)}
                                                     />
                                                 </td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.company_id ? item.company_id.company_name : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
                                                     <Link to={`/view-challan/details?id=${item.id}&back=true`}>
                                                         {item.cn_no ? item.cn_no : "--"}
@@ -173,6 +176,7 @@ const ViewChallan = () => {
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.from_loc ? item.from_loc : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.to_loc ? item.to_loc : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.truck_no ? item.truck_no : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_amount ? `₹ ${item.total_amount}` : "--"}</td>
                                                 <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
                                                     <button
                                                         onClick={() => handlePrint(item.id)}

@@ -36,6 +36,12 @@ router.get(
     MoneyReceiptController.generateMoneyReceiptPdf
 );
 
+router.get(
+    "/print-money-receipt",
+    middleware.isAuthenticated,
+    MoneyReceiptController.printMoneyReceipt
+);
+
 router.delete(
     "/delete-money-receipt/:id",
     middleware.isAuthenticated,

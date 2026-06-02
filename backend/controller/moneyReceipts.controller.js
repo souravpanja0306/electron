@@ -11,9 +11,44 @@ const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service");
 const InvoiceService = require("../service/invoice.service");
 const MoneyReceiptService = require("../service/moneyReceipt.service");
+const { generateMoneyReceiptHtml } = require("../helper/generateMoneyReceiptHtml");
 
 const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
+};
+
+module.exports.printMoneyReceipt = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { id } = req.query;
+        if (!id) return errorHandler(res, 400, "Money Receipt ID is required.");
+
+        let result = await MoneyReceiptService.findMoneyReceipts({ id });
+        if (!result.length) return errorHandler(res, 404, "Money Receipt not found.");
+        let receipt = result[0];
+
+        // Hydrate relations
+        let parties = await PartyService.getParty({ id: receipt.party_id });
+        let party = parties.length ? parties[0] : {};
+        receipt.data = receipt.data ? JSON.parse(receipt.data) : [];
+
+        // Get company
+        let companies = await CompanyService.getCompany({ id: receipt.company_id });
+        let company = companies.length ? companies[0] : {};
+
+        const html = generateMoneyReceiptHtml({ receipt, company, party });
+
+        response.status = 200;
+        response.message = "HTML generated successfully.";
+        response.body = {
+            html: html
+        };
+    } catch (error) {
+        console.log(`Something went wrong: controller: printMoneyReceipt: ${error}`);
+        response.status = 500;
+        response.message = error.message || "Something went wrong: controller: printMoneyReceipt";
+    }
+    return res.status(response.status).json(response);
 };
 
 exports.generateMoneyReceiptNo = async (req, res) => {

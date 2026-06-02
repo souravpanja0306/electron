@@ -21,7 +21,7 @@ import useMoneyReceiptStore from '../../store/MoneyReceiptStore';
 
 const ViewMoneyReceipts = () => {
     let token = localStorage.getItem("token");
-    const { moneyReceipts, getAllMoneyReceipts, downloadMoneyReceipts, deleteMoneyReceipts, loading, downloadLoading } = useMoneyReceiptStore(); // Store...
+    const { moneyReceipts, getAllMoneyReceipts, printMoneyReceipt, deleteMoneyReceipts, loading, downloadLoading } = useMoneyReceiptStore(); // Store...
 
     const navigate = useNavigate();
     const [alart, setAlart] = useState({ show: false });
@@ -50,10 +50,19 @@ const ViewMoneyReceipts = () => {
         };
     };
 
-    const importMoneyReceipts = async (id) => {
-        let result = await downloadMoneyReceipts({ id: id, token: token });
-        if (result.status == 200) {
-            window.open(result.body.downloadLink, "_black");
+    const handlePrint = async (id) => {
+        try {
+            toast.info("Generating Print View...");
+            let result = await printMoneyReceipt({ id, token });
+            if (result.status === 200) {
+                const newWindow = window.open();
+                newWindow.document.write(result.body.html);
+            } else {
+                toast.error(result.message);
+            };
+        } catch (error) {
+            console.log(error);
+            toast.error("Something went wrong!");
         };
     };
 
@@ -61,7 +70,7 @@ const ViewMoneyReceipts = () => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 'n') {
                 e.preventDefault();
-                navigate("/create-invoice");
+                navigate("/create-moeny-receipts");
             };
 
             if (e.ctrlKey && e.key === 'd') {
@@ -71,15 +80,15 @@ const ViewMoneyReceipts = () => {
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, []);
+    }, [checkedIds]);
 
 
 
     const limit = 10;
-    const total = moneyReceipts?.total || 0;
+    const total = moneyReceipts?.body?.length || 0;
     const totalPages = Math.ceil(total / limit);
 
-    const start = (page - 1) * limit + 1;
+    const start = total === 0 ? 0 : (page - 1) * limit + 1;
     const end = Math.min(page * limit, total);
 
     if (loading) return <CustomLoader />;
@@ -114,7 +123,7 @@ const ViewMoneyReceipts = () => {
                                 <th className="p-1 text-start truncate">Party</th>
                                 <th className="p-1 text-start truncate">Value</th>
                                 <th className="p-1 text-start truncate">Remark</th>
-                                <th className="p-1 text-center w-16">#</th>
+                                <th className="p-1 text-center w-16 text-slate-500">#</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -123,7 +132,7 @@ const ViewMoneyReceipts = () => {
                                 <>
                                     {moneyReceipts?.body?.map((item, index) => {
                                         return (
-                                            <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
+                                            <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer text-sm">
                                                 <td className="p-1 text-start truncate capitalize">
                                                     <input
                                                         type="checkbox"
@@ -132,32 +141,22 @@ const ViewMoneyReceipts = () => {
                                                     />
                                                 </td>
                                                 <td className="p-1 text-start truncate capitalize hover:underline hover:text-slate-600 dark:hover:text-slate-300">
-                                                    <Link to={`/view-invoice/details?id=${item.id}&back=true`}>
+                                                    <Link to={`/view-money-receipt/details?id=${item.id}&back=true`}>
                                                         {item.receipt_no ? item.receipt_no : "--"}
                                                     </Link>
                                                 </td>
-                                                <td className="p-1 text-start truncate capitalize">{item.receipt_date ? item.receipt_date : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.party_id ? item.party_id.name : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.total_value ? (parseFloat(item.total_value)).toFixed(2) : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize">{item.remarks ? item.remarks : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.receipt_date ? item.receipt_date : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.party_id ? item.party_id.name : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_value ? `₹ ${(parseFloat(item.total_value)).toFixed(2)}` : "--"}</td>
+                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.remarks ? item.remarks : "--"}</td>
                                                 <td className="flex justify-center items-center gap-2 p-1 w-16">
-                                                    {
-                                                        downloadLoading ?
-                                                            <button
-                                                                className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
-                                                                title="Loading"
-                                                            >
-                                                                <AiOutlineMeh />
-                                                            </button>
-                                                            :
-                                                            <button
-                                                                onClick={() => importMoneyReceipts(item.id)}
-                                                                className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
-                                                                title="Download"
-                                                            >
-                                                                <AiOutlinePrinter />
-                                                            </button>
-                                                    }
+                                                    <button
+                                                        onClick={() => handlePrint(item.id)}
+                                                        className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
+                                                        title="Print"
+                                                    >
+                                                        <AiOutlinePrinter />
+                                                    </button>
                                                 </td>
 
                                             </tr>
@@ -167,8 +166,8 @@ const ViewMoneyReceipts = () => {
                                 :
                                 <>
                                     {
-                                        <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                            <td className="p-1 text-center" colSpan={9}>No Data Found</td>
+                                        <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer text-sm">
+                                            <td className="p-1 text-center text-slate-500" colSpan={7}>No Data Found</td>
                                         </tr>
                                     }
                                 </>
@@ -176,6 +175,7 @@ const ViewMoneyReceipts = () => {
                         </tbody>
                     </table>
                 </MainArea>
+
 
                 <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
                     <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>

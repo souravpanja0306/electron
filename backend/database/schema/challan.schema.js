@@ -2,6 +2,7 @@ module.exports = `
     CREATE TABLE IF NOT EXISTS challan (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       
+      company_id INTEGER,
       consignor_id INTEGER,
       consignee_id INTEGER,
       
@@ -15,6 +16,7 @@ module.exports = `
       truck_no TEXT,
       note TEXT,
       
+      total_amount REAL DEFAULT 0,
       data TEXT,
 
       created_by INTEGER,

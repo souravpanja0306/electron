@@ -21,7 +21,7 @@ exports.addParty = async (req, res) => {
         let isMobileExist = await PartyService.getParty({ mobile: req.body.mobile });
         if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
 
-        let isEmailExist = await PartyService.getParty({ mobile: req.body.email });
+        let isEmailExist = await PartyService.getParty({ email: req.body.email });
         if (isEmailExist.length) return errorHandler(res, 409, "Email already registered.");
 
         let finalData = {
@@ -52,9 +52,10 @@ exports.addParty = async (req, res) => {
         response.message = "Data created successfully.";
         response.body = result;
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
     };
-    console.log(response.status)
     return res.status(response.status).json(response);
 };
 
@@ -81,6 +82,8 @@ exports.listParty = async (req, res) => {
         };
     } catch (error) {
         console.log(error);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
     };
     return res.status(response.status).json(response);
 };
@@ -89,10 +92,10 @@ exports.removeParty = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { id } = req.params;
-        if (!id) return errorHandler(res, 400, "ID are required.");
+        if (!id) return errorHandler(res, 400, "ID is required.");
 
-        let result = await PartyService.deleteParty({ ids: ids });
-        if (result.length) {
+        let result = await PartyService.deleteParty({ ids: [id] });
+        if (result.changes > 0) {
             response.status = 200;
             response.message = "Data deleted succesfully.";
             response.body = result;
@@ -103,6 +106,8 @@ exports.removeParty = async (req, res) => {
         };
     } catch (error) {
         console.log(error);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
     };
     return res.status(response.status).json(response);
 };
@@ -134,7 +139,6 @@ exports.editParty = async (req, res) => {
             ifse: req.body.ifse,
             branch: req.body.branch,
             account_no: req.body.account_no,
-            updated_at: moment().format("YYYY-MM-DD HH:mm:ss"),
         };
 
         // Remove undefined fields
