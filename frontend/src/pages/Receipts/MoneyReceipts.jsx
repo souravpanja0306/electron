@@ -34,7 +34,7 @@ const MoneyReceipts = () => {
     useEffect(() => {
         authToken();
         generateMoneyReceiptNo(token);
-        getAllParty();
+        getAllParty(token);
         getAllCompany(token);
     }, []);
 

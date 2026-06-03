@@ -26,6 +26,17 @@ router.get(
     UserController.getUsers
 );
 
+router.get(
+    "/get-profile",
+    middleware.isAuthenticated,
+    UserController.getProfile
+);
+
+router.put(
+    "/update-profile",
+    middleware.isAuthenticated,
+    UserController.updateProfile
+);
 
 router.delete(
     "/user-delete",

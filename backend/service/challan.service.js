@@ -78,3 +78,19 @@ exports.deleteChallan = async ({
         throw error;
     };
 };
+
+exports.updateChallanData = async (id, data) => {
+    try {
+        db.exec(require("../database/schema/challan.schema"));
+        const keys = Object.keys(data);
+        const setClause = keys.map(key => `${key} = @${key}`).join(", ");
+        const result = db
+            .prepare(`UPDATE challan SET ${setClause} WHERE id = @id`)
+            .run({ ...data, id });
+
+        return result;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    };
+};

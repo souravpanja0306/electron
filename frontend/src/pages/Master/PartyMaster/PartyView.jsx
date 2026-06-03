@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+// Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import { Link, NavLink } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 
-// Icon...
+// Icons...
 import {
     AiOutlineFileAdd,
     AiOutlineSync,
@@ -16,7 +18,7 @@ import {
 } from "react-icons/ai";
 
 // Services...
-import { handleGetParty } from "./PartyService"
+import { handleGetParty } from "../../../services/partyService"
 
 const ViewParty = () => {
     const [page, setPage] = useState(1);

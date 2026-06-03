@@ -14,20 +14,21 @@ const Signin = () => {
 
   useEffect(() => {
     authToken();
-    if (token) navigate("/"); window.api?.setItem("currentMenu", "home")
-  }, [])
+    if (token) navigate("/");
+  }, [token]);
 
   const [data, setData] = useState({ username: "", password: "" });
+  const [errorMessage, setErrorMessage] = useState(null);
   const handleSubmitSignin = async (e) => {
     e.preventDefault();
     try {
       let result = await signin({ username: data.username, password: data.password });
       if (result.status === 200) {
-        await window.api?.setItem("token", result.body.token);
-        await window.api?.setItem("user", JSON.stringify(result.body));
+        window.api?.setItem("token", result.body.token);
+        window.api?.setItem("user", JSON.stringify(result.body));
         navigate("/");
       } else {
-        toast(result.message, { theme: "dark" });
+        setErrorMessage(result.message);
       };
     } catch (error) {
       console.log(error);
@@ -116,7 +117,11 @@ const Signin = () => {
                 required
               />
             </div>
-
+            {errorMessage && (
+              <div className="flex items-center gap-2 p-2 rounded-md border border-red-500/30 bg-red-500/10 text-red-400 text-sm">
+                <span>{errorMessage}</span>
+              </div>
+            )}
             <button
               type="submit"
               className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition-all"

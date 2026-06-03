@@ -167,6 +167,50 @@ exports.deleteChallan = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
+exports.updateChallan = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { id } = req.params;
+        const { company_id, consignor_id, consignee_id, cn_no, date, from_loc, to_loc,
+            invoice_no, way_bill_no, truck_no, note, data, total_amount
+        } = req.body;
+
+        if (!consignor_id || !consignee_id) return errorHandler(res, 400, "Consignor and Consignee are required.");
+
+        let finalData = {
+            company_id,
+            consignor_id,
+            consignee_id,
+            cn_no,
+            date,
+            from_loc,
+            to_loc,
+            invoice_no,
+            way_bill_no,
+            truck_no,
+            note,
+            total_amount: total_amount || 0,
+            data: JSON.stringify(data)
+        };
+
+        let result = await ChallanService.updateChallanData(id, finalData);
+
+        if (result.changes > 0) {
+            response.status = 200;
+            response.message = "Challan updated successfully.";
+            response.body = result;
+        } else {
+            response.status = 202;
+            response.message = "Challan not found or no changes made.";
+        }
+    } catch (error) {
+        console.log(`Something went wrong: controller: updateChallan: ${error}`);
+        response.status = 500;
+        response.message = error.message || "Something went wrong: controller: updateChallan";
+    }
+    return res.status(response.status).json(response);
+};
+
 exports.generateChallanNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {

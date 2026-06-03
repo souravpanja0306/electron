@@ -9,7 +9,7 @@ import Alert from "../../../components/Alert";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
 // Service...
-import { handleCreateParty } from "./PartyService";
+import { handleCreateParty } from "../../../services/partyService";
 
 
 const PartyCreate = () => {

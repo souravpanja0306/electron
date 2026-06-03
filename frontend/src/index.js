@@ -36,8 +36,8 @@ import ViewGst from './pages/Master/GstMaster/ViewGst';
 import ChangePassword from './pages/Auth/ChangePassword';
 import CreateChallan from './pages/Challan/CreateChallan';
 import ViewChallan from './pages/Challan/ViewChallan';
+import EditChallan from './pages/Challan/EditChallan';
 import CompanyEdit from './pages/Master/CompanyMaster/CompanyEdit';
-import CompanyDetails from './pages/Master/CompanyMaster/CompanyDetails';
 import PartyEdit from './pages/Master/PartyMaster/PartyEdit';
 
 import { Middleware } from './middleware/middleware';
@@ -72,11 +72,11 @@ const router = createHashRouter([
   { path: "/add-company", element: <Middleware><Layout><Company /></Layout></Middleware> },
   { path: "/company", element: <Middleware><Layout><CompanyMaster /></Layout></Middleware> },
   { path: "/edit-company/:id", element: <Middleware><Layout><CompanyEdit /></Layout></Middleware> },
-  { path: "/view-company-details/:id", element: <Middleware><Layout><CompanyDetails /></Layout></Middleware> },
 
   // Challans
   { path: "/create-challan", element: <Middleware><Layout><CreateChallan /></Layout></Middleware> },
   { path: "/view-challan", element: <Middleware><Layout><ViewChallan /></Layout></Middleware> },
+  { path: "/edit-challan/:id", element: <Middleware><Layout><EditChallan /></Layout></Middleware> },
 
   // GST
   { path: "/create-gst", element: <Middleware><Layout><CreateGst /></Layout></Middleware> },

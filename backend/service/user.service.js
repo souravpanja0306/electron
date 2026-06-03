@@ -77,3 +77,19 @@ exports.getUsers = async ({
         console.log(error);
     };
 };
+
+exports.updateUsers = async (data, id) => {
+    try {
+        db.exec(require("../database/schema/user.schema"));
+        const keys = Object.keys(data);
+        const setClause = keys.map(k => `${k} = @${k}`).join(", ");
+        const result = db
+            .prepare(`UPDATE users SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = @id`)
+            .run({ ...data, id });
+
+        return result.changes > 0;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};

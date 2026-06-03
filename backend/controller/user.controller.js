@@ -21,7 +21,7 @@ exports.addUser = async (req, res) => {
         const { name, mobile, email, username, password, address_1,
             address_2, city, state, district, pincode, country,
             gst, pan, trade_licence, bank, ifse, branch, account_no,
-            is_active, is_deleted, } = req.body;
+            is_active, is_deleted } = req.body;
 
         let finalData = {
             name: name,
@@ -105,6 +105,54 @@ exports.getUsers = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: getUsers`;
         response.body = error.body ? error.body : "";
     };
+    return res.status(response.status).json(response);
+};
+
+exports.getProfile = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const id = req.body.t_userId;
+        let result = await UserService.getUsers({ id });
+        if (result.length) {
+            response.status = 200;
+            response.message = "Profile fetched successfully.";
+            response.body = result[0];
+        } else {
+            response.status = 404;
+            response.message = "User not found.";
+        }
+    } catch (error) {
+        console.log(`Something went wrong: controller: getProfile: ${error}`);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
+    }
+    return res.status(response.status).json(response);
+};
+
+exports.updateProfile = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const id = req.body.t_userId;
+        const updateData = { ...req.body };
+        // Remove token data from update
+        delete updateData.t_userId;
+        delete updateData.t_mobile;
+        delete updateData.t_username;
+        delete updateData.t_name;
+
+        let result = await UserService.updateUsers(updateData, id);
+        if (result) {
+            response.status = 200;
+            response.message = "Profile updated successfully.";
+        } else {
+            response.status = 400;
+            response.message = "Failed to update profile.";
+        }
+    } catch (error) {
+        console.log(`Something went wrong: controller: updateProfile: ${error}`);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
+    }
     return res.status(response.status).json(response);
 };
 

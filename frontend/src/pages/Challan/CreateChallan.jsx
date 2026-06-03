@@ -4,6 +4,8 @@ import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
+import SearchableSelect from '../../components/SearchableSelect';
+import Alert from "../../components/Alert";
 import { inrToWords } from '../../utils/InWordConverter';
 import moment from 'moment';
 
@@ -29,7 +31,7 @@ import useChallanStore from "../../store/ChallanStore";
 
 const CreateChallan = () => {
   const { authToken, token } = useAuthStore();
-
+  const [alart, setAlart] = useState({ show: false });
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const navigate = useNavigate();
@@ -111,8 +113,13 @@ const CreateChallan = () => {
     if (e) e.preventDefault();
     try {
       if (!form.company_id || !form.consignor_id || !form.consignee_id) {
-        return toast.error("Company, Consignor and Consignee are required.");
-      }
+        return setAlart({
+          show: true,
+          title: "Error",
+          type: "error",
+          message: "Company, Consignor and Consignee are required."
+        });
+      };
 
       let payload = { ...form, data: data };
       let result = await createChallan(payload, token);
@@ -120,22 +127,26 @@ const CreateChallan = () => {
         toast.success(result.message);
         navigate("/view-challan");
       } else {
-        toast.error(result.message);
-      }
+        setAlart({
+          show: true,
+          title: "Error",
+          type: "error",
+          message: result?.message
+        });
+      };
     } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong!");
-    }
+      setAlart({
+        show: true,
+        title: "Error",
+        type: "error",
+        message: `Something went wrong: CreateChallan : ${error.message}`
+      });
+    };
   };
 
   const { printChallan } = useChallanStore();
   const printInvoice = async (e) => {
     if (e) e.preventDefault();
-    toast.info("Generating PDF, please wait...");
-    // Since we need an ID, we usually save first or print from View page.
-    // If printing from Create page, we'd need to save first or pass data directly to a temporary print route.
-    // For now, let's assume the user saves then prints from the view list.
-    toast.warning("Please save the challan first, then print from the View list.");
   };
 
   return (
@@ -157,9 +168,9 @@ const CreateChallan = () => {
           <Link to="/view-challan">
             <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
           </Link>
-          <div onClick={printInvoice}>
+          {/* <div onClick={printInvoice}>
             <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
-          </div>
+          </div> */}
         </ActionArea>
 
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-1'>
@@ -171,41 +182,33 @@ const CreateChallan = () => {
                   <div className='flex justify-between items-center w-full gap-1'>
                     <label className='text-xs w-[20%]'>From Company</label>
                     <div className='flex items-center gap-1 w-[80%]'>
-                      <select
-                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                      <SearchableSelect
+                        className="w-full"
                         name="company_id"
+                        value={form.company_id}
                         onChange={handleChange}
+                        options={companyData?.map(item => ({ id: item.id, label: item.company_name }))}
+                        placeholder="Select Company"
                         required
-                      >
-                        <option value="" disabled selected>Select Company</option>
-                        {companyData?.map(item => (
-                          <option key={item.id} value={item.id}>
-                            {item.company_name}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   </div>
 
                   <div className='flex justify-between items-center w-full gap-1'>
                     <label className='text-xs w-[20%]'>Consignor</label>
                     <div className='flex items-center gap-1 w-[80%]'>
-                      <select
-                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                      <SearchableSelect
+                        className="w-full"
                         name="consignor_id"
+                        value={form.consignor_id}
                         onChange={handleChange}
+                        options={parties?.body?.map(item => ({ id: item.id, label: item.company_name }))}
+                        placeholder="Select Consignor"
                         required
-                      >
-                        <option value="" disabled selected>Select Consignor</option>
-                        {parties?.body?.map(item => (
-                          <option key={item.id} value={item.id}>
-                            {item.company_name}
-                          </option>
-                        ))}
-                      </select>
+                      />
                       <Link
                         to="/add-party?back=true"
-                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
                       >
                         + New
                       </Link>
@@ -215,22 +218,18 @@ const CreateChallan = () => {
                   <div className='flex justify-between items-center w-full gap-1'>
                     <label className='text-xs w-[20%]'>Consignee</label>
                     <div className='flex items-center gap-1 w-[80%]'>
-                      <select
-                        className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                      <SearchableSelect
+                        className="w-full"
                         name="consignee_id"
+                        value={form.consignee_id}
                         onChange={handleChange}
+                        options={parties?.body?.map(item => ({ id: item.id, label: item.company_name }))}
+                        placeholder="Select Consignee"
                         required
-                      >
-                        <option value="" disabled selected>Select Consignee</option>
-                        {parties?.body?.map(item => (
-                          <option key={item.id} value={item.id}>
-                            {item.company_name}
-                          </option>
-                        ))}
-                      </select>
+                      />
                       <Link
                         to="/add-party?back=true"
-                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
                       >
                         + New
                       </Link>
@@ -445,6 +444,13 @@ const CreateChallan = () => {
         </div>
 
       </div>
+      <Alert
+        open={alart.show}
+        type={alart.type}
+        title={alart.title}
+        message={alart.message}
+        onClose={() => setAlart({ ...alart, show: false })}
+      />
     </>
   )
 }

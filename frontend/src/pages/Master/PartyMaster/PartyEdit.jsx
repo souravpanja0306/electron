@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react'
+import { useSearchParams, useNavigate } from "react-router-dom";
+
+// Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
 import { Link, useParams } from "react-router-dom";
-import { AiOutlineFileAdd, AiOutlineRollback, AiOutlineIdcard } from "react-icons/ai";
 import Alert from "../../../components/Alert";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import usePartyStore from '../../../store/PartyStore';
 import CustomLoader from '../../../components/CustomLoader';
 
+// Icons...
+import { AiOutlineFileAdd, AiOutlineRollback, AiOutlineIdcard } from "react-icons/ai";
+
+// Stores...
+import usePartyStore from '../../../store/PartyStore';
+import useAuthStore from '../../../store/AuthStore';
+
 const PartyEdit = () => {
-    let token = window.api?.getItem("token");
+    const { authToken, token } = useAuthStore();
     const { getPartyById, updateParty, partyLoading } = usePartyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
@@ -41,45 +48,46 @@ const PartyEdit = () => {
         branch: "",
         account_no: ""
     });
+    const fetchPartyData = async () => {
+        if (id) {
+            const result = await getPartyById(id, token);
+            if (result.status === 200 && result.body.length > 0) {
+                const partyData = result.body[0];
+                setData({
+                    company_name: partyData.company_name || "",
+                    email: partyData.email || "",
+                    mobile: partyData.mobile || "",
+                    owner: partyData.owner || "",
+                    address_1: partyData.address_1 || "",
+                    address_2: partyData.address_2 || "",
+                    city: partyData.city || "",
+                    state: partyData.state || "",
+                    district: partyData.district || "",
+                    pincode: partyData.pincode || "",
+                    country: partyData.country || "INDIA",
+                    gst: partyData.gst || "",
+                    pan: partyData.pan || "",
+                    trade_licence: partyData.trade_licence || "",
+                    bank: partyData.bank || "",
+                    ifse: partyData.ifse || "",
+                    branch: partyData.branch || "",
+                    account_no: partyData.account_no || ""
+                });
+            } else {
+                setAlart({ show: true, title: "Error", type: "error", message: result.message || "Party not found." });
+            }
+        }
+    };
 
     useEffect(() => {
-        const fetchPartyData = async () => {
-            if (id) {
-                const result = await getPartyById(id);
-                if (result.status === 200 && result.body.length > 0) {
-                    const partyData = result.body[0];
-                    setData({
-                        company_name: partyData.company_name || "",
-                        email: partyData.email || "",
-                        mobile: partyData.mobile || "",
-                        owner: partyData.owner || "",
-                        address_1: partyData.address_1 || "",
-                        address_2: partyData.address_2 || "",
-                        city: partyData.city || "",
-                        state: partyData.state || "",
-                        district: partyData.district || "",
-                        pincode: partyData.pincode || "",
-                        country: partyData.country || "INDIA",
-                        gst: partyData.gst || "",
-                        pan: partyData.pan || "",
-                        trade_licence: partyData.trade_licence || "",
-                        bank: partyData.bank || "",
-                        ifse: partyData.ifse || "",
-                        branch: partyData.branch || "",
-                        account_no: partyData.account_no || ""
-                    });
-                } else {
-                    setAlart({ show: true, title: "Error", type: "error", message: result.message || "Party not found." });
-                }
-            }
-        };
+        authToken();
         fetchPartyData();
-    }, [id]);
+    }, []);
 
     const handleSubmit = async (e) => {
         try {
             e.preventDefault();
-            let result = await updateParty(id, data);
+            let result = await updateParty(id, data, token);
             if ((result.status) === 200) {
                 setAlart({ show: true, title: "Success", type: "success", message: result.message });
                 setTimeout(() => navigate("/party"), 1500);

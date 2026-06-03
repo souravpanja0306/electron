@@ -20,7 +20,6 @@ const Home = () => {
 
   useEffect(() => {
     authToken();
-    if (token) navigate("/"); window.api?.setItem("currentMenu", "home")
   }, []);
 
   const [count, setCount] = useState(0);

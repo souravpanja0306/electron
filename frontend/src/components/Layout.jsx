@@ -33,14 +33,17 @@ const Layout = ({ children }) => {
 
     // Safe user data retrieval
     const [user, setUser] = useState({ name: "User" });
-    // useEffect(() => {
-    //     try {
-    //         const userData = JSON.parse(localStorage.getItem("user"));
-    //         if (userData) setUser(userData);
-    //     } catch (error) {
-    //         console.error("Error parsing user data:", error);
-    //     }
-    // }, []);
+    const getUser = async () => {
+        try {
+            const userData = await window.api?.getItem("user");
+            if (userData) setUser(JSON.parse(userData));
+        } catch (error) {
+            console.error("Error parsing user data:", error);
+        };
+    };
+    useEffect(() => {
+        getUser();
+    }, []);
 
     const changeMenu = ({ menu = "" }) => {
         if (menu) {
@@ -67,7 +70,7 @@ const Layout = ({ children }) => {
             <ToastContainer style={{ zIndex: 99999 }} />
             {/* Custom Title Bar */}
             <Header />
-            
+
             <div className="flex h-[calc(100vh-2.5rem)] bg-slate-100 dark:bg-slate-900 w-full overflow-hidden">
                 {/* Left Sidebar */}
                 <div className="w-[64px] bg-slate-50 dark:bg-slate-950 flex flex-col items-center border-r border-slate-300 dark:border-slate-800 overflow-y-auto overflow-x-hidden shadow-sm z-20">

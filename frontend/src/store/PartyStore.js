@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from "axios";
-let token = localStorage.getItem("token");
 
 const usePartyStore = create((set) => ({
     parties: [],
@@ -25,7 +24,7 @@ const usePartyStore = create((set) => ({
         };
     },
 
-    getPartyById: async (id) => {
+    getPartyById: async (id, token) => {
         try {
             set({ partyLoading: true });
             const result = await axios({
@@ -44,7 +43,7 @@ const usePartyStore = create((set) => ({
         }
     },
 
-    updateParty: async (id, payload) => {
+    updateParty: async (id, payload, token) => {
         try {
             set({ partyLoading: true });
             const result = await axios({
@@ -62,26 +61,6 @@ const usePartyStore = create((set) => ({
             set({ partyLoading: false });
             throw error;
         }
-    },
-
-    createGst: async (payload) => {
-        try {
-            set({ loading: true });
-            const res = await axios({
-                method: "post",
-                url: "http://localhost:3001/api/v1/admin/create-gst",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                data: payload,
-            });
-            set((state) => ({ gstData: [], loading: false }));
-            return res.data;
-        } catch (error) {
-            set({ loading: false });
-            throw error;
-        };
     },
 }));
 

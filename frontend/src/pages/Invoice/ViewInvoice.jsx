@@ -121,9 +121,6 @@ const ViewInvoices = () => {
                             <div onClick={(e) => handleDelete(e)} className={`${!checkedIds ? "hidden" : "block"}`}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                             </div>
-                            <div>
-                                <CustomButton title={"Export (Ctrl+E)"} color={"blue"}><AiOutlineDownload /></CustomButton>
-                            </div>
                         </div>
                         <div className="flex gap-1">
                             <div onClick={handleRefresh}>
@@ -208,7 +205,7 @@ const ViewInvoices = () => {
 
                 {/* Pagination */}
                 <MainArea>
-                    <div className="flex justify-between items-center text-sm">
+                    <div className="w-full flex justify-between items-center text-sm">
                         <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
                         <div className="flex items-center gap-1">
                             <button

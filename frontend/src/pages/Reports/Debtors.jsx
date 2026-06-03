@@ -26,16 +26,17 @@ import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
 import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore"
 import useReportStore from "../../store/ReportStore";
+import useAuthStore from "../../store/AuthStore";
 
 
 const Debtors = () => {
-  let token = window.api?.getItem("token");
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const navigate = useNavigate();
 
   const { reportData, getDebtors, reportLoading } = useReportStore();
   const { companyData, getAllCompany } = useCompanyStore();
+  const { authToken, token } = useCompanyStore();
 
   const [{ ledger, totals }, setDebtors] = useState({
     ledger: [],
@@ -54,6 +55,7 @@ const Debtors = () => {
   };
 
   useEffect(() => {
+    authToken();
     getDebtorsData(token);
     getAllCompany(token)
   }, []);

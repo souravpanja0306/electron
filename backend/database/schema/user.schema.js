@@ -17,6 +17,14 @@ module.exports = `
     pincode TEXT,
     country TEXT,
 
+    gst TEXT,
+    pan TEXT,
+    trade_licence TEXT,
+    bank TEXT,
+    ifse TEXT,
+    branch TEXT,
+    account_no TEXT,
+
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
 

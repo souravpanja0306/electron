@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+
+// Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import { Link, useParams } from "react-router-dom";
-import { AiOutlineFileAdd, AiOutlineRollback } from "react-icons/ai";
 import Alert from "../../../components/Alert";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import useCompanyStore from '../../../store/CompanyStore';
 import CustomLoader from '../../../components/CustomLoader';
 
+// Icons...
+import { AiOutlineFileAdd, AiOutlineRollback } from "react-icons/ai";
+
+// Store...
+import useCompanyStore from '../../../store/CompanyStore';
+import useAuthStore from '../../../store/AuthStore';
+
 const CompanyEdit = () => {
-    let token = window.api?.getItem("token");
     const { getCompanyById, updateCompany, companyLoading } = useCompanyStore();
+    const { authToken, token } = useCompanyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -42,39 +49,40 @@ const CompanyEdit = () => {
         account_no: ""
     });
 
-    useEffect(() => {
-        const fetchCompanyData = async () => {
-            if (id) {
-                const result = await getCompanyById(id, token);
-                if (result.status === 200 && result.body.length > 0) {
-                    const companyData = result.body[0];
-                    setData({
-                        company_name: companyData.company_name || "",
-                        email: companyData.email || "",
-                        mobile: companyData.mobile || "",
-                        owner: companyData.owner || "",
-                        address_1: companyData.address_1 || "",
-                        address_2: companyData.address_2 || "",
-                        city: companyData.city || "",
-                        state: companyData.state || "",
-                        district: companyData.district || "",
-                        pincode: companyData.pincode || "",
-                        country: companyData.country || "INDIA",
-                        gst: companyData.gst || "",
-                        pan: companyData.pan || "",
-                        trade_licence: companyData.trade_licence || "",
-                        bank: companyData.bank || "",
-                        ifse: companyData.ifse || "",
-                        branch: companyData.branch || "",
-                        account_no: companyData.account_no || ""
-                    });
-                } else {
-                    setAlart({ show: true, title: "Error", type: "error", message: result.message || "Company not found." });
-                }
+    const fetchCompanyData = async () => {
+        if (id) {
+            const result = await getCompanyById(id, token);
+            if (result.status === 200 && result.body.length > 0) {
+                const companyData = result.body[0];
+                setData({
+                    company_name: companyData.company_name || "",
+                    email: companyData.email || "",
+                    mobile: companyData.mobile || "",
+                    owner: companyData.owner || "",
+                    address_1: companyData.address_1 || "",
+                    address_2: companyData.address_2 || "",
+                    city: companyData.city || "",
+                    state: companyData.state || "",
+                    district: companyData.district || "",
+                    pincode: companyData.pincode || "",
+                    country: companyData.country || "INDIA",
+                    gst: companyData.gst || "",
+                    pan: companyData.pan || "",
+                    trade_licence: companyData.trade_licence || "",
+                    bank: companyData.bank || "",
+                    ifse: companyData.ifse || "",
+                    branch: companyData.branch || "",
+                    account_no: companyData.account_no || ""
+                });
+            } else {
+                setAlart({ show: true, title: "Error", type: "error", message: result.message || "Company not found." });
             }
-        };
+        }
+    };
+    useEffect(() => {
+        authToken();
         fetchCompanyData();
-    }, [id, token]);
+    }, [id]);
 
     const handleSubmit = async (e) => {
         try {

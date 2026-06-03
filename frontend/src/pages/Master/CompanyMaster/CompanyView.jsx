@@ -20,16 +20,18 @@ import CustomLoader from "../../../components/CustomLoader";
 
 // Stores...
 import useCompanyStore from "../../../store/CompanyStore";
+import useAuthStore from "../../../store/AuthStore";
 
 const ViewCompany = () => {
-    let token = window.api?.getItem("token");
     const { companyData, getAllCompany, deleteCompany, companyLoading } = useCompanyStore();
+    const { authToken, token } = useAuthStore();
 
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [checkedIds, setCheckedIds] = useState([]);
 
     useEffect(() => {
+        authToken();
         getAllCompany(token);
     }, []);
 

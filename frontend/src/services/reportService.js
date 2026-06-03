@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken } from "./authService"
+import { getToken } from "./authService";
 
 export const getDashboardData = async (token) => {
     try {

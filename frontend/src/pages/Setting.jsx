@@ -9,9 +9,14 @@ const Setting = () => {
     const [suffix, setSuffix] = useState("");
     const [active, setActive] = useState(0);
     const [light, setLight] = useState(true);
+    const [theme, setTheme] = useState("dark");
 
-    useEffect(async () => {
-        const theme = await window.api?.getItem("theme");
+    const getThemeData = async () => {
+        const getTheme = await window.api?.getItem("theme");
+        if (getTheme) setTheme(getTheme)
+    };
+
+    useEffect(() => {
         if (theme === "dark") {
             setLight(false);
             document.documentElement.classList.add("dark");

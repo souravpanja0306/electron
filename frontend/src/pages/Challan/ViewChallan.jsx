@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from 'react-toastify';
 
 // Icon...
@@ -9,7 +9,9 @@ import {
     AiOutlinePrinter,
     AiOutlineDownload,
     AiOutlineFilter,
-    AiOutlineDelete
+    AiOutlineDelete,
+    AiOutlineEdit,
+    AiOutlineRollback
 } from "react-icons/ai";
 
 // Components...
@@ -26,6 +28,8 @@ import useAuthStore from '../../store/AuthStore';
 const ViewChallan = () => {
     const { authToken, token } = useAuthStore();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const back = searchParams.get("back");
 
     const { challanData, challanLoading, getAllChallan, deleteChallan, printChallan } = useChallanStore();
     const [page, setPage] = useState(1);
@@ -93,6 +97,11 @@ const ViewChallan = () => {
                 e.preventDefault();
                 handleDelete()
             };
+
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                if (checkedIds) navigate(`/edit-challan/${checkedIds}`);
+            };
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
@@ -114,15 +123,22 @@ const ViewChallan = () => {
                 <ActionArea>
                     <div className="flex justify-between w-full">
                         <div className="flex gap-1">
+                            {
+                                back ?
+                                    <div onClick={() => navigate(-1)}>
+                                        <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                                    </div>
+                                    : ""
+                            }
                             <Link to="/create-challan">
                                 <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div onClick={handleDelete} className={`${!checkedIds ? "hidden" : "block"}`}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                             </div>
-                            <div>
-                                <CustomButton title={"Export (Ctrl+E)"} color={"blue"}><AiOutlineDownload /></CustomButton>
-                            </div>
+                            <Link to={`/edit-challan/${checkedIds}?back=true`} className={`${!checkedIds ? "hidden" : "block"}`}>
+                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineEdit /></CustomButton>
+                            </Link>
                         </div>
                         <div className="flex gap-1">
                             <div onClick={handleRefresh}>
@@ -168,7 +184,7 @@ const ViewChallan = () => {
                                                 </td>
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.company_id ? item.company_id.company_name : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
-                                                    <Link to={`/view-challan/details?id=${item.id}&back=true`}>
+                                                    <Link to={`/edit-challan/${item.id}?back=true`}>
                                                         {item.cn_no ? item.cn_no : "--"}
                                                     </Link>
                                                 </td>

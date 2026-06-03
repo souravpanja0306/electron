@@ -93,6 +93,27 @@ const useChallanStore = create((set) => ({
         }
     },
 
+    updateChallan: async (id, payload, token) => {
+        try {
+            set({ challanLoading: true });
+            let result = await axios.request({
+                method: 'put',
+                url: `${baseURL.challan}update/${id}`,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                data: JSON.stringify(payload),
+                validateStatus: (status) => status < 500,
+            });
+            set({ challanLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ challanLoading: false });
+            throw error;
+        }
+    },
+
     printChallan: async ({ id = "", token = "" }) => {
         try {
             set({ challanLoading: true });

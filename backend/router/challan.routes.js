@@ -38,4 +38,10 @@ router.delete(
     ChallanController.deleteChallan
 );
 
+router.put(
+    "/update/:id",
+    middleware.isAuthenticated,
+    ChallanController.updateChallan
+);
+
 module.exports = router;
