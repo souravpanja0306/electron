@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { AiOutlineArrowLeft, AiOutlineArrowRight, AiOutlineCheck } from 'react-icons/ai';
 
 // Components...
@@ -11,7 +11,18 @@ import CustomLoader from "../components/CustomLoader";
 import Alert from '../components/Alert';
 import CreateCompany from './CreateCompany';
 
+// Store...
+import useAuthStore from '../store/AuthStore';
+
 const Home = () => {
+  const { authToken, token } = useAuthStore(); // Store...
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    authToken();
+    if (token) navigate("/"); window.api?.setItem("currentMenu", "home")
+  }, []);
+
   const [count, setCount] = useState(0);
   const [companyData, setCompanyData] = useState({});
 

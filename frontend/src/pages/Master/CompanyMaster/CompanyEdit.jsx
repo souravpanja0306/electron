@@ -11,7 +11,7 @@ import useCompanyStore from '../../../store/CompanyStore';
 import CustomLoader from '../../../components/CustomLoader';
 
 const CompanyEdit = () => {
-    let token = localStorage.getItem("token");
+    let token = window.api?.getItem("token");
     const { getCompanyById, updateCompany, companyLoading } = useCompanyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();

@@ -18,17 +18,21 @@ import {
     AiOutlineRollback,
 } from "react-icons/ai";
 
+
+// Stores...
 import useMoneyReceiptStore from '../../store/MoneyReceiptStore';
 import usePartyStore from '../../store/PartyStore';
 import useCompanyStore from '../../store/CompanyStore';
+import useAuthStore from '../../store/AuthStore';
 
 const MoneyReceipts = () => {
-    let token = localStorage.getItem("token");
     const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
     const { parties, getAllParty } = usePartyStore();
     const { companyData, getAllCompany } = useCompanyStore();
+    const { authToken, token } = useAuthStore();
 
     useEffect(() => {
+        authToken();
         generateMoneyReceiptNo(token);
         getAllParty();
         getAllCompany(token);

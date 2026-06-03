@@ -10,8 +10,8 @@ const Setting = () => {
     const [active, setActive] = useState(0);
     const [light, setLight] = useState(true);
 
-    useEffect(() => {
-        const theme = localStorage.getItem("theme");
+    useEffect(async () => {
+        const theme = await window.api?.getItem("theme");
         if (theme === "dark") {
             setLight(false);
             document.documentElement.classList.add("dark");
@@ -21,9 +21,9 @@ const Setting = () => {
         };
     }, []);
 
-    const changeTheme = (e) => {
+    const changeTheme = async (e) => {
         setLight(e);
-        localStorage.setItem("theme", e ? "light" : "dark");
+        await window.api?.setItem("theme", e ? "light" : "dark");
         document.documentElement.classList.toggle("dark", !e);
     };
 

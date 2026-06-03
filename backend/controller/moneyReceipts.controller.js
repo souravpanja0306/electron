@@ -1,7 +1,6 @@
 // Package...
 const moment = require("moment");
 const fs = require('fs');
-const { getBrowser } = require("../helper/puppeteer");
 
 // Contents...
 const contents = require("../content/contents");

@@ -26,7 +26,7 @@ const CompanyDetails = () => {
     const navigate = useNavigate();
 
     const { id } = useParams();
-    const token = localStorage.getItem("token");
+    const token = window.api?.getItem("token");
     const { companyData, deleteCompany, getCompanyById, companyLoading, error } = useCompanyStore();
 
     useEffect(() => {

@@ -1,21 +1,28 @@
 {
   "name": "electron-react",
   "version": "1.0.0",
-  "description": "testing project",
+  "description": "A desktop billing and transport logistics management application built with Electron, React, and SQLite.",
   "license": "ISC",
   "author": "SRV",
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
     "start": "nodemon --exec electron .",
-    "dev": "electron ."
+    "dev": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.company.billing",
+    "productName": "Billing Software",
+    "win": {
+      "target": "nsis"
+    }
   },
   "dependencies": {
     "axios": "^1.13.2",
     "better-sqlite3": "^12.6.2",
     "body-parser": "^2.2.2",
     "cors": "^2.8.5",
-    "electron": "^39.2.6",
     "electron-store": "^11.0.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
@@ -24,9 +31,12 @@
     "mongoose": "^9.2.2",
     "multer": "^2.0.2",
     "node-machine-id": "^1.1.12",
-    "nodemon": "^3.1.11",
     "pdfkit": "^0.17.2",
-    "puppeteer": "^24.36.1",
     "sql.js": "^1.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11",
+    "electron": "^39.2.6",
+    "electron-builder": "^26.8.1"
   }
 }

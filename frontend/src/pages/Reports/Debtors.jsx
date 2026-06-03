@@ -29,7 +29,7 @@ import useReportStore from "../../store/ReportStore";
 
 
 const Debtors = () => {
-  let token = localStorage.getItem("token");
+  let token = window.api?.getItem("token");
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const navigate = useNavigate();

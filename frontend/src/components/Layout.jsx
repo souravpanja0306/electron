@@ -33,14 +33,14 @@ const Layout = ({ children }) => {
 
     // Safe user data retrieval
     const [user, setUser] = useState({ name: "User" });
-    useEffect(() => {
-        try {
-            const userData = JSON.parse(localStorage.getItem("user"));
-            if (userData) setUser(userData);
-        } catch (error) {
-            console.error("Error parsing user data:", error);
-        }
-    }, []);
+    // useEffect(() => {
+    //     try {
+    //         const userData = JSON.parse(localStorage.getItem("user"));
+    //         if (userData) setUser(userData);
+    //     } catch (error) {
+    //         console.error("Error parsing user data:", error);
+    //     }
+    // }, []);
 
     const changeMenu = ({ menu = "" }) => {
         if (menu) {
@@ -191,7 +191,7 @@ const Layout = ({ children }) => {
 
                 {/* Main Content Area */}
                 <div className="flex-1 bg-white dark:bg-slate-800 flex flex-col overflow-hidden">
-                    <main className="flex-1 p-4 overflow-auto bg-white dark:bg-slate-800 relative z-0">
+                    <main className="flex-1 p-2 overflow-auto bg-white dark:bg-slate-800 relative z-0">
                         {children}
                     </main>
                 </div>

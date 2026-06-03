@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDelete, AiOutlineSearch } from "react-icons/ai";
 
 const ViewHsnSac = () => {
-    const token = localStorage.getItem("token");
+    const token = window.api?.getItem("token");
     const { gstData, getAllHsnSac, loading } = useHsnSacStore();
     const [searchTerm, setSearchTerm] = useState("");
 

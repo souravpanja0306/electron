@@ -26,17 +26,19 @@ import useInvoiceStore from '../../store/InvoiceStore';
 import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
 import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore"
+import useAuthStore from '../../store/AuthStore';
 
 const ViewInvoiceDetails = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
   const { invoiceData, getAllInvoice, deleteInvoice, printInvoice, invoiceLoading } = useInvoiceStore();
+  const { authToken, token } = useAuthStore();
 
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const invoiceId = searchParams.get("id");
 
   useEffect(() => {
+    authToken();
     getAllInvoice({ id: invoiceId, token: token });
   }, []);
 

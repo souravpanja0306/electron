@@ -1,17 +1,21 @@
-
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 
+// Store...
+import useAuthStore from "../store/AuthStore";
+
 export const Middleware = ({ children }) => {
+    const { authToken, token } = useAuthStore();
     useEffect(() => {
-        const theme = localStorage.getItem("theme");
+        authToken();
+        const theme = window.api?.getItem("theme");
+
         if (theme === "dark") {
             document.documentElement.classList.add("dark");
         } else {
             document.documentElement.classList.remove("dark");
-        };
+        }
     }, []);
 
-    const isAuth = localStorage.getItem("token");
-    return isAuth ? children : <Navigate to="/signin" replace />;
+    return token ? children : <Navigate to="/signin" replace />;
 };

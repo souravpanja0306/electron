@@ -22,12 +22,14 @@ import { Link, NavLink } from "react-router-dom";
 
 // Stores...
 import useCompanyStore from "../../store/CompanyStore";
+import useAuthStore from '../../store/AuthStore';
 import usePartyStore from "../../store/PartyStore"
 import useChallanStore from "../../store/ChallanStore";
 
 
 const CreateChallan = () => {
-  let token = localStorage.getItem("token");
+  const { authToken, token } = useAuthStore();
+
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const navigate = useNavigate();
@@ -44,7 +46,8 @@ const CreateChallan = () => {
   };
 
   useEffect(() => {
-    getAllParty();
+    authToken();
+    getAllParty(token);
     getAllCompany(token);
     getChallanNo();
   }, []);

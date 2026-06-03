@@ -3,32 +3,34 @@ import PageTitle from '../../components/PageTitle';
 import CustomButton from '../../components/CustomButton';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import useAuthStore from '../../store/AuthStore';
 import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 
+// Store...
+import useAuthStore from '../../store/AuthStore';
+
 const Signin = () => {
-  const { signinData, signin, createMoneyReceipts, generateMoneyReceiptNo, signinLoading } = useAuthStore(); // Store...
+  const { signinData, signin, signinLoading, authToken, token } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isAuth = localStorage.getItem("token");
-    if (isAuth) navigate("/dashboard"); localStorage.setItem("currentMenu", "dashboard")
-    console.log("hello");
+    authToken();
+    if (token) navigate("/"); window.api?.setItem("currentMenu", "home")
   }, [])
 
   const [data, setData] = useState({ username: "", password: "" });
-  const handleSubmitSignin = async () => {
+  const handleSubmitSignin = async (e) => {
+    e.preventDefault();
     try {
       let result = await signin({ username: data.username, password: data.password });
       if (result.status === 200) {
-        localStorage.setItem("token", result.body.token);
-        localStorage.setItem("user", JSON.stringify(result.body));
+        await window.api?.setItem("token", result.body.token);
+        await window.api?.setItem("user", JSON.stringify(result.body));
         navigate("/");
       } else {
         toast(result.message, { theme: "dark" });
       };
     } catch (error) {
-      console.log(error)
+      console.log(error);
     };
   };
 
@@ -38,7 +40,7 @@ const Signin = () => {
       <div className="titlebar border-b border-slate-300 dark:border-slate-600 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between p-2 shadow-md">
         <div className="flex items-center gap-2">
           <div className="font-semibold tracking-wide">
-            <Link to="#">HelloWorld</Link>
+            <Link to="#">Zero® ERP</Link>
           </div>
         </div>
         <div className="flex items-center gap-2 text-sm">
@@ -83,7 +85,7 @@ const Signin = () => {
 
           <form
             className="flex flex-col gap-4"
-            onSubmit={() => handleSubmitSignin()}
+            onSubmit={(e) => handleSubmitSignin(e)}
           >
             <div className="flex flex-col gap-1">
               <label className="text-slate-400 text-xs uppercase">

@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import axios from "axios";
 
+// Service...
+import { getDashboardData } from "../services/reportService";
+
 const useReportStore = create((set) => ({
     reportData: [],
     reportLoading: false,
@@ -11,19 +14,10 @@ const useReportStore = create((set) => ({
     dashboardStats: null,
     dashboardStatsLoading: false,
 
-    getDashboardStats: async ({
-        token = ""
-    }) => {
+    getDashboardStats: async ({ token = "" }) => {
         try {
             set({ dashboardStatsLoading: true });
-            const result = await axios({
-                method: "get",
-                url: `http://localhost:3001/api/v1/report/dashboard-stats`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const result = await getDashboardData();
             if (result.data.status === 200) {
                 set({ dashboardStats: result.data.body, dashboardStatsLoading: false });
             };

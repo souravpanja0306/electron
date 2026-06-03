@@ -1,7 +1,11 @@
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain } = require("electron");
 const path = require("path");
 const { machineIdSync } = require('node-machine-id');
-const { validateLicense } = require("./licenseService.js")
+const { validateLicense } = require("./licenseService.js");
+const Store = require('electron-store').default;
+
+// Initialize the store
+const store = new Store();
 
 require("./server.js");
 app.whenReady().then(() => {
@@ -22,11 +26,11 @@ app.whenReady().then(() => {
         icon: iconPath,
         title: "Zero® ERP — Complete Solution",
     });
-    win.loadURL("http://localhost:3000");
+    win.loadURL("http://localhost:3000/");
     // win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
 
 
-    // win.webContents.openDevTools(); // For Permanents for Developments.
+    win.webContents.openDevTools(); // For Permanents for Developments.
     globalShortcut.register("Control+Shift+I", () => {
         win.webContents.openDevTools();
     });
@@ -39,4 +43,17 @@ app.whenReady().then(() => {
         win.webContents.isDevToolsOpened() ? win.webContents.closeDevTools() : win.webContents.openDevTools();
     });
     ipcMain.handle("get-machine-id", () => { return machineIdSync({ original: false }) });
+    // Listeners to read/write hardware files safely
+    ipcMain.on('store-set', (event, key, value) => {
+        store.set(key, value);
+    });
+    ipcMain.handle('store-get', (event, key) => {
+        return store.get(key);
+    });
+    ipcMain.on('store-delete', (event, key) => {
+        store.delete(key);
+    });
+    ipcMain.on('store-clear-all', (event, key) => {
+        store.clear();
+    });
 });

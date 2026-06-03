@@ -20,7 +20,7 @@ import { Link, NavLink } from "react-router-dom";
 import useGstStore from '../../../store/GstStore';
 
 const CreateGst = () => {
-  let token = localStorage.getItem("token");
+  let token = window.api?.getItem("token");
   const { gstData, getAllGst, createGst, loading } = useGstStore();
 
   const [isProforma, setIsProforma] = useState(true);

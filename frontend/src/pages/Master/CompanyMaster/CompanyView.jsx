@@ -22,7 +22,7 @@ import CustomLoader from "../../../components/CustomLoader";
 import useCompanyStore from "../../../store/CompanyStore";
 
 const ViewCompany = () => {
-    let token = localStorage.getItem("token");
+    let token = window.api?.getItem("token");
     const { companyData, getAllCompany, deleteCompany, companyLoading } = useCompanyStore();
 
     const navigate = useNavigate();

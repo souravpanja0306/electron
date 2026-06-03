@@ -29,7 +29,7 @@ import useReportStore from "../../store/ReportStore";
 
 
 const CustomerLedger = () => {
-    let token = localStorage.getItem("token");
+    let token = window.api?.getItem("token");
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
     const party_id = searchParams.get("id");

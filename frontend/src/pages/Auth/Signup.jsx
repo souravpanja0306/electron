@@ -22,10 +22,9 @@ const Signup = () => {
         try {
             e.preventDefault();
             let result = await signup(data);
-            console.log("🚀 ~ handleSubmitSignup ~ result:", result.status)
             if (result.status === 200) {
-                localStorage.setItem("token", result.body.token);
-                localStorage.setItem("user", JSON.stringify(result.body));
+                window.api?.setItem("token", result.body.token);
+                window.api?.setItem("user", JSON.stringify(result.body));
                 navigate("/");
                 toast(result.message, { theme: "dark" });
             } else {

@@ -4,29 +4,9 @@ let token = localStorage.getItem("token");
 
 const usePartyStore = create((set) => ({
     parties: [],
-    moneyReceiptNo: "",
     partyLoading: false,
 
-    generateMoneyReceiptNo: async () => {
-        try {
-            set({ loading: true });
-            const result = await axios({
-                method: "get",
-                url: "http://localhost:3001/api/v1/money-receipt/generate-receipt-no?types=moneyreceipt",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            set({ moneyReceiptNo: result.data.body, loading: false });
-            return result.data;
-        } catch (error) {
-            set({ loading: false });
-            throw error;
-        };
-    },
-
-    getAllParty: async () => {
+    getAllParty: async (token) => {
         try {
             set({ loading: true });
             const result = await axios({

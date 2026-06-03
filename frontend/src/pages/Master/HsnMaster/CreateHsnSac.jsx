@@ -20,7 +20,7 @@ const CreateHsnSac = () => {
     const { createHsnSac } = useHsnSacStore(); // Removed 'loading' to simplify as per theme
     
     const isBack = searchParams.get("back") === "true";
-    const token = localStorage.getItem('token');
+    const token = window.api?.getItem('token');
 
     // 1. Initial State for easy blanking
     const initialState = {

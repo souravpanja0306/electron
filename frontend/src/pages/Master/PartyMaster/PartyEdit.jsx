@@ -11,7 +11,7 @@ import usePartyStore from '../../../store/PartyStore';
 import CustomLoader from '../../../components/CustomLoader';
 
 const PartyEdit = () => {
-    let token = localStorage.getItem("token");
+    let token = window.api?.getItem("token");
     const { getPartyById, updateParty, partyLoading } = usePartyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();

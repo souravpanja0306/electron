@@ -25,34 +25,27 @@ import 'react-toastify/dist/ReactToastify.css';
 const Header = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState({ name: "User" });
-    const [activeMenu, setActiveMenu] = useState(null);
+    const [activeMenu, setActiveMenu] = useState("home");
 
-    useEffect(() => {
+    const getUser = async () => {
         try {
-            const userData = JSON.parse(localStorage.getItem("user"));
-            if (userData) setUser(userData);
+            const userData = await window.api?.getItem("user");
+            if (userData) setUser(JSON.parse(userData));
         } catch (error) {
             console.error("Error parsing user data:", error);
-        }
-    }, []);
+        };
+    };
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (!event.target.closest('.menu-container')) {
-                setActiveMenu(null);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        getUser();
     }, []);
 
     const toggleMenu = (menu) => {
         setActiveMenu(activeMenu === menu ? null : menu);
     };
 
-    const handleSignOut = (e) => {
-        localStorage.clear();
-        sessionStorage.clear();
+    const handleSignOut = async (e) => {
+        await window.api?.clearAll();
         navigate("/signin");
     };
 
@@ -65,7 +58,7 @@ const Header = () => {
                 <div className="flex text-xs space-x-1">
                     {/* File */}
                     <div className="relative menu-container">
-                        <button 
+                        <button
                             onClick={() => toggleMenu('file')}
                             className={`btn px-2 py-1 rounded transition-colors ${activeMenu === 'file' ? 'bg-slate-300 dark:bg-slate-800' : 'hover:bg-slate-300 dark:hover:bg-slate-800'}`}>
                             File
@@ -89,7 +82,7 @@ const Header = () => {
 
                     {/* Edit */}
                     <div className="relative menu-container">
-                        <button 
+                        <button
                             onClick={() => toggleMenu('edit')}
                             className={`btn px-2 py-1 rounded transition-colors ${activeMenu === 'edit' ? 'bg-slate-300 dark:bg-slate-800' : 'hover:bg-slate-300 dark:hover:bg-slate-800'}`}>
                             Edit
@@ -106,7 +99,7 @@ const Header = () => {
 
                     {/* Help */}
                     <div className="relative menu-container">
-                        <button 
+                        <button
                             onClick={() => toggleMenu('help')}
                             className={`btn px-2 py-1 rounded transition-colors ${activeMenu === 'help' ? 'bg-slate-300 dark:bg-slate-800' : 'hover:bg-slate-300 dark:hover:bg-slate-800'}`}>
                             Help
@@ -140,12 +133,12 @@ const Header = () => {
             <div className="flex items-center gap-3 text-sm no-drag">
                 <div className="flex items-center gap-2 pr-2 border-r border-slate-300 dark:border-slate-700">
                     <div className="relative menu-container">
-                        <button 
+                        <button
                             onClick={() => toggleMenu('user')}
                             className="btn w-7 h-7 flex items-center justify-center bg-blue-600 text-white hover:bg-blue-500 rounded-full text-[10px] font-bold uppercase shadow-sm">
                             {user?.name?.[0] || "U"}
                         </button>
-                        <div className={`p-1 absolute left-0 top-full ${activeMenu === 'user' ? 'block' : 'hidden'} bg-white dark:bg-slate-800 text-black dark:text-white min-w-48 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]`}>
+                        <div className={`p-1 absolute right-0 top-full ${activeMenu === 'user' ? 'block' : 'hidden'} bg-white dark:bg-slate-800 text-black dark:text-white min-w-48 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]`}>
                             <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700 mb-1">
                                 <p className="text-xs font-semibold truncate">{user?.name}</p>
                                 <p className="text-[10px] text-slate-500 truncate">{user?.email || "User Profile"}</p>

@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDownload, AiOutlineDelete } from "react-icons/ai";
 
 const GstTable = () => {
-  const isAuth = localStorage.getItem("token");
+  const isAuth = window.api?.getItem("token");
   const { gstData, getAllGst, loading } = useGstStore();
 
   useEffect(() => {

@@ -21,9 +21,10 @@ import CustomLoader from "../../components/CustomLoader";
 
 // Stores...
 import useChallanStore from "../../store/ChallanStore";
+import useAuthStore from '../../store/AuthStore';
 
 const ViewChallan = () => {
-    let token = localStorage.getItem("token");
+    const { authToken, token } = useAuthStore();
     const navigate = useNavigate();
 
     const { challanData, challanLoading, getAllChallan, deleteChallan, printChallan } = useChallanStore();
@@ -31,6 +32,7 @@ const ViewChallan = () => {
     const [checkedIds, setCheckedIds] = useState(null);
 
     useEffect(() => {
+        authToken();
         getAllChallan({ token: token });
     }, []);
 

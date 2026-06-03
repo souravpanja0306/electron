@@ -18,16 +18,18 @@ import useInvoiceStore from '../../store/InvoiceStore';
 import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore"
 import useMoneyReceiptStore from '../../store/MoneyReceiptStore';
+import useAuthStore from '../../store/AuthStore';
 
 const ViewMoneyReceipts = () => {
-    let token = localStorage.getItem("token");
     const { moneyReceipts, getAllMoneyReceipts, printMoneyReceipt, deleteMoneyReceipts, loading, downloadLoading } = useMoneyReceiptStore(); // Store...
+    const { authToken, token } = useAuthStore(); // Store...
 
     const navigate = useNavigate();
     const [alart, setAlart] = useState({ show: false });
     const [page, setPage] = useState(1);
 
     useEffect(() => {
+        authToken();
         getAllMoneyReceipts(token);
     }, []);
 

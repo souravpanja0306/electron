@@ -22,18 +22,19 @@ import { Link, NavLink } from "react-router-dom";
 
 // Stores...
 import useInvoiceStore from '../../store/InvoiceStore';
+import useAuthStore from '../../store/AuthStore';
 import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
 import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore";
 import useGstStore from "../../store/GstStore";
 
 const CreateInvoice = () => {
-  let token = localStorage.getItem("token");
   const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
   const { invoiceData, createInvoice, generateInvoiceNo, invoiceNo, printInvoice, invoiceLoading } = useInvoiceStore();
   const { companyData, getAllCompany } = useCompanyStore();
   const { parties, getAllParty, partyLoading } = usePartyStore();
   const { gstData, getAllGst, gstLoading } = useGstStore();
+  const { authToken, token } = useAuthStore();
 
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
@@ -79,8 +80,9 @@ const CreateInvoice = () => {
   };
 
   useEffect(() => {
+    authToken();
     getPartys();
-    generateInvoiceNumber()
+    generateInvoiceNumber();
     getAllCompany(token);
     getAllGst(token)
   }, []);

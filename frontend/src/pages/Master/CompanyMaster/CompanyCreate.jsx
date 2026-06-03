@@ -11,7 +11,7 @@ import useCompanyStore from '../../../store/CompanyStore';
 
 
 const CompanyCreate = () => {
-    let token = localStorage.getItem("token");
+    let token = window.api?.getItem("token");
     const { companyData, createCompany, getAllCompany, companyLoading } = useCompanyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
