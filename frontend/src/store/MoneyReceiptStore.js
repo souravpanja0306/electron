@@ -95,19 +95,39 @@ const useMoneyReceiptStore = create((set) => ({
         token = ""
     }) => {
         try {
-            set({ downloadLoading: true });
+            set({ loading: true });
             const result = await axios({
-                method: "get",
+                method: "delete",
                 url: `http://localhost:3001/api/v1/money-receipt/delete-money-receipt/${id}`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
             });
-            set({ downloadLoading: false });
+            set({ loading: false });
             return result.data;
         } catch (error) {
-            set({ downloadLoading: false });
+            set({ loading: false });
+            throw error;
+        };
+    },
+
+    updateMoneyReceipts: async ({ id, payload, token }) => {
+        try {
+            set({ loading: true });
+            const result = await axios({
+                method: "put",
+                url: `http://localhost:3001/api/v1/money-receipt/update-money-receipt`,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                data: { ...payload, id },
+            });
+            set({ loading: false });
+            return result.data;
+        } catch (error) {
+            set({ loading: false });
             throw error;
         };
     },

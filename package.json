@@ -15,7 +15,8 @@
     "appId": "com.company.billing",
     "productName": "Billing Software",
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "./public/icon/truck.ico"
     }
   },
   "dependencies": {

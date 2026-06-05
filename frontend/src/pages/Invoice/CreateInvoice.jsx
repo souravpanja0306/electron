@@ -5,6 +5,7 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
+import Alert from '../../components/Alert';
 import { inrToWords } from '../../utils/InWordConverter';
 import moment from 'moment';
 
@@ -46,9 +47,14 @@ const CreateInvoice = () => {
   const [grandTotal, setGrandTotal] = useState({
     total_quantity: 0,
     total_value: 0,
-    tax_amount: 0,
+    total_cgst: 0,
+    total_sgst: 0,
+    total_igst: 0,
+    grand_total: 0,
+    inWord: ""
   });
   const [alart, setAlart] = useState({ show: false });
+  const [isSameState, setIsSameState] = useState(true);
   const [party, setParty] = useState([]);
   const [invoiceDetails, setInvoiceDetails] = useState({
     type: "tax",
@@ -60,6 +66,8 @@ const CreateInvoice = () => {
     billTo: "",
     shipTo: "",
     placeOfSupply: "",
+    lorry_no: "",
+    lr_no: ""
   });
   const [invoiceFields, setInvoiceFields] = useState([
     { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0, gst: 0 },
@@ -71,7 +79,7 @@ const CreateInvoice = () => {
   };
 
   const generateInvoiceNumber = async () => {
-    let result = await generateInvoiceNo(token);
+    let result = await generateInvoiceNo({ token, types: "invoice" });
     if (result.status === 200) {
       setInvoiceDetails(prev => ({
         ...prev,
@@ -88,29 +96,79 @@ const CreateInvoice = () => {
     getAllGst(token)
   }, []);
 
-  const handleAddFields = (e) => {
+  const handleAddFields = () => {
     setInvoiceFields([...invoiceFields, {
-      id: randomNumber,
+      id: Math.floor(Math.random() * 10000000000),
       sl_no: "",
       description: "",
       hsn: "",
       quantity: 0,
       rate: 0,
-      percentage: 0,
-      discount: 0,
+      gst: 0,
       total: 0,
     }]);
   };
 
   const handleRemoveFields = (id) => {
-    let invoiceData = invoiceFields.find(item => item.id == id);
-    if (invoiceData) {
-      if (invoiceData.description != "" || invoiceData.quantity != "") {
-        toast("You can't delete this field because it contains data.", { theme: "dark" });
+    if (invoiceFields.length > 1) {
+      const updatedFields = invoiceFields.filter(item => item.id !== id);
+      setInvoiceFields(updatedFields);
+      calculateGrandTotal(updatedFields, invoiceDetails.billFrom, invoiceDetails.billTo);
+    } else {
+      toast.info("At least one row is required.");
+    }
+  };
+
+  const calculateGrandTotal = (fields, billFromId, billToId) => {
+    let finalQuantity = 0;
+    let finalValue = 0;
+    let finalCGST = 0;
+    let finalSGST = 0;
+    let finalIGST = 0;
+
+    const company = companyData.find(c => String(c.id) === String(billFromId));
+    const selectedParty = party.find(p => String(p.id) === String(billToId));
+
+    if (!company || !selectedParty) {
+        setIsSameState(true);
         return;
-      };
-    };
-    setInvoiceFields(invoiceFields.filter(item => item.id !== id));
+    }
+
+    const companyState = (company?.state || "").toLowerCase().trim();
+    const partyState = (selectedParty?.state || "").toLowerCase().trim();
+    const sameState = companyState === partyState;
+    setIsSameState(sameState);
+
+    fields.forEach(item => {
+      let qty = parseFloat(item.quantity || 0);
+      let rate = parseFloat(item.rate || 0);
+      let gstRate = parseFloat(item.gst || 0);
+      let subtotal = qty * rate;
+
+      finalQuantity += qty;
+      finalValue += subtotal;
+
+      let taxAmount = subtotal * (gstRate / 100);
+
+      if (sameState) {
+        finalCGST += taxAmount / 2;
+        finalSGST += taxAmount / 2;
+      } else {
+        finalIGST += taxAmount;
+      }
+    });
+
+    const grandTotalValue = finalValue + finalCGST + finalSGST + finalIGST;
+
+    setGrandTotal({
+      total_quantity: finalQuantity,
+      total_value: finalValue,
+      total_cgst: finalCGST,
+      total_sgst: finalSGST,
+      total_igst: finalIGST,
+      grand_total: grandTotalValue,
+      inWord: inrToWords(grandTotalValue)
+    });
   };
 
   const handleChange = ({
@@ -122,16 +180,14 @@ const CreateInvoice = () => {
       let updatedData = prev.map(item =>
         item.id === id ? { ...item, [key]: value } : item
       );
-      let finalQuantity = 0;
-      let finalValue = 0;
-      updatedData.map(item => {
-        finalQuantity += parseFloat(item.quantity);
-        finalValue += (parseFloat(item.quantity) * parseFloat(item.rate));
-      });
-      setGrandTotal({ total_quantity: finalQuantity, total_value: finalValue, inWord: inrToWords(finalValue) });
+      calculateGrandTotal(updatedData, invoiceDetails.billFrom, invoiceDetails.billTo);
       return updatedData;
     });
   };
+
+  useEffect(() => {
+    calculateGrandTotal(invoiceFields, invoiceDetails.billFrom, invoiceDetails.billTo);
+  }, [invoiceDetails.billFrom, invoiceDetails.billTo, companyData, party]);
 
   const handleSubmitForm = async ({
     invoiceDetails,
@@ -145,7 +201,17 @@ const CreateInvoice = () => {
           { id: Math.floor(Math.random() * 10000000000), sl_no: "", description: "", hsn: "", quantity: 0, rate: 0, total: 0, gst: 0 },
         ]);
         setInvoiceDetails({
-          type: "tax", invoiceNo: invoiceNo, date: moment().format("YYYY-MM-DD"), transporter: "", ewayBill: "", billTo: "", shipTo: "", placeOfSupply: "",
+          type: "tax",
+          invoiceNo: "",
+          date: moment().format("YYYY-MM-DD"),
+          transporter: "",
+          ewayBill: "",
+          billFrom: "",
+          billTo: "",
+          shipTo: "",
+          placeOfSupply: "Kolkata",
+          lorry_no: "",
+          lr_no: ""
         });
       };
       toast(result.message, { theme: "dark" });
@@ -292,7 +358,7 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600 bg-slate-50"
                       type="text"
-                      value={invoiceNo}
+                      value={invoiceDetails.invoiceNo}
                       readOnly
                       required
                     />
@@ -324,7 +390,15 @@ const CreateInvoice = () => {
                   <th className='w-24'>Quantity</th>
                   <th className='w-24'>Rate</th>
                   <th className='w-24'>Subtotal</th>
-                  <th className='w-24'>Tax</th>
+                  <th className='w-24'>Tax (%)</th>
+                  {isSameState ? (
+                    <>
+                      <th className='w-20'>CGST</th>
+                      <th className='w-20'>SGST</th>
+                    </>
+                  ) : (
+                    <th className='w-20'>IGST</th>
+                  )}
                   <th className='w-24'>Grand Total</th>
                   <th className='w-12'>#</th>
                 </tr>
@@ -333,6 +407,13 @@ const CreateInvoice = () => {
                 {
                   invoiceFields && invoiceFields.map((item, index) => {
                     const isLast = index === invoiceFields.length - 1;
+                    const subtotal = parseFloat(item.quantity || 0) * parseFloat(item.rate || 0);
+                    const taxAmount = subtotal * (parseFloat(item.gst || 0) / 100);
+                    const cgst = isSameState ? (taxAmount / 2).toFixed(2) : "0.00";
+                    const sgst = isSameState ? (taxAmount / 2).toFixed(2) : "0.00";
+                    const igst = !isSameState ? taxAmount.toFixed(2) : "0.00";
+                    const grandTotal = subtotal + taxAmount;
+
                     return (
                       <tr key={item.id} className='items-center text-black'>
                         <td className=''>
@@ -387,7 +468,7 @@ const CreateInvoice = () => {
                         <td className=''>
                           <input
                             className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
-                            value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
+                            value={subtotal.toFixed(2)}
                             type='number'
                             readOnly
                           />
@@ -398,12 +479,13 @@ const CreateInvoice = () => {
                               gstData && gstData.length ?
                                 <select
                                   className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
+                                  value={item.gst}
                                   onChange={(e) => { handleChange({ value: e.target.value, id: item.id, key: "gst" }); }}
                                   required
                                 >
                                   <option value="" disabled>Select GST</option>
                                   {gstData?.map((g, i) => (
-                                    <option key={g.id} value={g.total_rate} selected={(i === 0)}>
+                                    <option key={g.id} value={g.total_rate}>
                                       {g.title}
                                     </option>
                                   ))}
@@ -416,10 +498,36 @@ const CreateInvoice = () => {
                             }
                           </div>
                         </td>
+                        {isSameState ? (
+                          <>
+                            <td className=''>
+                              <input
+                                className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
+                                value={cgst}
+                                readOnly
+                              />
+                            </td>
+                            <td className=''>
+                              <input
+                                className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
+                                value={sgst}
+                                readOnly
+                              />
+                            </td>
+                          </>
+                        ) : (
+                          <td className=''>
+                            <input
+                              className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
+                              value={igst}
+                              readOnly
+                            />
+                          </td>
+                        )}
                         <td className=''>
                           <input
                             className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
-                            value={(parseFloat(item.quantity) * parseFloat(item.rate)).toFixed(2)}
+                            value={grandTotal.toFixed(2)}
                             type='number'
                             readOnly
                           />
@@ -502,41 +610,54 @@ const CreateInvoice = () => {
                 <div className='flex flex-col justify-end gap-1 w-full p-1'>
                   <div className='flex justify-between w-full gap-1 font-bold'>
                     <span className=''>Total Quantity</span>
-                    <span className=''>{parseFloat(grandTotal.total_quantity).toFixed()}</span>
+                    <span className=' text-blue-600'>{parseFloat(grandTotal.total_quantity).toFixed()}</span>
                   </div>
                   <hr />
                   <div className='flex justify-between w-full gap-1 font-bold'>
                     <span className=''>Subtotal</span>
-                    <span className=''>{grandTotal.total_value.toLocaleString("en-IN", {
+                    <span className=' text-blue-600'>{grandTotal.total_value.toLocaleString("en-IN", {
                       style: "currency",
                       currency: "INR",
                     })}</span>
                   </div>
                   <hr />
-                  <div className='flex justify-between w-full gap-1'>
-                    <span className=''>SGST</span>
-                    <span className=''>0</span>
-                  </div>
-                  <hr />
-                  <div className='flex justify-between w-full gap-1'>
-                    <span className=''>CGST</span>
-                    <span className=''>0</span>
-                  </div>
-                  <hr />
-                  <div className='flex justify-between w-full gap-1'>
-                    <span className=''>Round-Off</span>
-                    <span className=''>0</span>
-                  </div>
+                  {grandTotal.total_igst > 0 ? (
+                    <div className='flex justify-between w-full gap-1'>
+                      <span className=''>IGST</span>
+                      <span className=''>{grandTotal.total_igst.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                      })}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className='flex justify-between w-full gap-1'>
+                        <span className=''>SGST</span>
+                        <span className=''>{grandTotal.total_sgst.toLocaleString("en-IN", {
+                          style: "currency",
+                          currency: "INR",
+                        })}</span>
+                      </div>
+                      <hr />
+                      <div className='flex justify-between w-full gap-1'>
+                        <span className=''>CGST</span>
+                        <span className=''>{grandTotal.total_cgst.toLocaleString("en-IN", {
+                          style: "currency",
+                          currency: "INR",
+                        })}</span>
+                      </div>
+                    </>
+                  )}
                   <hr />
                   <div className='text-lg flex justify-between w-full gap-1 font-bold'>
-                    <span className=''>Grand Value</span>
-                    <span className=''>{grandTotal.total_value.toLocaleString("en-IN", {
+                    <span className=' text-xl'>Grand Total</span>
+                    <span className=' text-blue-600 text-xl'>{grandTotal.grand_total.toLocaleString("en-IN", {
                       style: "currency",
                       currency: "INR",
                     })}</span>
                   </div>
                   <div className='bg-white flex flex-col justify-between w-full gap-1 text-black p-1 rounded'>
-                    <span className=' font-bold'>In Rupess :</span>
+                    <span className=' font-bold'>In Rupees :</span>
                     <span className=' text-xs italic'>{grandTotal.inWord}</span>
                   </div>
                 </div>
@@ -545,6 +666,13 @@ const CreateInvoice = () => {
           </div>
         </form>
       </div>
+      <Alert
+        open={alart.show}
+        type={alart.type}
+        title={alart.title}
+        message={alart.message}
+        onClose={() => setAlart({ ...alart, show: false })}
+      />
     </>
   )
 }

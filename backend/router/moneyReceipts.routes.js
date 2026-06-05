@@ -24,6 +24,12 @@ router.post(
     MoneyReceiptController.createMoneyReceipt
 );
 
+router.put(
+    "/update-money-receipt",
+    middleware.isAuthenticated,
+    MoneyReceiptController.updateMoneyReceipt
+);
+
 router.get(
     "/get-money-receipt",
     middleware.isAuthenticated,

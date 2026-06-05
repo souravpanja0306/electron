@@ -62,11 +62,12 @@ exports.generateInvoiceNo = async (req, res) => {
 exports.createInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
-        const { t_userId, t_mobile, t_username, t_name, company, type, invoiceNo,
+        const { t_userId, t_mobile, t_username, t_name, company_id, type, invoiceNo,
             date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, gst
         } = req.body;
 
         if (!billTo) return errorHandler(res, 400, "Please select Party.");
+        if (!company_id) return errorHandler(res, 400, "Please select Company.");
 
         let search_key = {};
         if (invoiceNo) search_key["invoice_no"] = invoiceNo;
@@ -74,30 +75,42 @@ exports.createInvoice = async (req, res) => {
         let isInvoiceNumberExist = await InvoiceService.findInvoices(search_key);
         if (isInvoiceNumberExist.length) return errorHandler(res, 409, "Invoice Number Already Exists.");
 
+        // Fetch company and party to get states for tax calculation
+        let partyResult = await PartyService.getParty({ id: billTo });
+        let companyResult = await CompanyService.getCompany({ id: company_id });
+
+        let partyState = partyResult.length ? (partyResult[0].state || "").toLowerCase().trim() : "";
+        let companyState = companyResult.length ? (companyResult[0].state || "").toLowerCase().trim() : "";
+
         let totalQty = 0;
         let totalValue = 0;
         let totalSGST = 0;
         let totalCGST = 0;
         let totalIGST = 0;
-        let totalRoundOff = 0;
-        let totalDiscoount = 0;
-        let totalAdvance = 0;
-        let grandTotal = 0;
 
         if (data.length) {
             for (let item of data) {
-                totalQty += parseInt(item.quantity);
-                totalValue += (item.quantity * item.rate);
-                // totalSGST +=
-                //     totalCGST +=
-                //     totalIGST +=
-                //     totalRoundOff +=
-                //     totalDiscoount +=
-                //     totalAdvance +=
+                let qty = parseFloat(item.quantity || 0);
+                let rate = parseFloat(item.rate || 0);
+                let gstRate = parseFloat(item.gst || 0);
+                let subtotal = qty * rate;
+
+                totalQty += qty;
+                totalValue += subtotal;
+
+                let taxAmount = subtotal * (gstRate / 100);
+
+                if (partyState === companyState) {
+                    totalCGST += taxAmount / 2;
+                    totalSGST += taxAmount / 2;
+                } else {
+                    totalIGST += taxAmount;
+                }
             };
         };
 
         let finalData = {
+            company_id: company_id,
             type: type,
             invoice_no: invoiceNo,
             invoice_date: date,
@@ -107,6 +120,9 @@ exports.createInvoice = async (req, res) => {
             created_by: t_userId,
             total_amount: totalValue,
             total_quantity: totalQty,
+            total_cgst: totalCGST,
+            total_sgst: totalSGST,
+            total_igst: totalIGST,
             placeOfSupply: placeOfSupply,
             data: JSON.stringify(data)
         };
@@ -140,8 +156,10 @@ exports.getAllInvoice = async (req, res) => {
             for (let item of result) {
 
                 let billTo = await PartyService.getParty({ id: item.party_id });
+                let company = await CompanyService.getCompany({ id: item.company_id });
                 let newData = {
                     id: item.id ? item.id : "",
+                    company_id: company.length ? company[0] : "",
                     type: item.type ? item.type : "",
                     invoice_no: item.invoice_no ? item.invoice_no : "",
                     eway_bill: item.eway_bill ? item.eway_bill : "",
@@ -155,6 +173,8 @@ exports.getAllInvoice = async (req, res) => {
                     total_sgst: item.total_sgst ? item.total_sgst : "",
                     total_cgst: item.total_cgst ? item.total_cgst : "",
                     total_igst: item.total_igst ? item.total_igst : "",
+                    lorry_no: item.lorry_no ? item.lorry_no : "",
+                    lr_no: item.lr_no ? item.lr_no : "",
                     created_by: item.created_by ? item.created_by : "",
                     created_at: item.created_at ? item.created_at : "",
                     is_active: item.is_active ? item.is_active : "",
@@ -231,7 +251,75 @@ exports.invoiceExports = async (req, res) => {
 exports.invoiceUpdate = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
+        const { id, company_id, type, invoice_no, invoice_date, transporter, eway_bill, party_id, placeOfSupply, data } = req.body;
 
+        if (!id) return errorHandler(res, 400, "Invoice ID is required.");
+        if (!party_id) return errorHandler(res, 400, "Please select Party.");
+        if (!company_id) return errorHandler(res, 400, "Please select Company.");
+
+        let items = typeof data === 'string' ? JSON.parse(data) : data;
+
+        // Fetch company and party to get states for tax calculation
+        let partyResult = await PartyService.getParty({ id: party_id });
+        let companyResult = await CompanyService.getCompany({ id: company_id });
+
+        let partyState = partyResult.length ? (partyResult[0].state || "").toLowerCase().trim() : "";
+        let companyState = companyResult.length ? (companyResult[0].state || "").toLowerCase().trim() : "";
+
+        let totalQty = 0;
+        let totalValue = 0;
+        let totalSGST = 0;
+        let totalCGST = 0;
+        let totalIGST = 0;
+
+        if (items && items.length) {
+            for (let item of items) {
+                let qty = parseFloat(item.quantity || 0);
+                let rate = parseFloat(item.rate || 0);
+                let gstRate = parseFloat(item.gst || 0);
+                let subtotal = qty * rate;
+
+                totalQty += qty;
+                totalValue += subtotal;
+
+                let taxAmount = subtotal * (gstRate / 100);
+
+                if (partyState === companyState) {
+                    totalCGST += taxAmount / 2;
+                    totalSGST += taxAmount / 2;
+                } else {
+                    totalIGST += taxAmount;
+                }
+            };
+        };
+
+        let updateData = {
+            company_id: company_id,
+            type: type,
+            invoice_no: invoice_no,
+            invoice_date: invoice_date,
+            transporter: transporter,
+            eway_bill: eway_bill,
+            party_id: party_id,
+            total_amount: totalValue,
+            total_quantity: totalQty,
+            total_cgst: totalCGST,
+            total_sgst: totalSGST,
+            total_igst: totalIGST,
+            placeOfSupply: placeOfSupply,
+            data: JSON.stringify(items)
+        };
+
+        let result = await InvoiceService.updateInvoiceData(id, updateData);
+
+        if (result.changes) {
+            response.status = 200;
+            response.message = "Data updated successfully.";
+            response.body = result;
+        } else {
+            response.status = 202;
+            response.message = "No changes made or invoice not found.";
+        }
     } catch (error) {
         console.log(`Something went wrong: controller: invoiceUpdate: ${error}`);
         response.status = error.status ? error.status : 500;

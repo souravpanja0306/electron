@@ -9,7 +9,6 @@ import MainArea from '../components/MainArea';
 import CustomButton from '../components/CustomButton';
 import CustomLoader from "../components/CustomLoader";
 import Alert from '../components/Alert';
-import CreateCompany from './CreateCompany';
 
 // Store...
 import useAuthStore from '../store/AuthStore';

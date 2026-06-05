@@ -85,3 +85,17 @@ module.exports.deleteInvoices = async ({
         console.log(error);
     };
 };
+
+exports.updateInvoiceData = async (id, data) => {
+    try {
+        db.exec(require("../database/schema/invoice.schema"));
+        const keys = Object.keys(data);
+        const setClause = keys.map(k => `${k} = @${k}`).join(", ");
+        const result = db
+            .prepare(`UPDATE invoice SET ${setClause} WHERE id = @id`)
+            .run({ ...data, id });
+        return result;
+    } catch (error) {
+        console.log(error);
+    };
+};

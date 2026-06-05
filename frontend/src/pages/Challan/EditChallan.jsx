@@ -17,7 +17,8 @@ import {
     AiOutlinePrinter,
     AiOutlineTable,
     AiOutlineRollback,
-    AiOutlineSave
+    AiOutlineSave,
+    AiOutlineDelete
 } from "react-icons/ai";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -201,6 +202,9 @@ const EditChallan = () => {
                     </Link>
                     <div onClick={handlePrint}>
                         <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
+                    </div>
+                    <div>
+                        <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                     </div>
                 </ActionArea>
 

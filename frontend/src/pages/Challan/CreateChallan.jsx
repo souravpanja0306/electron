@@ -423,6 +423,46 @@ const CreateChallan = () => {
                     placeholder="Truck No"
                   />
                 </div>
+                <div className='flex items-center justify-between w-full gap-1'>
+                  <label className='text-xs w-[20%]'>Container Number</label>
+                  <input
+                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="number"
+                    name="way_bill_no"
+                    onChange={handleChange}
+                    placeholder="Container Number"
+                  />
+                </div>
+                <div className='flex items-center justify-between w-full gap-1'>
+                  <label className='text-xs w-[20%]'>CHA</label>
+                  <input
+                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="number"
+                    name="way_bill_no"
+                    onChange={handleChange}
+                    placeholder="CHA"
+                  />
+                </div>
+                <div className='flex items-center justify-between w-full gap-1'>
+                  <label className='text-xs w-[20%]'>Booking Number</label>
+                  <input
+                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="number"
+                    name="way_bill_no"
+                    onChange={handleChange}
+                    placeholder="Booking Number"
+                  />
+                </div>
+                <div className='flex items-center justify-between w-full gap-1'>
+                  <label className='text-xs w-[20%]'>Way Bill Date</label>
+                  <input
+                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="number"
+                    name="way_bill_no"
+                    onChange={handleChange}
+                    placeholder="Way Bill Date"
+                  />
+                </div>
               </div>
             </MainArea>
           </div>

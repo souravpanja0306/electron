@@ -320,6 +320,51 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
+module.exports.updateMoneyReceipt = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { id, company_id, party_id, receipt_no, receipt_date, data, remarks } = req.body;
+
+        if (!id) return errorHandler(res, 400, "Money Receipt ID is required.");
+        if (!party_id) return errorHandler(res, 400, "Please select Party.");
+
+        let items = typeof data === 'string' ? JSON.parse(data) : data;
+        let totalValue = 0;
+        if (items && items.length) {
+            for (let item of items) {
+                totalValue += parseFloat(item.amount || 0);
+            };
+        };
+
+        let updateData = {
+            company_id: company_id,
+            party_id: party_id,
+            receipt_no: receipt_no,
+            receipt_date: receipt_date,
+            data: JSON.stringify(items),
+            remarks: remarks,
+            total_value: (totalValue).toFixed(2)
+        };
+
+        let result = await MoneyReceiptService.updateMoneyReceiptData(id, updateData);
+
+        if (result.changes) {
+            response.status = 200;
+            response.message = "Money Receipt Updated Successfully.";
+            response.body = result;
+        } else {
+            response.status = 202;
+            response.message = "No changes made or Money Receipt not found.";
+        }
+    } catch (error) {
+        console.log(`Something went wrong: controller: updateMoneyReceipt: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: updateMoneyReceipt`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.status(response.status).json(response);
+};
+
 module.exports.deleteMoneyReceipt = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {

@@ -29,6 +29,7 @@ import Error from './pages/Error';
 import Creditors from './pages/Reports/Creditors';
 import CreateMoneyReceipts from './pages/Receipts/MoneyReceipts';
 import ViewMoneyReceipts from './pages/Receipts/ViewMoneyReceipts';
+import EditMoneyReceipts from './pages/Receipts/EditMoneyReceipts';
 import CreateHsnSac from './pages/Master/HsnMaster/CreateHsnSac';
 import ViewHsnSac from './pages/Master/HsnMaster/ViewHsnSac';
 import CreateGst from './pages/Master/GstMaster/CreateGst';
@@ -41,6 +42,8 @@ import CompanyEdit from './pages/Master/CompanyMaster/CompanyEdit';
 import PartyEdit from './pages/Master/PartyMaster/PartyEdit';
 
 import { Middleware } from './middleware/middleware';
+import Documentation from './pages/Documentation';
+import ContactUs from './pages/ContactUs';
 
 const router = createHashRouter([
   { path: "/*", element: <Error /> },
@@ -51,6 +54,7 @@ const router = createHashRouter([
   { path: "/create-creditors", element: <Middleware><Layout><CreateInvoice /></Layout></Middleware> },
   { path: "/create-moeny-receipts", element: <Middleware><Layout><CreateMoneyReceipts /></Layout></Middleware> },
   { path: "/view-money-receipts", element: <Middleware><Layout><ViewMoneyReceipts /></Layout></Middleware> },
+  { path: "/view-money-receipt/details", element: <Middleware><Layout><EditMoneyReceipts /></Layout></Middleware> },
   { path: "/view-all-creditors", element: <Middleware><Layout><ViewInvoice /></Layout></Middleware> },
   { path: "/dashboard", element: <Middleware><Layout><Dashboard /></Layout></Middleware> },
   { path: "/sales-reports", element: <Middleware><Layout><SalesReport /></Layout></Middleware> },
@@ -65,7 +69,10 @@ const router = createHashRouter([
   { path: "/edit-party/:id", element: <Middleware><Layout><PartyEdit /></Layout></Middleware> },
   { path: "/add-product", element: <Middleware><Layout><ProductMaster /></Layout></Middleware> },
   { path: "/product", element: <Middleware><Layout><Product /></Layout></Middleware> },
+
   { path: "/about", element: <Middleware><Layout><About /></Layout></Middleware> },
+  { path: "/documentation", element: <Middleware><Layout><Documentation /></Layout></Middleware> },
+  { path: "/contact-us", element: <Middleware><Layout><ContactUs /></Layout></Middleware> },
   { path: "/settings", element: <Middleware><Layout><Setting /></Layout></Middleware> },
 
   // Add Company

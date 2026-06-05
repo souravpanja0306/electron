@@ -75,3 +75,17 @@ module.exports.deleteMoneyReceipt = async ({
         return { success: false, deleted: "" }
     };
 };
+
+exports.updateMoneyReceiptData = async (id, data) => {
+    try {
+        db.exec(require("../database/schema/moneyReceipts.schema"));
+        const keys = Object.keys(data);
+        const setClause = keys.map(k => `${k} = @${k}`).join(", ");
+        const result = db
+            .prepare(`UPDATE money_receipts SET ${setClause} WHERE id = @id`)
+            .run({ ...data, id });
+        return result;
+    } catch (error) {
+        console.log(error);
+    };
+};

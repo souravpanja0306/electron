@@ -8,12 +8,12 @@ const useInvoiceStore = create((set) => ({
     invoiceLoading: false,
     invoiceNo: "",
 
-    generateInvoiceNo: async (token) => {
+    generateInvoiceNo: async ({ token, types }) => {
         try {
             set({ invoiceLoading: true });
             let result = await axios.request({
                 method: 'get',
-                url: `${baseURL.invoice}generate-invoice-no?types=invoice`,
+                url: `${baseURL.invoice}generate-invoice-no?types=${types}`,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -21,9 +21,10 @@ const useInvoiceStore = create((set) => ({
                 validateStatus: (status) => status < 500,
             });
             if (result.data.status === 200) {
-                set({ invoiceNo: result.data.body, invoiceLoading: false });
-                return result.data;
+                set({ invoiceNo: result.data.body });
             };
+            set({ invoiceLoading: false });
+            return result.data;
         } catch (error) {
             set({ invoiceLoading: false });
             throw error;
@@ -94,6 +95,27 @@ const useInvoiceStore = create((set) => ({
                 validateStatus: (status) => status < 500,
             });
             set((state) => ({ invoiceLoading: false }));
+            return result.data;
+        } catch (error) {
+            set({ invoiceLoading: false });
+            throw error;
+        };
+    },
+
+    updateInvoice: async (id, payload, token) => {
+        try {
+            set({ invoiceLoading: true });
+            let result = await axios.request({
+                method: 'put',
+                url: `${baseURL.invoice}invoice-update`,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                data: JSON.stringify({ ...payload, id }),
+                validateStatus: (status) => status < 500,
+            });
+            set({ invoiceLoading: false });
             return result.data;
         } catch (error) {
             set({ invoiceLoading: false });
