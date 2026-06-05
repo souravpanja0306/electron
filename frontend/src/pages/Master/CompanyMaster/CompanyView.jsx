@@ -31,9 +31,12 @@ const ViewCompany = () => {
     const [checkedIds, setCheckedIds] = useState([]);
 
     useEffect(() => {
-        authToken();
-        getAllCompany(token);
-    }, []);
+        if (token) {
+            getAllCompany(token);
+        } else {
+            authToken();
+        }
+    }, [token]);
 
     const handleChecked = (e, id) => {
         if (e.target.checked) {
@@ -194,7 +197,7 @@ const ViewCompany = () => {
                                     <>
                                         {
                                             <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                                <td className="p-1 text-center" colSpan={10}>No Data Found</td>
+                                                <td className="p-1 text-center" colSpan={10}>No Company Found</td>
                                             </tr>
                                         }
                                     </>
@@ -204,7 +207,7 @@ const ViewCompany = () => {
                 </MainArea>
 
                 <MainArea>
-                    <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
+                    <div className="w-full flex justify-between items-center text-sm">
                         <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
                         <div className="flex items-center gap-1">
                             <button

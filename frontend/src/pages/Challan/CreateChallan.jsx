@@ -56,8 +56,6 @@ const CreateChallan = () => {
 
   const [data, setData] = useState([
     { id: Math.floor(Math.random() * 10000000000), packages: "", description: "", weight: "", amount: "" },
-    { id: Math.floor(Math.random() * 10000000000), packages: "", description: "", weight: "", amount: "" },
-    { id: Math.floor(Math.random() * 10000000000), packages: "", description: "", weight: "", amount: "" },
   ]);
 
   const [form, setForm] = useState({
@@ -72,6 +70,9 @@ const CreateChallan = () => {
     to_loc: "",
     truck_no: "",
     way_bill_no: "",
+    way_bill_date: "",
+    container: "",
+    booking_number: "",
     note: "",
     total_amount: 0,
     data: data,
@@ -414,6 +415,16 @@ const CreateChallan = () => {
                   />
                 </div>
                 <div className='flex items-center justify-between w-full gap-1'>
+                  <label className='text-xs w-[20%]'>Way Bill Date</label>
+                  <input
+                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                    type="date"
+                    name="way_bill_date"
+                    onChange={handleChange}
+                    placeholder="Way Bill Date"
+                  />
+                </div>
+                <div className='flex items-center justify-between w-full gap-1'>
                   <label className='text-xs w-[20%]'>Truck No</label>
                   <input
                     className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
@@ -423,22 +434,30 @@ const CreateChallan = () => {
                     placeholder="Truck No"
                   />
                 </div>
+              </div>
+            </MainArea>
+          </div>
+
+          <div className='flex flex-col gap-1'>
+            <PageTitle>Additional Remarks</PageTitle>
+            <MainArea>
+              <div className='grid gap-2 w-full p-1'>
                 <div className='flex items-center justify-between w-full gap-1'>
-                  <label className='text-xs w-[20%]'>Container Number</label>
+                  <label className='text-xs w-[20%]'>Container</label>
                   <input
                     className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    type="number"
-                    name="way_bill_no"
+                    type="text"
+                    name="container"
                     onChange={handleChange}
-                    placeholder="Container Number"
+                    placeholder="Container"
                   />
                 </div>
                 <div className='flex items-center justify-between w-full gap-1'>
                   <label className='text-xs w-[20%]'>CHA</label>
                   <input
                     className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    type="number"
-                    name="way_bill_no"
+                    type="text"
+                    name="cha"
                     onChange={handleChange}
                     placeholder="CHA"
                   />
@@ -447,43 +466,28 @@ const CreateChallan = () => {
                   <label className='text-xs w-[20%]'>Booking Number</label>
                   <input
                     className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    type="number"
-                    name="way_bill_no"
+                    type="text"
+                    name="booking_number"
                     onChange={handleChange}
                     placeholder="Booking Number"
                   />
                 </div>
                 <div className='flex items-center justify-between w-full gap-1'>
-                  <label className='text-xs w-[20%]'>Way Bill Date</label>
-                  <input
-                    className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    type="number"
-                    name="way_bill_no"
+                  <label className='text-xs w-[20%]'>Additonal Note</label>
+                  <textarea
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                    name="note"
+                    rows="4"
                     onChange={handleChange}
-                    placeholder="Way Bill Date"
+                    placeholder="Note"
                   />
                 </div>
               </div>
             </MainArea>
           </div>
+        </div >
 
-          <div className='flex flex-col gap-1'>
-            <PageTitle>Additional Remarks</PageTitle>
-            <MainArea>
-              <div className='flex flex-col w-full gap-1 p-1'>
-                <textarea
-                  className="p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                  name="note"
-                  rows="2"
-                  onChange={handleChange}
-                  placeholder="Note"
-                />
-              </div>
-            </MainArea>
-          </div>
-        </div>
-
-      </div>
+      </div >
       <Alert
         open={alart.show}
         type={alart.type}

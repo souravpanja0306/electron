@@ -13,6 +13,10 @@ module.exports = `
       
       invoice_no TEXT,
       way_bill_no TEXT,
+      way_bill_date TEXT,
+      container TEXT,
+      cha TEXT,
+      booking_number TEXT,
       truck_no TEXT,
       note TEXT,
       

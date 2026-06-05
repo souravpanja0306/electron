@@ -19,10 +19,14 @@ const errorHandler = (res, status, message) => {
 module.exports.printMoneyReceipt = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
+        const { t_userId } = req.body;
         const { id } = req.query;
         if (!id) return errorHandler(res, 400, "Money Receipt ID is required.");
 
-        let result = await MoneyReceiptService.findMoneyReceipts({ id });
+        let search_key = { id };
+        if (t_userId) search_key["created_by"] = t_userId.toString();
+
+        let result = await MoneyReceiptService.findMoneyReceipts(search_key);
         if (!result.length) return errorHandler(res, 404, "Money Receipt not found.");
         let receipt = result[0];
 
@@ -323,10 +327,17 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
 module.exports.updateMoneyReceipt = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
+        const { t_userId } = req.body;
         const { id, company_id, party_id, receipt_no, receipt_date, data, remarks } = req.body;
 
         if (!id) return errorHandler(res, 400, "Money Receipt ID is required.");
         if (!party_id) return errorHandler(res, 400, "Please select Party.");
+
+        let search_key = { id };
+        if (t_userId) search_key["created_by"] = t_userId.toString();
+
+        let checkReceipt = await MoneyReceiptService.findMoneyReceipts(search_key);
+        if (!checkReceipt.length) return errorHandler(res, 404, "Money Receipt not found.");
 
         let items = typeof data === 'string' ? JSON.parse(data) : data;
         let totalValue = 0;

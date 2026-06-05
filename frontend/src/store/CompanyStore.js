@@ -50,6 +50,8 @@ const useCompanyStore = create((set) => ({
             });
             if (result.data.status === 200) {
                 set({ companyData: result.data.body, companyLoading: false });
+            } else {
+                set({ companyData: [], companyLoading: false });
             };
             return result.data;
         } catch (error) {

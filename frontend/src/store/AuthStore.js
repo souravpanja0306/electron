@@ -52,7 +52,6 @@ const useAuthStore = create((set, get) => ({
         try {
             set({ signinLoading: true });
             const result = await signinUser(payload);
-            console.log("🚀 ~ result:", result)
             set({ signinData: result, signinLoading: false, token: result?.body?.token });
             return result;
         } catch (error) {

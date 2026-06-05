@@ -46,7 +46,6 @@ import Documentation from './pages/Documentation';
 import ContactUs from './pages/ContactUs';
 
 const router = createHashRouter([
-  { path: "/*", element: <Error /> },
   { path: "/", element: <Middleware><Layout><Home /></Layout></Middleware> },
   { path: "/create-invoice", element: <Middleware><Layout><CreateInvoice /></Layout></Middleware> },
   { path: "/view-invoice", element: <Middleware><Layout><ViewInvoice /></Layout></Middleware> },
@@ -102,6 +101,7 @@ const router = createHashRouter([
   { path: "/signup", element: <Signup /> },
   { path: "/change-password", element: <Middleware><Layout><ChangePassword /></Layout></Middleware> },
   { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/*", element: <Error /> },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

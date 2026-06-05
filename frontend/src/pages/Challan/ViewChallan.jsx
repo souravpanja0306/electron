@@ -212,7 +212,7 @@ const ViewChallan = () => {
                                 <>
                                     {
                                         <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                            <td className="p-1 text-center text-slate-500" colSpan={9}>No Data Found</td>
+                                            <td className="p-1 text-center text-slate-500" colSpan={11}>No Data Found</td>
                                         </tr>
                                     }
                                 </>

@@ -26,7 +26,7 @@ import Header from "./Header";
 const Layout = ({ children }) => {
     const navigate = useNavigate();
     const currentMenuValue = localStorage.getItem("currentMenu") ? localStorage.getItem("currentMenu") : "home";
-    const [subMenu, setSubMenu] = useState({ index: null, active: false })
+    const [openMenuIndex, setOpenMenuIndex] = useState(null);
     const [currentMenu, setCurrentMenu] = useState(MenuMap[currentMenuValue]);
     const [activeMenu, setActiveManu] = useState(currentMenuValue);
     const [sideBar, setSideBar] = useState(true);
@@ -51,12 +51,12 @@ const Layout = ({ children }) => {
             setActiveManu(menu);
             setCurrentMenu(MenuMap[menu] || []);
             localStorage.setItem("currentMenu", menu);
-            setSubMenu({ index: 0, active: true });
+            setOpenMenuIndex(null);
         };
     };
 
-    const changeSubMenu = (index) => {
-        setSubMenu({ index: index, active: subMenu.index !== index ? true : !subMenu.active })
+    const toggleSubMenu = (index) => {
+        setOpenMenuIndex(openMenuIndex === index ? null : index);
     };
 
     const handleSignOut = (e) => {
@@ -140,8 +140,8 @@ const Layout = ({ children }) => {
                                 ? (
                                     <div key={index} className="mb-1">
                                         <div
-                                            onClick={() => changeSubMenu(index)}
-                                            className={`text-[13px] w-full px-4 py-2 flex justify-between items-center cursor-pointer transition-colors ${subMenu.index === index && subMenu.active
+                                            onClick={() => toggleSubMenu(index)}
+                                            className={`text-[13px] w-full px-4 py-2 flex justify-between items-center cursor-pointer transition-colors ${openMenuIndex === index
                                                 ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
                                                 : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
                                                 }`}
@@ -150,11 +150,11 @@ const Layout = ({ children }) => {
                                                 <span className="opacity-70">{item.icon}</span>
                                                 <span>{item.title}</span>
                                             </div>
-                                            <span className="text-[10px] opacity-50 transition-transform duration-300" style={{ transform: subMenu.index === index && subMenu.active ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                                            <span className="text-[10px] opacity-50 transition-transform duration-300" style={{ transform: openMenuIndex === index ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                                                 <AiOutlineDownSquare size={14} />
                                             </span>
                                         </div>
-                                        <div className={`overflow-hidden transition-all duration-300 ${subMenu.index === index && subMenu.active ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"}`}>
+                                        <div className={`overflow-hidden transition-all duration-300 ${openMenuIndex === index ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0"}`}>
                                             {item?.submenu?.map((sub, i) => (
                                                 <NavLink
                                                     key={i}

@@ -5,8 +5,16 @@ const { app } = require("electron");
 
 const connectMongo = async () => {
     try {
-        // await mongoose.connect("");
-        console.log("MongoDB Connected");
+        if (process.env.MONGODB_URI) {
+            try {
+                await mongoose.connect(process.env.MONGODB_URI);
+                console.log("MongoDB Connected Successfully...");
+            } catch (error) {
+                console.error(error);
+            };
+        } else {
+            console.log("MONGODB_URI not found in environment variables. MongoDB connection skipped.");
+        };
     } catch (error) {
         console.error("MongoDB Connection Failed:", error);
     };

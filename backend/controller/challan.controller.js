@@ -13,10 +13,14 @@ const errorHandler = (res, status, message) => {
 exports.generateChallanPdf = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
+        const { t_userId } = req.body;
         const { id } = req.query;
         if (!id) return errorHandler(res, 400, "Challan ID is required.");
 
-        let challans = await ChallanService.findChallans({ id });
+        let search_key = { id };
+        if (t_userId) search_key["created_by"] = t_userId;
+
+        let challans = await ChallanService.findChallans(search_key);
         if (!challans.length) return errorHandler(res, 404, "Challan not found.");
         let challan = challans[0];
 
@@ -50,7 +54,7 @@ exports.createChallan = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId, company_id, consignor_id, consignee_id, cn_no, date, from_loc, to_loc,
-            invoice_no, way_bill_no, truck_no, note, data
+            invoice_no, way_bill_no, way_bill_date, container, cha, booking_number, truck_no, note, data
         } = req.body;
 
         if (!consignor_id || !consignee_id) return errorHandler(res, 400, "Consignor and Consignee are required.");
@@ -70,6 +74,10 @@ exports.createChallan = async (req, res) => {
             to_loc,
             invoice_no,
             way_bill_no,
+            way_bill_date,
+            container,
+            cha,
+            booking_number,
             truck_no,
             note,
             total_amount: req.body.total_amount || 0,
@@ -98,8 +106,7 @@ exports.getAllChallans = async (req, res) => {
 
         let search_key = {};
         if (id) search_key["id"] = id;
-        // Optional: filter by user if required, usually admin can see all
-        // if (t_userId) search_key["created_by"] = t_userId.toString();
+        if (t_userId) search_key["created_by"] = t_userId.toString();
 
         let result = await ChallanService.findChallans(search_key);
         if (result.length) {
@@ -120,6 +127,10 @@ exports.getAllChallans = async (req, res) => {
                     to_loc: item.to_loc || "--",
                     invoice_no: item.invoice_no || "--",
                     way_bill_no: item.way_bill_no || "--",
+                    way_bill_date: item.way_bill_date || "--",
+                    container: item.container || "--",
+                    cha: item.cha || "--",
+                    booking_number: item.booking_number || "--",
                     truck_no: item.truck_no || "--",
                     note: item.note || "--",
                     total_amount: item.total_amount || 0,
@@ -150,7 +161,15 @@ exports.getAllChallans = async (req, res) => {
 exports.deleteChallan = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
+        const { t_userId } = req.body;
         const { id } = req.params;
+
+        let search_key = { id };
+        if (t_userId) search_key["created_by"] = t_userId.toString();
+
+        let checkChallan = await ChallanService.findChallans(search_key);
+        if (!checkChallan.length) return errorHandler(res, 404, "Challan not found.");
+
         let result = await ChallanService.deleteChallan({ id });
         if (result.deleted) {
             response.status = 200;
@@ -170,12 +189,19 @@ exports.deleteChallan = async (req, res) => {
 exports.updateChallan = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
+        const { t_userId } = req.body;
         const { id } = req.params;
         const { company_id, consignor_id, consignee_id, cn_no, date, from_loc, to_loc,
-            invoice_no, way_bill_no, truck_no, note, data, total_amount
+            invoice_no, way_bill_no, way_bill_date, container, cha, booking_number, truck_no, note, data, total_amount
         } = req.body;
 
         if (!consignor_id || !consignee_id) return errorHandler(res, 400, "Consignor and Consignee are required.");
+
+        let search_key = { id };
+        if (t_userId) search_key["created_by"] = t_userId.toString();
+
+        let checkChallan = await ChallanService.findChallans(search_key);
+        if (!checkChallan.length) return errorHandler(res, 404, "Challan not found.");
 
         let finalData = {
             company_id,
@@ -187,6 +213,10 @@ exports.updateChallan = async (req, res) => {
             to_loc,
             invoice_no,
             way_bill_no,
+            way_bill_date,
+            container,
+            cha,
+            booking_number,
             truck_no,
             note,
             total_amount: total_amount || 0,

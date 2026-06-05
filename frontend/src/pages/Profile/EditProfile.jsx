@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import PageTitle from '../../components/PageTitle';
-import MainArea from '../../components/MainArea';
-import CustomButton from '../../components/CustomButton';
 import useAuthStore from '../../store/AuthStore';
 import { AiOutlineSave, AiOutlineRollback } from "react-icons/ai";
+
+// Components...
+import PageTitle from '../../components/PageTitle';
+import ActionArea from '../../components/ActionArea';
+import MainArea from '../../components/MainArea';
+import CustomButton from '../../components/CustomButton';
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -79,20 +82,18 @@ const EditProfile = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center pr-4">
-        <PageTitle>Update Profile</PageTitle>
-        <div className="flex gap-2">
+      <PageTitle>Update Profile</PageTitle>
+      <div className='flex flex-col gap-1'>
+        <ActionArea>
           <div onClick={() => navigate(-1)}>
             <CustomButton title="Back" color="slate"><AiOutlineRollback /></CustomButton>
           </div>
           <div onClick={handleSubmit}>
             <CustomButton title="Save Changes" color="blue"><AiOutlineSave /></CustomButton>
           </div>
-        </div>
-      </div>
+        </ActionArea>
 
-      <div className="p-4 max-w-5xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className='flex flex-col gap-1'>
           <MainArea>
             <div className="p-4 w-full">
               <h3 className="text-lg font-semibold mb-4 border-b pb-2">Personal Information</h3>
@@ -104,7 +105,7 @@ const EditProfile = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Full Name"
                     required
                   />
@@ -116,7 +117,7 @@ const EditProfile = () => {
                     name="mobile"
                     value={formData.mobile}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Mobile Number"
                     required
                   />
@@ -128,7 +129,7 @@ const EditProfile = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Email Address"
                     required
                   />
@@ -148,7 +149,7 @@ const EditProfile = () => {
                     name="gst"
                     value={formData.gst}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="GST Number"
                   />
                 </div>
@@ -159,18 +160,18 @@ const EditProfile = () => {
                     name="pan"
                     value={formData.pan}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="PAN Number"
                   />
                 </div>
-                <div className="flex flex-col gap-1 md:col-span-2">
+                <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold">Trade License</label>
                   <input
                     type="text"
                     name="trade_licence"
                     value={formData.trade_licence}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Trade License"
                   />
                 </div>
@@ -181,7 +182,7 @@ const EditProfile = () => {
                     name="address_1"
                     value={formData.address_1}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Address Line 1"
                   />
                 </div>
@@ -192,7 +193,7 @@ const EditProfile = () => {
                     name="address_2"
                     value={formData.address_2}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Address Line 2"
                   />
                 </div>
@@ -203,7 +204,7 @@ const EditProfile = () => {
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="City"
                   />
                 </div>
@@ -214,7 +215,7 @@ const EditProfile = () => {
                     name="pincode"
                     value={formData.pincode}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Pincode"
                   />
                 </div>
@@ -233,7 +234,7 @@ const EditProfile = () => {
                     name="bank"
                     value={formData.bank}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Bank Name"
                   />
                 </div>
@@ -244,7 +245,7 @@ const EditProfile = () => {
                     name="account_no"
                     value={formData.account_no}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Account Number"
                   />
                 </div>
@@ -255,7 +256,7 @@ const EditProfile = () => {
                     name="ifse"
                     value={formData.ifse}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="IFSC Code"
                   />
                 </div>
@@ -266,7 +267,7 @@ const EditProfile = () => {
                     name="branch"
                     value={formData.branch}
                     onChange={handleChange}
-                    className="h-9 px-2 rounded border border-slate-300 dark:border-slate-600 bg-transparent outline-none focus:border-blue-500"
+                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     placeholder="Branch Name"
                   />
                 </div>

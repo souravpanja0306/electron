@@ -332,10 +332,14 @@ exports.invoiceUpdate = async (req, res) => {
 exports.generateInvoicePdf = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
+        const { t_userId } = req.body;
         const { id } = req.query;
         if (!id) return errorHandler(res, 400, "Invoice ID is required.");
 
-        let result = await InvoiceService.findInvoices({ id });
+        let search_key = { id };
+        if (t_userId) search_key["created_by"] = t_userId.toString();
+
+        let result = await InvoiceService.findInvoices(search_key);
         if (!result.length) return errorHandler(res, 404, "Invoice not found.");
         let invoice = result[0];
 

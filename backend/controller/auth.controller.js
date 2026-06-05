@@ -14,6 +14,9 @@ const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
 const LicenseService = require("../service/license.service");
 
+// MongoDB Models...
+const UserModel = require("../database/model/user.model");
+
 const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
@@ -55,6 +58,19 @@ exports.signup = async (req, res) => {
         };
         let result = await UserService.insertUsers(newData);
         if (result) {
+            // Track signup in MongoDB
+            try {
+                const mongoUser = new UserModel({
+                    name: name,
+                    mobile: mobile,
+                    email: email,
+                    username: username,
+                    machine_id: machineId
+                });
+                await mongoUser.save();
+            } catch (mongoError) {
+                console.error("Failed to track user in MongoDB:", mongoError);
+            };
 
             // Create FREE 1 year license
             const startDate = new Date();
@@ -111,6 +127,17 @@ exports.signin = async (req, res) => {
             username: username,
         });
         if (getUserDetails.length) {
+            // Update last activity in MongoDB
+            try {
+                await UserModel.findOneAndUpdate(
+                    { username: username },
+                    { last_activity: new Date() },
+                    { upsert: true } // In case the user exists in SQLite but not yet in MongoDB
+                );
+            } catch (mongoError) {
+                console.error("Failed to update last activity in MongoDB:", mongoError);
+            }
+
             let tokenData = {
                 TOKEN_UID: getUserDetails[0].id,
                 TOKEN_MOBILE: getUserDetails[0].mobile,

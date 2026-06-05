@@ -17,8 +17,9 @@ const errorHandler = (res, status, message) => {
 exports.debtors = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
+        const { t_userId } = req.body;
         const { party_id } = req.query;
-        const result = await ReportService.getDebtors({ party_id: party_id });
+        const result = await ReportService.getDebtors({ party_id: party_id, created_by: t_userId });
 
         response.status = 200;
         response.message = "Ledger fetched successfully";
@@ -35,9 +36,10 @@ exports.debtors = async (req, res) => {
 exports.customerLedger = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
+        const { t_userId } = req.body;
         const { party_id } = req.query;
 
-        const result = await ReportService.getDebtorsDetails({ party_id: party_id });
+        const result = await ReportService.getDebtorsDetails({ party_id: party_id, created_by: t_userId });
 
         response.status = 200;
         response.message = "Ledger fetched successfully";
@@ -54,7 +56,8 @@ exports.customerLedger = async (req, res) => {
 exports.dashboardStats = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
-        const result = await ReportService.getDashboardStats();
+        const { t_userId } = req.body;
+        const result = await ReportService.getDashboardStats({ created_by: t_userId });
 
         response.status = 200;
         response.message = "Dashboard statistics fetched successfully";

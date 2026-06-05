@@ -9,12 +9,19 @@ const Setting = () => {
     const [suffix, setSuffix] = useState("");
     const [active, setActive] = useState(0);
     const [light, setLight] = useState(true);
-    const [theme, setTheme] = useState("dark");
+    const [theme, setTheme] = useState("light");
 
     const getThemeData = async () => {
         const getTheme = await window.api?.getItem("theme");
-        if (getTheme) setTheme(getTheme)
+        if (getTheme) {
+            setTheme(getTheme);
+            setLight(getTheme === "light");
+        }
     };
+
+    useEffect(() => {
+        getThemeData();
+    }, []);
 
     useEffect(() => {
         if (theme === "dark") {
@@ -24,12 +31,13 @@ const Setting = () => {
             setLight(true);
             document.documentElement.classList.remove("dark");
         };
-    }, []);
+    }, [theme]);
 
     const changeTheme = async (e) => {
+        const newTheme = e ? "light" : "dark";
+        setTheme(newTheme);
         setLight(e);
-        await window.api?.setItem("theme", e ? "light" : "dark");
-        document.documentElement.classList.toggle("dark", !e);
+        await window.api?.setItem("theme", newTheme);
     };
 
     return (

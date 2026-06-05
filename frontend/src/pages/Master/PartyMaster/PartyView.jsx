@@ -182,7 +182,7 @@ const ViewParty = () => {
                 </MainArea>
 
                 <MainArea>
-                    <div className="flex justify-between items-center mt-3 px-2 py-2 text-sm">
+                    <div className="w-full flex justify-between items-center text-sm">
                         <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
                         <div className="flex items-center gap-1">
                             <button

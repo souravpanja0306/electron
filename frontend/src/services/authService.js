@@ -11,6 +11,7 @@ export const getToken = async () => {
 };
 
 export const signinUser = async (payload) => {
+    console.log("🚀 ~ signinUser ~ payload:", payload)
     try {
         let response = await axios({
             method: "post",
@@ -21,6 +22,7 @@ export const signinUser = async (payload) => {
             data: payload,
             validateStatus: (status) => status < 500,
         });
+        console.log("🚀 ~ signinUser ~ response:", response)
         return response.data;
     } catch (error) {
         console.log("Something went wrong", error);

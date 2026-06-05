@@ -91,8 +91,15 @@ exports.listParty = async (req, res) => {
 exports.removeParty = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
+        const { t_userId } = req.body;
         const { id } = req.params;
         if (!id) return errorHandler(res, 400, "ID is required.");
+
+        let search_key = { id: id };
+        if (t_userId) search_key["created_by"] = t_userId;
+
+        let checkParty = await PartyService.getParty(search_key);
+        if (!checkParty.length) return errorHandler(res, 404, "Party not found.");
 
         let result = await PartyService.deleteParty({ ids: [id] });
         if (result.changes > 0) {
@@ -119,6 +126,12 @@ exports.editParty = async (req, res) => {
         const { t_userId } = req.body;
 
         if (!id) return errorHandler(res, 400, "ID is required.");
+
+        let search_key = { id: id };
+        if (t_userId) search_key["created_by"] = t_userId;
+
+        let checkParty = await PartyService.getParty(search_key);
+        if (!checkParty.length) return errorHandler(res, 404, "Party not found.");
 
         let finalData = {
             company_name: req.body.company_name,

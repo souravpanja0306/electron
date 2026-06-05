@@ -7,21 +7,34 @@ import useAuthStore from "../store/AuthStore";
 export const Middleware = ({ children }) => {
     const { authToken, token } = useAuthStore();
     const [theme, setTheme] = useState("light");
+    const [loading, setLoading] = useState(true);
 
     const getThemeData = async () => {
         const getTheme = await window.api?.getItem("theme");
         if (getTheme) setTheme(getTheme)
     };
 
+    const checkAuth = async () => {
+        await authToken();
+        setLoading(false);
+    };
+
     useEffect(() => {
-        authToken();
+        checkAuth();
         getThemeData();
+    }, []);
+
+    useEffect(() => {
         if (theme === "dark") {
             document.documentElement.classList.add("dark");
         } else {
             document.documentElement.classList.remove("dark");
         }
-    }, [token]);
+    }, [theme]);
+
+    if (loading) {
+        return null; // Or a loading spinner
+    }
 
     return token ? children : <Navigate to="/signin" replace />;
 };
