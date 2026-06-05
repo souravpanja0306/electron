@@ -19,7 +19,7 @@ import useAuthStore from '../../../store/AuthStore';
 
 const CompanyEdit = () => {
     const { getCompanyById, updateCompany, companyLoading } = useCompanyStore();
-    const { authToken, token } = useCompanyStore();
+    const { authToken, token } = useAuthStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");

@@ -1,0 +1,32 @@
+const StateList = [
+    { title: "Andhra Pradesh", value: "Andhra Pradesh" },
+    { title: "Arunachal Pradesh", value: "Arunachal Pradesh" },
+    { title: "Assam", value: "Assam" },
+    { title: "Bihar", value: "Bihar" },
+    { title: "Chhattisgarh", value: "Chhattisgarh" },
+    { title: "Goa", value: "Goa" },
+    { title: "Gujarat", value: "Gujarat" },
+    { title: "Haryana", value: "Haryana" },
+    { title: "Himachal Pradesh", value: "Himachal Pradesh" },
+    { title: "Jharkhand", value: "Jharkhand" },
+    { title: "Karnataka", value: "Karnataka" },
+    { title: "Kerala", value: "Kerala" },
+    { title: "Madhya Pradesh", value: "Madhya Pradesh" },
+    { title: "Maharashtra", value: "Maharashtra" },
+    { title: "Manipur", value: "Manipur" },
+    { title: "Meghalaya", value: "Meghalaya" },
+    { title: "Mizoram", value: "Mizoram" },
+    { title: "Nagaland", value: "Nagaland" },
+    { title: "Odisha", value: "Odisha" },
+    { title: "Punjab", value: "Punjab" },
+    { title: "Rajasthan", value: "Rajasthan" },
+    { title: "Sikkim", value: "Sikkim" },
+    { title: "Tamil Nadu", value: "Tamil Nadu" },
+    { title: "Telangana", value: "Telangana" },
+    { title: "Tripura", value: "Tripura" },
+    { title: "Uttarakhand", value: "Uttarakhand" },
+    { title: "Uttar Pradesh", value: "Uttar Pradesh" },
+    { title: "West Bengal", value: "West Bengal" }
+];
+
+export default StateList

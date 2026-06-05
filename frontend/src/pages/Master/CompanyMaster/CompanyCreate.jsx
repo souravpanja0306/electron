@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react'
+import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import StateList from '../../../utils/StateList';
+
+// Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import { Link, NavLink } from "react-router-dom";
-import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
 import Alert from "../../../components/Alert";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import useCompanyStore from '../../../store/CompanyStore';
+import SearchableSelect from '../../../components/SearchableSelect';
 
+// Stores...
+import useCompanyStore from '../../../store/CompanyStore';
+import useAuthStore from '../../../store/AuthStore';
 
 const CompanyCreate = () => {
-    let token = window.api?.getItem("token");
+    const { authToken, token } = useAuthStore();
     const { companyData, createCompany, getAllCompany, companyLoading } = useCompanyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
@@ -127,7 +133,7 @@ const CompanyCreate = () => {
                                                     value={data.company_name}
                                                     type="text"
                                                     onChange={(e) =>
-                                                        setData({ ...data, company_name: e.target.value.toLowerCase() })
+                                                        setData({ ...data, company_name: e.target.value })
                                                     }
                                                     required
                                                 />
@@ -142,7 +148,7 @@ const CompanyCreate = () => {
                                                     value={data.owner}
                                                     type="text"
                                                     onChange={(e) =>
-                                                        setData({ ...data, owner: e.target.value.toLowerCase() })
+                                                        setData({ ...data, owner: e.target.value })
                                                     }
                                                     required
                                                 />
@@ -157,7 +163,7 @@ const CompanyCreate = () => {
                                                     value={data.email}
                                                     type="email"
                                                     onChange={(e) =>
-                                                        setData({ ...data, email: e.target.value.toLowerCase() })
+                                                        setData({ ...data, email: e.target.value })
                                                     }
                                                     required
                                                 />
@@ -246,7 +252,7 @@ const CompanyCreate = () => {
                                                         value={data.address_1}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, address_1: e.target.value.toLowerCase() })
+                                                            setData({ ...data, address_1: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -260,7 +266,7 @@ const CompanyCreate = () => {
                                                         value={data.address_2}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, address_2: e.target.value.toLowerCase() })
+                                                            setData({ ...data, address_2: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -274,7 +280,7 @@ const CompanyCreate = () => {
                                                         value={data.city}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, city: e.target.value.toLowerCase() })
+                                                            setData({ ...data, city: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -284,14 +290,14 @@ const CompanyCreate = () => {
                                                     State
                                                 </td>
                                                 <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='State'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                    <SearchableSelect
+                                                        className="w-full"
+                                                        name="consignee_id"
                                                         value={data.state}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, state: e.target.value.toLowerCase() })
-                                                        }
+                                                        onChange={(e) => setData({ ...data, state: e.target.value })}
+                                                        options={StateList?.map(state => ({ id: state.value, label: state.value }))}
+                                                        placeholder="State"
+                                                        required
                                                     />
                                                 </td>
                                             </tr>
@@ -304,7 +310,7 @@ const CompanyCreate = () => {
                                                         value={data.district}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, district: e.target.value.toLowerCase() })
+                                                            setData({ ...data, district: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -318,7 +324,7 @@ const CompanyCreate = () => {
                                                         value={data.pincode}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, pincode: e.target.value.toLowerCase() })
+                                                            setData({ ...data, pincode: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -345,7 +351,7 @@ const CompanyCreate = () => {
                                                         value={data.gst}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, gst: e.target.value.toLowerCase() })
+                                                            setData({ ...data, gst: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -359,7 +365,7 @@ const CompanyCreate = () => {
                                                         value={data.pan}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, pan: e.target.value.toLowerCase() })
+                                                            setData({ ...data, pan: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -373,7 +379,7 @@ const CompanyCreate = () => {
                                                         value={data.trade_licence}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, trade_licence: e.target.value.toLowerCase() })
+                                                            setData({ ...data, trade_licence: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -399,7 +405,7 @@ const CompanyCreate = () => {
                                                         value={data.bank}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, bank: e.target.value.toLowerCase() })
+                                                            setData({ ...data, bank: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -413,7 +419,7 @@ const CompanyCreate = () => {
                                                         value={data.branch}
                                                         type="text"
                                                         onChange={(e) =>
-                                                            setData({ ...data, branch: e.target.value.toLowerCase() })
+                                                            setData({ ...data, branch: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -427,7 +433,7 @@ const CompanyCreate = () => {
                                                         value={data.ifse}
                                                         type="tel"
                                                         onChange={(e) =>
-                                                            setData({ ...data, ifse: e.target.value.toLowerCase() })
+                                                            setData({ ...data, ifse: e.target.value })
                                                         }
                                                     />
                                                 </td>
@@ -441,7 +447,7 @@ const CompanyCreate = () => {
                                                         value={data.account_no}
                                                         type="tel"
                                                         onChange={(e) =>
-                                                            setData({ ...data, account_no: e.target.value.toLowerCase() })
+                                                            setData({ ...data, account_no: e.target.value })
                                                         }
                                                     />
                                                 </td>

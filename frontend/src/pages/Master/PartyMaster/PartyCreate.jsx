@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react'
+import { Link, NavLink } from "react-router-dom";
+import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import StateList from '../../../utils/StateList';
+
+// Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import { Link, NavLink } from "react-router-dom";
-import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
 import Alert from "../../../components/Alert";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import SearchableSelect from '../../../components/SearchableSelect';
 
 // Service...
 import { handleCreateParty } from "../../../services/partyService";
@@ -308,14 +312,14 @@ const PartyCreate = () => {
                                                     State
                                                 </td>
                                                 <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='State'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                    <SearchableSelect
+                                                        className="w-full"
+                                                        name="consignee_id"
                                                         value={data.state}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, state: e.target.value })
-                                                        }
+                                                        onChange={(e) => setData({ ...data, state: e.target.value })}
+                                                        options={StateList?.map(state => ({ id: state.value, label: state.value }))}
+                                                        placeholder="State"
+                                                        required
                                                     />
                                                 </td>
                                             </tr>
