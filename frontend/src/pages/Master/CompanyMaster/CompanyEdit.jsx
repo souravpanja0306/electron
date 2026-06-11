@@ -7,7 +7,6 @@ import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import Alert from "../../../components/Alert";
 import CustomLoader from '../../../components/CustomLoader';
 
 // Icons...
@@ -476,13 +475,6 @@ const CompanyEdit = () => {
                     </div>
                 </form>
             </div >
-            <Alert
-                open={alart.show}
-                type={alart.type}
-                title={alart.title}
-                message={alart.message}
-                onClose={() => setAlart({ ...alart, show: false })}
-            />
         </>
     )
 }

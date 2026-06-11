@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'sonner';
 
 // Components...
 import PageTitle from '../../../components/PageTitle';
@@ -44,7 +45,7 @@ const ViewParty = () => {
     const handleDelete = async () => {
         try {
             if (!checkedIds.length) {
-                window.alert("Please select an item, that you want to delete.")
+                toast.error("Please select an item to delete.");
             } else {
                 await window.api.deleteParty({ ids: checkedIds }).then((res) => {
                     console.log(res, "res")

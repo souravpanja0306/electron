@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
         mobile: { type: String, required: true },
         email: { type: String, required: true },
         username: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
         machine_id: { type: String, required: true },
         last_activity: { type: Date, default: Date.now }
     },

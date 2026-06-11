@@ -1,7 +1,7 @@
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 // Icons...
 import {
@@ -20,7 +20,6 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
-import Alert from '../../components/Alert';
 import { inrToWords } from '../../utils/InWordConverter';
 
 // Stores...
@@ -39,7 +38,6 @@ const MoneyReceipts = () => {
     const { companyData, getAllCompany } = useCompanyStore();
     const { authToken, token } = useAuthStore();
 
-    const [alert, setAlert] = useState({ show: false });
     const [grandTotal, setGrandTotal] = useState({
         total_value: 0,
         inWord: ""
@@ -98,8 +96,8 @@ const MoneyReceipts = () => {
             setReceiptFields(newFields);
             calculateGrandTotal(newFields);
         } else {
-            toast.info("At least one row is required.");
-        }
+            return toast.info("At least one row is required.");
+        };
     };
 
     const handleChangeField = (id, key, value) => {
@@ -113,12 +111,7 @@ const MoneyReceipts = () => {
     const handleSubmitForm = async () => {
         try {
             if (!form.company_id || !form.party_id) {
-                return setAlert({
-                    show: true,
-                    title: "Error",
-                    type: "error",
-                    message: "Company and Recipient are required."
-                });
+                return toast.error("Company and Party are required.");
             }
 
             let payload = { ...form, data: receiptFields };
@@ -358,13 +351,6 @@ const MoneyReceipts = () => {
                     </div>
                 </div>
             </div>
-            <Alert
-                open={alert.show}
-                type={alert.type}
-                title={alert.title}
-                message={alert.message}
-                onClose={() => setAlert({ ...alert, show: false })}
-            />
         </>
     );
 };

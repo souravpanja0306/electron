@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PageTitle from '../../components/PageTitle';
 import CustomButton from '../../components/CustomButton';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 
 // Store...
@@ -19,10 +19,12 @@ const Signin = () => {
 
   const [data, setData] = useState({ username: "", password: "" });
   const [errorMessage, setErrorMessage] = useState(null);
+
   const handleSubmitSignin = async (e) => {
     e.preventDefault();
     try {
-      let result = await signin({ username: data.username, password: data.password });
+      let MACHINE_ID = await window.api.getMachineId();
+      let result = await signin({ username: data.username, password: data.password, machineId: MACHINE_ID });
       if (result.status === 200) {
         window.api?.setItem("token", result.body.token);
         window.api?.setItem("user", JSON.stringify(result.body));
@@ -38,7 +40,7 @@ const Signin = () => {
   return (
     <>
       {/* Custom Title Bar */}
-      <div className="titlebar border-b border-slate-300 dark:border-slate-600 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between p-2 shadow-md">
+      <div className="titlebar border-b border-slate-600 w-full h-10 bg-slate-950 text-white flex items-center justify-between p-2 shadow-md">
         <div className="flex items-center gap-2">
           <div className="font-semibold tracking-wide">
             <Link to="#">Zero® ERP</Link>

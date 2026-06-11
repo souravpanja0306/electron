@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
-import Alert from "../../components/Alert";
 import { inrToWords } from '../../utils/InWordConverter';
 import moment from 'moment';
 
@@ -486,15 +485,7 @@ const CreateChallan = () => {
             </MainArea>
           </div>
         </div >
-
       </div >
-      <Alert
-        open={alart.show}
-        type={alart.type}
-        title={alart.title}
-        message={alart.message}
-        onClose={() => setAlart({ ...alart, show: false })}
-      />
     </>
   )
 }

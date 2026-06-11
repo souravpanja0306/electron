@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 // Icon...
 import {
@@ -65,7 +65,7 @@ const ViewInvoices = () => {
 
     const handleRefresh = () => {
         getAllInvoice({ token: token });
-        toast.info("Refreshing data...");
+        toast.info("Invoice Data Refreshing.");
     };
 
     const handlePrint = async (id) => {

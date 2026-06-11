@@ -41,6 +41,24 @@ exports.resetAllTable = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
+module.exports.migrateTable = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        let result = await AdminService.migrateTableData(req.body);
+        if (result) {
+            response.status = 200;
+            response.message = "Table Migrated Sucessfully";
+            response.body = result;
+        };
+    } catch (error) {
+        console.log(`Something went wrong: controller: resetAllTable: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: resetAllTable`;
+        response.body = error.body ? error.body : "";
+    };
+    return res.status(response.status).json(response);
+};
+
 module.exports.createHsnSac = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {

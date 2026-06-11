@@ -14,9 +14,6 @@ const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
 const LicenseService = require("../service/license.service");
 
-// MongoDB Models...
-const UserModel = require("../database/model/user.model");
-
 const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
@@ -37,7 +34,7 @@ exports.signup = async (req, res) => {
         if (!machineId) return errorHandler(res, 400, "machineId Required.");
 
         let isMachineIdExist = await UserService.getUsers({ machine_id: machineId });
-        if (isMachineIdExist.length) return errorHandler(res, 409, "This Machine is already registered.");
+        if (isMachineIdExist.length) return errorHandler(res, 409, "This Machine is already registered. You cannot create new account with this machine.");
 
         let isEmailExist = await UserService.getUsers({ email: email });
         if (isEmailExist.length) return errorHandler(res, 409, "Email is already registered.");
@@ -58,19 +55,7 @@ exports.signup = async (req, res) => {
         };
         let result = await UserService.insertUsers(newData);
         if (result) {
-            // Track signup in MongoDB
-            try {
-                const mongoUser = new UserModel({
-                    name: name,
-                    mobile: mobile,
-                    email: email,
-                    username: username,
-                    machine_id: machineId
-                });
-                await mongoUser.save();
-            } catch (mongoError) {
-                console.error("Failed to track user in MongoDB:", mongoError);
-            };
+            let mongoResult = await UserService.insertUsersInMongodb(newData)
 
             // Create FREE 1 year license
             const startDate = new Date();
@@ -80,7 +65,7 @@ exports.signup = async (req, res) => {
             let newLicenseData = {
                 license_key: generateLicenseKey(),
                 machine_id: machineId ? machineId : "",
-                user_id: result.id ? result.id : "",
+                user_id: mongoResult.id ? mongoResult.id : "",
                 plan: "FREE",
                 max_devices: 1,
                 start_date: startDate,
@@ -118,25 +103,35 @@ exports.signup = async (req, res) => {
 exports.signin = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-        const { username, password } = req.body;
+        const { username, password, machineId } = req.body;
         if (!username) return errorHandler(res, 400, "Username Required.");
         if (!password) return errorHandler(res, 400, "Password Required.");
+        if (!machineId) return errorHandler(res, 400, "Machine ID Required.");
 
         let getUserDetails = await UserService.getUsers({
             password: password,
             username: username,
         });
         if (getUserDetails.length) {
-            // Update last activity in MongoDB
-            try {
-                await UserModel.findOneAndUpdate(
-                    { username: username },
-                    { last_activity: new Date() },
-                    { upsert: true } // In case the user exists in SQLite but not yet in MongoDB
-                );
-            } catch (mongoError) {
-                console.error("Failed to update last activity in MongoDB:", mongoError);
-            }
+            let findMongoUser = await UserService.findUsersInMongodb({
+                username: username,
+                machine_id: machineId
+            });
+            if (!findMongoUser.length) {
+                response.status = 401;
+                response.message = "This is different machine. You cannot login here.";
+                response.body = {};
+                return res.status(response.status).json(response);
+            };
+            await UserService.updateUsersInMongodb({
+                search_key: {
+                    username: username,
+                },
+                update_info: {
+                    last_activity: new Date(),
+                    machine_id: machineId
+                }
+            });
 
             let tokenData = {
                 TOKEN_UID: getUserDetails[0].id,

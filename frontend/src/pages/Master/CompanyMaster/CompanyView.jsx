@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 // Icon...
 import {
@@ -58,28 +58,28 @@ const ViewCompany = () => {
     const handleDelete = async () => {
         try {
             if (!checkedIds.length) {
-                toast.warning("Please select an item to delete.", { theme: "dark" });
+                toast.warning("Please select an item to delete.");
                 return;
             }
             if (window.confirm("Are you sure you want to delete selected companies?")) {
                 let result = await deleteCompany({ ids: checkedIds, token: token });
                 if (result.status === 200) {
-                    toast.success(result.message, { theme: "dark" });
+                    toast.success(result.message);
                     setCheckedIds([]);
                     getAllCompany(token);
                 } else {
-                    toast.error(result.message, { theme: "dark" });
+                    toast.error(result.message);
                 }
             }
         } catch (error) {
             console.log(error);
-            toast.error("Something went wrong!", { theme: "dark" });
+            toast.error("Something went wrong!");
         };
     };
 
     const handleRefresh = () => {
         getAllCompany(token);
-        toast.info("Refreshing data...", { theme: "dark" });
+        toast.info("Company Data Refreshing.");
     };
 
     useEffect(() => {

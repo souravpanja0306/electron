@@ -1,4 +1,8 @@
+// SQL Database...
 const { db } = require("../database/connection");
+
+// MongoDB Models...
+const UserModel = require("../database/model/user.model");
 
 exports.insertUsers = async (data) => {
     try {
@@ -91,5 +95,48 @@ exports.updateUsers = async (data, id) => {
     } catch (error) {
         console.log(error);
         throw error;
-    }
+    };
+};
+
+// MongoDB Working Here...
+exports.insertUsersInMongodb = async (data) => {
+    try {
+        let newData = new UserModel(data);
+        let result = await newData.save();
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: insertUsersInMongodb: ${error}`)
+    };
+};
+
+exports.findUsersInMongodb = async ({
+    machine_id = "",
+    username = "",
+}) => {
+    try {
+        let search_key = {};
+        if (machine_id) search_key["machine_id"] = machine_id;
+        if (username) search_key["username"] = username;
+
+        let result = await UserModel.find(search_key);
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: findUsersInMongodb: ${error}`)
+    };
+};
+
+exports.updateUsersInMongodb = async ({
+    search_key = {},
+    update_info = {}
+}) => {
+    try {
+        let result = await UserModel.findOneAndUpdate(
+            search_key,
+            update_info,
+            { upsert: true, new: true }
+        );
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: updateUsersInMongodb: ${error}`)
+    };
 };

@@ -35,10 +35,15 @@ exports.generateInvoiceNo = async (req, res) => {
         const existsCheck = async ({
             type = ""
         }) => {
-            let count = await InvoiceService.findInvoices({ count: true });
+            let search_key = {};
+            if (t_userId) search_key["created_by"] = t_userId;
+
+            let count = await InvoiceService.findInvoices({ ...search_key, count: true });
             while (true) {
                 const invoiceNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
-                const exists = await InvoiceService.findInvoices({ invoice_no: invoiceNo });
+                search_key["invoice_no"] = invoiceNo;
+
+                const exists = await InvoiceService.findInvoices(search_key);
                 if (!exists.length) return invoiceNo;
                 count++;
             };

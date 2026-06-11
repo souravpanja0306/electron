@@ -13,6 +13,11 @@ router.get(
     AdminController.resetAllTable
 );
 
+router.post(
+    "/migrate-table",
+    AdminController.migrateTable
+);
+
 // HSN Create...
 router.post(
     "/create-hsn-code",

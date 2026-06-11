@@ -18,8 +18,8 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import MenuMap from "../utils/menuMap";
 import { useState, useEffect } from "react";
 import "../index.css"
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster, toast } from 'sonner'
+
 import Header from "./Header";
 
 
@@ -67,7 +67,7 @@ const Layout = ({ children }) => {
 
     return (
         <div className="flex flex-col h-screen select-none">
-            <ToastContainer style={{ zIndex: 99999 }} />
+            <Toaster style={{ zIndex: 99999 }} />
             {/* Custom Title Bar */}
             <Header />
 

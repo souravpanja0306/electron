@@ -59,8 +59,8 @@ exports.findInvoices = async ({
             params.push(Number(limit), Number(skip));
         };
         if (count) {
-            let query = `SELECT COUNT(*) AS total FROM invoice;`
-            let result = db.prepare(query).all(...params);
+            const countQuery = query.replace("SELECT *", "SELECT COUNT(*) AS total");
+            let result = db.prepare(countQuery).all(...params);
             return result[0].total;
         };
         let result = db.prepare(query).all(...params);

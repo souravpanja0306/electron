@@ -8,10 +8,10 @@ const ChangePassword = () => {
 
     <>
       {/* Custom Title Bar */}
-      <div className="titlebar border-b border-slate-300 dark:border-slate-600 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between p-2 shadow-md">
+      <div className="titlebar border-b border-slate-600 w-full h-10 bg-slate-950 text-white flex items-center justify-between p-2 shadow-md">
         <div className="flex items-center gap-2">
           <div className="font-semibold tracking-wide">
-            <Link to="#">HelloWorld</Link>
+            <Link to="#">Zero® ERP</Link>
           </div>
         </div>
         <div className="flex items-center gap-2 text-sm">
@@ -80,7 +80,7 @@ const ChangePassword = () => {
             </div>
 
             <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition-all">
-              Send Reset Link
+              Send Request
             </button>
 
             <div className="text-center text-xs text-slate-400">

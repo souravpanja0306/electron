@@ -18,8 +18,6 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import MenuMap from "../utils/menuMap";
 import { useState, useEffect } from "react";
 import "../index.css"
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 
 const Header = () => {

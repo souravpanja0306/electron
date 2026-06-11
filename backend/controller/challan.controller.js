@@ -244,6 +244,7 @@ exports.updateChallan = async (req, res) => {
 exports.generateChallanNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
+        const { t_userId } = req.body;
         const { types } = req.query;
         if (!types) {
             response.status = 400;
@@ -257,10 +258,14 @@ exports.generateChallanNo = async (req, res) => {
         const existsCheck = async ({
             type = ""
         }) => {
-            let count = await ChallanService.findChallans({ count: true });
+            let search_key = {};
+            if (t_userId) search_key["created_by"] = t_userId;
+
+            let count = await ChallanService.findChallans({ ...search_key, count: true });
             while (true) {
                 const challanNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
-                const exists = await ChallanService.findChallans({ cn_no: challanNo });
+                search_key["cn_no"] = challanNo;
+                const exists = await ChallanService.findChallans(search_key);
                 if (!exists.length) return challanNo;
                 count++;
             };

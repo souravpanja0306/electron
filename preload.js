@@ -10,4 +10,5 @@ contextBridge.exposeInMainWorld("api", {
     getItem: (key) => ipcRenderer.invoke('store-get', key),
     deleteItem: (key) => ipcRenderer.send('store-delete', key),
     clearAll: () => ipcRenderer.send("store-clear-all"),
+    showNotification: (data) => ipcRenderer.send("show-notification", data),
 });

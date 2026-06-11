@@ -1,4 +1,4 @@
-const {db} = require("../database/connection");
+const { db } = require("../database/connection");
 
 exports.resetTableData = async ({
     tableNames = "",
@@ -7,7 +7,36 @@ exports.resetTableData = async ({
         let result = await db.exec(`DROP TABLE IF EXISTS ${tableNames}`);
         return result;
     } catch (error) {
-        console.log(error)
+        console.log(`Something went wrong: service: resetTableData: ${error}`);
+    };
+};
+
+exports.migrateTableData = async (data) => {
+    try {
+        const migratedFields = [];
+
+        for (const table of data) {
+            const { table_name, fields } = table;
+            const columns = db.prepare(`PRAGMA table_info(${table_name})`).all();
+
+            for (const field of fields) {
+                const { field_name, field_type } = field;
+
+                const exists = columns.some(
+                    column => column.name === field_name
+                );
+                if (!exists) {
+                    db.prepare(`ALTER TABLE ${table_name} ADD COLUMN ${field_name} ${field_type}`).run();
+                    migratedFields.push({
+                        table_name,
+                        field_name,
+                    });
+                };
+            };
+        };
+        return migratedFields;;
+    } catch (error) {
+        console.log(`Something went wrong: service: migrateTableData: ${error}`);
     };
 };
 
@@ -21,7 +50,7 @@ exports.createHSNSAC = async (data) => {
 
         return result;
     } catch (error) {
-        console.log(error)
+        console.log(`Something went wrong: service: createHSNSAC: ${error}`);
     };
 };
 
@@ -71,10 +100,9 @@ exports.findHSNSAC = async ({
         let result = db.prepare(query).all(...params);
         return result;
     } catch (error) {
-        console.log(error)
+        console.log(`Something went wrong: service: findHSNSAC: ${error}`);
     };
 };
-
 
 exports.createGST = async (data) => {
     try {
@@ -86,7 +114,7 @@ exports.createGST = async (data) => {
 
         return result;
     } catch (error) {
-        console.log(error)
+        console.log(`Something went wrong: service: createGST: ${error}`);
     };
 };
 
@@ -130,7 +158,6 @@ exports.findGST = async ({
         let result = db.prepare(query).all(...params);
         return result;
     } catch (error) {
-        console.log(error)
+        console.log(`Something went wrong: service: findGST: ${error}`);
     };
 };
-

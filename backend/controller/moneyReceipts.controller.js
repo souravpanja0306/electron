@@ -72,10 +72,15 @@ exports.generateMoneyReceiptNo = async (req, res) => {
         const existsCheck = async ({
             type = ""
         }) => {
-            let count = await MoneyReceiptService.findMoneyReceipts({ count: true });
+            let seearch_key = {};
+            if (t_userId) seearch_key["created_by"] = t_userId;
+
+            let count = await MoneyReceiptService.findMoneyReceipts({ ...seearch_key, count: true });
             while (true) {
                 const receiptNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
-                const exists = await MoneyReceiptService.findMoneyReceipts({ receipt_no: receiptNo });
+                seearch_key["receipt_no"] = receiptNo;
+
+                const exists = await MoneyReceiptService.findMoneyReceipts(seearch_key);
                 if (!exists.length) return receiptNo;
                 count++;
             };

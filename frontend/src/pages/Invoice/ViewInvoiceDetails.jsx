@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import moment from 'moment';
 
 // Icon...
@@ -23,7 +23,6 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
-import Alert from '../../components/Alert';
 import { inrToWords } from '../../utils/InWordConverter';
 
 // Stores...
@@ -45,7 +44,6 @@ const ViewInvoiceDetails = () => {
     const back = searchParams.get("back");
     const invoiceId = searchParams.get("id");
 
-    const [alert, setAlert] = useState({ show: false });
     const [isSameState, setIsSameState] = useState(true);
     const [grandTotal, setGrandTotal] = useState({
         total_quantity: 0,
@@ -199,12 +197,7 @@ const ViewInvoiceDetails = () => {
     const handleUpdate = async () => {
         try {
             if (!invoiceDetails.party_id) {
-                return setAlert({
-                    show: true,
-                    title: "Error",
-                    type: "error",
-                    message: "Party is required."
-                });
+                return toast.error("Party is required.");
             }
 
             let payload = { ...invoiceDetails, data: invoiceFields };
@@ -214,22 +207,12 @@ const ViewInvoiceDetails = () => {
                 if (back) navigate(-1);
                 else navigate("/view-invoice");
             } else {
-                setAlert({
-                    show: true,
-                    title: "Error",
-                    type: "error",
-                    message: result?.message
-                });
-            }
+                toast.error(result.message);
+            };
         } catch (error) {
             console.error(error);
-            setAlert({
-                show: true,
-                title: "Error",
-                type: "error",
-                message: "Something went wrong!"
-            });
-        }
+            toast.error("Something went wrong!");
+        };
     };
 
     const handleDelete = async () => {
@@ -650,13 +633,7 @@ const ViewInvoiceDetails = () => {
                     </div>
                 </div>
             </div>
-            <Alert
-                open={alert.show}
-                type={alert.type}
-                title={alert.title}
-                message={alert.message}
-                onClose={() => setAlert({ ...alert, show: false })}
-            />
+          
         </>
     );
 };

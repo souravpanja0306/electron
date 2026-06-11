@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import moment from 'moment';
 
 // Icon...
@@ -22,7 +22,6 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
-import Alert from '../../components/Alert';
 import { inrToWords } from '../../utils/InWordConverter';
 
 // Stores...
@@ -42,7 +41,6 @@ const EditMoneyReceipts = () => {
     const back = searchParams.get("back");
     const receiptId = searchParams.get("id");
 
-    const [alert, setAlert] = useState({ show: false });
     const [grandTotal, setGrandTotal] = useState({
         total_value: 0,
         inWord: ""
@@ -137,13 +135,8 @@ const EditMoneyReceipts = () => {
     const handleUpdate = async () => {
         try {
             if (!receiptDetails.party_id) {
-                return setAlert({
-                    show: true,
-                    title: "Error",
-                    type: "error",
-                    message: "Party is required."
-                });
-            }
+                return toast.error("Party is required.");
+            };
 
             let payload = { ...receiptDetails, data: receiptFields };
             let result = await updateMoneyReceipts({ id: receiptId, payload, token });
@@ -152,22 +145,12 @@ const EditMoneyReceipts = () => {
                 if (back) navigate(-1);
                 else navigate("/view-money-receipts");
             } else {
-                setAlert({
-                    show: true,
-                    title: "Error",
-                    type: "error",
-                    message: result?.message
-                });
-            }
+                toast.error(result.message);
+            };
         } catch (error) {
             console.error(error);
-            setAlert({
-                show: true,
-                title: "Error",
-                type: "error",
-                message: "Something went wrong!"
-            });
-        }
+            toast.error("Something went wrong!");
+        };
     };
 
     const handleDelete = async () => {
@@ -428,13 +411,7 @@ const EditMoneyReceipts = () => {
                     </div>
                 </div>
             </div>
-            <Alert
-                open={alert.show}
-                type={alert.type}
-                title={alert.title}
-                message={alert.message}
-                onClose={() => setAlert({ ...alert, show: false })}
-            />
+          
         </>
     );
 };

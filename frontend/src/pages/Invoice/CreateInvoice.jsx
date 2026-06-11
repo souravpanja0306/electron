@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
-import Alert from '../../components/Alert';
 import { inrToWords } from '../../utils/InWordConverter';
 import moment from 'moment';
 
@@ -130,8 +129,8 @@ const CreateInvoice = () => {
     const selectedParty = party.find(p => String(p.id) === String(billToId));
 
     if (!company || !selectedParty) {
-        setIsSameState(true);
-        return;
+      setIsSameState(true);
+      return;
     }
 
     const companyState = (company?.state || "").toLowerCase().trim();
@@ -493,7 +492,7 @@ const CreateInvoice = () => {
                                 : <Link
                                   to="/create-gst?back=true"
                                   className="text-center h-8 p-1 rounded w-full text-slate-900 border hover:bg-blue-600 hover:text-white border-slate-400 dark:border-slate-600">
-                                  Create New
+                                  + New
                                 </Link>
                             }
                           </div>
@@ -666,13 +665,6 @@ const CreateInvoice = () => {
           </div>
         </form>
       </div>
-      <Alert
-        open={alart.show}
-        type={alart.type}
-        title={alart.title}
-        message={alart.message}
-        onClose={() => setAlart({ ...alart, show: false })}
-      />
     </>
   )
 }

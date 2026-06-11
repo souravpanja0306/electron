@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 // Icon...
 import {
@@ -136,9 +136,6 @@ const ViewChallan = () => {
                             <div onClick={handleDelete} className={`${!checkedIds ? "hidden" : "block"}`}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                             </div>
-                            <Link to={`/edit-challan/${checkedIds}?back=true`} className={`${!checkedIds ? "hidden" : "block"}`}>
-                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineEdit /></CustomButton>
-                            </Link>
                         </div>
                         <div className="flex gap-1">
                             <div onClick={handleRefresh}>

@@ -8,7 +8,6 @@ import ActionArea from '../components/ActionArea';
 import MainArea from '../components/MainArea';
 import CustomButton from '../components/CustomButton';
 import CustomLoader from "../components/CustomLoader";
-import Alert from '../components/Alert';
 
 // Store...
 import useAuthStore from '../store/AuthStore';

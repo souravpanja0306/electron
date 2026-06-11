@@ -3,6 +3,11 @@ const { db } = require("../database/connection");
 exports.insertChallanData = async (data) => {
     try {
         db.exec(require("../database/schema/challan.schema"));
+
+        const columns = db.prepare("PRAGMA table_info(challan)").all();
+        console.log(columns);
+
+
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO challan (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -47,10 +52,10 @@ exports.findChallans = async ({
             query += " LIMIT ? OFFSET ?";
             params.push(Number(limit), Number(skip));
         };
-        
+
         if (count) {
-            let countQuery = `SELECT COUNT(*) AS total FROM challan WHERE 1=1;`
-            let result = db.prepare(countQuery).all();
+            const countQuery = query.replace("SELECT *", "SELECT COUNT(*) AS total");
+            let result = db.prepare(countQuery).all(...params);
             return result[0].total;
         };
 
