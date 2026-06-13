@@ -1,6 +1,9 @@
 // Package...
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const path = require("path");
+const file = multer({ dest: "./uploads/main/" });
 
 // Controllers...
 const CompanyController = require("../controller/company.controller");
@@ -11,6 +14,7 @@ const middleware = require("../middleware/middleware");
 router.post(
     "/create-company",
     middleware.isAuthenticated,
+    file.single('logo'),
     CompanyController.addCompany
 );
 
@@ -35,6 +39,7 @@ router.delete(
 router.put(
     "/update-company/:id",
     middleware.isAuthenticated,
+    file.single('logo'),
     CompanyController.updateCompany
 );
 

@@ -12,7 +12,6 @@ const useCompanyStore = create((set) => ({
                 method: "post",
                 url: "http://localhost:3001/api/v1/company/create-company",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
                 data: payload,
@@ -106,7 +105,6 @@ const useCompanyStore = create((set) => ({
                 method: "put",
                 url: `http://localhost:3001/api/v1/company/update-company/${id}`,
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
                 data: payload,

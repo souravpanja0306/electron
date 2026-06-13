@@ -93,6 +93,15 @@ const ViewCompany = () => {
                 e.preventDefault();
                 handleDelete()
             };
+
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                if (checkedIds.length === 1) {
+                    navigate(`/edit-company/${checkedIds[0]}`);
+                } else {
+                    toast.warning("Please select exactly one company to edit.");
+                }
+            };
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
@@ -150,6 +159,7 @@ const ViewCompany = () => {
                                         checked={checkedIds.length === companyData.length && companyData.length > 0}
                                     />
                                 </th>
+                                <th className="p-1 text-start truncate w-16">Logo</th>
                                 <th className="p-1 text-start truncate">Company</th>
                                 <th className="p-1 text-start truncate">Mobile</th>
                                 <th className="p-1 text-start truncate">Email</th>
@@ -175,6 +185,9 @@ const ViewCompany = () => {
                                                                 onChange={(e) => handleChecked(e, item.id)}
                                                                 checked={checkedIds.includes(item.id)}
                                                             />
+                                                        </td>
+                                                        <td className="p-1 text-start truncate">
+                                                            {item.logo ? <img src={`http://localhost:3001/${item.logo}`} alt="Logo" className="w-10 h-10 object-contain" /> : "--"}
                                                         </td>
                                                         <td className="p-1 text-start truncate capitalize hover:underline hover:text-blue-500">
                                                             <Link to={`/view-company-details/${item.id}?back=true`}>

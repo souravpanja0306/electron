@@ -6,7 +6,7 @@ module.exports = `
       consignor_id INTEGER,
       consignee_id INTEGER,
       
-      cn_no TEXT UNIQUE,
+      cn_no TEXT,
       date TEXT,
       from_loc TEXT,
       to_loc TEXT,

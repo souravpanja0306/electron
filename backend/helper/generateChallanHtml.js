@@ -319,7 +319,7 @@ exports.generateChallanHtml = ({ challan, company }) => {
                 ${company.gst ? `<div class="company-sub">GSTIN: <strong>${company.gst}</strong></div>` : ''}
             </div>
             <div class="header-right">
-                ${company.logo ? `<img src="${company.logo}" alt="Logo"
+                ${company.logo ? `<img src="http://localhost:3001/uploads/company/${company.logo}" alt="Logo"
                     style="max-height:70px; max-width:160px; object-fit:contain;" />` : `<div
                     style="width:160px; height:70px; border:1px dashed #aaa; display:flex; align-items:center; justify-content:center; font-size:9px; color:#aaa; text-align:center;">
                     LOGO<br />160×70</div>`}

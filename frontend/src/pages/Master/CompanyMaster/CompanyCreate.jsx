@@ -25,6 +25,8 @@ const CompanyCreate = () => {
     const navigate = useNavigate();
 
     const [alart, setAlart] = useState({ show: false });
+    const [logo, setLogo] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
     const [data, setData] = useState({
         company_name: "",
         email: "",
@@ -46,10 +48,26 @@ const CompanyCreate = () => {
         account_no: ""
     });
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setLogo(file);
+            setLogoPreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e) => {
         try {
             e.preventDefault();
-            let result = await createCompany(data, token);
+            const formData = new FormData();
+            Object.keys(data).forEach(key => {
+                formData.append(key, data[key]);
+            });
+            if (logo) {
+                formData.append('logo', logo);
+            }
+
+            let result = await createCompany(formData, token);
             if ((result.status) === 200) {
                 setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
                 setData({
@@ -72,6 +90,8 @@ const CompanyCreate = () => {
                     branch: "",
                     account_no: ""
                 });
+                setLogo(null);
+                setLogoPreview(null);
             };
         } catch (error) {
             console.log(error);
@@ -199,17 +219,23 @@ const CompanyCreate = () => {
                                     <tbody>
                                         <tr className="dark:bg-slate-800 flex justify-between items-center">
                                             <td className="rounded flex flex-col justify-center items-center p-1 w-36 h-36 border border-slate-300 dark:border-slate-600 text-xs">
-                                                <span className="font-medium text-slate-600 dark:text-slate-300">
-                                                    Image Size
-                                                </span>
-                                                <span className="text-slate-400">512 × 512</span>
+                                                {logoPreview ? (
+                                                    <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-contain" />
+                                                ) : (
+                                                    <>
+                                                        <span className="font-medium text-slate-600 dark:text-slate-300">
+                                                            Image Size
+                                                        </span>
+                                                        <span className="text-slate-400">512 × 512</span>
+                                                    </>
+                                                )}
                                             </td>
                                             <td className="p-1 w-full">
                                                 <label className="rounded flex flex-col items-center justify-center h-36 border border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-blue-600 hover:bg-blue-100 dark:hover:bg-slate-900 transition">
                                                     <span className="text-xs text-slate-500 dark:text-slate-400">
-                                                        Click to upload image
+                                                        {logo ? logo.name : "Click to upload image"}
                                                     </span>
-                                                    <input type="file" accept="image/*" className="hidden" />
+                                                    <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                                                 </label>
                                             </td>
                                         </tr>

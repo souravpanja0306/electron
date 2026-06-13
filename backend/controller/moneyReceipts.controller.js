@@ -9,6 +9,7 @@ const contents = require("../content/contents");
 const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service");
 const InvoiceService = require("../service/invoice.service");
+const CompanyService = require("../service/company.service");
 const MoneyReceiptService = require("../service/moneyReceipt.service");
 const { generateMoneyReceiptHtml } = require("../helper/generateMoneyReceiptHtml");
 
@@ -105,7 +106,7 @@ module.exports.createMoneyReceipt = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId, t_mobile, t_username, t_name } = req.body;
-        let { company_id, party_id, receipt_no, receipt_date, data, remarks, total_value } = req.body;
+        let { company_id, party_id, receipt_no, receipt_date, data, remarks, total_value, payment_mode, reference } = req.body;
 
         let totalValue = 0;
         data.length && data.map((item) => {
@@ -120,6 +121,8 @@ module.exports.createMoneyReceipt = async (req, res) => {
             data: JSON.stringify(data),
             remarks: remarks,
             total_value: (totalValue).toFixed(2),
+            payment_mode: payment_mode,
+            reference: reference,
             created_by: t_userId,
         };
 
@@ -168,6 +171,8 @@ module.exports.getMoneyReceipt = async (req, res) => {
                 receipt_date: item.receipt_date,
                 data: JSON.parse(item.data),
                 remarks: item.remarks,
+                payment_mode: item.payment_mode,
+                reference: item.reference,
                 total_value: item.total_value,
                 created_by: item.t_userId,
             };
@@ -184,6 +189,7 @@ module.exports.getMoneyReceipt = async (req, res) => {
     };
     return res.status(response.status).json(response);
 };
+
 
 module.exports.generateMoneyReceiptPdf = async (req, res) => {
     let response = { ...contents.defaultResponse };
@@ -333,7 +339,7 @@ module.exports.updateMoneyReceipt = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id, company_id, party_id, receipt_no, receipt_date, data, remarks } = req.body;
+        const { id, company_id, party_id, receipt_no, receipt_date, data, remarks, payment_mode, reference } = req.body;
 
         if (!id) return errorHandler(res, 400, "Money Receipt ID is required.");
         if (!party_id) return errorHandler(res, 400, "Please select Party.");
@@ -359,7 +365,9 @@ module.exports.updateMoneyReceipt = async (req, res) => {
             receipt_date: receipt_date,
             data: JSON.stringify(items),
             remarks: remarks,
-            total_value: (totalValue).toFixed(2)
+            total_value: (totalValue).toFixed(2),
+            payment_mode: payment_mode,
+            reference: reference,
         };
 
         let result = await MoneyReceiptService.updateMoneyReceiptData(id, updateData);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useParams } from "react-router-dom";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { toast } from 'sonner';
 
 // Components...
 import PageTitle from '../../../components/PageTitle';
@@ -10,13 +11,13 @@ import CustomButton from '../../../components/CustomButton';
 import CustomLoader from '../../../components/CustomLoader';
 
 // Icons...
-import { AiOutlineFileAdd, AiOutlineRollback } from "react-icons/ai";
+import { AiOutlineFileAdd, AiOutlineRollback, AiOutlineIdcard } from "react-icons/ai";
 
 // Store...
 import useCompanyStore from '../../../store/CompanyStore';
 import useAuthStore from '../../../store/AuthStore';
 
-const CompanyEdit = () => {
+const CompanyViewDetails = () => {
     const { getCompanyById, updateCompany, companyLoading } = useCompanyStore();
     const { authToken, token } = useAuthStore();
     const [active, setActive] = useState(0);
@@ -26,7 +27,8 @@ const CompanyEdit = () => {
 
     const navigate = useNavigate();
 
-    const [alart, setAlart] = useState({ show: false });
+    const [logo, setLogo] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
     const [data, setData] = useState({
         company_name: "",
         email: "",
@@ -73,8 +75,11 @@ const CompanyEdit = () => {
                     branch: companyData.branch || "",
                     account_no: companyData.account_no || ""
                 });
+                if (companyData.logo) {
+                    setLogoPreview(`http://localhost:3001/${companyData.logo}`);
+                }
             } else {
-                setAlart({ show: true, title: "Error", type: "error", message: result.message || "Company not found." });
+                toast.error(result.message || "Company not found.");
             }
         }
     };
@@ -83,19 +88,36 @@ const CompanyEdit = () => {
         fetchCompanyData();
     }, [id]);
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setLogo(file);
+            setLogoPreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e) => {
         try {
             e.preventDefault();
-            let result = await updateCompany(id, data, token);
+            const formData = new FormData();
+            Object.keys(data).forEach(key => {
+                formData.append(key, data[key]);
+            });
+            if (logo) {
+                formData.append('logo', logo);
+            }
+
+            let result = await updateCompany(id, formData, token);
             if ((result.status) === 200) {
-                setAlart({ show: true, title: "Success", type: "success", message: result.message });
-                setTimeout(() => navigate("/company"), 1500);
+                toast.success(result.message);
+                if (back) navigate(-1);
+                else navigate("/company");
             } else {
-                setAlart({ show: true, title: "Error", type: "error", message: result.message });
+                toast.error(result.message);
             }
         } catch (error) {
             console.log(error);
-            setAlart({ show: true, title: "Error", type: "error", message: "Something went wrong!" });
+            toast.error("Something went wrong!");
         };
     };
 
@@ -119,26 +141,23 @@ const CompanyEdit = () => {
 
     return (
         <>
-            <PageTitle>Edit Company</PageTitle>
+            <PageTitle>Company View/Edit Details</PageTitle>
 
             <div className='flex flex-col gap-1'>
                 <ActionArea>
-                    {id ?
-                        <div onClick={() => navigate(-1)}>
-                            <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-                        </div>
-                        : ""
-                    }
+                    <div onClick={() => navigate(-1)}>
+                        <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                    </div>
                     <div onClick={(e) => handleSubmit(e)}>
-                        <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                        <CustomButton title={"Update (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </div>
                     <Link to="/company">
-                        <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                        <CustomButton title={"View All (Ctrl+I)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                     </Link>
                 </ActionArea>
 
                 <form className='flex flex-col gap-1'>
-                    <div className='grid sm:md:lg:xl:flex w-full gap-1'>
+                    <div className='grid grid-cols-1 lg:grid-cols-2 w-full gap-1'>
                         <MainArea>
                             <div className='flex flex-col w-full gap-1'>
                                 <PageTitle>Company Details</PageTitle>
@@ -215,33 +234,50 @@ const CompanyEdit = () => {
                         </MainArea>
                         <MainArea>
                             <div className='flex flex-col w-full gap-1'>
-                                <PageTitle>Business Icon/Logo</PageTitle>
+                                <PageTitle>Preview & Logo</PageTitle>
                                 <hr />
-                                <table className="w-full text-sm">
-                                    <tbody>
-                                        <tr className="dark:bg-slate-800 flex justify-between items-center">
-                                            <td className="rounded flex flex-col justify-center items-center p-1 w-36 h-36 border border-slate-300 dark:border-slate-600 text-xs">
-                                                <span className="font-medium text-slate-600 dark:text-slate-300">
-                                                    Image Size
-                                                </span>
-                                                <span className="text-slate-400">512 × 512</span>
-                                            </td>
-                                            <td className="p-1 w-full">
-                                                <label className="rounded flex flex-col items-center justify-center h-36 border border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-blue-600 hover:bg-blue-100 dark:hover:bg-slate-900 transition">
-                                                    <span className="text-xs text-slate-500 dark:text-slate-400">
-                                                        Click to upload image
-                                                    </span>
-                                                    <input type="file" accept="image/*" className="hidden" />
-                                                </label>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div className='flex flex-col sm:flex-row w-full p-1 gap-4 items-center sm:items-start'>
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="rounded flex flex-col justify-center items-center p-1 w-32 h-32 border border-slate-300 dark:border-slate-600 text-xs bg-white overflow-hidden">
+                                            {logoPreview ? (
+                                                <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-contain" />
+                                            ) : (
+                                                <AiOutlineIdcard className='text-7xl text-slate-300' />
+                                            )}
+                                        </div>
+                                        <label className="px-3 py-1 bg-blue-600 text-white text-xs rounded cursor-pointer hover:bg-blue-700 transition">
+                                            Upload Logo
+                                            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                                        </label>
+                                    </div>
+                                    <div className='flex-1 flex flex-col justify-center'>
+                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
+                                            <span className='font-bold text-xs w-24'>Company : </span>
+                                            <p className='text-slate-500 text-xs uppercase'>{data.company_name || "--"}</p>
+                                        </div>
+                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
+                                            <span className='font-bold text-xs w-24'>Owner : </span>
+                                            <p className='text-slate-500 text-xs uppercase'>{data.owner || "--"}</p>
+                                        </div>
+                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
+                                            <span className='font-bold text-xs w-24'>Email : </span>
+                                            <p className='text-slate-500 text-xs'>{data.email || "--"}</p>
+                                        </div>
+                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
+                                            <span className='font-bold text-xs w-24'>Mobile : </span>
+                                            <p className='text-slate-500 text-xs'>{data.mobile || "--"}</p>
+                                        </div>
+                                        <div className='flex gap-1 py-1'>
+                                            <span className='font-bold text-xs w-24'>GST : </span>
+                                            <p className='text-slate-500 text-xs uppercase'>{data.gst || "--"}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </MainArea>
                     </div>
 
-                    <div className="flex border-slate-700">
+                    <div className="flex border-slate-700 mt-2">
                         <span
                             onClick={() => setActive(0)}
                             className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 0 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white rounded-t" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
@@ -479,4 +515,4 @@ const CompanyEdit = () => {
     )
 }
 
-export default CompanyEdit
+export default CompanyViewDetails

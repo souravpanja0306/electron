@@ -1,5 +1,6 @@
 // Package...
 const moment = require("moment");
+const fs = require("fs");
 
 // Contents...
 const contents = require("../content/contents");
@@ -25,6 +26,17 @@ exports.addCompany = async (req, res) => {
         let isEmailExist = await CompanyService.getCompany({ mobile: req.body.email });
         if (isEmailExist.length) return errorHandler(res, 409, "Email Id already registered.");
 
+        let createFolder = process.env.PHYSICAL_MEDIA_PATH + "company/"
+        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+
+        let oldpath = req.file.path;
+        let file_date = moment().format("DD-MM-YYYY");
+        let random_number = Math.floor(Math.random() * 10000000000 + 1);
+        let fileName = `${random_number}_${file_date}_${req.file.originalname}`
+        let filePath = `./uploads/company/${fileName}`;
+        fs.renameSync(oldpath, filePath, (err) => {
+            if (err) console.log(err)
+        });
         let finalData = {
             company_name: req.body.company_name,
             email: req.body.email,
@@ -44,6 +56,7 @@ exports.addCompany = async (req, res) => {
             ifse: req.body.ifse,
             branch: req.body.branch,
             account_no: req.body.account_no,
+            logo: fileName,
             created_by: t_userId,
         };
 
@@ -74,6 +87,9 @@ exports.getCompany = async (req, res) => {
         let result = await CompanyService.getCompany(search_key);
 
         if (result.length) {
+            result.map((item)=>{
+              item["logo"] =  `http://localhost:3001/uploads/company/${item.logo}`;
+            });
             response.status = 200;
             response.message = "Data fetched succesfully.";
             response.body = result;
@@ -156,14 +172,24 @@ exports.updateCompany = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { id } = req.params;
-
-
         if (!id) {
             response.status = 400;
             response.message = "Company ID is required";
             response.body = [];
             return res.status(response.status).json(response);
         };
+
+        let createFolder = process.env.PHYSICAL_MEDIA_PATH + "company/"
+        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+
+        let oldpath = req.file.path;
+        let file_date = moment().format("DD-MM-YYYY");
+        let random_number = Math.floor(Math.random() * 10000000000 + 1);
+        let fileName = `${random_number}_${file_date}_${req.file.originalname}`
+        let filePath = `./uploads/company/${fileName}`;
+        fs.renameSync(oldpath, filePath, (err) => {
+            if (err) console.log(err)
+        });
 
         const updateData = {
             company_name: req.body.company_name ? req.body.company_name : "",
@@ -185,6 +211,7 @@ exports.updateCompany = async (req, res) => {
             branch: req.body.branch ? req.body.branch : "",
             account_no: req.body.account_no ? req.body.account_no : "",
         };
+        if (req.file) updateData["logo"] = fileName;
 
         let result = await CompanyService.updateCompany(id, updateData);
 

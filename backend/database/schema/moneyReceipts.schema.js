@@ -5,7 +5,7 @@ module.exports = `
     company_id INTEGER,
     party_id INTEGER,
 
-    receipt_no TEXT UNIQUE,
+    receipt_no TEXT,
     receipt_date TEXT,
     data TEXT,
     remarks TEXT,

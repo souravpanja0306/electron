@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
+import { baseURL } from "../utils/baseUrl";
 
 const useMoneyReceiptStore = create((set) => ({
     moneyReceipts: [],
@@ -12,7 +13,7 @@ const useMoneyReceiptStore = create((set) => ({
             set({ loading: true });
             const result = await axios({
                 method: "get",
-                url: "http://localhost:3001/api/v1/money-receipt/generate-receipt-no?types=moneyreceipt",
+                url: `${baseURL.moneyreceipt}generate-receipt-no?types=moneyreceipt`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -31,7 +32,7 @@ const useMoneyReceiptStore = create((set) => ({
             set({ loading: true });
             const result = await axios({
                 method: "get",
-                url: `http://localhost:3001/api/v1/money-receipt/get-money-receipt`,
+                url: `${baseURL.moneyreceipt}get-money-receipt`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -53,7 +54,7 @@ const useMoneyReceiptStore = create((set) => ({
             set({ downloadLoading: true });
             const result = await axios({
                 method: "get",
-                url: `http://localhost:3001/api/v1/money-receipt/generate-money-receipt-pdf/${id}`,
+                url: `${baseURL.moneyreceipt}generate-money-receipt-pdf/${id}`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -75,7 +76,7 @@ const useMoneyReceiptStore = create((set) => ({
             set({ loading: true });
             const res = await axios({
                 method: "post",
-                url: "http://localhost:3001/api/v1/money-receipt/create-money-receipt",
+                url: `${baseURL.moneyreceipt}create-money-receipt`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -98,7 +99,7 @@ const useMoneyReceiptStore = create((set) => ({
             set({ loading: true });
             const result = await axios({
                 method: "delete",
-                url: `http://localhost:3001/api/v1/money-receipt/delete-money-receipt/${id}`,
+                url: `${baseURL.moneyreceipt}delete-money-receipt/${id}`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -117,7 +118,7 @@ const useMoneyReceiptStore = create((set) => ({
             set({ loading: true });
             const result = await axios({
                 method: "put",
-                url: `http://localhost:3001/api/v1/money-receipt/update-money-receipt`,
+                url: `${baseURL.moneyreceipt}update-money-receipt`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -137,7 +138,7 @@ const useMoneyReceiptStore = create((set) => ({
             set({ downloadLoading: true });
             const result = await axios({
                 method: "get",
-                url: `http://localhost:3001/api/v1/money-receipt/print-money-receipt?id=${id}`,
+                url: `${baseURL.moneyreceipt}print-money-receipt?id=${id}`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -151,5 +152,6 @@ const useMoneyReceiptStore = create((set) => ({
         }
     },
 }));
+
 
 export default useMoneyReceiptStore;

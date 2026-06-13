@@ -20,6 +20,7 @@ module.exports = `
     ifse TEXT,
     branch TEXT,
     account_no TEXT,
+    logo TEXT,
 
     created_by INTEGER,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,

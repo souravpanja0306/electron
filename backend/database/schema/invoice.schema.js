@@ -7,7 +7,7 @@ module.exports = `
 
       ship_to TEXT,
       type TEXT,
-      invoice_no TEXT UNIQUE,
+      invoice_no TEXT,
       invoice_date TEXT,
       eway_bill TEXT,
       transporter TEXT,
