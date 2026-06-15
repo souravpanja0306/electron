@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from "axios";
-import { baseURL } from "../utils/baseUrl";
 
 const useHsnSacStore = create((set) => ({
     hsnData: [],
@@ -9,81 +8,57 @@ const useHsnSacStore = create((set) => ({
     getAllHsnSac: async (token) => {
         try {
             set({ loading: true });
-            const result = await axios({
-                method: "get",
-                url: `http://localhost:3001/api/v1/admin/get-hsn-code`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+            const result = await axios.get("http://localhost:3001/api/v1/admin/get-hsn-code", {
+                headers: { Authorization: `Bearer ${token}` }
             });
-            set({ hsnData: result.data, loading: false });
+            set({ hsnData: result.data.body || [], loading: false });
             return result.data;
         } catch (error) {
-            set({ loading: false });
-            throw error;
-        };
+            set({ loading: false, hsnData: [] });
+            return { status: 500, message: "Server Error" };
+        }
     },
 
     createHsnSac: async (payload, token) => {
         try {
             set({ loading: true });
-            const res = await axios({
-                method: "post",
-                url: `http://localhost:3001/api/v1/admin/create-hsn-code`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                data: payload,
+            const res = await axios.post("http://localhost:3001/api/v1/admin/create-hsn-code", payload, {
+                headers: { Authorization: `Bearer ${token}` }
             });
-            set((state) => ({
-                loading: false,
-            }));
+            set({ loading: false });
             return res.data;
         } catch (error) {
             set({ loading: false });
-            throw error;
-        };
+            return { status: 500, message: "Server Error" };
+        }
     },
 
     updateHsnSac: async (payload, token) => {
         try {
             set({ loading: true });
-            const res = await axios({
-                method: "put",
-                url: `http://localhost:3001/api/v1/admin/update-hsn-code`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                data: payload,
+            const res = await axios.put("http://localhost:3001/api/v1/admin/update-hsn-code", payload, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             set({ loading: false });
             return res.data;
         } catch (error) {
             set({ loading: false });
-            throw error;
-        };
+            return { status: 500, message: "Server Error" };
+        }
     },
 
     deleteHsnSac: async (id, token) => {
         try {
             set({ loading: true });
-            const res = await axios({
-                method: "delete",
-                url: `http://localhost:3001/api/v1/admin/delete-hsn-code/${id}`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+            const res = await axios.delete(`http://localhost:3001/api/v1/admin/delete-hsn-code/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             set({ loading: false });
             return res.data;
         } catch (error) {
             set({ loading: false });
-            throw error;
-        };
+            return { status: 500, message: "Server Error" };
+        }
     },
 }));
 

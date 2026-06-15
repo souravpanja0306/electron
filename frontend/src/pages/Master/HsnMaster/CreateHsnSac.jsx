@@ -33,8 +33,8 @@ const CreateHsnSac = () => {
 
     useEffect(() => {
         if (editId) {
-            if (hsnData?.body?.length) {
-                const editData = hsnData.body.find(item => item.id.toString() === editId);
+            if (hsnData?.length) {
+                const editData = hsnData.find(item => item.id.toString() === editId);
                 if (editData) {
                     setFormData({
                         code: editData.code,
@@ -54,25 +54,27 @@ const CreateHsnSac = () => {
     };
 
     const handleSubmit = async (e) => {
-        try {
-            e.preventDefault();
-            if (!formData.code) return toast.error("Code is required");
+        if (e) e.preventDefault();
+        if (!formData.code) return toast.error("Code is required");
 
-            const payload = {
-                ...formData,
-                gst_rate: parseFloat(formData.gst_rate) || 0
-            };
-            let res = await createHsnSac(payload, token);
+        const payload = { ...formData, gst_rate: parseFloat(formData.gst_rate) || 0 };
+        try {
+            let res;
+            if (editId) {
+                res = await updateHsnSac({ ...payload, id: editId }, token);
+            } else {
+                res = await createHsnSac(payload, token);
+            }
+
             if (res.status === 200) {
                 toast.success(res.message);
-                setFormData(initialState);
                 navigate("/view-hsn-sac");
             } else {
                 toast.error(res.message);
-            };
+            }
         } catch (error) {
             toast.error("Failed to save data");
-        };
+        }
     };
 
     return (

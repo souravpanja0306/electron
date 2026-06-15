@@ -22,10 +22,35 @@ const generateLicenseKey = () => {
     return crypto.randomBytes(16).toString("hex").match(/.{1,4}/g).join("-").toUpperCase();
 };
 
+exports.checkUsername = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { username } = req.params;
+        if (!username) return errorHandler(res, 400, "Username Required.");
+
+        let isUsernameExist = await UserService.findUsersInMongodb({ username: username });
+        if (isUsernameExist.length) {
+            response.status = 409;
+            response.message = "Username already taken, try another.";
+            response.body = { exists: true };
+        } else {
+            response.status = 200;
+            response.message = "Username is available.";
+            response.body = { exists: false };
+        };
+    } catch (error) {
+        console.log(`Something went wrong: controller: checkUsername: ${error}`);
+        response.status = 500;
+        response.message = "Internal Server Error";
+    };
+    return res.status(response.status).json(response);
+};
+
 exports.signup = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { name, mobile, email, username, password, machineId } = req.body;
+        console.log("🚀 ~ machineId:", machineId)
         if (!name) return errorHandler(res, 400, "name Required.");
         if (!mobile) return errorHandler(res, 400, "mobile Required.");
         if (!email) return errorHandler(res, 400, "email Required.");

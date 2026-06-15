@@ -52,7 +52,7 @@ const ViewHsnSac = () => {
         }
     };
 
-    const filteredData = hsnData?.body?.filter(item =>
+    const filteredData = hsnData?.filter(item =>
         item.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description?.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];

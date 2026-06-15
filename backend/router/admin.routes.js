@@ -18,6 +18,11 @@ router.post(
     AdminController.migrateTable
 );
 
+router.get(
+    "/dump-db",
+    AdminController.dumpDB
+);
+
 // HSN Create...
 router.post(
     "/create-hsn-code",

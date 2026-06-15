@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import axios from "axios";
-import { baseURL } from "../utils/baseUrl";
 
 const useGstStore = create((set) => ({
     gstData: [],
@@ -9,94 +8,58 @@ const useGstStore = create((set) => ({
     getAllGst: async (token) => {
         try {
             set({ gstLoading: true });
-            const result = await axios({
-                method: "get",
-                url: `http://localhost:3001/api/v1/admin/get-all-gst`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                validateStatus: (status) => status < 500,
+            const result = await axios.get("http://localhost:3001/api/v1/admin/get-all-gst", {
+                headers: { Authorization: `Bearer ${token}` }
             });
-            if (result.data.status === 200) {
-                set({ gstData: result.data.body, gstLoading: false });
-            } else {
-                set({ gstData: [], gstLoading: false });
-            };
+            set({ gstData: result.data.body || [], gstLoading: false });
             return result.data;
         } catch (error) {
-            set({ gstLoading: false });
-            throw error;
-        };
+            set({ gstLoading: false, gstData: [] });
+            return { status: 500, message: "Server Error" };
+        }
     },
 
-    createGst: async ({
-        data = "",
-        token = ""
-    }) => {
+    createGst: async ({ data, token }) => {
         try {
             set({ gstLoading: true });
-            const res = await axios({
-                method: "post",
-                url: `http://localhost:3001/api/v1/admin/create-gst`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                data: data,
-            });
-            set((state) => ({
-                gstLoading: false,
-            }));
-            return res.data;
-        } catch (error) {
-            set({ gstLoading: false });
-            throw error;
-        };
-    },
-
-    updateGst: async ({
-        data = "",
-        token = ""
-    }) => {
-        try {
-            set({ gstLoading: true });
-            const res = await axios({
-                method: "put",
-                url: `http://localhost:3001/api/v1/admin/update-gst`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                data: data,
+            const res = await axios.post("http://localhost:3001/api/v1/admin/create-gst", data, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             set({ gstLoading: false });
             return res.data;
         } catch (error) {
             set({ gstLoading: false });
-            throw error;
-        };
+            return { status: 500, message: "Server Error" };
+        }
+    },
+
+    updateGst: async ({ data, token }) => {
+        try {
+            set({ gstLoading: true });
+            const res = await axios.put("http://localhost:3001/api/v1/admin/update-gst", data, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            set({ gstLoading: false });
+            return res.data;
+        } catch (error) {
+            set({ gstLoading: false });
+            return { status: 500, message: "Server Error" };
+        }
     },
 
     deleteGst: async (id, token) => {
         try {
             set({ gstLoading: true });
-            const res = await axios({
-                method: "delete",
-                url: `http://localhost:3001/api/v1/admin/delete-gst/${id}`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+            const res = await axios.delete(`http://localhost:3001/api/v1/admin/delete-gst/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             set({ gstLoading: false });
             return res.data;
         } catch (error) {
             set({ gstLoading: false });
-            throw error;
-        };
+            return { status: 500, message: "Server Error" };
+        }
     },
 }));
 
 export default useGstStore;
-

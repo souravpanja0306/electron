@@ -3,8 +3,14 @@ import PageTitle from '../components/PageTitle';
 import ActionArea from '../components/ActionArea';
 import MainArea from '../components/MainArea';
 import CustomToggle from '../components/CustomToggle';
+import { toast } from 'sonner';
+import { dumpDatabase, resetAllTables } from '../services/adminService';
+import useAuthStore from '../store/AuthStore';
+import CustomButton from '../components/CustomButton';
+import { AiOutlineDownload, AiOutlineDelete } from 'react-icons/ai';
 
 const Setting = () => {
+    const { token, authToken } = useAuthStore();
     const [prefix, setPrefix] = useState("");
     const [suffix, setSuffix] = useState("");
     const [active, setActive] = useState(0);
@@ -21,6 +27,7 @@ const Setting = () => {
 
     useEffect(() => {
         getThemeData();
+        authToken();
     }, []);
 
     useEffect(() => {
@@ -40,28 +47,61 @@ const Setting = () => {
         await window.api?.setItem("theme", newTheme);
     };
 
+    const handleDumpDB = async () => {
+        try {
+            await dumpDatabase();
+            toast.success("Database backup started.");
+        } catch (error) {
+            toast.error("Failed to dump database.");
+        }
+    };
+
+    const handleResetDB = async () => {
+        if (window.confirm("Are you sure you want to reset ALL tables? This cannot be undone.")) {
+            try {
+                // Assuming we want to reset common tables, or maybe the backend handles "all" if we pass something specific
+                // For now, let's assume we need to list them or the backend needs a specific trigger.
+                // The current backend reset-all-table takes tableNames and drops them.
+                // If the user wants to "Dump" meaning clear, maybe they want to clear everything.
+                const tablesToReset = "parties,invoices,challans,money_receipts,gst,hsn_sac"; 
+                const res = await resetAllTables(token, tablesToReset);
+                if (res.status === 200) {
+                    toast.success(res.message);
+                } else {
+                    toast.error(res.message);
+                }
+            } catch (error) {
+                toast.error("Failed to reset database.");
+            }
+        }
+    };
+
     return (
         <div className='flex flex-col gap-1'>
             <PageTitle>Settings</PageTitle>
-            <div className="flex border-slate-700">
+            <div className="flex border-slate-700 overflow-x-auto">
                 <span
                     onClick={() => setActive(0)}
-                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 0 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition whitespace-nowrap ${active === 0 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
                 >Appearance/Theme</span>
                 <span
                     onClick={() => setActive(1)}
-                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 1 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition whitespace-nowrap ${active === 1 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
                 >Invoice Setup
                 </span>
                 <span
                     onClick={() => setActive(2)}
-                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 2 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition whitespace-nowrap ${active === 2 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
                 >Challan Setup
                 </span>
                 <span
                     onClick={() => setActive(3)}
-                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 3 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition whitespace-nowrap ${active === 3 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
                 >Print Setup</span>
+                <span
+                    onClick={() => setActive(4)}
+                    className={`cursor-pointer px-4 py-2 text-sm font-medium transition whitespace-nowrap ${active === 4 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
+                >Database</span>
             </div>
 
             {active === 0 &&
@@ -157,36 +197,6 @@ const Setting = () => {
                             // onChange={setGstType}
                             />
                         </div>
-
-                        {/* Show Discount */}
-                        {/* <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                            <div>
-                                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Show Discount</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Show discount column in invoice</p>
-                            </div>
-                            <CustomToggle
-                                activeColor="green"
-                                inactiveColor="blue"
-                                option={["Yes", "No"]}
-                            // value={showDiscount}
-                            // onChange={setShowDiscount}
-                            />
-                        </div> */}
-
-                        {/* Show Shipping */}
-                        {/* <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                            <div>
-                                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Show Shipping Charges</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Add shipping charges to invoice</p>
-                            </div>
-                            <CustomToggle
-                                activeColor="green"
-                                inactiveColor="blue"
-                                option={["Yes", "No"]}
-                            // value={showShipping}
-                            // onChange={setShowShipping}
-                            />
-                        </div> */}
 
                         {/* Show Signature */}
                         <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
@@ -295,36 +305,6 @@ const Setting = () => {
                             />
                         </div>
 
-                        {/* Show Discount */}
-                        {/* <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                            <div>
-                                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Show Discount</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Show discount column in invoice</p>
-                            </div>
-                            <CustomToggle
-                                activeColor="green"
-                                inactiveColor="blue"
-                                option={["Yes", "No"]}
-                            // value={showDiscount}
-                            // onChange={setShowDiscount}
-                            />
-                        </div> */}
-
-                        {/* Show Shipping */}
-                        {/* <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                            <div>
-                                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Show Shipping Charges</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Add shipping charges to invoice</p>
-                            </div>
-                            <CustomToggle
-                                activeColor="green"
-                                inactiveColor="blue"
-                                option={["Yes", "No"]}
-                            // value={showShipping}
-                            // onChange={setShowShipping}
-                            />
-                        </div> */}
-
                         {/* Show Signature */}
                         <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
                             <div>
@@ -378,6 +358,39 @@ const Setting = () => {
                         </div>
                         <div className="rounded border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
                             More settings coming soon…
+                        </div>
+                    </div>
+                </MainArea>
+            }
+            {active === 4 &&
+                <MainArea>
+                    <div className="w-full max-w-xl space-y-1">
+                        <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
+                            <div>
+                                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Backup Database</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Download the current database file for backup</p>
+                            </div>
+                            <div onClick={handleDumpDB}>
+                                <CustomButton title="Export DB" color="blue">
+                                    <AiOutlineDownload />
+                                </CustomButton>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded border border-red-300 dark:border-red-900 bg-red-50 dark:bg-red-900/10 p-4">
+                            <div>
+                                <p className="text-sm font-medium text-red-800 dark:text-red-400">Reset All Data</p>
+                                <p className="text-xs text-red-500 dark:text-red-500/70">Danger: This will delete all your records permanently.</p>
+                            </div>
+                            <div onClick={handleResetDB}>
+                                <CustomButton title="Reset DB" color="red">
+                                    <AiOutlineDelete />
+                                </CustomButton>
+                            </div>
+                        </div>
+
+                        <div className="rounded border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
+                            Manage your database records and schema here.
                         </div>
                     </div>
                 </MainArea>

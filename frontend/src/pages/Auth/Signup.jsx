@@ -7,31 +7,67 @@ import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 
 const Signup = () => {
     const navigate = useNavigate();
-    const { signinData, signup, signinLoading } = useAuthStore(); // Store...
-    const [data, setData] = useState({ name: "", mobile: "", mobile: "", username: "", password: "", machineId: "" });
+    const { signup, checkUsername, usernameExists, signinLoading } = useAuthStore();
+    const [data, setData] = useState({ name: "", mobile: "", email: "", username: "", password: "", machineId: "" });
+    const [usernameMsg, setUsernameMsg] = useState("");
 
-    const getMachineIdFromLocal = async () => {
-        let MACHINE_ID = await window.api.getMachineId();
-        setData({ ...data, machineId: MACHINE_ID })
-    };
     useEffect(() => {
-        getMachineIdFromLocal();
+        const getMachineId = async () => {
+            try {
+                const MACHINE_ID = await window.api?.getMachineId();
+                if (MACHINE_ID) {
+                    setData(prev => ({ ...prev, machineId: MACHINE_ID }));
+                }
+            } catch (err) {
+                console.error("Failed to get machine ID", err);
+            }
+        };
+        getMachineId();
     }, []);
 
-    const handleSubmitSignup = async (e) => {
+    const handleKeyUpUsername = async (e) => {
+        const val = e.target.value;
+        if (!val) {
+            setUsernameMsg("");
+            return;
+        }
         try {
-            e.preventDefault();
+            const res = await checkUsername(val);
+            if (res.status === 409) {
+                setUsernameMsg(res.message);
+            } else {
+                setUsernameMsg("");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleSubmitSignup = async (e) => {
+        e.preventDefault();
+        if (signinLoading) return;
+        
+        if (usernameExists) {
+            return toast.error("Username already taken. Please choose another.");
+        }
+
+        if (!data.machineId) {
+            return toast.error("Hardware ID not found. Please restart the app.");
+        }
+
+        try {
             let result = await signup(data);
             if (result.status === 200) {
                 window.api?.setItem("token", result.body.token);
                 window.api?.setItem("user", JSON.stringify(result.body));
                 navigate("/");
-                toast(result.message, { theme: "dark" });
+                toast.success(result.message);
             } else {
-                toast(result.message, { theme: "dark" });
+                toast.error(result.message);
             };
         } catch (error) {
-            console.log(error)
+            console.error(error);
+            toast.error("An unexpected error occurred. Please try again.");
         };
     };
     return (
@@ -77,15 +113,15 @@ const Signup = () => {
 
             {/* Main Screen */}
             <div className="min-h-[calc(100vh-2.5rem)] w-full bg-slate-900 flex justify-center items-center select-none">
-                <div className="w-[380px] bg-slate-800 rounded-xl shadow-lg shadow-black/40 p-6">
+                <div className="w-[380px] bg-slate-800 rounded-xl shadow-lg shadow-black/40 p-6 border border-slate-700">
 
                     <h1 className="text-white text-center text-2xl font-semibold mb-4">Sign up</h1>
 
-                    <form className="flex flex-col gap-4" onSubmit={(e) => handleSubmitSignup(e)}>
+                    <form className="flex flex-col gap-4" onSubmit={handleSubmitSignup}>
                         <div className="flex flex-col gap-1">
                             <label className="text-slate-400 text-xs uppercase">Name</label>
                             <input
-                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-1 focus:ring-blue-600"
                                 placeholder="Enter full name"
                                 value={data.name}
                                 type="text"
@@ -96,7 +132,7 @@ const Signup = () => {
                         <div className="flex flex-col gap-1">
                             <label className="text-slate-400 text-xs uppercase">Mobile</label>
                             <input
-                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-1 focus:ring-blue-600"
                                 placeholder="Enter mobile number"
                                 value={data.mobile}
                                 maxLength={10}
@@ -108,7 +144,7 @@ const Signup = () => {
                         <div className="flex flex-col gap-1">
                             <label className="text-slate-400 text-xs uppercase">Email</label>
                             <input
-                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-1 focus:ring-blue-600"
                                 placeholder="Enter email"
                                 value={data.email}
                                 type="email"
@@ -116,21 +152,27 @@ const Signup = () => {
                                 required
                             />
                         </div>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1 relative">
                             <label className="text-slate-400 text-xs uppercase">Username</label>
                             <input
-                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className={`px-3 py-2 rounded bg-slate-900 border ${usernameMsg ? 'border-red-500' : 'border-slate-700'} text-white focus:outline-none focus:ring-1 focus:ring-blue-600`}
                                 placeholder="Choose username"
                                 value={data.username}
                                 type="text"
                                 onChange={(e) => setData({ ...data, username: e.target.value })}
+                                onKeyUp={handleKeyUpUsername}
                                 required
                             />
+                            {usernameMsg && (
+                                <p className="text-red-500 text-[10px] absolute -bottom-4 right-0 font-medium">
+                                    {usernameMsg}
+                                </p>
+                            )}
                         </div>
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1 mt-1">
                             <label className="text-slate-400 text-xs uppercase">Password</label>
                             <input
-                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-1 focus:ring-blue-600"
                                 placeholder="Create password"
                                 value={data.password}
                                 type="password"
@@ -139,8 +181,14 @@ const Signup = () => {
                             />
                         </div>
 
-                        <button type="submit" className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition-all">
-                            Sign up
+                        <button 
+                            type="submit" 
+                            disabled={signinLoading}
+                            className={`mt-2 ${signinLoading ? 'bg-blue-800 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white font-medium py-2 rounded transition-all flex justify-center items-center`}
+                        >
+                            {signinLoading ? (
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            ) : "Sign up"}
                         </button>
 
                         <div className="text-center text-xs text-slate-400 mt-1">

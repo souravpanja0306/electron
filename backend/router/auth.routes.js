@@ -29,6 +29,11 @@ router.get(
 );
 
 router.get(
+    "/check-username/:username",
+    AuthController.checkUsername
+);
+
+router.get(
     "/view-profile",
     middleware.isAuthenticated,
     AuthController.viewProfile

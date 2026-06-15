@@ -1,5 +1,7 @@
 // Package...
 const moment = require("moment");
+const fs = require("fs");
+const path = require("path");
 
 // Contents...
 const contents = require("../content/contents");
@@ -11,8 +13,28 @@ const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
 
+// DB Connection...
+const { dbPath } = require("../database/connection");
+
 const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
+};
+
+exports.dumpDB = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        if (!fs.existsSync(dbPath)) {
+            return errorHandler(res, 404, "Database file not found.");
+        };
+        res.download(dbPath, "backup.db");
+        response.status = 200;
+        response.message = "Database backed up Sucessfully";
+        response.body = [];
+    } catch (error) {
+        console.log(`Something went wrong: controller: dumpDB: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
 };
 
 exports.resetAllTable = async (req, res) => {

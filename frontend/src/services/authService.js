@@ -47,3 +47,17 @@ export const signupUser = async (payload) => {
         throw error;
     };
 };
+
+export const checkUsernameAvailability = async (username) => {
+    try {
+        let response = await axios({
+            method: "get",
+            url: `http://localhost:3001/api/v1/auth/check-username/${username}`,
+            validateStatus: (status) => status < 500,
+        });
+        return response.data;
+    } catch (error) {
+        console.log("Something went wrong", error);
+        throw error;
+    };
+};

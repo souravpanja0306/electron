@@ -26,4 +26,4 @@ const dbPath = app.isPackaged
 
 const db = new Database(dbPath);
 
-module.exports = { connectMongo, db };
+module.exports = { connectMongo, db, dbPath };
