@@ -122,16 +122,16 @@ const MenuMap = {
                 { title: "View All GST", url: "/view-gst", icon: <AiOutlinePercentage /> },
             ]
         },
-        {
-            type: "main",
-            title: "Vehicle",
-            url: "#",
-            icon: <AiOutlineDiff />,
-            submenu: [
-                { title: "Add Vehicle", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
-                { title: "View Vehicles", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
-            ]
-        },
+        // {
+        //     type: "main",
+        //     title: "Vehicle",
+        //     url: "#",
+        //     icon: <AiOutlineDiff />,
+        //     submenu: [
+        //         { title: "Add Vehicle", url: "/create-invoice", icon: <AiOutlinePlusSquare /> },
+        //         { title: "View Vehicles", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
+        //     ]
+        // },
     ],
     "settings": [
         { title: "Profile", url: "/profile", icon: <AiOutlineUser /> },

@@ -16,7 +16,7 @@
     "productName": "Billing Software",
     "win": {
       "target": "nsis",
-      "icon": "./public/icon/truck.ico"
+      "icon": "./public/icon/zero.ico"
     }
   },
   "dependencies": {

@@ -18,12 +18,12 @@ import useAuthStore from '../../../store/AuthStore';
 const CompanyCreate = () => {
     const { authToken, token } = useAuthStore();
     const { companyData, createCompany, getAllCompany, companyLoading } = useCompanyStore();
-    const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
 
     const navigate = useNavigate();
 
+    const [active, setActive] = useState(0);
     const [alart, setAlart] = useState({ show: false });
     const [logo, setLogo] = useState(null);
     const [logoPreview, setLogoPreview] = useState(null);
@@ -485,7 +485,7 @@ const CompanyCreate = () => {
                     </div>
                 </form>
             </div >
-           
+
         </>
     )
 }

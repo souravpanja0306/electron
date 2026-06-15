@@ -18,15 +18,16 @@ exports.findInvoices = async ({
     id = "",
     created_by = "",
     invoice_no = "",
-    mobile = "",
-    email = "",
+    startDate = "",
+    endDate = "",
+    search = "",
     limit = "",
     skip = "",
     count = false,
 }) => {
     try {
         db.exec(require("../database/schema/invoice.schema"));
-        let query = "SELECT * FROM invoice WHERE 1=1";
+        let query = "SELECT * FROM invoice WHERE is_deleted = 0";
         let params = [];
 
         if (id) {
@@ -44,22 +45,35 @@ exports.findInvoices = async ({
             params.push(invoice_no);
         };
 
-        if (mobile) {
-            query += " AND mobile = ?";
-            params.push(mobile);
-        };
+        if (startDate && endDate) {
+            query += " AND invoice_date BETWEEN ? AND ?";
+            params.push(startDate, endDate);
+        } else if (startDate) {
+            query += " AND invoice_date >= ?";
+            params.push(startDate);
+        } else if (endDate) {
+            query += " AND invoice_date <= ?";
+            params.push(endDate);
+        }
 
-        if (email) {
-            query += " AND email = ?";
-            params.push(email);
-        };
+        if (search) {
+            query += " AND (invoice_no LIKE ? OR transporter LIKE ? OR lorry_no LIKE ? OR lr_no LIKE ?)";
+            const searchParam = `%${search}%`;
+            params.push(searchParam, searchParam, searchParam, searchParam);
+        }
+
+        query += " ORDER BY id DESC";
 
         if (limit && skip) {
             query += " LIMIT ? OFFSET ?";
             params.push(Number(limit), Number(skip));
-        };
+        } else if (limit) {
+            query += " LIMIT ?";
+            params.push(Number(limit));
+        }
+
         if (count) {
-            const countQuery = query.replace("SELECT *", "SELECT COUNT(*) AS total");
+            const countQuery = `SELECT COUNT(*) AS total FROM (${query})`;
             let result = db.prepare(countQuery).all(...params);
             return result[0].total;
         };
@@ -77,7 +91,7 @@ module.exports.deleteInvoices = async ({
         db.exec(require("../database/schema/invoice.schema"));
         if (id) {
             const result = db
-                .prepare("DELETE FROM invoice WHERE id = ?")
+                .prepare("UPDATE invoice SET is_deleted = 1 WHERE id = ?")
                 .run(id);
             return { deleted: result.changes };
         };
@@ -85,6 +99,7 @@ module.exports.deleteInvoices = async ({
         console.log(error);
     };
 };
+
 
 exports.updateInvoiceData = async (id, data) => {
     try {

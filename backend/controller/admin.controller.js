@@ -146,6 +146,58 @@ module.exports.getHsnSac = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
+module.exports.updateHsnSac = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { id, code, description, gst_rate, type } = req.body;
+        if (!id) return errorHandler(res, 400, "ID is required.");
+
+        let updateData = {
+            code,
+            type,
+            description,
+            gst_rate
+        };
+
+        let result = await AdminService.updateHSNSAC(id, updateData);
+        if (result.changes) {
+            response.status = 200;
+            response.message = "Data Updated Successfully.";
+            response.body = result;
+        } else {
+            response.status = 202;
+            response.message = "No changes made or data not found.";
+        }
+    } catch (error) {
+        console.log(`Something went wrong: controller: updateHsnSac: ${error}`);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
+    }
+    return res.status(response.status).json(response);
+};
+
+module.exports.deleteHsnSac = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { id } = req.params;
+        if (!id) return errorHandler(res, 400, "ID is required.");
+
+        let result = await AdminService.deleteHSNSAC(id);
+        if (result.changes) {
+            response.status = 200;
+            response.message = "Data Deleted Successfully.";
+        } else {
+            response.status = 202;
+            response.message = "Data not found.";
+        }
+    } catch (error) {
+        console.log(`Something went wrong: controller: deleteHsnSac: ${error}`);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
+    }
+    return res.status(response.status).json(response);
+};
+
 module.exports.createGST = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
@@ -233,5 +285,59 @@ module.exports.getGST = async (req, res) => {
         response.message = error.message ? error.message : `Something went wrong: controller: getGST`;
         response.body = error.body ? error.body : "";
     };
+    return res.status(response.status).json(response);
+};
+
+module.exports.updateGST = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { id, title, total_rate, cgst, sgst, igst, type } = req.body;
+        if (!id) return errorHandler(res, 400, "ID is required.");
+
+        let updateData = {
+            title,
+            total_rate,
+            cgst,
+            sgst,
+            igst,
+            type
+        };
+
+        let result = await AdminService.updateGST(id, updateData);
+        if (result.changes) {
+            response.status = 200;
+            response.message = "Data Updated Successfully.";
+            response.body = result;
+        } else {
+            response.status = 202;
+            response.message = "No changes made or data not found.";
+        }
+    } catch (error) {
+        console.log(`Something went wrong: controller: updateGST: ${error}`);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
+    }
+    return res.status(response.status).json(response);
+};
+
+module.exports.deleteGST = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { id } = req.params;
+        if (!id) return errorHandler(res, 400, "ID is required.");
+
+        let result = await AdminService.deleteGST(id);
+        if (result.changes) {
+            response.status = 200;
+            response.message = "Data Deleted Successfully.";
+        } else {
+            response.status = 202;
+            response.message = "Data not found.";
+        }
+    } catch (error) {
+        console.log(`Something went wrong: controller: deleteGST: ${error}`);
+        response.status = 500;
+        response.message = error.message || "Internal Server Error";
+    }
     return res.status(response.status).json(response);
 };

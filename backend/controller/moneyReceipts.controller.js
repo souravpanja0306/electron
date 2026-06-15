@@ -145,9 +145,9 @@ module.exports.getMoneyReceipt = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId, t_mobile, t_username, t_name } = req.body;
-        const { id } = req.query;
+        const { id, startDate, endDate, search } = req.query;
 
-        let search_key = {};
+        let search_key = { startDate, endDate, search };
         if (id) search_key["id"] = id;
         if (t_userId) search_key["created_by"] = t_userId.toString();
 

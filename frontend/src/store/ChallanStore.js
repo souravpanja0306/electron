@@ -7,13 +7,19 @@ const useChallanStore = create((set) => ({
     challanLoading: false,
     challanNo: "",
 
-    getAllChallan: async ({ id = "", token = "" }) => {
+    getAllChallan: async ({ id = "", token = "", startDate = "", endDate = "", search = "" }) => {
         try {
             set({ challanLoading: true });
-            let queries = id ? `?id=${id}` : "";
+            let queries = [];
+            if (id) queries.push(`id=${id}`);
+            if (startDate) queries.push(`startDate=${startDate}`);
+            if (endDate) queries.push(`endDate=${endDate}`);
+            if (search) queries.push(`search=${search}`);
+            
+            let queryStr = queries.length ? `?${queries.join("&")}` : "";
             let result = await axios({
                 method: 'get',
-                url: `${baseURL.challan}list${queries}`,
+                url: `${baseURL.challan}list${queryStr}`,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`

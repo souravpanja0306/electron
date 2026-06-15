@@ -65,7 +65,7 @@ exports.findHSNSAC = async ({
 }) => {
     try {
         db.exec(require("../database/schema/hsn.schema"));
-        let query = "SELECT * FROM hsn_sac WHERE 1=1";
+        let query = "SELECT * FROM hsn_sac WHERE is_deleted = 0";
         let params = [];
 
         if (id) {
@@ -104,6 +104,32 @@ exports.findHSNSAC = async ({
     };
 };
 
+exports.updateHSNSAC = async (id, data) => {
+    try {
+        db.exec(require("../database/schema/hsn.schema"));
+        const keys = Object.keys(data);
+        const setClause = keys.map(k => `${k} = @${k}`).join(", ");
+        const result = db
+            .prepare(`UPDATE hsn_sac SET ${setClause} WHERE id = @id`)
+            .run({ ...data, id });
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: updateHSNSAC: ${error}`);
+    };
+};
+
+exports.deleteHSNSAC = async (id) => {
+    try {
+        db.exec(require("../database/schema/hsn.schema"));
+        const result = db
+            .prepare("UPDATE hsn_sac SET is_deleted = 1 WHERE id = ?")
+            .run(id);
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: deleteHSNSAC: ${error}`);
+    };
+};
+
 exports.createGST = async (data) => {
     try {
         db.exec(require("../database/schema/gst.schema"));
@@ -128,7 +154,7 @@ exports.findGST = async ({
 }) => {
     try {
         db.exec(require("../database/schema/gst.schema"));
-        let query = "SELECT * FROM gst WHERE 1=1";
+        let query = "SELECT * FROM gst WHERE is_deleted = 0";
         let params = [];
 
         if (id) {
@@ -151,7 +177,7 @@ exports.findGST = async ({
             params.push(Number(limit), Number(skip));
         };
         if (count) {
-            let query = `SELECT COUNT(*) AS total FROM gst;`
+            let query = `SELECT COUNT(*) AS total FROM gst WHERE is_deleted = 0;`
             let result = db.prepare(query).all(...params);
             return result[0].total;
         };
@@ -159,5 +185,31 @@ exports.findGST = async ({
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: findGST: ${error}`);
+    };
+};
+
+exports.updateGST = async (id, data) => {
+    try {
+        db.exec(require("../database/schema/gst.schema"));
+        const keys = Object.keys(data);
+        const setClause = keys.map(k => `${k} = @${k}`).join(", ");
+        const result = db
+            .prepare(`UPDATE gst SET ${setClause} WHERE id = @id`)
+            .run({ ...data, id });
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: updateGST: ${error}`);
+    };
+};
+
+exports.deleteGST = async (id) => {
+    try {
+        db.exec(require("../database/schema/gst.schema"));
+        const result = db
+            .prepare("UPDATE gst SET is_deleted = 1 WHERE id = ?")
+            .run(id);
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: deleteGST: ${error}`);
     };
 };

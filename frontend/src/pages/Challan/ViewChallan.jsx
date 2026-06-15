@@ -34,11 +34,20 @@ const ViewChallan = () => {
     const { challanData, challanLoading, getAllChallan, deleteChallan, printChallan } = useChallanStore();
     const [page, setPage] = useState(1);
     const [checkedIds, setCheckedIds] = useState(null);
+    const [filters, setFilters] = useState({
+        startDate: "",
+        endDate: "",
+        search: ""
+    });
 
     useEffect(() => {
         authToken();
-        getAllChallan({ token: token });
-    }, []);
+        getAllChallan({ token: token, ...filters });
+    }, [filters]);
+
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
 
     const handleChecked = (e, id) => {
         setCheckedIds(null);
@@ -66,6 +75,7 @@ const ViewChallan = () => {
     };
 
     const handleRefresh = () => {
+        setFilters({ startDate: "", endDate: "", search: "" });
         getAllChallan({ token: token });
         toast.info("Data refreshed.", { theme: "dark" });
     };
@@ -121,7 +131,7 @@ const ViewChallan = () => {
             <PageTitle>View All Challans</PageTitle>
             <div className='flex flex-col gap-1'>
                 <ActionArea>
-                    <div className="flex justify-between w-full">
+                    <div className="flex flex-col md:flex-row justify-between w-full gap-2">
                         <div className="flex gap-1">
                             {
                                 back ?
@@ -137,12 +147,37 @@ const ViewChallan = () => {
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                             </div>
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1">
+                                <label className="text-xs font-semibold">From:</label>
+                                <input
+                                    type="date"
+                                    name="startDate"
+                                    value={filters.startDate}
+                                    onChange={handleFilterChange}
+                                    className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs"
+                                />
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <label className="text-xs font-semibold">To:</label>
+                                <input
+                                    type="date"
+                                    name="endDate"
+                                    value={filters.endDate}
+                                    onChange={handleFilterChange}
+                                    className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs"
+                                />
+                            </div>
+                            <input
+                                type="text"
+                                name="search"
+                                placeholder="Search C/N, Truck..."
+                                value={filters.search}
+                                onChange={handleFilterChange}
+                                className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs w-32 md:w-48"
+                            />
                             <div onClick={handleRefresh}>
                                 <CustomButton title={"Refresh"} color={"blue"}><AiOutlineSync /></CustomButton>
-                            </div>
-                            <div>
-                                <CustomButton title={"Filter"} color={"blue"}><AiOutlineFilter /></CustomButton>
                             </div>
                         </div>
                     </div>

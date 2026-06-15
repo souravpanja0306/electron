@@ -34,16 +34,23 @@ const useInvoiceStore = create((set) => ({
     getAllInvoice: async ({
         id = "",
         token = "",
+        startDate = "",
+        endDate = "",
+        search = ""
     }) => {
         try {
             set({ invoiceLoading: true });
-            let queries = `?`;
-            if (id) queries += `id=${id}`;
-
+            let queries = [];
+            if (id) queries.push(`id=${id}`);
+            if (startDate) queries.push(`startDate=${startDate}`);
+            if (endDate) queries.push(`endDate=${endDate}`);
+            if (search) queries.push(`search=${search}`);
+            
+            let queryStr = queries.length ? `?${queries.join("&")}` : "";
             let result = await axios({
                 method: 'get',
                 maxBodyLength: Infinity,
-                url: `${baseURL.invoice}invoice-list${queries}`,
+                url: `${baseURL.invoice}invoice-list${queryStr}`,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`

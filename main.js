@@ -11,7 +11,7 @@ const store = new Store();
 require("./server.js");
 app.whenReady().then(() => {
     validateLicense();
-    const iconPath = path.join(__dirname, "./public/icon/truck.png");
+    const iconPath = path.join(__dirname, "./public/icon/zero.png");
     const win = new BrowserWindow({
         frame: false,
         titleBarStyle: "hidden",

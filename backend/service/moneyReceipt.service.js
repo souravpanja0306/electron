@@ -19,13 +19,16 @@ exports.findMoneyReceipts = async ({
     id = "",
     created_by = "",
     receipt_no = "",
+    startDate = "",
+    endDate = "",
+    search = "",
     limit = "",
     skip = "",
     count = false,
 }) => {
     try {
         db.exec(require("../database/schema/moneyReceipts.schema"));
-        let query = "SELECT * FROM money_receipts WHERE 1=1";
+        let query = "SELECT * FROM money_receipts WHERE is_deleted = 0";
         let params = [];
 
         if (id) {
@@ -43,12 +46,35 @@ exports.findMoneyReceipts = async ({
             params.push(receipt_no);
         };
 
+        if (startDate && endDate) {
+            query += " AND receipt_date BETWEEN ? AND ?";
+            params.push(startDate, endDate);
+        } else if (startDate) {
+            query += " AND receipt_date >= ?";
+            params.push(startDate);
+        } else if (endDate) {
+            query += " AND receipt_date <= ?";
+            params.push(endDate);
+        }
+
+        if (search) {
+            query += " AND (receipt_no LIKE ? OR remarks LIKE ? OR payment_mode LIKE ? OR reference LIKE ?)";
+            const searchParam = `%${search}%`;
+            params.push(searchParam, searchParam, searchParam, searchParam);
+        }
+
+        query += " ORDER BY id DESC";
+
         if (limit && skip) {
             query += " LIMIT ? OFFSET ?";
             params.push(Number(limit), Number(skip));
-        };
+        } else if (limit) {
+            query += " LIMIT ?";
+            params.push(Number(limit));
+        }
+
         if (count) {
-            const countQuery = query.replace("SELECT *", "SELECT COUNT(*) AS total");
+            const countQuery = `SELECT COUNT(*) AS total FROM (${query})`;
             let result = db.prepare(countQuery).all(...params);
             return result[0].total;
         };
@@ -66,7 +92,7 @@ module.exports.deleteMoneyReceipt = async ({
         db.exec(require("../database/schema/moneyReceipts.schema"));
         if (!id) throw new Error("ID is required");
 
-        let query = "DELETE FROM money_receipts WHERE id = ?";
+        let query = "UPDATE money_receipts SET is_deleted = 1 WHERE id = ?";
         let result = db.prepare(query).run(id);
 
         return { success: true, deleted: result.changes };
@@ -75,6 +101,7 @@ module.exports.deleteMoneyReceipt = async ({
         return { success: false, deleted: "" }
     };
 };
+
 
 exports.updateMoneyReceiptData = async (id, data) => {
     try {

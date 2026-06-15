@@ -31,6 +31,18 @@ router.get(
     AdminController.getHsnSac
 );
 
+router.put(
+    "/update-hsn-code",
+    middleware.isAuthenticated,
+    AdminController.updateHsnSac
+);
+
+router.delete(
+    "/delete-hsn-code/:id",
+    middleware.isAuthenticated,
+    AdminController.deleteHsnSac
+);
+
 // GST setup
 router.post(
     "/create-gst",
@@ -42,6 +54,18 @@ router.get(
     "/get-all-gst",
     middleware.isAuthenticated,
     AdminController.getGST
+);
+
+router.put(
+    "/update-gst",
+    middleware.isAuthenticated,
+    AdminController.updateGST
+);
+
+router.delete(
+    "/delete-gst/:id",
+    middleware.isAuthenticated,
+    AdminController.deleteGST
 );
 
 module.exports = router;

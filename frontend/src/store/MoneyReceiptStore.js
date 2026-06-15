@@ -27,12 +27,18 @@ const useMoneyReceiptStore = create((set) => ({
         };
     },
 
-    getAllMoneyReceipts: async (token) => {
+    getAllMoneyReceipts: async (token, startDate = "", endDate = "", search = "") => {
         try {
             set({ loading: true });
+            let queries = [];
+            if (startDate) queries.push(`startDate=${startDate}`);
+            if (endDate) queries.push(`endDate=${endDate}`);
+            if (search) queries.push(`search=${search}`);
+            
+            let queryStr = queries.length ? `?${queries.join("&")}` : "";
             const result = await axios({
                 method: "get",
-                url: `${baseURL.moneyreceipt}get-money-receipt`,
+                url: `${baseURL.moneyreceipt}get-money-receipt${queryStr}`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
