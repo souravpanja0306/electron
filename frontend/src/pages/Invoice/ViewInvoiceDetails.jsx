@@ -216,18 +216,21 @@ const ViewInvoiceDetails = () => {
     };
 
     const handleDelete = async () => {
-        try {
-            if (!invoiceId) return;
-            let result = await deleteInvoice({ id: invoiceId, token: token });
-            if (result.status === 200) {
-                toast.success(result.message);
-                navigate("/view-invoice");
-            } else {
-                toast.error(result.message);
-            }
-        } catch (error) {
-            console.log(error);
-        }
+        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
+            try {
+                if (!invoiceId) return;
+                let result = await deleteInvoice({ id: invoiceId, token: token });
+                if (result.status === 200) {
+                    toast.success(result.message);
+                    navigate("/view-invoice");
+                } else {
+                    toast.error(result.message);
+                };
+            } catch (error) {
+                console.log(error);
+                toast.error(error.message);
+            };
+        };
     };
 
     const handlePrint = async () => {
@@ -243,7 +246,8 @@ const ViewInvoiceDetails = () => {
             }
         } catch (error) {
             console.log(error);
-        }
+            toast.error(error.message);
+        };
     };
 
     return (
@@ -259,9 +263,6 @@ const ViewInvoiceDetails = () => {
                             <div onClick={handleUpdate}>
                                 <CustomButton title={"Update (Ctrl+S)"} color={"blue"}><AiOutlineSave /></CustomButton>
                             </div>
-                            <Link to="/view-invoice">
-                                <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-                            </Link>
                             <div onClick={handlePrint}>
                                 <CustomButton title={"Print (Ctrl+P)"} color={"blue"}><AiOutlinePrinter /></CustomButton>
                             </div>
@@ -633,7 +634,7 @@ const ViewInvoiceDetails = () => {
                     </div>
                 </div>
             </div>
-          
+
         </>
     );
 };

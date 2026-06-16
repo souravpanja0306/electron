@@ -56,24 +56,26 @@ const ViewCompany = () => {
     };
 
     const handleDelete = async () => {
-        try {
-            if (!checkedIds.length) {
-                toast.warning("Please select an item to delete.");
-                return;
-            }
-            if (window.confirm("Are you sure you want to delete selected companies?")) {
-                let result = await deleteCompany({ ids: checkedIds, token: token });
-                if (result.status === 200) {
-                    toast.success(result.message);
-                    setCheckedIds([]);
-                    getAllCompany(token);
-                } else {
-                    toast.error(result.message);
+        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
+            try {
+                if (!checkedIds.length) {
+                    toast.warning("Please select an item to delete.");
+                    return;
                 }
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error("Something went wrong!");
+                if (window.confirm("Are you sure you want to delete selected companies?")) {
+                    let result = await deleteCompany({ ids: checkedIds, token: token });
+                    if (result.status === 200) {
+                        toast.success(result.message);
+                        setCheckedIds([]);
+                        getAllCompany(token);
+                    } else {
+                        toast.error(result.message);
+                    };
+                };
+            } catch (error) {
+                console.log(error);
+                toast.error("Something went wrong!");
+            };
         };
     };
 

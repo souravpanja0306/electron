@@ -324,6 +324,14 @@ exports.generateInvoiceHtml = ({ invoice, company }) => {
         <div class="amount-words">
             <span class="lbl">Amount in Words</span>
             ${inrToWords(Math.round(grandTotal))}
+
+            <div class="bank-details" style="margin-top:15px;">
+                <span class="lbl">Bank Details</span>
+                Bank: <strong>${company.bank || '--'}</strong><br/>
+                A/c No: <strong>${company.account_no || '--'}</strong><br/>
+                IFSC: <strong>${company.ifse || '--'}</strong><br/>
+                Branch: ${company.branch || '--'}
+            </div>
         </div>
         <table class="tax-table">
             <tr><td>Total Before Tax</td><td>${(invoice.total_amount || 0).toFixed(2)}</td></tr>
@@ -340,11 +348,10 @@ exports.generateInvoiceHtml = ({ invoice, company }) => {
     <!-- FOOTER -->
     <div class="footer">
         <div class="bank-col">
-            <span class="lbl">Bank Details</span>
-            Bank: <strong>${company.bank || '--'}</strong><br/>
-            A/c No: <strong>${company.account_no || '--'}</strong><br/>
-            IFSC: <strong>${company.ifse || '--'}</strong><br/>
-            Branch: ${company.branch || '--'}
+           <td style="width:50%; background:#f5f5f5;">
+                <span class="lbl">Remarks / Note</span>
+                    Goods are transported at owner's risk. Claims for damage or shortage must be reported at the time of delivery. This is not a tax invoice. Subject to City jurisdiction only.
+            </td>
         </div>
         <div class="sig-col">
             <span class="for-company">For <strong>${company.company_name || 'Your Company Name'}</strong></span>

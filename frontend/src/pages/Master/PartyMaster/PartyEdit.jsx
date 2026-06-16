@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import StateList from '../../../utils/StateList';
 
 // Components...
+import SearchableSelect from '../../../components/SearchableSelect';
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
 import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import { Link, useParams } from "react-router-dom";
 import CustomLoader from '../../../components/CustomLoader';
 
 // Icons...
@@ -307,14 +309,14 @@ const PartyEdit = () => {
                                                     State
                                                 </td>
                                                 <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='State'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
+                                                    <SearchableSelect
+                                                        className="w-full"
+                                                        name="consignee_id"
                                                         value={data.state}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, state: e.target.value })
-                                                        }
+                                                        onChange={(e) => setData({ ...data, state: e.target.value })}
+                                                        options={StateList?.map(state => ({ id: state.value, label: state.value }))}
+                                                        placeholder="State"
+                                                        required
                                                     />
                                                 </td>
                                             </tr>

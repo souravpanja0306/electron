@@ -108,7 +108,7 @@ const Layout = ({ children }) => {
                     {/* Bottom section */}
                     <div className="mt-auto flex flex-col w-full pb-2 space-y-1">
                         {[
-                            { id: "notification", icon: <AiOutlineBell size={20} />, label: "Alert" },
+                            // { id: "notification", icon: <AiOutlineBell size={20} />, label: "Alert" },
                             { id: "master", icon: <AiOutlineAppstoreAdd size={20} />, label: "Master" },
                             { id: "settings", icon: <AiOutlineSetting size={20} />, label: "Setup" }
                         ].map(item => (

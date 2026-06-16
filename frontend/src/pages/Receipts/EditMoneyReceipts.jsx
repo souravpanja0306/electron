@@ -199,9 +199,6 @@ const EditMoneyReceipts = () => {
                             <div onClick={handleUpdate}>
                                 <CustomButton title={"Update (Ctrl+S)"} color={"blue"}><AiOutlineSave /></CustomButton>
                             </div>
-                            <Link to="/view-money-receipts">
-                                <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-                            </Link>
                             <div onClick={handlePrint}>
                                 <CustomButton title={"Print (Ctrl+P)"} color={"blue"}><AiOutlinePrinter /></CustomButton>
                             </div>

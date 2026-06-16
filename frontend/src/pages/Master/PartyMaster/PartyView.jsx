@@ -43,23 +43,25 @@ const ViewParty = () => {
     };
 
     const handleDelete = async () => {
-        try {
-            if (!checkedIds.length) {
-                toast.error("Please select an item to delete.");
-            } else {
-                await window.api.deleteParty({ ids: checkedIds }).then((res) => {
-                    console.log(res, "res")
-                    if (res.status === 200) {
-                        setCheckedIds([])
-                    };
-                });
-                await window.api.getParty({}).then((data) => {
-                    setParty(data.body);
-                });
+        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
+            try {
+                if (!checkedIds.length) {
+                    toast.error("Please select an item to delete.");
+                } else {
+                    await window.api.deleteParty({ ids: checkedIds }).then((res) => {
+                        console.log(res, "res")
+                        if (res.status === 200) {
+                            setCheckedIds([])
+                        };
+                    });
+                    await window.api.getParty({}).then((data) => {
+                        setParty(data.body);
+                    });
 
+                };
+            } catch (error) {
+                console.log(error);
             };
-        } catch (error) {
-            console.log(error);
         };
     };
 
@@ -99,13 +101,15 @@ const ViewParty = () => {
                             <Link to="/add-party">
                                 <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
-                            <div onClick={(e) => handleDelete(e)}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"blue"}><AiOutlineDelete /></CustomButton>
-                            </div>
                             {checkedIds && (
                                 <Link to={`/edit-party/${checkedIds}`}>
-                                    <CustomButton title={"Edit"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                                    <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                                 </Link>
+                            )}
+                            {checkedIds && (
+                                <div onClick={(e) => handleDelete(e)}>
+                                    <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                                </div>
                             )}
                         </div>
                         <div className="flex gap-1">
@@ -123,9 +127,7 @@ const ViewParty = () => {
                     <table className="table-fixed w-full">
                         <thead>
                             <tr className="border-b border-slate-600 p-1 ">
-                                <th className="p-1 text-start truncate w-16">
-                                    <input type="checkbox" />
-                                </th>
+                                <th className="p-1 text-start truncate w-16">Select</th>
                                 <th className="p-1 text-start">Company</th>
                                 <th className="p-1 text-start">Mobile</th>
                                 <th className="p-1 text-start">Email</th>

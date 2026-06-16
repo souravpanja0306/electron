@@ -60,15 +60,17 @@ const ViewInvoices = () => {
     };
 
     const handleDelete = async () => {
-        try {
-            if (checkedIds == null) toast("Please select which one you want to delete.", { theme: "dark" });
-            let result = await deleteInvoice({ id: checkedIds, token: token });
-            if (result) {
-                getAllInvoice({ token: token });
+        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
+            try {
+                if (checkedIds == null) toast("Please select which one you want to delete.", { theme: "dark" });
+                let result = await deleteInvoice({ id: checkedIds, token: token });
+                if (result) {
+                    getAllInvoice({ token: token });
+                };
+                toast(result.message, { theme: "dark" });
+            } catch (error) {
+                console.log(error);
             };
-            toast(result.message, { theme: "dark" });
-        } catch (error) {
-            console.log(error);
         };
     };
 
@@ -125,7 +127,10 @@ const ViewInvoices = () => {
                     <div className="flex flex-col md:flex-row justify-between w-full gap-2">
                         <div className="flex gap-1">
                             <Link to="/create-invoice">
-                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                            </Link>
+                            <Link to={`/view-invoice/details?id=${checkedIds}&back=true`} className={`${!checkedIds ? "hidden" : "block"}`}>
+                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div onClick={(e) => handleDelete(e)} className={`${!checkedIds ? "hidden" : "block"}`}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>

@@ -103,10 +103,6 @@ const Header = () => {
                             Help
                         </button>
                         <div className={`p-1 absolute left-0 top-[28px] ${activeMenu === 'help' ? 'block' : 'hidden'} bg-white dark:bg-slate-800 text-black dark:text-white min-w-60 rounded shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-[60]`}>
-                            <Link to="/" onClick={() => setActiveMenu(null)} className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
-                                <span>Welcome</span>
-                                <span className="text-slate-500 text-[10px] font-mono"></span>
-                            </Link>
                             <Link to="/contact-us" onClick={() => setActiveMenu(null)} className="flex justify-between w-full text-left px-3 py-2 hover:rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                                 <span>Contact Us</span>
                                 <span className="text-slate-500 text-[10px] font-mono">Ctrl+Alt+C</span>

@@ -49,15 +49,17 @@ const ViewMoneyReceipts = () => {
     };
 
     const handleDelete = async () => {
-        try {
-            if (checkedIds == null) toast("Please select which one you want to delete.", { theme: "dark" });
-            let result = await deleteMoneyReceipts({ id: checkedIds, token: token });
-            if (result) {
-                getAllMoneyReceipts(token);
+        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
+            try {
+                if (checkedIds == null) toast("Please select which one you want to delete.", { theme: "dark" });
+                let result = await deleteMoneyReceipts({ id: checkedIds, token: token });
+                if (result) {
+                    getAllMoneyReceipts(token);
+                };
+                toast(result.message, { theme: "dark" });
+            } catch (error) {
+                console.log(error);
             };
-            toast(result.message, { theme: "dark" });
-        } catch (error) {
-            console.log(error);
         };
     };
 
@@ -118,6 +120,9 @@ const ViewMoneyReceipts = () => {
                         <div className="flex gap-1">
                             <Link to="/create-moeny-receipts">
                                 <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                            </Link>
+                            <Link to={`/view-money-receipt/details?id=${checkedIds}&back=true`} className={`${!checkedIds ? "hidden" : "block"}`}>
+                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div onClick={() => handleDelete()} className={`${!checkedIds ? "hidden" : "block"}`}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineFileAdd /></CustomButton>

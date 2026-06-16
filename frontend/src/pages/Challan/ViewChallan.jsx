@@ -55,23 +55,25 @@ const ViewChallan = () => {
     };
 
     const handleDelete = async () => {
-        try {
-            if (checkedIds == null) {
-                toast("Please select which one you want to delete.", { theme: "dark" });
-                return;
-            }
-            let result = await deleteChallan({ id: checkedIds, token: token });
-            if (result.status === 200) {
-                getAllChallan({ token: token });
-                setCheckedIds(null);
-                toast.success(result.message);
-            } else {
-                toast.error(result.message);
-            }
-        } catch (error) {
-            console.log(error);
-            toast.error("Something went wrong!");
-        }
+        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
+            try {
+                if (checkedIds == null) {
+                    toast("Please select which one you want to delete.", { theme: "dark" });
+                    return;
+                }
+                let result = await deleteChallan({ id: checkedIds, token: token });
+                if (result.status === 200) {
+                    getAllChallan({ token: token });
+                    setCheckedIds(null);
+                    toast.success(result.message);
+                } else {
+                    toast.error(result.message);
+                }
+            } catch (error) {
+                console.log(error);
+                toast.error("Something went wrong!");
+            };
+        };
     };
 
     const handleRefresh = () => {
@@ -141,7 +143,10 @@ const ViewChallan = () => {
                                     : ""
                             }
                             <Link to="/create-challan">
-                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                            </Link>
+                            <Link to={`/edit-challan/${checkedIds}?back=true`} className={`${!checkedIds ? "hidden" : "block"}`}>
+                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div onClick={handleDelete} className={`${!checkedIds ? "hidden" : "block"}`}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>

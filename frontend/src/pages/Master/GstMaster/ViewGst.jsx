@@ -62,7 +62,7 @@ const GstTable = () => {
                     <div className="flex justify-between w-full">
                         <div className="flex gap-1">
                             <Link to="/create-gst">
-                                <CustomButton title={"New (Ctrl+N)"} color={"green"}><AiOutlineFileAdd /></CustomButton>
+                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
                             <div className={`${!checkedIds ? "hidden" : "block"}`} onClick={() => navigate(`/create-gst?id=${checkedIds}`)}>
                                 <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineEdit /></CustomButton>

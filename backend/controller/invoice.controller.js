@@ -256,7 +256,8 @@ exports.invoiceExports = async (req, res) => {
 exports.invoiceUpdate = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
-        const { id, company_id, type, invoice_no, invoice_date, transporter, eway_bill, party_id, placeOfSupply, data } = req.body;
+        const { id, company_id, type, invoice_no, invoice_date, transporter, eway_bill, party_id,
+            placeOfSupply, data, lorry_no, lr_no } = req.body;
 
         if (!id) return errorHandler(res, 400, "Invoice ID is required.");
         if (!party_id) return errorHandler(res, 400, "Please select Party.");
@@ -306,6 +307,8 @@ exports.invoiceUpdate = async (req, res) => {
             transporter: transporter,
             eway_bill: eway_bill,
             party_id: party_id,
+            lorry_no: lorry_no,
+            lr_no: lr_no,
             total_amount: totalValue,
             total_quantity: totalQty,
             total_cgst: totalCGST,

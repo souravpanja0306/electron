@@ -83,11 +83,11 @@ const EditChallan = () => {
             } else {
                 toast.error("Challan not found");
                 navigate("/view-challan");
-            }
+            };
         } catch (error) {
             console.error("Error fetching challan:", error);
-            toast.error("Failed to fetch challan data");
-        }
+            toast.error(error.message);
+        };
     };
 
     useEffect(() => {
@@ -150,20 +150,11 @@ const EditChallan = () => {
                 if (back) navigate(-1);
                 else navigate("/view-challan");
             } else {
-                setAlart({
-                    show: true,
-                    title: "Error",
-                    type: "error",
-                    message: result?.message
-                });
+                toast.error(result.message);
             };
         } catch (error) {
-            setAlart({
-                show: true,
-                title: "Error",
-                type: "error",
-                message: `Something went wrong: EditChallan : ${error.message}`
-            });
+            console.log(error);
+            toast.error(error.message);
         };
     };
 
@@ -180,7 +171,7 @@ const EditChallan = () => {
             };
         } catch (error) {
             console.log(error);
-            toast.error("Something went wrong!");
+            toast.error(error.message);
         };
     };
 
@@ -196,9 +187,6 @@ const EditChallan = () => {
                     <div onClick={handleSubmitForm}>
                         <CustomButton title={"Update (Ctrl+S)"} color={"blue"}><AiOutlineSave /></CustomButton>
                     </div>
-                    <Link to="/view-challan">
-                        <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-                    </Link>
                     <div onClick={handlePrint}>
                         <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
                     </div>
@@ -484,7 +472,7 @@ const EditChallan = () => {
                 </div>
 
             </div>
-            
+
         </>
     )
 }
