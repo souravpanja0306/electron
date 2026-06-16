@@ -75,13 +75,12 @@ const CompanyViewDetails = () => {
                     branch: companyData.branch || "",
                     account_no: companyData.account_no || ""
                 });
-                if (companyData.logo) {
-                    setLogoPreview(`http://localhost:3001/${companyData.logo}`);
-                }
+                if (companyData.logo) setLogoPreview(`${companyData.logo}`);
+
             } else {
                 toast.error(result.message || "Company not found.");
-            }
-        }
+            };
+        };
     };
     useEffect(() => {
         authToken();

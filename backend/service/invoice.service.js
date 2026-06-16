@@ -11,6 +11,7 @@ exports.insertInvoiceData = async (data) => {
         return result;
     } catch (error) {
         console.log(error);
+        throw error;
     };
 };
 
@@ -54,13 +55,13 @@ exports.findInvoices = async ({
         } else if (endDate) {
             query += " AND invoice_date <= ?";
             params.push(endDate);
-        }
+        };
 
         if (search) {
             query += " AND (invoice_no LIKE ? OR transporter LIKE ? OR lorry_no LIKE ? OR lr_no LIKE ?)";
             const searchParam = `%${search}%`;
             params.push(searchParam, searchParam, searchParam, searchParam);
-        }
+        };
 
         query += " ORDER BY id DESC";
 
@@ -70,7 +71,7 @@ exports.findInvoices = async ({
         } else if (limit) {
             query += " LIMIT ?";
             params.push(Number(limit));
-        }
+        };
 
         if (count) {
             const countQuery = `SELECT COUNT(*) AS total FROM (${query})`;
@@ -81,6 +82,7 @@ exports.findInvoices = async ({
         return result;
     } catch (error) {
         console.log(error);
+        throw error;
     };
 };
 
@@ -97,6 +99,7 @@ module.exports.deleteInvoices = async ({
         };
     } catch (error) {
         console.log(error);
+        throw error;
     };
 };
 
@@ -112,5 +115,6 @@ exports.updateInvoiceData = async (id, data) => {
         return result;
     } catch (error) {
         console.log(error);
+        throw error;
     };
 };

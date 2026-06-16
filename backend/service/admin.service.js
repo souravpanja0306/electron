@@ -8,6 +8,7 @@ exports.resetTableData = async ({
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: resetTableData: ${error}`);
+        throw error;
     };
 };
 
@@ -37,6 +38,7 @@ exports.migrateTableData = async (data) => {
         return migratedFields;;
     } catch (error) {
         console.log(`Something went wrong: service: migrateTableData: ${error}`);
+        throw error;
     };
 };
 
@@ -51,6 +53,7 @@ exports.createHSNSAC = async (data) => {
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: createHSNSAC: ${error}`);
+        throw error;
     };
 };
 
@@ -101,6 +104,7 @@ exports.findHSNSAC = async ({
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: findHSNSAC: ${error}`);
+        throw error;
     };
 };
 
@@ -115,6 +119,7 @@ exports.updateHSNSAC = async (id, data) => {
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: updateHSNSAC: ${error}`);
+        throw error;
     };
 };
 
@@ -127,6 +132,7 @@ exports.deleteHSNSAC = async (id) => {
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: deleteHSNSAC: ${error}`);
+        throw error;
     };
 };
 
@@ -141,6 +147,7 @@ exports.createGST = async (data) => {
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: createGST: ${error}`);
+        throw error;
     };
 };
 
@@ -185,6 +192,7 @@ exports.findGST = async ({
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: findGST: ${error}`);
+        throw error;
     };
 };
 
@@ -199,6 +207,7 @@ exports.updateGST = async (id, data) => {
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: updateGST: ${error}`);
+        throw error;
     };
 };
 
@@ -211,5 +220,6 @@ exports.deleteGST = async (id) => {
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: deleteGST: ${error}`);
+        throw error;
     };
 };

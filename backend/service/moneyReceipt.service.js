@@ -55,13 +55,13 @@ exports.findMoneyReceipts = async ({
         } else if (endDate) {
             query += " AND receipt_date <= ?";
             params.push(endDate);
-        }
+        };
 
         if (search) {
             query += " AND (receipt_no LIKE ? OR remarks LIKE ? OR payment_mode LIKE ? OR reference LIKE ?)";
             const searchParam = `%${search}%`;
             params.push(searchParam, searchParam, searchParam, searchParam);
-        }
+        };
 
         query += " ORDER BY id DESC";
 
@@ -71,7 +71,7 @@ exports.findMoneyReceipts = async ({
         } else if (limit) {
             query += " LIMIT ?";
             params.push(Number(limit));
-        }
+        };
 
         if (count) {
             const countQuery = `SELECT COUNT(*) AS total FROM (${query})`;
@@ -82,6 +82,7 @@ exports.findMoneyReceipts = async ({
         return result;
     } catch (error) {
         console.log(error);
+        throw error;
     };
 };
 
@@ -114,5 +115,6 @@ exports.updateMoneyReceiptData = async (id, data) => {
         return result;
     } catch (error) {
         console.log(error);
+        throw error;
     };
 };

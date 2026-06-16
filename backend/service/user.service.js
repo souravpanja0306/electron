@@ -105,7 +105,8 @@ exports.insertUsersInMongodb = async (data) => {
         let result = await newData.save();
         return result;
     } catch (error) {
-        console.log(`Something went wrong: service: insertUsersInMongodb: ${error}`)
+        console.log(`Something went wrong: service: insertUsersInMongodb: ${error}`);
+        throw error;
     };
 };
 
@@ -121,7 +122,8 @@ exports.findUsersInMongodb = async ({
         let result = await UserModel.find(search_key);
         return result;
     } catch (error) {
-        console.log(`Something went wrong: service: findUsersInMongodb: ${error}`)
+        console.log(`Something went wrong: service: findUsersInMongodb: ${error}`);
+        throw error;
     };
 };
 
@@ -137,6 +139,7 @@ exports.updateUsersInMongodb = async ({
         );
         return result;
     } catch (error) {
-        console.log(`Something went wrong: service: updateUsersInMongodb: ${error}`)
+        console.log(`Something went wrong: service: updateUsersInMongodb: ${error}`);
+        throw error;
     };
 };

@@ -162,10 +162,11 @@ const EditMoneyReceipts = () => {
                 navigate("/view-money-receipts");
             } else {
                 toast.error(result.message);
-            }
+            };
         } catch (error) {
             console.log(error);
-        }
+            throw error;
+        };
     };
 
     const handlePrint = async () => {
@@ -178,10 +179,11 @@ const EditMoneyReceipts = () => {
                 toast.info("Print preview generated.");
             } else {
                 toast.error(result.message);
-            }
+            };
         } catch (error) {
             console.log(error);
-        }
+            throw error;
+        };
     };
 
     return (
@@ -411,7 +413,7 @@ const EditMoneyReceipts = () => {
                     </div>
                 </div>
             </div>
-          
+
         </>
     );
 };

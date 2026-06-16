@@ -30,7 +30,6 @@ import useChallanStore from "../../store/ChallanStore";
 
 const CreateChallan = () => {
   const { authToken, token } = useAuthStore();
-  const [alart, setAlart] = useState({ show: false });
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const navigate = useNavigate();
@@ -113,34 +112,19 @@ const CreateChallan = () => {
     if (e) e.preventDefault();
     try {
       if (!form.company_id || !form.consignor_id || !form.consignee_id) {
-        return setAlart({
-          show: true,
-          title: "Error",
-          type: "error",
-          message: "Company, Consignor and Consignee are required."
-        });
+        toast.error("Company, Consignor and Consignee are required.");
       };
-
       let payload = { ...form, data: data };
       let result = await createChallan(payload, token);
       if (result.status === 200) {
         toast.success(result.message);
         navigate("/view-challan");
       } else {
-        setAlart({
-          show: true,
-          title: "Error",
-          type: "error",
-          message: result?.message
-        });
+        toast.success(result.message);
       };
     } catch (error) {
-      setAlart({
-        show: true,
-        title: "Error",
-        type: "error",
-        message: `Something went wrong: CreateChallan : ${error.message}`
-      });
+      toast.success(error.message);
+      console.log(error);
     };
   };
 

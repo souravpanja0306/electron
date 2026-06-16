@@ -37,6 +37,7 @@ exports.getDebtors = async ({
         };
     } catch (error) {
         console.log("Something went wrong: Service: getDebtors", error);
+        throw error;
     };
 };
 
@@ -76,6 +77,7 @@ exports.getDebtorsDetails = async ({
         };
     } catch (error) {
         console.log("Something went wrong: Service: getDebtorsDetails", error);
+        throw error;
     };
 };
 
@@ -139,10 +141,10 @@ exports.getDashboardStats = async () => {
             aging: {
                 debtors: debtorAging,
                 creditors: creditorAging
-            }
+            },
         };
     } catch (error) {
         console.log("Something went wrong: Service: getDashboardStats", error);
         throw error;
-    }
-}
+    };
+};

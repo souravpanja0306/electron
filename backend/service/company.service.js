@@ -1,4 +1,4 @@
-const {db} = require("../database/connection");
+const { db } = require("../database/connection");
 
 exports.createCompany = async (data) => {
     try {
@@ -10,7 +10,8 @@ exports.createCompany = async (data) => {
 
         return result;
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        throw error;
     };
 };
 
@@ -60,6 +61,7 @@ exports.getCompany = async ({
         return result;
     } catch (error) {
         console.log(error);
+        throw error;
     };
 };
 
@@ -72,7 +74,8 @@ exports.deleteCompany = async ({
         let result = await db.prepare(`DELETE FROM company WHERE id IN (${placeholders})`).run(...ids);
         return result;
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        throw error;
     };
 };
 

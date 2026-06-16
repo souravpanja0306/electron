@@ -3,6 +3,7 @@ import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icon
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 import StateList from '../../../utils/StateList';
+import { toast } from 'sonner';
 
 // Components...
 import PageTitle from '../../../components/PageTitle';
@@ -24,7 +25,6 @@ const CompanyCreate = () => {
     const navigate = useNavigate();
 
     const [active, setActive] = useState(0);
-    const [alart, setAlart] = useState({ show: false });
     const [logo, setLogo] = useState(null);
     const [logoPreview, setLogoPreview] = useState(null);
     const [data, setData] = useState({
@@ -63,13 +63,11 @@ const CompanyCreate = () => {
             Object.keys(data).forEach(key => {
                 formData.append(key, data[key]);
             });
-            if (logo) {
-                formData.append('logo', logo);
-            }
+            if (logo) formData.append('logo', logo);
 
             let result = await createCompany(formData, token);
             if ((result.status) === 200) {
-                setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
+                toast.success(result.message);
                 setData({
                     company_name: "",
                     email: "",
@@ -92,8 +90,11 @@ const CompanyCreate = () => {
                 });
                 setLogo(null);
                 setLogoPreview(null);
+            } else {
+                toast.success(result.message);
             };
         } catch (error) {
+            toast.success(error.message);
             console.log(error);
         };
     };

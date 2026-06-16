@@ -20,23 +20,27 @@ exports.addCompany = async (req, res) => {
     try {
         const { t_userId } = req.body;
 
-        let isMobileExist = await CompanyService.getCompany({ mobile: req.body.mobile });
+        let isMobileExist = await CompanyService.getCompany({ mobile: req.body.mobile, created_by: t_userId });
         if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
 
-        let isEmailExist = await CompanyService.getCompany({ mobile: req.body.email });
+        let isEmailExist = await CompanyService.getCompany({ mobile: req.body.email, created_by: t_userId });
         if (isEmailExist.length) return errorHandler(res, 409, "Email Id already registered.");
 
-        let createFolder = process.env.PHYSICAL_MEDIA_PATH + "company/"
+        let createFolder = "./uploads/company/"
         if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
 
-        let oldpath = req.file.path;
-        let file_date = moment().format("DD-MM-YYYY");
-        let random_number = Math.floor(Math.random() * 10000000000 + 1);
-        let fileName = `${random_number}_${file_date}_${req.file.originalname}`
-        let filePath = `./uploads/company/${fileName}`;
-        fs.renameSync(oldpath, filePath, (err) => {
-            if (err) console.log(err)
-        });
+        let fileName = "";
+        if (req.file) {
+            let oldpath = req.file.path;
+            let file_date = moment().format("DD-MM-YYYY");
+            let random_number = Math.floor(Math.random() * 10000000000 + 1);
+            fileName = `${random_number}_${file_date}_${req.file.originalname}`
+            let filePath = `./uploads/company/${fileName}`;
+
+            fs.renameSync(oldpath, filePath, (err) => {
+                if (err) console.log(err)
+            });
+        };
         let finalData = {
             company_name: req.body.company_name,
             email: req.body.email,
@@ -87,8 +91,8 @@ exports.getCompany = async (req, res) => {
         let result = await CompanyService.getCompany(search_key);
 
         if (result.length) {
-            result.map((item)=>{
-              item["logo"] =  `http://localhost:3001/uploads/company/${item.logo}`;
+            result.map((item) => {
+                item["logo"] = `http://localhost:3001/uploads/company/${item.logo}`;
             });
             response.status = 200;
             response.message = "Data fetched succesfully.";
@@ -179,7 +183,7 @@ exports.updateCompany = async (req, res) => {
             return res.status(response.status).json(response);
         };
 
-        let createFolder = process.env.PHYSICAL_MEDIA_PATH + "company/"
+        let createFolder = "./uploads/company/"
         if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
 
         let oldpath = req.file.path;

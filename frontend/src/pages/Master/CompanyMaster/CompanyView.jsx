@@ -187,7 +187,7 @@ const ViewCompany = () => {
                                                             />
                                                         </td>
                                                         <td className="p-1 text-start truncate">
-                                                            {item.logo ? <img src={`http://localhost:3001/${item.logo}`} alt="Logo" className="w-10 h-10 object-contain" /> : "--"}
+                                                            {item.logo ? <img src={`${item.logo}`} alt="Logo" className="w-10 h-10 object-contain" /> : "--"}
                                                         </td>
                                                         <td className="p-1 text-start truncate capitalize hover:underline hover:text-blue-500">
                                                             <Link to={`/view-company-details/${item.id}?back=true`}>

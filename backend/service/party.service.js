@@ -62,7 +62,7 @@ exports.getParty = async ({
     } catch (error) {
         console.log(error);
         throw error;
-    }
+    };
 };
 
 exports.deleteParty = async ({
@@ -76,7 +76,7 @@ exports.deleteParty = async ({
     } catch (error) {
         console.log(error);
         throw error;
-    }
+    };
 };
 
 exports.updateParty = async (id, data) => {
@@ -90,5 +90,5 @@ exports.updateParty = async (id, data) => {
     } catch (error) {
         console.log(error);
         throw error;
-    }
+    };
 };

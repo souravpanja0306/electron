@@ -3,11 +3,7 @@ const { db } = require("../database/connection");
 exports.insertChallanData = async (data) => {
     try {
         db.exec(require("../database/schema/challan.schema"));
-
         const columns = db.prepare("PRAGMA table_info(challan)").all();
-        console.log(columns);
-
-
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO challan (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -60,13 +56,13 @@ exports.findChallans = async ({
         } else if (endDate) {
             query += " AND date <= ?";
             params.push(endDate);
-        }
+        };
 
         if (search) {
             query += " AND (cn_no LIKE ? OR truck_no LIKE ? OR from_loc LIKE ? OR to_loc LIKE ?)";
             const searchParam = `%${search}%`;
             params.push(searchParam, searchParam, searchParam, searchParam);
-        }
+        };
 
         query += " ORDER BY id DESC";
 
@@ -76,7 +72,7 @@ exports.findChallans = async ({
         } else if (limit) {
             query += " LIMIT ?";
             params.push(Number(limit));
-        }
+        };
 
         if (count) {
             const countQuery = `SELECT COUNT(*) AS total FROM (${query})`;

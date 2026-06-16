@@ -13,8 +13,8 @@ const middleware = require("../middleware/middleware");
 
 router.post(
     "/create-company",
-    middleware.isAuthenticated,
     file.single('logo'),
+    middleware.isAuthenticated,
     CompanyController.addCompany
 );
 
