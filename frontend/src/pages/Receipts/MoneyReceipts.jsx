@@ -36,7 +36,7 @@ const MoneyReceipts = () => {
     const { moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
     const { parties, getAllParty } = usePartyStore();
     const { companyData, getAllCompany } = useCompanyStore();
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
 
     const [grandTotal, setGrandTotal] = useState({
         total_value: 0,
@@ -58,7 +58,6 @@ const MoneyReceipts = () => {
     ]);
 
     useEffect(() => {
-        authToken();
         generateMoneyReceiptNo(token);
         getAllParty(token);
         getAllCompany(token);
@@ -158,11 +157,6 @@ const MoneyReceipts = () => {
                             <Link to="/view-money-receipts">
                                 <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
                             </Link>
-                        </div>
-                        <div className="flex gap-1">
-                            <div onClick={() => generateMoneyReceiptNo(token)}>
-                                <CustomButton title={"Regenerate No"} color={"blue"}><AiOutlineSync /></CustomButton>
-                            </div>
                         </div>
                     </div>
                 </ActionArea>
@@ -273,16 +267,17 @@ const MoneyReceipts = () => {
                                                 />
                                             </td>
                                             <td className=''>
-                                                <div
+                                                <button
+                                                    type="button"
                                                     className="w-full flex justify-center text-2xl cursor-pointer transition"
                                                     onClick={() => isLast ? handleAddFields() : handleRemoveFields(item.id)}
                                                 >
                                                     {isLast ? (
-                                                        <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
+                                                        <AiOutlinePlusSquare className="text-green-600" />
                                                     ) : (
-                                                        <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
+                                                        <AiOutlineMinusSquare className="text-red-600" />
                                                     )}
-                                                </div>
+                                                </button>
                                             </td>
                                         </tr>
                                     )

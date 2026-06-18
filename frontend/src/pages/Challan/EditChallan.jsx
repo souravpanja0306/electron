@@ -31,7 +31,7 @@ import useChallanStore from "../../store/ChallanStore";
 
 
 const EditChallan = () => {
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
     const [alart, setAlart] = useState({ show: false });
     const [searchParams] = useSearchParams();
     const { id } = useParams();
@@ -91,7 +91,6 @@ const EditChallan = () => {
     };
 
     useEffect(() => {
-        authToken();
         getAllParty(token);
         getAllCompany(token);
         if (id) {
@@ -165,7 +164,7 @@ const EditChallan = () => {
             if (result.status === 200) {
                 const newWindow = window.open();
                 newWindow.document.write(result.body.html);
-                toast.info("PDF generated.", { theme: "dark" });
+                toast.info("PDF generated.");
             } else {
                 toast.error(result.message);
             };

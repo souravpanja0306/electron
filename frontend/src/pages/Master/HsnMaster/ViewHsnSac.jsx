@@ -18,14 +18,13 @@ import useAuthStore from '../../../store/AuthStore';
 import useHsnSacStore from "../../../store/HsnSacStore";
 
 const ViewHsnSac = () => {
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
     const { hsnData, getAllHsnSac, deleteHsnSac, loading } = useHsnSacStore();
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
         getAllHsnSac(token);
-        authToken()
     }, []);
 
     const [checkedIds, setCheckedIds] = useState(null);

@@ -10,20 +10,11 @@ import ActionArea from '../../components/ActionArea';
 import CustomButton from '../../components/CustomButton';
 
 const Profile = () => {
-  const { profileData, getProfileData, authToken, token } = useAuthStore();
+  const { profileData, getProfileData, token } = useAuthStore();
 
   useEffect(() => {
-    const loadProfile = async () => {
-      await authToken();
-    };
-    loadProfile();
+    getProfileData(token);
   }, []);
-
-  useEffect(() => {
-    if (token) {
-      getProfileData(token);
-    }
-  }, [token]);
 
   if (!profileData) {
     return (

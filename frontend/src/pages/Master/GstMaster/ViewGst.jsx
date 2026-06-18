@@ -19,14 +19,13 @@ import useAuthStore from '../../../store/AuthStore';
 import useHsnSacStore from "../../../store/HsnSacStore";
 
 const GstTable = () => {
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
     const { gstData, getAllGst, deleteGst, gstLoading } = useGstStore();
     const navigate = useNavigate();
     const [checkedIds, setCheckedIds] = useState(null);
 
     useEffect(() => {
         getAllGst(token);
-        authToken()
     }, []);
 
     const handleChecked = (e, id) => {

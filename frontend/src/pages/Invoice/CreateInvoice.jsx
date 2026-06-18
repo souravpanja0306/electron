@@ -35,7 +35,7 @@ const CreateInvoice = () => {
   const { companyData, getAllCompany } = useCompanyStore();
   const { parties, getAllParty, partyLoading } = usePartyStore();
   const { gstData, getAllGst, gstLoading } = useGstStore();
-  const { authToken, token } = useAuthStore();
+  const { token } = useAuthStore();
 
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
@@ -61,7 +61,7 @@ const CreateInvoice = () => {
     date: moment().format("YYYY-MM-DD"),
     transporter: "",
     ewayBill: "",
-    billFrom: "",
+    company_id: "",
     billTo: "",
     shipTo: "",
     placeOfSupply: "",
@@ -88,7 +88,6 @@ const CreateInvoice = () => {
   };
 
   useEffect(() => {
-    authToken();
     getPartys();
     generateInvoiceNumber();
     getAllCompany(token);
@@ -112,7 +111,7 @@ const CreateInvoice = () => {
     if (invoiceFields.length > 1) {
       const updatedFields = invoiceFields.filter(item => item.id !== id);
       setInvoiceFields(updatedFields);
-      calculateGrandTotal(updatedFields, invoiceDetails.billFrom, invoiceDetails.billTo);
+      calculateGrandTotal(updatedFields, invoiceDetails.company_id, invoiceDetails.billTo);
     } else {
       toast.info("At least one row is required.");
     }
@@ -179,14 +178,14 @@ const CreateInvoice = () => {
       let updatedData = prev.map(item =>
         item.id === id ? { ...item, [key]: value } : item
       );
-      calculateGrandTotal(updatedData, invoiceDetails.billFrom, invoiceDetails.billTo);
+      calculateGrandTotal(updatedData, invoiceDetails.company_id, invoiceDetails.billTo);
       return updatedData;
     });
   };
 
   useEffect(() => {
-    calculateGrandTotal(invoiceFields, invoiceDetails.billFrom, invoiceDetails.billTo);
-  }, [invoiceDetails.billFrom, invoiceDetails.billTo, companyData, party]);
+    calculateGrandTotal(invoiceFields, invoiceDetails.company_id, invoiceDetails.billTo);
+  }, [invoiceDetails.company_id, invoiceDetails.billTo, companyData, party]);
 
   const handleSubmitForm = async ({
     invoiceDetails,
@@ -205,7 +204,7 @@ const CreateInvoice = () => {
           date: moment().format("YYYY-MM-DD"),
           transporter: "",
           ewayBill: "",
-          billFrom: "",
+          company_id: "",
           billTo: "",
           shipTo: "",
           placeOfSupply: "Kolkata",
@@ -213,7 +212,7 @@ const CreateInvoice = () => {
           lr_no: ""
         });
       };
-      toast(result.message, { theme: "dark" });
+      toast(result.message);
       await generateInvoiceNumber();
     } catch (error) {
       console.log(error);
@@ -277,10 +276,10 @@ const CreateInvoice = () => {
                     <div className='flex items-center gap-1 w-[75%]'>
                       <SearchableSelect
                         className="w-full"
-                        name="billFrom"
-                        value={invoiceDetails.billFrom}
+                        name="company_id"
+                        value={invoiceDetails.company_id}
                         onChange={(e) =>
-                          setInvoiceDetails({ ...invoiceDetails, billFrom: e.target.value })
+                          setInvoiceDetails({ ...invoiceDetails, company_id: e.target.value })
                         }
                         options={companyData?.map(item => ({ id: item.id, label: item.company_name }))}
                         placeholder="Select Company"
@@ -483,6 +482,7 @@ const CreateInvoice = () => {
                                   required
                                 >
                                   <option value="" disabled>Select GST</option>
+                                  <option value={0}>0%</option>
                                   {gstData?.map((g, i) => (
                                     <option key={g.id} value={g.total_rate}>
                                       {g.title}
@@ -532,16 +532,17 @@ const CreateInvoice = () => {
                           />
                         </td>
                         <td className=''>
-                          <div
+                          <button
+                            type="button"
                             className="w-full flex justify-center text-2xl cursor-pointer transition"
                             onClick={(e) => isLast ? handleAddFields(e) : handleRemoveFields(item.id)}
                           >
                             {isLast ? (
-                              <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
+                              <AiOutlinePlusSquare className="text-green-600" />
                             ) : (
-                              <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
+                              <AiOutlineMinusSquare className="text-red-600" />
                             )}
-                          </div>
+                          </button>
                         </td>
                       </tr>
                     )

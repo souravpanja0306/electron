@@ -38,7 +38,7 @@ const ViewInvoiceDetails = () => {
     const { companyData, getAllCompany } = useCompanyStore();
     const { parties, getAllParty } = usePartyStore();
     const { gstData, getAllGst } = useGstStore();
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
 
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -152,7 +152,6 @@ const ViewInvoiceDetails = () => {
     };
 
     useEffect(() => {
-        authToken();
         getAllParty(token);
         getAllCompany(token);
         getAllGst(token);
@@ -235,15 +234,15 @@ const ViewInvoiceDetails = () => {
 
     const handlePrint = async () => {
         try {
-            if (!invoiceId) return toast("Please select which one you want to print.", { theme: "dark" });
+            if (!invoiceId) return toast("Please select which one you want to print.");
             let result = await printInvoice({ id: invoiceId, token: token });
             if (result.status === 200) {
                 const newWindow = window.open();
                 newWindow.document.write(result.body.html);
-                toast.info("PDF generated.", { theme: "dark" });
+                toast.info("Generating Print View...");
             } else {
                 toast.error(result.message);
-            }
+            };
         } catch (error) {
             console.log(error);
             toast.error(error.message);
@@ -462,6 +461,7 @@ const ViewInvoiceDetails = () => {
                                                     value={item.gst}
                                                     onChange={(e) => handleChangeField(item.id, "gst", e.target.value)}
                                                 >
+                                                    <option value="" disabled>Select GST</option>
                                                     <option value={0}>0%</option>
                                                     {gstData?.map(g => (
                                                         <option key={g.id} value={g.total_rate}>{g.title}</option>

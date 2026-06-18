@@ -13,13 +13,8 @@ import CustomLoader from "../components/CustomLoader";
 import useAuthStore from '../store/AuthStore';
 
 const Home = () => {
-  const { authToken, token } = useAuthStore(); // Store...
+  const { token } = useAuthStore(); // Store...
   const navigate = useNavigate();
-
-  useEffect(() => {
-    authToken();
-  }, []);
-
   const [count, setCount] = useState(0);
   const [companyData, setCompanyData] = useState({});
 

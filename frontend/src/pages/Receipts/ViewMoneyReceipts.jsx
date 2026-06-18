@@ -22,7 +22,7 @@ import useAuthStore from '../../store/AuthStore';
 
 const ViewMoneyReceipts = () => {
     const { moneyReceipts, getAllMoneyReceipts, printMoneyReceipt, deleteMoneyReceipts, loading, downloadLoading } = useMoneyReceiptStore(); // Store...
-    const { authToken, token } = useAuthStore(); // Store...
+    const { token } = useAuthStore(); // Store...
 
     const navigate = useNavigate();
     const [alart, setAlart] = useState({ show: false });
@@ -34,7 +34,6 @@ const ViewMoneyReceipts = () => {
     });
 
     useEffect(() => {
-        authToken();
         getAllMoneyReceipts(token, filters.startDate, filters.endDate, filters.search);
     }, [filters]);
 
@@ -51,17 +50,19 @@ const ViewMoneyReceipts = () => {
     const handleDelete = async () => {
         if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
             try {
-                if (checkedIds == null) toast("Please select which one you want to delete.", { theme: "dark" });
+                if (checkedIds == null) toast("Please select which one you want to delete.");
                 let result = await deleteMoneyReceipts({ id: checkedIds, token: token });
                 if (result) {
                     getAllMoneyReceipts(token);
+                    setCheckedIds(null);
                 };
-                toast(result.message, { theme: "dark" });
+                toast(result.message);
             } catch (error) {
                 console.log(error);
             };
         };
     };
+    console.log(checkedIds) // please check...
 
     const handlePrint = async (id) => {
         try {

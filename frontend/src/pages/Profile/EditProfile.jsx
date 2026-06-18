@@ -12,7 +12,7 @@ import CustomButton from '../../components/CustomButton';
 
 const EditProfile = () => {
   const navigate = useNavigate();
-  const { profileData, updateProfileData, authToken, token } = useAuthStore();
+  const { profileData, updateProfileData, token } = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
@@ -32,10 +32,6 @@ const EditProfile = () => {
     branch: '',
     account_no: ''
   });
-
-  useEffect(() => {
-    authToken();
-  }, []);
 
   useEffect(() => {
     if (profileData) {

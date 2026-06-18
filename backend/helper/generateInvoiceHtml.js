@@ -241,7 +241,7 @@ exports.generateInvoiceHtml = ({ invoice, company }) => {
     </style>
 </head>
 <body>
-<button class="print-btn" onclick="window.print()">🖨 Print Invoice</button>
+<button class="print-btn" onclick="window.print()">Print</button>
 <div class="page">
 
     <!-- HEADER -->

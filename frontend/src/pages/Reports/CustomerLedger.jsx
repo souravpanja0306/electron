@@ -26,10 +26,11 @@ import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
 import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore"
 import useReportStore from "../../store/ReportStore";
+import useAuthStore from "../../store/AuthStore";
 
 
 const CustomerLedger = () => {
-    let token = window.api?.getItem("token");
+    const { token } = useAuthStore();
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
     const party_id = searchParams.get("id");

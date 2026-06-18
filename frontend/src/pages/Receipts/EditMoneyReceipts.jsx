@@ -35,7 +35,7 @@ const EditMoneyReceipts = () => {
     const { moneyReceipts, getAllMoneyReceipts, deleteMoneyReceipts, printMoneyReceipt, updateMoneyReceipts, loading } = useMoneyReceiptStore();
     const { companyData, getAllCompany } = useCompanyStore();
     const { parties, getAllParty } = usePartyStore();
-    const { authToken, token } = useAuthStore();
+    const {  token } = useAuthStore();
 
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -90,7 +90,6 @@ const EditMoneyReceipts = () => {
     };
 
     useEffect(() => {
-        authToken();
         getAllParty(token);
         getAllCompany(token);
         if (receiptId) {

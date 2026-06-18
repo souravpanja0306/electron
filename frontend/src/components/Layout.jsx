@@ -16,33 +16,37 @@ import {
 import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import MenuMap from "../utils/menuMap";
+import { Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "../index.css"
 import { Toaster, toast } from 'sonner'
 
 import Header from "./Header";
 
+// Stores...
+import useAuthStore from '../store/AuthStore';
 
-const Layout = ({ children }) => {
+
+const Layout = () => {
     const navigate = useNavigate();
-    const currentMenuValue = localStorage.getItem("currentMenu") ? localStorage.getItem("currentMenu") : "home";
-    const [openMenuIndex, setOpenMenuIndex] = useState(null);
-    const [currentMenu, setCurrentMenu] = useState(MenuMap[currentMenuValue]);
-    const [activeMenu, setActiveManu] = useState(currentMenuValue);
+    const [openMenuIndex, setOpenMenuIndex] = useState();
+    const [currentMenu, setCurrentMenu] = useState(MenuMap["home"]);
+    const [activeMenu, setActiveManu] = useState();
     const [sideBar, setSideBar] = useState(true);
+    const { authToken } = useAuthStore(); // Store...
 
-    // Safe user data retrieval
-    const [user, setUser] = useState({ name: "User" });
-    const getUser = async () => {
-        try {
-            const userData = await window.api?.getItem("user");
-            if (userData) setUser(JSON.parse(userData));
-        } catch (error) {
-            console.error("Error parsing user data:", error);
+    const getCurrentMenu = async () => {
+        let currentMenuValue = await window.api?.getItem("currentMenu");
+        if (currentMenuValue) {
+            setActiveManu(currentMenuValue);
+            setOpenMenuIndex(currentMenuValue);
+            setCurrentMenu(MenuMap[currentMenuValue] || []);
         };
     };
+
     useEffect(() => {
-        getUser();
+        authToken();
+        getCurrentMenu();
     }, []);
 
     const changeMenu = ({ menu = "" }) => {
@@ -50,7 +54,7 @@ const Layout = ({ children }) => {
             setSideBar(true)
             setActiveManu(menu);
             setCurrentMenu(MenuMap[menu] || []);
-            localStorage.setItem("currentMenu", menu);
+            window.api?.setItem("currentMenu", menu);
             setOpenMenuIndex(null);
         };
     };
@@ -60,14 +64,13 @@ const Layout = ({ children }) => {
     };
 
     const handleSignOut = (e) => {
-        localStorage.clear();
-        sessionStorage.clear();
+        window.api?.clearAll();
         navigate("/signin");
     };
 
     return (
         <div className="flex flex-col h-screen select-none">
-            <Toaster style={{ zIndex: 99999 }} />
+            <Toaster />
             {/* Custom Title Bar */}
             <Header />
 
@@ -159,6 +162,7 @@ const Layout = ({ children }) => {
                                                 <NavLink
                                                     key={i}
                                                     to={sub.url}
+                                                    onClick={() => window.api?.setItem("lastPage", sub.url)}
                                                     className={({ isActive }) =>
                                                         `text-[12px] w-full pl-11 pr-4 py-2 flex gap-3 items-center transition-all border-l-2 ${isActive
                                                             ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-600 font-medium"
@@ -177,6 +181,7 @@ const Layout = ({ children }) => {
                                     <NavLink
                                         key={index}
                                         to={item.url}
+                                        onClick={() => window.api?.setItem("lastPage", item.url)}
                                         className={({ isActive }) =>
                                             `text-[13px] w-full px-4 py-2.5 flex gap-3 items-center transition-all border-l-2 ${isActive
                                                 ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-600 font-medium"
@@ -195,11 +200,11 @@ const Layout = ({ children }) => {
                 {/* Main Content Area */}
                 <div className="flex-1 bg-white dark:bg-slate-800 flex flex-col overflow-hidden">
                     <main className="flex-1 p-2 overflow-auto bg-white dark:bg-slate-800 relative z-0">
-                        {children}
+                        <Outlet />
                     </main>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

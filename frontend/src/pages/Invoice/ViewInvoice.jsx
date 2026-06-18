@@ -33,7 +33,7 @@ const ViewInvoices = () => {
     const { invoiceData, getAllInvoice, deleteInvoice, printInvoice, invoiceLoading } = useInvoiceStore();
     const { companyData, getAllCompany } = useCompanyStore();
     const { parties, getAllParty, partyLoading } = usePartyStore();
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
 
     const navigate = useNavigate();
     const [alart, setAlart] = useState({ show: false });
@@ -45,7 +45,6 @@ const ViewInvoices = () => {
     });
 
     useEffect(() => {
-        authToken();
         getAllInvoice({ token: token, ...filters });
     }, [filters]);
 
@@ -62,12 +61,12 @@ const ViewInvoices = () => {
     const handleDelete = async () => {
         if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
             try {
-                if (checkedIds == null) toast("Please select which one you want to delete.", { theme: "dark" });
+                if (checkedIds == null) toast("Please select which one you want to delete.");
                 let result = await deleteInvoice({ id: checkedIds, token: token });
                 if (result) {
                     getAllInvoice({ token: token });
                 };
-                toast(result.message, { theme: "dark" });
+                toast(result.message);
             } catch (error) {
                 console.log(error);
             };
@@ -85,7 +84,7 @@ const ViewInvoices = () => {
             if (result.status === 200) {
                 const newWindow = window.open();
                 newWindow.document.write(result.body.html);
-                toast.info("PDF generated.", { theme: "dark" });
+                toast.info("PDF generated.");
             } else {
                 toast.error(result.message);
             };

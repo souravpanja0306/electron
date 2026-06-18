@@ -29,7 +29,7 @@ import useChallanStore from "../../store/ChallanStore";
 
 
 const CreateChallan = () => {
-  const { authToken, token } = useAuthStore();
+  const { token } = useAuthStore();
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const navigate = useNavigate();
@@ -46,7 +46,6 @@ const CreateChallan = () => {
   };
 
   useEffect(() => {
-    authToken();
     getAllParty(token);
     getAllCompany(token);
     getChallanNo();
@@ -343,16 +342,17 @@ const CreateChallan = () => {
                           />
                         </td>
                         <td className=''>
-                          <div
+                          <button
+                            type="button"
                             className="w-full flex justify-center text-2xl cursor-pointer transition"
                             onClick={(e) => isLast ? handleAddFields(e) : handleRemoveFields(item.id)}
                           >
                             {isLast ? (
-                              <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
+                              <AiOutlinePlusSquare className="text-green-600" />
                             ) : (
-                              <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
+                              <AiOutlineMinusSquare className="text-red-600" />
                             )}
-                          </div>
+                          </button>
                         </td>
                       </tr>
                     )

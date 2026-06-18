@@ -36,7 +36,7 @@ const Debtors = () => {
 
   const { reportData, getDebtors, reportLoading } = useReportStore();
   const { companyData, getAllCompany } = useCompanyStore();
-  const { authToken, token } = useCompanyStore();
+  const { token } = useAuthStore();
 
   const [{ ledger, totals }, setDebtors] = useState({
     ledger: [],
@@ -55,7 +55,6 @@ const Debtors = () => {
   };
 
   useEffect(() => {
-    authToken();
     getDebtorsData(token);
     getAllCompany(token)
   }, []);

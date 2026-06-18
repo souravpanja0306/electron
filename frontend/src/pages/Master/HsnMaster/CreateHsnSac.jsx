@@ -17,7 +17,7 @@ import useAuthStore from '../../../store/AuthStore';
 import useHsnSacStore from "../../../store/HsnSacStore";
 
 const CreateHsnSac = () => {
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
     const { createHsnSac, updateHsnSac, hsnData, getAllHsnSac } = useHsnSacStore();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -25,9 +25,6 @@ const CreateHsnSac = () => {
     const isBack = searchParams.get("back") === "true";
     const editId = searchParams.get("id");
 
-    useEffect(() => {
-        authToken()
-    }, []);
 
     const [formData, setFormData] = useState({ code: '', type: 'HSN', description: '', gst_rate: '' });
 

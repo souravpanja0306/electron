@@ -19,7 +19,7 @@ import useAuthStore from '../../../store/AuthStore';
 
 const CompanyViewDetails = () => {
     const { getCompanyById, updateCompany, companyLoading } = useCompanyStore();
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -83,7 +83,6 @@ const CompanyViewDetails = () => {
         };
     };
     useEffect(() => {
-        authToken();
         fetchCompanyData();
     }, [id]);
 

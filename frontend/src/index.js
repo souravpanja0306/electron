@@ -40,67 +40,78 @@ import ViewChallan from './pages/Challan/ViewChallan';
 import EditChallan from './pages/Challan/EditChallan';
 import CompanyViewDetails from './pages/Master/CompanyMaster/CompanyViewDetails';
 import PartyEdit from './pages/Master/PartyMaster/PartyEdit';
-
-import { Middleware } from './middleware/middleware';
 import Documentation from './pages/Documentation';
 import ContactUs from './pages/ContactUs';
 
+import { Middleware } from './middleware/middleware';
+
 const router = createHashRouter([
-  { path: "/", element: <Middleware><Layout><Home /></Layout></Middleware> },
-  { path: "/create-invoice", element: <Middleware><Layout><CreateInvoice /></Layout></Middleware> },
-  { path: "/view-invoice", element: <Middleware><Layout><ViewInvoice /></Layout></Middleware> },
-  { path: "/view-invoice/details", element: <Middleware><Layout><ViewInvoiceDetails /></Layout></Middleware> },
-  { path: "/create-creditors", element: <Middleware><Layout><CreateInvoice /></Layout></Middleware> },
-  { path: "/create-moeny-receipts", element: <Middleware><Layout><CreateMoneyReceipts /></Layout></Middleware> },
-  { path: "/view-money-receipts", element: <Middleware><Layout><ViewMoneyReceipts /></Layout></Middleware> },
-  { path: "/view-money-receipt/details", element: <Middleware><Layout><EditMoneyReceipts /></Layout></Middleware> },
-  { path: "/view-all-creditors", element: <Middleware><Layout><ViewInvoice /></Layout></Middleware> },
-  { path: "/dashboard", element: <Middleware><Layout><Dashboard /></Layout></Middleware> },
-  { path: "/sales-reports", element: <Middleware><Layout><SalesReport /></Layout></Middleware> },
-  { path: "/debtors", element: <Middleware><Layout><Debtors /></Layout></Middleware> },
-  { path: "/debtors/details-debtors", element: <Middleware><Layout><CustomerLedger /></Layout></Middleware> },
-  { path: "/creditors", element: <Middleware><Layout><Creditors /></Layout></Middleware> },
-  { path: "/notification", element: <Middleware><Layout><Notification /></Layout></Middleware> },
-  { path: "/profile", element: <Middleware><Layout><Profile /></Layout></Middleware> },
-  { path: "/edit-profile", element: <Middleware><Layout><EditProfile /></Layout></Middleware> },
-  { path: "/add-party", element: <Middleware><Layout><PartyCreate /></Layout></Middleware> },
-  { path: "/party", element: <Middleware><Layout><PartyView /></Layout></Middleware> },
-  { path: "/edit-party/:id", element: <Middleware><Layout><PartyEdit /></Layout></Middleware> },
-  { path: "/add-product", element: <Middleware><Layout><ProductMaster /></Layout></Middleware> },
-  { path: "/product", element: <Middleware><Layout><Product /></Layout></Middleware> },
+  {
+    element: (
+      <Middleware>
+        <Layout />
+      </Middleware>
+    ),
+    children: [
+      { path: "/", element: <Home /> },
+      { path: "/create-invoice", element: <CreateInvoice /> },
+      { path: "/view-invoice", element: <ViewInvoice /> },
+      { path: "/view-invoice/details", element: <ViewInvoiceDetails /> },
+      { path: "/create-creditors", element: <CreateInvoice /> },
+      { path: "/create-moeny-receipts", element: <CreateMoneyReceipts /> },
+      { path: "/view-money-receipts", element: <ViewMoneyReceipts /> },
+      { path: "/view-money-receipt/details", element: <EditMoneyReceipts /> },
+      { path: "/view-all-creditors", element: <ViewInvoice /> },
+      { path: "/dashboard", element: <Dashboard /> },
+      { path: "/sales-reports", element: <SalesReport /> },
+      { path: "/debtors", element: <Debtors /> },
+      { path: "/debtors/details-debtors", element: <CustomerLedger /> },
+      { path: "/creditors", element: <Creditors /> },
+      { path: "/notification", element: <Notification /> },
+      { path: "/profile", element: <Profile /> },
+      { path: "/edit-profile", element: <EditProfile /> },
+      { path: "/add-party", element: <PartyCreate /> },
+      { path: "/party", element: <PartyView /> },
+      { path: "/edit-party/:id", element: <PartyEdit /> },
+      { path: "/add-product", element: <ProductMaster /> },
+      { path: "/product", element: <Product /> },
 
-  { path: "/about", element: <Middleware><Layout><About /></Layout></Middleware> },
-  { path: "/documentation", element: <Middleware><Layout><Documentation /></Layout></Middleware> },
-  { path: "/contact-us", element: <Middleware><Layout><ContactUs /></Layout></Middleware> },
-  { path: "/settings", element: <Middleware><Layout><Setting /></Layout></Middleware> },
+      // CMS
+      { path: "/about", element: <About /> },
+      { path: "/documentation", element: <Documentation /> },
+      { path: "/contact-us", element: <ContactUs /> },
+      { path: "/settings", element: <Setting /> },
 
-  // Add Company
-  { path: "/add-company", element: <Middleware><Layout><Company /></Layout></Middleware> },
-  { path: "/company", element: <Middleware><Layout><CompanyMaster /></Layout></Middleware> },
-  { path: "/edit-company/:id", element: <Middleware><Layout><CompanyViewDetails /></Layout></Middleware> },
-  { path: "/view-company-details/:id", element: <Middleware><Layout><CompanyViewDetails /></Layout></Middleware> },
+      // Add Company
+      { path: "/add-company", element: <Company /> },
+      { path: "/company", element: <CompanyMaster /> },
+      { path: "/edit-company/:id", element: <CompanyViewDetails /> },
+      { path: "/view-company-details/:id", element: <CompanyViewDetails /> },
 
-  // Challans
-  { path: "/create-challan", element: <Middleware><Layout><CreateChallan /></Layout></Middleware> },
-  { path: "/view-challan", element: <Middleware><Layout><ViewChallan /></Layout></Middleware> },
-  { path: "/edit-challan/:id", element: <Middleware><Layout><EditChallan /></Layout></Middleware> },
+      // Challans
+      { path: "/create-challan", element: <CreateChallan /> },
+      { path: "/view-challan", element: <ViewChallan /> },
+      { path: "/edit-challan/:id", element: <EditChallan /> },
 
-  // GST
-  { path: "/create-gst", element: <Middleware><Layout><CreateGst /></Layout></Middleware> },
-  { path: "/view-gst", element: <Middleware><Layout><ViewGst /></Layout></Middleware> },
+      // GST
+      { path: "/create-gst", element: <CreateGst /> },
+      { path: "/view-gst", element: <ViewGst /> },
 
-  // HSN and SAC
-  { path: "/create-hsn-sac", element: <Middleware><Layout><CreateHsnSac /></Layout></Middleware> },
-  { path: "/view-hsn-sac", element: <Middleware><Layout><ViewHsnSac /></Layout></Middleware> },
+      // HSN and SAC
+      { path: "/create-hsn-sac", element: <CreateHsnSac /> },
+      { path: "/view-hsn-sac", element: <ViewHsnSac /> },
 
-  // Vehicles
-  { path: "/create-hsn-sac", element: <Middleware><Layout><CreateHsnSac /></Layout></Middleware> },
-  { path: "/view-hsn-sac", element: <Middleware><Layout><ViewHsnSac /></Layout></Middleware> },
+      // Vehicles
+      { path: "/create-hsn-sac", element: <CreateHsnSac /> },
+      { path: "/view-hsn-sac", element: <ViewHsnSac /> },
 
+      // Auth
+      { path: "/change-password", element: <ChangePassword /> },
+    ]
+  },
   // Auth
   { path: "/signin", element: <Signin /> },
   { path: "/signup", element: <Signup /> },
-  { path: "/change-password", element: <Middleware><Layout><ChangePassword /></Layout></Middleware> },
   { path: "/forgot-password", element: <ForgotPassword /> },
   { path: "/*", element: <Error /> },
 ]);

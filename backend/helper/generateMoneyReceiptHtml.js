@@ -252,7 +252,7 @@ exports.generateMoneyReceiptHtml = ({ receipt, company, party }) => {
 </head>
 
 <body>
-    <button class="print-btn" onclick="window.print()">Print Receipt</button>
+    <button class="print-btn" onclick="window.print()">Print</button>
     <div class="page">
 
         <!-- HEADER -->

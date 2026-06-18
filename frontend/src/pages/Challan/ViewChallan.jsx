@@ -26,7 +26,7 @@ import useChallanStore from "../../store/ChallanStore";
 import useAuthStore from '../../store/AuthStore';
 
 const ViewChallan = () => {
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -41,7 +41,6 @@ const ViewChallan = () => {
     });
 
     useEffect(() => {
-        authToken();
         getAllChallan({ token: token, ...filters });
     }, [filters]);
 
@@ -58,7 +57,7 @@ const ViewChallan = () => {
         if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
             try {
                 if (checkedIds == null) {
-                    toast("Please select which one you want to delete.", { theme: "dark" });
+                    toast("Please select which one you want to delete.");
                     return;
                 }
                 let result = await deleteChallan({ id: checkedIds, token: token });
@@ -79,7 +78,7 @@ const ViewChallan = () => {
     const handleRefresh = () => {
         setFilters({ startDate: "", endDate: "", search: "" });
         getAllChallan({ token: token });
-        toast.info("Data refreshed.", { theme: "dark" });
+        toast.info("Data refreshed.");
     };
 
     const handlePrint = async (id) => {
@@ -88,7 +87,7 @@ const ViewChallan = () => {
             if (result.status === 200) {
                 const newWindow = window.open();
                 newWindow.document.write(result.body.html);
-                toast.info("PDF generated.", { theme: "dark" });
+                toast.info("Generating Print View...");
             } else {
                 toast.error(result.message);
             };

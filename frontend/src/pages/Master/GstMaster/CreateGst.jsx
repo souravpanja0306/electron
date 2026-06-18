@@ -10,7 +10,7 @@ import useGstStore from '../../../store/GstStore';
 import useAuthStore from '../../../store/AuthStore';
 
 const CreateGst = () => {
-  const { token, authToken } = useAuthStore();
+  const { token } = useAuthStore();
   const { createGst, updateGst, getAllGst, gstData, gstLoading } = useGstStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -20,7 +20,6 @@ const CreateGst = () => {
   const [gst, setGst] = useState({ title: "", cgst: 0, sgst: 0, type: "percentage" });
 
   useEffect(() => {
-    authToken();
     if (editId) {
       if (gstData?.length) {
         const editData = gstData.find(item => item.id.toString() === editId);

@@ -24,19 +24,15 @@ import useAuthStore from "../../../store/AuthStore";
 
 const ViewCompany = () => {
     const { companyData, getAllCompany, deleteCompany, companyLoading } = useCompanyStore();
-    const { authToken, token } = useAuthStore();
+    const { token } = useAuthStore();
 
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [checkedIds, setCheckedIds] = useState([]);
 
     useEffect(() => {
-        if (token) {
-            getAllCompany(token);
-        } else {
-            authToken();
-        }
-    }, [token]);
+        getAllCompany(token);
+    }, []);
 
     const handleChecked = (e, id) => {
         if (e.target.checked) {

@@ -10,7 +10,7 @@ import CustomButton from '../components/CustomButton';
 import { AiOutlineDownload, AiOutlineDelete } from 'react-icons/ai';
 
 const Setting = () => {
-    const { token, authToken } = useAuthStore();
+    const { token } = useAuthStore();
     const [prefix, setPrefix] = useState("");
     const [suffix, setSuffix] = useState("");
     const [active, setActive] = useState(0);
@@ -27,7 +27,6 @@ const Setting = () => {
 
     useEffect(() => {
         getThemeData();
-        authToken();
     }, []);
 
     useEffect(() => {
@@ -44,7 +43,7 @@ const Setting = () => {
         const newTheme = e ? "light" : "dark";
         setTheme(newTheme);
         setLight(e);
-        await window.api?.setItem("theme", newTheme);
+        window.api?.setItem("theme", newTheme);
     };
 
     const handleDumpDB = async () => {
@@ -63,7 +62,7 @@ const Setting = () => {
                 // For now, let's assume we need to list them or the backend needs a specific trigger.
                 // The current backend reset-all-table takes tableNames and drops them.
                 // If the user wants to "Dump" meaning clear, maybe they want to clear everything.
-                const tablesToReset = "parties,invoices,challans,money_receipts,gst,hsn_sac"; 
+                const tablesToReset = "parties,invoices,challans,money_receipts,gst,hsn_sac";
                 const res = await resetAllTables(token, tablesToReset);
                 if (res.status === 200) {
                     toast.success(res.message);
