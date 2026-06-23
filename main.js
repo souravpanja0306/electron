@@ -8,17 +8,16 @@ const { Notification } = require("electron");
 // Initialize the store
 const store = new Store();
 
-require("./server.js");
 app.whenReady().then(() => {
     validateLicense();
     const iconPath = path.join(__dirname, "./public/icon/zero.png");
     const win = new BrowserWindow({
         frame: false,
         titleBarStyle: "hidden",
-        width: 1000,
-        height: 500,
-        minWidth: 1600,
-        minHeight: 600,
+        width: 600,
+        height: 400,
+        minWidth: 600,
+        minHeight: 400,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             contextIsolation: true,
@@ -61,5 +60,61 @@ app.whenReady().then(() => {
             title: data.title,
             body: data.body,
         }).show();
+    });
+});
+
+// Express Setup.................................
+const dotenv = require("dotenv");
+const express = require("express");
+const exp = express();
+const cors = require("cors");
+const bodyParser = require('body-parser');
+const { connectMongo } = require("./backend/database/connection");
+
+// ENV CONFIG...
+dotenv.config({
+    path: path.join(__dirname, ".env"),
+    quiet: true
+});
+
+connectMongo();
+
+exp.use(cors());
+exp.use(express.json({ limit: "50mb" }));
+exp.use(express.urlencoded({ limit: "50mb", extended: true }));
+exp.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
+exp.use(bodyParser.json({ limit: "50mb" }));
+
+exp.use(`/api/${process.env.VERSION}/party/`, require("./backend/router/party.routes"));
+exp.use(`/api/${process.env.VERSION}/company/`, require("./backend/router/company.routes"));
+exp.use(`/api/${process.env.VERSION}/invoice/`, require("./backend/router/invoice.routes"));
+exp.use(`/api/${process.env.VERSION}/auth/`, require("./backend/router/auth.routes"));
+exp.use(`/api/${process.env.VERSION}/user/`, require("./backend/router/user.routes"));
+exp.use(`/api/${process.env.VERSION}/admin/`, require("./backend/router/admin.routes"));
+exp.use(`/api/${process.env.VERSION}/report/`, require("./backend/router/report.routes"));
+exp.use(`/api/${process.env.VERSION}/money-receipt/`, require("./backend/router/moneyReceipts.routes"));
+exp.use(`/api/${process.env.VERSION}/challan/`, require("./backend/router/challan.routes"));
+
+exp.get("/", (req, res) => {
+    return res.json({
+        status: "200",
+        body: [],
+        message: "Server is Ready To Go..."
+    }).status(200);
+});
+
+exp.listen(process.env.PORT, () => {
+    console.log(`Server started at http://localhost:${process.env.PORT}/`);
+});
+
+exp.use("/uploads", express.static(__dirname + "/uploads"));
+
+// error handler middleware
+exp.use(function (err, req, res, next) {
+    console.error(err.stack);
+    res.status(500).send({
+        status: 500,
+        message: err.message,
+        body: {},
     });
 });

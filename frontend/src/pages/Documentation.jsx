@@ -10,7 +10,7 @@ const Documentation = () => {
               📄
             </div>
             <div>
-              <p className="text-base font-bold text-gray-900">Zero® ERP</p>
+              <p className="text-base font-bold text-gray-900">ZeroERP</p>
               <p className="text-xs text-gray-400 mt-0.5">Complete ERP Solution</p>
             </div>
           </div>
@@ -20,7 +20,7 @@ const Documentation = () => {
             </tbody>
           </table>
           <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 text-center text-xs text-gray-400">
-            © 2026 Zero® ERP. &nbsp;·&nbsp; All rights reserved
+            © 2026 ZeroERP. &nbsp;·&nbsp; All rights reserved
           </div>
         </div>
       </div>

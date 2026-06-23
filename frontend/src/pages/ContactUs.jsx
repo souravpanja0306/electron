@@ -10,7 +10,7 @@ const ContactUs = () => {
               📄
             </div>
             <div>
-              <p className="text-base font-bold text-gray-900">Zero® ERP</p>
+              <p className="text-base font-bold text-gray-900">ZeroERP</p>
               <p className="text-xs text-gray-400 mt-0.5">Complete ERP Solution</p>
             </div>
           </div>

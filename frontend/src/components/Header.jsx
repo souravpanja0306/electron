@@ -51,7 +51,7 @@ const Header = () => {
         <div className="titlebar border-b border-slate-300 dark:border-slate-700 w-full h-10 bg-slate-200 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-between px-3 shadow-sm z-50">
             <div className="flex items-center gap-4 no-drag">
                 <div className="font-bold tracking-tight text-blue-600 dark:text-blue-400">
-                    <Link to="/" className="hover:opacity-80">Zero® ERP</Link>
+                    <Link to="/" className="hover:opacity-80">ZeroERP</Link>
                 </div>
                 <div className="flex text-xs space-x-1">
                     {/* File */}

@@ -1,5 +1,5 @@
 {
-  "name": "Zero® ERP",
+  "name": "ZeroERP",
   "version": "1.0.0",
   "description": "A desktop billing and transport logistics management application built with Electron, React, and SQLite.",
   "license": "ISC",
@@ -13,7 +13,17 @@
   },
   "build": {
     "appId": "com.company.billing",
-    "productName": "Billing Software",
+    "productName": "ZeroERP",
+    "files": [
+      ".env",
+      "main.js",
+      "preload.js",
+      "licenseService.js",
+      "backend/**/*",
+      "frontend/build/**/*",
+      "public/**/*",
+      "package.json"
+    ],
     "win": {
       "target": "nsis",
       "icon": "./public/icon/zero.ico"

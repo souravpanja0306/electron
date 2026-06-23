@@ -76,7 +76,7 @@ const Signup = () => {
             <div className="titlebar border-b border-slate-600 w-full h-10 bg-slate-950 text-white flex items-center justify-between p-2 shadow-md">
                 <div className="flex items-center gap-2">
                     <div className="font-semibold tracking-wide">
-                        <Link to="#">Zero® ERP</Link>
+                        <Link to="#">ZeroERP</Link>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
