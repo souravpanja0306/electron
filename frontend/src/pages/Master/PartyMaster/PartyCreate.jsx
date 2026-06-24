@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { AiOutlineFileAdd, AiOutlineIdcard, AiOutlineRollback } from "react-icons/ai";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import StateList from '../../../utils/StateList';
+import { toast } from 'sonner';
 
 // Components...
 import PageTitle from '../../../components/PageTitle';
@@ -45,23 +46,15 @@ const PartyCreate = () => {
     });
     const handleSubmit = async (e) => {
         try {
-            console.log("handleSubmit called", data);
             if (e) e.preventDefault();
             if (!data.company_name || data.company_name === "") {
-                console.log("Validation failed: Company Name Required");
-                setAlart({
-                    show: true,
-                    title: "Field required",
-                    type: "warning",
-                    message: "Company Name Required."
-                });
+                toast.success("Company Name Required.");
                 return;
             };
 
             let result = await handleCreateParty(data);
-            console.log("handleCreateParty result:", result);
             if (result && (result.status) === 200) {
-                setAlart({ show: true, title: "Sccesss", type: "success", message: result.message });
+                toast.success(result.message);
                 setData({
                     company_name: "",
                     email: "",
@@ -83,22 +76,11 @@ const PartyCreate = () => {
                     account_no: ""
                 });
             } else {
-                setAlart({
-                    show: true,
-                    title: "Error",
-                    type: "error",
-                    message: result?.message || "Failed to create party"
-                });
-            }
+                toast.success(result.message);
+            };
         } catch (error) {
-            console.log("handleSubmit error:", error);
-            setAlart({
-                show: true,
-                title: "Error",
-                type: "error",
-                message: "Something went wrong!"
-            });
-        }
+            toast.success("Something went wrong!");
+        };
     };
 
     useEffect(() => {

@@ -1,7 +1,6 @@
 const { app, BrowserWindow, Menu, globalShortcut, ipcMain } = require("electron");
 const path = require("path");
 const { machineIdSync } = require('node-machine-id');
-const { validateLicense } = require("./licenseService.js");
 const Store = require('electron-store').default;
 const { Notification } = require("electron");
 
@@ -9,15 +8,14 @@ const { Notification } = require("electron");
 const store = new Store();
 
 app.whenReady().then(() => {
-    validateLicense();
     const iconPath = path.join(__dirname, "./public/icon/zero.png");
     const win = new BrowserWindow({
         frame: false,
         titleBarStyle: "hidden",
-        width: 600,
-        height: 400,
-        minWidth: 600,
-        minHeight: 400,
+        width: 1400,
+        height: 1400,
+        minWidth: 1400,
+        minHeight: 1400,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             contextIsolation: true,

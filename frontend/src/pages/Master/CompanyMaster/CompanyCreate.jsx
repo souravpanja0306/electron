@@ -18,6 +18,7 @@ import useAuthStore from '../../../store/AuthStore';
 
 const CompanyCreate = () => {
     const { token } = useAuthStore();
+    console.log("🚀 ~ CompanyCreate ~ token:", token)
     const { companyData, createCompany, getAllCompany, companyLoading } = useCompanyStore();
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
