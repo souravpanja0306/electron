@@ -12,10 +12,10 @@ app.whenReady().then(() => {
     const win = new BrowserWindow({
         frame: false,
         titleBarStyle: "hidden",
-        width: 1400,
-        height: 1400,
-        minWidth: 1400,
-        minHeight: 1400,
+        width: 1280,
+        height: 720,
+        minWidth: 1280,
+        minHeight: 720,
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             contextIsolation: true,

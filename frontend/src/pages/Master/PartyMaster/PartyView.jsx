@@ -18,15 +18,19 @@ import {
     AiOutlineFilter
 } from "react-icons/ai";
 
-// Services...
-import { handleGetParty } from "../../../services/partyService"
+// Store...
+import useCompanyStore from '../../../store/CompanyStore';
+import useAuthStore from '../../../store/AuthStore';
+import usePartyStore from '../../../store/PartyStore';
 
 const ViewParty = () => {
+    const { token } = useAuthStore();
+    const { createParty, getAllParty, getPartyById, updateParty, parties } = usePartyStore()
     const [page, setPage] = useState(1);
     const [party, setParty] = useState([]);
 
     const getPartys = async () => {
-        let result = await handleGetParty();
+        let result = await getAllParty();
         if (result.body.length) {
             result.body.map(item => item.is_selected = false)
             setParty(result.body);

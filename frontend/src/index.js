@@ -11,7 +11,10 @@ import ViewInvoice from './pages/Invoice/ViewInvoice';
 import ViewInvoiceDetails from './pages/Invoice/ViewInvoiceDetails';
 import Notification from './pages/Notification';
 import Profile from './pages/Profile/Profile';
-import Setting from './pages/Setting';
+import Setting from './pages/Settings/Setting';
+import DatabaseSettings from './pages/Settings/DatabaseSettings';
+import InvoiceSetttings from './pages/Settings/InvoiceSettings';
+import ChallanSettings from './pages/Settings/ChallanSettings';
 import SalesReport from './pages/Reports/SalesReport';
 import EditProfile from './pages/Profile/EditProfile';
 import PartyCreate from './pages/Master/PartyMaster/PartyCreate';
@@ -80,7 +83,12 @@ const router = createHashRouter([
       { path: "/about", element: <About /> },
       { path: "/documentation", element: <Documentation /> },
       { path: "/contact-us", element: <ContactUs /> },
+
+      // Settings...
       { path: "/settings", element: <Setting /> },
+      { path: "/challan-settings", element: <ChallanSettings /> },
+      { path: "/invoice-setttings", element: <InvoiceSetttings /> },
+      { path: "/database-settings", element: <DatabaseSettings /> },
 
       // Add Company
       { path: "/add-company", element: <Company /> },

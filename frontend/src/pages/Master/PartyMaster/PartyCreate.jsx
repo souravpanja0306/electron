@@ -12,11 +12,14 @@ import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
 import SearchableSelect from '../../../components/SearchableSelect';
 
-// Service...
-import { handleCreateParty } from "../../../services/partyService";
-
+// Store...
+import useCompanyStore from '../../../store/CompanyStore';
+import useAuthStore from '../../../store/AuthStore';
+import usePartyStore from '../../../store/PartyStore';
 
 const PartyCreate = () => {
+    const { token } = useAuthStore();
+    const { createParty, getAllParty, getPartyById, updateParty, parties } = usePartyStore()
     const [searchParams] = useSearchParams();
     const [active, setActive] = useState(0);
     const back = searchParams.get("back");
@@ -52,7 +55,7 @@ const PartyCreate = () => {
                 return;
             };
 
-            let result = await handleCreateParty(data);
+            let result = await createParty({ data: data, token: token });
             if (result && (result.status) === 200) {
                 toast.success(result.message);
                 setData({

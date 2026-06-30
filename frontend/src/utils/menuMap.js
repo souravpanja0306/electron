@@ -16,6 +16,7 @@ import {
     AiOutlineFileAdd,
     AiOutlinePercentage,
     AiOutlineAppstoreAdd,
+    AiOutlineFileText
 } from "react-icons/ai";
 
 const MenuMap = {
@@ -142,6 +143,9 @@ const MenuMap = {
             icon: <AiOutlineSetting />,
             submenu: [
                 { title: "General", url: "/settings", icon: <AiOutlinePicture /> },
+                { title: "Invoice Settings", url: "/invoice-setttings", icon: <AiOutlineFileText /> },
+                { title: "Challan Setiings", url: "/challan-settings", icon: <AiOutlineFileText /> },
+                { title: "Database", url: "/database-settings", icon: <AiOutlineDatabase /> },
                 { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
             ]
         },

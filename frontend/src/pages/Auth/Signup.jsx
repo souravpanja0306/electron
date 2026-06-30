@@ -26,13 +26,12 @@ const Signup = () => {
     }, []);
 
     const handleKeyUpUsername = async (e) => {
-        const val = e.target.value;
-        if (!val) {
+        if (!e.target.value) {
             setUsernameMsg("");
             return;
-        }
+        };
         try {
-            const res = await checkUsername(val);
+            const res = await checkUsername(e.target.value);
             if (res.status === 409) {
                 setUsernameMsg(res.message);
             } else {
@@ -46,7 +45,7 @@ const Signup = () => {
     const handleSubmitSignup = async (e) => {
         e.preventDefault();
         if (signinLoading) return;
-        
+
         if (usernameExists) {
             return toast.error("Username already taken. Please choose another.");
         }
@@ -164,9 +163,9 @@ const Signup = () => {
                                 required
                             />
                             {usernameMsg && (
-                                <p className="text-red-500 text-[10px] absolute -bottom-4 right-0 font-medium">
-                                    {usernameMsg}
-                                </p>
+                                <div className="flex items-center gap-2 p-2 rounded-md border border-red-500/30 bg-red-500/10 text-red-400 text-sm">
+                                    <span>{usernameMsg}</span>
+                                </div>
                             )}
                         </div>
                         <div className="flex flex-col gap-1 mt-1">
@@ -181,8 +180,8 @@ const Signup = () => {
                             />
                         </div>
 
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             disabled={signinLoading}
                             className={`mt-2 ${signinLoading ? 'bg-blue-800 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white font-medium py-2 rounded transition-all flex justify-center items-center`}
                         >

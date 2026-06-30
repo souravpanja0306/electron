@@ -5,6 +5,29 @@ const usePartyStore = create((set) => ({
     parties: [],
     partyLoading: false,
 
+    createParty: async ({
+        data: data,
+        token: token
+    }) => {
+        try {
+            set({ loading: true });
+            const result = await axios({
+                method: "post",
+                url: "http://localhost:3001/api/v1/party/party-create",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                data: data,
+            });
+            set({ parties: result.data, loading: false });
+            return result.data;
+        } catch (error) {
+            set({ loading: false });
+            throw error;
+        };
+    },
+
     getAllParty: async (token) => {
         try {
             set({ loading: true });

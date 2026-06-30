@@ -19,7 +19,7 @@ import usePartyStore from '../../../store/PartyStore';
 import useAuthStore from '../../../store/AuthStore';
 
 const PartyEdit = () => {
-    const {  token } = useAuthStore();
+    const { token } = useAuthStore();
     const { getPartyById, updateParty, partyLoading } = usePartyStore();
     const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
