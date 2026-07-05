@@ -16,7 +16,7 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.generateInvoiceNo = async (req, res) => {
+module.exports.generateInvoiceNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId, t_mobile, t_username, t_name } = req.body;
@@ -64,7 +64,7 @@ exports.generateInvoiceNo = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.createInvoice = async (req, res) => {
+module.exports.createInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId, t_mobile, t_username, t_name, company_id, type, invoiceNo,
@@ -145,7 +145,7 @@ exports.createInvoice = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.getAllInvoice = async (req, res) => {
+module.exports.getAllInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId, t_mobile, t_username, t_name, } = req.body;
@@ -204,7 +204,7 @@ exports.getAllInvoice = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.deleteInvoice = async (req, res) => {
+module.exports.deleteInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId, t_mobile, t_username, t_name, } = req.body;
@@ -240,7 +240,7 @@ exports.deleteInvoice = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.invoiceExports = async (req, res) => {
+module.exports.invoiceExports = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
 
@@ -253,7 +253,7 @@ exports.invoiceExports = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.invoiceUpdate = async (req, res) => {
+module.exports.invoiceUpdate = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { id, company_id, type, invoice_no, invoice_date, transporter, eway_bill, party_id,
@@ -337,7 +337,7 @@ exports.invoiceUpdate = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.generateInvoicePdf = async (req, res) => {
+module.exports.generateInvoicePdf = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId } = req.body;

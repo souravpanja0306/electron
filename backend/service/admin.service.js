@@ -1,6 +1,6 @@
 const { db } = require("../database/connection");
 
-exports.resetTableData = async ({
+module.exports.resetTableData = async ({
     tableNames = "",
 }) => {
     try {
@@ -12,7 +12,7 @@ exports.resetTableData = async ({
     };
 };
 
-exports.migrateTableData = async (data) => {
+module.exports.migrateTableData = async (data) => {
     try {
         const migratedFields = [];
 
@@ -42,9 +42,8 @@ exports.migrateTableData = async (data) => {
     };
 };
 
-exports.createHSNSAC = async (data) => {
+module.exports.createHSNSAC = async (data) => {
     try {
-        db.exec(require("../database/schema/hsn.schema"));
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO hsn_sac (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -57,7 +56,7 @@ exports.createHSNSAC = async (data) => {
     };
 };
 
-exports.findHSNSAC = async ({
+module.exports.findHSNSAC = async ({
     id = "",
     created_by = "",
     code = "",
@@ -67,7 +66,6 @@ exports.findHSNSAC = async ({
     count = false,
 }) => {
     try {
-        db.exec(require("../database/schema/hsn.schema"));
         let query = "SELECT * FROM hsn_sac WHERE is_deleted = 0";
         let params = [];
 
@@ -108,9 +106,8 @@ exports.findHSNSAC = async ({
     };
 };
 
-exports.updateHSNSAC = async (id, data) => {
+module.exports.updateHSNSAC = async (id, data) => {
     try {
-        db.exec(require("../database/schema/hsn.schema"));
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db
@@ -123,9 +120,8 @@ exports.updateHSNSAC = async (id, data) => {
     };
 };
 
-exports.deleteHSNSAC = async (id) => {
+module.exports.deleteHSNSAC = async (id) => {
     try {
-        db.exec(require("../database/schema/hsn.schema"));
         const result = db
             .prepare("UPDATE hsn_sac SET is_deleted = 1 WHERE id = ?")
             .run(id);
@@ -136,9 +132,8 @@ exports.deleteHSNSAC = async (id) => {
     };
 };
 
-exports.createGST = async (data) => {
+module.exports.createGST = async (data) => {
     try {
-        db.exec(require("../database/schema/gst.schema"));
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO gst (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -151,7 +146,7 @@ exports.createGST = async (data) => {
     };
 };
 
-exports.findGST = async ({
+module.exports.findGST = async ({
     id = "",
     created_by = "",
     total_rate = "",
@@ -160,7 +155,6 @@ exports.findGST = async ({
     count = false,
 }) => {
     try {
-        db.exec(require("../database/schema/gst.schema"));
         let query = "SELECT * FROM gst WHERE is_deleted = 0";
         let params = [];
 
@@ -196,9 +190,9 @@ exports.findGST = async ({
     };
 };
 
-exports.updateGST = async (id, data) => {
+module.exports.updateGST = async (id, data) => {
     try {
-        db.exec(require("../database/schema/gst.schema"));
+
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db
@@ -211,9 +205,9 @@ exports.updateGST = async (id, data) => {
     };
 };
 
-exports.deleteGST = async (id) => {
+module.exports.deleteGST = async (id) => {
     try {
-        db.exec(require("../database/schema/gst.schema"));
+
         const result = db
             .prepare("UPDATE gst SET is_deleted = 1 WHERE id = ?")
             .run(id);

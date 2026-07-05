@@ -92,6 +92,7 @@ exp.use(`/api/${process.env.VERSION}/admin/`, require("./backend/router/admin.ro
 exp.use(`/api/${process.env.VERSION}/report/`, require("./backend/router/report.routes"));
 exp.use(`/api/${process.env.VERSION}/money-receipt/`, require("./backend/router/moneyReceipts.routes"));
 exp.use(`/api/${process.env.VERSION}/challan/`, require("./backend/router/challan.routes"));
+exp.use(`/api/${process.env.VERSION}/setting/`, require("./backend/router/setting.routes"));
 
 exp.get("/", (req, res) => {
     return res.json({

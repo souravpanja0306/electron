@@ -26,4 +26,15 @@ const dbPath = app.isPackaged
 
 const db = new Database(dbPath);
 
+db.exec(require("../database/schema/gst.schema"));
+db.exec(require("../database/schema/challan.schema"));
+db.exec(require("../database/schema/invoice.schema"));
+db.exec(require("../database/schema/moneyReceipts.schema"));
+db.exec(require("../database/schema/company.schema"));
+db.exec(require("../database/schema/user.schema"));
+db.exec(require("../database/schema/party.schema"));
+db.exec(require("../database/schema/invoice.schema"));
+db.exec(require("../database/schema/moneyReceipts.schema"));
+db.exec(require("./schema/settingChallanSchema"));
+
 module.exports = { connectMongo, db, dbPath };

@@ -22,7 +22,7 @@ const generateLicenseKey = () => {
     return crypto.randomBytes(16).toString("hex").match(/.{1,4}/g).join("-").toUpperCase();
 };
 
-exports.checkUsername = async (req, res) => {
+module.exports.checkUsername = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { username } = req.params;
@@ -46,11 +46,11 @@ exports.checkUsername = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.signup = async (req, res) => {
+module.exports.signup = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { name, mobile, email, username, password, machineId } = req.body;
-        console.log("🚀 ~ machineId:", machineId)
+
         if (!name) return errorHandler(res, 400, "name Required.");
         if (!mobile) return errorHandler(res, 400, "mobile Required.");
         if (!email) return errorHandler(res, 400, "email Required.");
@@ -125,7 +125,7 @@ exports.signup = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.signin = async (req, res) => {
+module.exports.signin = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { username, password, machineId } = req.body;
@@ -143,7 +143,7 @@ exports.signin = async (req, res) => {
                 machine_id: machineId
             });
             if (!findMongoUser.length) {
-                response.status = 401;
+                response.status = 202;
                 response.message = "This is different machine. You cannot login here.";
                 response.body = {};
                 return res.status(response.status).json(response);
@@ -174,7 +174,7 @@ exports.signin = async (req, res) => {
                 token: token,
             };
         } else {
-            response.status = 401;
+            response.status = 202;
             response.message = "Incorrect username Or password.";
             response.body = {};
         };
@@ -187,7 +187,7 @@ exports.signin = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.forgotPassword = async (req, res) => {
+module.exports.forgotPassword = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
 
@@ -200,7 +200,7 @@ exports.forgotPassword = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.resetPassword = async (req, res) => {
+module.exports.resetPassword = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
 
@@ -213,7 +213,7 @@ exports.resetPassword = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.viewProfile = async (req, res) => {
+module.exports.viewProfile = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
 

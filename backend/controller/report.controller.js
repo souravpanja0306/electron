@@ -14,7 +14,7 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.debtors = async (req, res) => {
+module.exports.debtors = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId } = req.body;
@@ -33,7 +33,7 @@ exports.debtors = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.customerLedger = async (req, res) => {
+module.exports.customerLedger = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId } = req.body;
@@ -53,7 +53,7 @@ exports.customerLedger = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.dashboardStats = async (req, res) => {
+module.exports.dashboardStats = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId } = req.body;
@@ -71,7 +71,7 @@ exports.dashboardStats = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.creditors = async (req, res) => {
+module.exports.creditors = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
 
@@ -84,7 +84,7 @@ exports.creditors = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.salesReports = async (req, res) => {
+module.exports.salesReports = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
 

@@ -62,7 +62,6 @@ const ViewMoneyReceipts = () => {
             };
         };
     };
-    console.log(checkedIds) // please check...
 
     const handlePrint = async (id) => {
         try {

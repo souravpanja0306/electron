@@ -4,9 +4,9 @@ const { db } = require("../database/connection");
 // MongoDB Models...
 const UserModel = require("../database/model/user.model");
 
-exports.insertUsers = async (data) => {
+module.exports.insertUsers = async (data) => {
     try {
-        db.exec(require("../database/schema/user.schema"));
+
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO users (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -20,11 +20,11 @@ exports.insertUsers = async (data) => {
             return insertedUser;
         };
     } catch (error) {
-        console.log(error)
+        console.log(`Something went wrong: service: insertUsers: ${error}`)
     };
 };
 
-exports.getUsers = async ({
+module.exports.getUsers = async ({
     id = "",
     mobile = "",
     machine_id = "",
@@ -35,7 +35,6 @@ exports.getUsers = async ({
     skip = "",
 }) => {
     try {
-        db.exec(require("../database/schema/user.schema"));
         let query = "SELECT * FROM users";
         let search_key = [];
         let params = [];
@@ -78,13 +77,12 @@ exports.getUsers = async ({
         let result = db.prepare(query).all(...params);
         return result;
     } catch (error) {
-        console.log(error);
+        console.log(`Something went wrong: service: getUsers: ${error}`);
     };
 };
 
-exports.updateUsers = async (data, id) => {
+module.exports.updateUsers = async (data, id) => {
     try {
-        db.exec(require("../database/schema/user.schema"));
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db
@@ -93,13 +91,13 @@ exports.updateUsers = async (data, id) => {
 
         return result.changes > 0;
     } catch (error) {
-        console.log(error);
+        console.log(`Something went wrong: service: updateUsers: ${error}`);
         throw error;
     };
 };
 
 // MongoDB Working Here...
-exports.insertUsersInMongodb = async (data) => {
+module.exports.insertUsersInMongodb = async (data) => {
     try {
         let newData = new UserModel(data);
         let result = await newData.save();
@@ -110,7 +108,7 @@ exports.insertUsersInMongodb = async (data) => {
     };
 };
 
-exports.findUsersInMongodb = async ({
+module.exports.findUsersInMongodb = async ({
     machine_id = "",
     username = "",
 }) => {
@@ -127,7 +125,7 @@ exports.findUsersInMongodb = async ({
     };
 };
 
-exports.updateUsersInMongodb = async ({
+module.exports.updateUsersInMongodb = async ({
     search_key = {},
     update_info = {}
 }) => {

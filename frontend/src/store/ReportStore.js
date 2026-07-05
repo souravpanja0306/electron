@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import api from "../utils/axiosInterceptor";
 
 const useReportStore = create((set) => ({
     reportData: [],
@@ -14,12 +14,9 @@ const useReportStore = create((set) => ({
     getDashboardStats: async ({ token }) => {
         try {
             set({ dashboardStatsLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: "http://localhost:3001/api/v1/report/dashboard-stats",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
+                url: "/report/dashboard-stats",
             });
             if (result.data.status === 200) {
                 set({ dashboardStats: result.data.body, dashboardStatsLoading: false });
@@ -37,13 +34,9 @@ const useReportStore = create((set) => ({
     }) => {
         try {
             set({ reportLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: `http://localhost:3001/api/v1/report/debtors`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                url: `/report/debtors`,
             });
             if (result.data.status === 200) {
                 set({ reportData: result.data.body, reportLoading: false });
@@ -61,13 +54,9 @@ const useReportStore = create((set) => ({
     }) => {
         try {
             set({ debtorDetailsLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: `http://localhost:3001/api/v1/report/customer-ledger?party_id=${id}`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                url: `/report/customer-ledger?party_id=${id}`,
             });
             if (result.data.status === 200) {
                 set({ debtorDetails: result.data.body, debtorDetailsLoading: false });

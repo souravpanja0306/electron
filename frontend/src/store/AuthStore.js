@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import api from "../utils/axiosInterceptor";
 
 const useAuthStore = create((set, get) => ({
     token: null,
@@ -16,10 +16,9 @@ const useAuthStore = create((set, get) => ({
 
     checkUsername: async (username) => {
         try {
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: `http://localhost:3001/api/v1/auth/check-username/${username}`,
-                validateStatus: (status) => status < 500,
+                url: `/auth/check-username/${username}`,
             });
             if (result.data.status === 409) {
                 set({ usernameExists: true });
@@ -36,12 +35,9 @@ const useAuthStore = create((set, get) => ({
     getProfileData: async (token) => {
         try {
             set({ profileLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: `http://localhost:3001/api/v1/user/get-profile`,
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                url: `/user/get-profile`,
             });
             if (result.data.status === 200) {
                 set({ profileData: result.data.body, profileLoading: false });
@@ -58,13 +54,10 @@ const useAuthStore = create((set, get) => ({
     updateProfileData: async (payload, token) => {
         try {
             set({ profileLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "put",
-                url: `http://localhost:3001/api/v1/user/update-profile`,
+                url: `/user/update-profile`,
                 data: payload,
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
             });
             if (result.data.status === 200) {
                 await get().getProfileData(token);
@@ -80,14 +73,10 @@ const useAuthStore = create((set, get) => ({
     signin: async (payload) => {
         try {
             set({ signinLoading: true });
-            const result = await await axios({
+            const result = await api({
                 method: "post",
-                url: "http://localhost:3001/api/v1/auth/signin",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                url: "/auth/signin",
                 data: payload,
-                validateStatus: (status) => status < 500,
             });
             set({ signinData: result.data, signinLoading: false, token: result.data?.body?.token });
             return result.data;
@@ -100,14 +89,10 @@ const useAuthStore = create((set, get) => ({
     signup: async (payload) => {
         try {
             set({ signinLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "post",
-                url: "http://localhost:3001/api/v1/auth/signup",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                url: "/auth/signup",
                 data: payload,
-                validateStatus: (status) => status < 500,
             });
             set({ signinData: result.data, signinLoading: false });
             return result.data;

@@ -2,6 +2,7 @@ const moment = require("moment");
 const fs = require('fs');
 const contents = require("../content/contents");
 const ChallanService = require("../service/challan.service");
+const SettingService = require("../service/setting.service");
 const PartyService = require("../service/party.service");
 const CompanyService = require("../service/company.service");
 const { generateChallanHtml } = require("../helper/generateChallanHtml");
@@ -10,7 +11,7 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.generateChallanPdf = async (req, res) => {
+module.exports.generateChallanPdf = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -33,9 +34,10 @@ exports.generateChallanPdf = async (req, res) => {
 
         // Get company
         let companies = await CompanyService.getCompany({ id: challan.company_id });
+        let challanSetting = await SettingService.getChallanSetting({ company_id: challan.company_id });
         let company = companies.length ? companies[0] : {};
 
-        const html = generateChallanHtml({ challan, company });
+        const html = generateChallanHtml({ challan, company, terms: challanSetting.length ? challanSetting[0].terms : "" });
 
         response.status = 200;
         response.message = "PDF generated successfully.";
@@ -50,7 +52,7 @@ exports.generateChallanPdf = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.createChallan = async (req, res) => {
+module.exports.createChallan = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId, company_id, consignor_id, consignee_id, cn_no, date, from_loc, to_loc,
@@ -98,7 +100,7 @@ exports.createChallan = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.getAllChallans = async (req, res) => {
+module.exports.getAllChallans = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -158,7 +160,7 @@ exports.getAllChallans = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.deleteChallan = async (req, res) => {
+module.exports.deleteChallan = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -186,7 +188,7 @@ exports.deleteChallan = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.updateChallan = async (req, res) => {
+module.exports.updateChallan = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -241,29 +243,39 @@ exports.updateChallan = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.generateChallanNo = async (req, res) => {
+module.exports.generateChallanNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { types } = req.query;
+        const { types, company_id } = req.query;
         if (!types) {
             response.status = 400;
             response.message = "Type required";
             response.body = [];
             return res.status(response.status).json(response);
         };
-        let type = "";
-        if (types == "challan") type = "CHA";
+        let prefix = "";
+        let starting = 0;
+        let suffix = "";
+
+        let isExist = await SettingService.getChallanSetting({ company_id: company_id });
+        if (isExist.length) {
+            prefix = isExist[0].prefix;
+            starting = isExist[0].starting;
+            suffix = isExist[0].suffix;
+        };
 
         const existsCheck = async ({
-            type = ""
+            prefix = "",
+            starting = "",
+            suffix = ""
         }) => {
             let search_key = {};
             if (t_userId) search_key["created_by"] = t_userId;
 
             let count = await ChallanService.findChallans({ ...search_key, count: true });
             while (true) {
-                const challanNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
+                const challanNo = `${prefix ? prefix : ""}${(count + 1 + parseInt(starting)).toString().padStart(6, "0")}${suffix ? suffix : ""}`;
                 search_key["cn_no"] = challanNo;
                 const exists = await ChallanService.findChallans(search_key);
                 if (!exists.length) return challanNo;
@@ -271,7 +283,12 @@ exports.generateChallanNo = async (req, res) => {
             };
         };
 
-        let result = await existsCheck({ type: type });
+        let result = await existsCheck({
+            prefix: prefix,
+            starting: starting,
+            suffix: suffix
+        });
+
         if (result) {
             response.status = 200;
             response.message = "Challan Number Generated Successfully.";

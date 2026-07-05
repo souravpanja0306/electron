@@ -1,12 +1,11 @@
 // services/debtor.service.js
 const { db } = require("../database/connection");
 
-exports.getDebtors = async ({
+module.exports.getDebtors = async ({
     party_id = ""
 }) => {
     try {
-        db.exec(require("../database/schema/invoice.schema"));
-        db.exec(require("../database/schema/moneyReceipts.schema"));
+        
 
         const stmt = db.prepare(`
             SELECT 
@@ -41,14 +40,10 @@ exports.getDebtors = async ({
     };
 };
 
-exports.getDebtorsDetails = async ({
+module.exports.getDebtorsDetails = async ({
     party_id = ""
 }) => {
     try {
-        db.exec(require("../database/schema/invoice.schema"));
-        db.exec(require("../database/schema/moneyReceipts.schema"));
-        db.exec(require("../database/schema/party.schema"));
-
         const party = db.prepare(`SELECT * FROM party WHERE id = ?`).get(party_id);
         const stmt = db.prepare(`
             SELECT invoice_date AS date, 'Invoice #' || invoice_no AS description, total_amount AS dr, 0 AS cr FROM invoice WHERE party_id = ?
@@ -81,11 +76,8 @@ exports.getDebtorsDetails = async ({
     };
 };
 
-exports.getDashboardStats = async () => {
+module.exports.getDashboardStats = async () => {
     try {
-        db.exec(require("../database/schema/invoice.schema"));
-        db.exec(require("../database/schema/moneyReceipts.schema"));
-
         // 1. Total Debtors
         const debtorTotals = db.prepare(`
             SELECT 

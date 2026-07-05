@@ -1,6 +1,6 @@
 const moment = require("moment");
 
-exports.generateChallanHtml = ({ challan, company }) => {
+module.exports.generateChallanHtml = ({ challan, company, terms }) => {
     const items = challan.data || [];
 
     let itemsHtml = items.map((item, index) => `
@@ -410,7 +410,7 @@ exports.generateChallanHtml = ({ challan, company }) => {
                 </td>
                 <td style="width:50%; background:#f5f5f5;">
                     <span class="lbl">Remarks / Note</span>
-                    Goods are transported at owner's risk. Claims for damage or shortage must be reported at the time of delivery. This is not a tax invoice. Subject to City jurisdiction only.
+                    ${terms}
                 </td>
             </tr>
         </table>

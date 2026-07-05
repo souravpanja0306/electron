@@ -1,8 +1,7 @@
 const { db } = require("../database/connection");
 
-exports.insertMoneyReceipts = async (data) => {
+module.exports.insertMoneyReceipts = async (data) => {
     try {
-        db.exec(require("../database/schema/moneyReceipts.schema"));
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO money_receipts (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -15,7 +14,7 @@ exports.insertMoneyReceipts = async (data) => {
 };
 
 
-exports.findMoneyReceipts = async ({
+module.exports.findMoneyReceipts = async ({
     id = "",
     created_by = "",
     receipt_no = "",
@@ -27,7 +26,6 @@ exports.findMoneyReceipts = async ({
     count = false,
 }) => {
     try {
-        db.exec(require("../database/schema/moneyReceipts.schema"));
         let query = "SELECT * FROM money_receipts WHERE is_deleted = 0";
         let params = [];
 
@@ -90,7 +88,6 @@ module.exports.deleteMoneyReceipt = async ({
     id = "",
 }) => {
     try {
-        db.exec(require("../database/schema/moneyReceipts.schema"));
         if (!id) throw new Error("ID is required");
 
         let query = "UPDATE money_receipts SET is_deleted = 1 WHERE id = ?";
@@ -104,9 +101,8 @@ module.exports.deleteMoneyReceipt = async ({
 };
 
 
-exports.updateMoneyReceiptData = async (id, data) => {
+module.exports.updateMoneyReceiptData = async (id, data) => {
     try {
-        db.exec(require("../database/schema/moneyReceipts.schema"));
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db

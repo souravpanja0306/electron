@@ -16,7 +16,7 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.keyValidate = async (req, res) => {
+module.exports.keyValidate = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
      

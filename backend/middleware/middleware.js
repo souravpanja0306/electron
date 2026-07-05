@@ -4,8 +4,10 @@ const jwt = require("jsonwebtoken");
 // Contents...
 const contents = require("../content/contents");
 
+// Services...
+const UserService = require("../service/user.service");
 
-exports.isAuthenticated = async (req, res, next) => {
+module.exports.isAuthenticated = async (req, res, next) => {
     let response = { ...contents.defaultResponse };
     try {
         if (!req.body) req.body = {};
@@ -19,6 +21,15 @@ exports.isAuthenticated = async (req, res, next) => {
         const token = authHeader.split(" ")[1];
 
         const decoded = jwt.verify(token, "secretOrPrivateKey");
+
+        let userExists = await UserService.getUsers({ id: decoded.TOKEN_UID });
+        if (!userExists.length) {
+            response.status = 401;
+            response.message = "Unauthorized";
+            response.body = [];
+            return res.status(response.status).json(response);
+        };
+
         if (decoded) {
             req.body.t_userId = decoded.TOKEN_UID;
             req.body.t_mobile = decoded.TOKEN_MOBILE;

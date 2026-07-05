@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import api from "../utils/axiosInterceptor";
 
 const usePartyStore = create((set) => ({
     parties: [],
@@ -11,13 +11,9 @@ const usePartyStore = create((set) => ({
     }) => {
         try {
             set({ loading: true });
-            const result = await axios({
+            const result = await api({
                 method: "post",
-                url: "http://localhost:3001/api/v1/party/party-create",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                url: "/party/party-create",
                 data: data,
             });
             set({ parties: result.data, loading: false });
@@ -31,13 +27,9 @@ const usePartyStore = create((set) => ({
     getAllParty: async (token) => {
         try {
             set({ loading: true });
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: "http://localhost:3001/api/v1/party/party-list",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                url: "/party/party-list",
             });
             set({ parties: result.data, loading: false });
             return result.data;
@@ -50,32 +42,24 @@ const usePartyStore = create((set) => ({
     getPartyById: async (id, token) => {
         try {
             set({ partyLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: `http://localhost:3001/api/v1/party/party-list?id=${id}`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                url: `/party/party-list?id=${id}`,
             });
             set({ partyLoading: false });
             return result.data;
         } catch (error) {
             set({ partyLoading: false });
             throw error;
-        }
+        };
     },
 
     updateParty: async (id, payload, token) => {
         try {
             set({ partyLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "put",
-                url: `http://localhost:3001/api/v1/party/party-update/${id}`,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                url: `/party/party-update/${id}`,
                 data: payload,
             });
             set({ partyLoading: false });

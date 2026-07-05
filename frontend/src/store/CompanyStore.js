@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import axios from "axios";
+import api from "../utils/axiosInterceptor";
+
 
 const useCompanyStore = create((set) => ({
     companyData: [],
@@ -8,22 +9,16 @@ const useCompanyStore = create((set) => ({
     createCompany: async (payload, token) => {
         try {
             set({ companyLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "post",
-                url: "http://localhost:3001/api/v1/company/create-company",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                url: "/company/create-company",
+               
                 data: payload,
             });
             if (result.data.status === 200) {
-                const result = await axios({
+                const result = await api({
                     method: "get",
-                    url: "http://localhost:3001/api/v1/company/get-company",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
+                    url: "/company/get-company",
                 });
                 if (result.data.status === 200) {
                     set({ companyData: result.data.body, companyLoading: false });
@@ -39,13 +34,9 @@ const useCompanyStore = create((set) => ({
     getAllCompany: async (token) => {
         try {
             set({ companyLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: "http://localhost:3001/api/v1/company/get-company",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                url: "/company/get-company",
             });
             if (result.data.status === 200) {
                 set({ companyData: result.data.body, companyLoading: false });
@@ -62,13 +53,9 @@ const useCompanyStore = create((set) => ({
     deleteCompany: async ({ ids, token }) => {
         try {
             set({ companyLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "delete",
-                url: "http://localhost:3001/api/v1/company/company-delete",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+                url: "/company/company-delete",
                 data: { ids: ids },
             });
             set({ companyLoading: false });
@@ -82,9 +69,9 @@ const useCompanyStore = create((set) => ({
     getCompanyById: async (id, token) => {
         try {
             set({ companyLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "get",
-                url: `http://localhost:3001/api/v1/company/get-company?id=${id}`,
+                url: `/company/get-company?id=${id}`,
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -101,9 +88,9 @@ const useCompanyStore = create((set) => ({
     updateCompany: async (id, payload, token) => {
         try {
             set({ companyLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "put",
-                url: `http://localhost:3001/api/v1/company/update-company/${id}`,
+                url: `/company/update-company/${id}`,
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

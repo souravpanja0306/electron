@@ -53,15 +53,13 @@ const ViewParty = () => {
                     toast.error("Please select an item to delete.");
                 } else {
                     await window.api.deleteParty({ ids: checkedIds }).then((res) => {
-                        console.log(res, "res")
                         if (res.status === 200) {
-                            setCheckedIds([])
+                            setCheckedIds([]);
                         };
                     });
                     await window.api.getParty({}).then((data) => {
                         setParty(data.body);
                     });
-
                 };
             } catch (error) {
                 console.log(error);

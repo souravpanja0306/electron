@@ -15,7 +15,7 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.addCompany = async (req, res) => {
+module.exports.addCompany = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -78,7 +78,7 @@ exports.addCompany = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.getCompany = async (req, res) => {
+module.exports.getCompany = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -111,7 +111,7 @@ exports.getCompany = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.getCompanyById = async (req, res) => {
+module.exports.getCompanyById = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -141,7 +141,7 @@ exports.getCompanyById = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.removeCompany = async (req, res) => {
+module.exports.removeCompany = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { ids } = req.body;
@@ -172,7 +172,7 @@ exports.removeCompany = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.updateCompany = async (req, res) => {
+module.exports.updateCompany = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { id } = req.params;

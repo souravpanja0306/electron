@@ -1,12 +1,12 @@
 import { create } from "zustand";
-import axios from "axios";
+import api from "../utils/axiosInterceptor";
 
 const useSettingStore = create((set) => ({
-    
+
     dumpDatabase: async ({ token }) => {
         try {
-            const response = await axios({
-                url: "http://localhost:3001/api/v1/admin/dump-db",
+            const response = await api({
+                url: "/admin/dump-db",
                 method: 'GET',
                 responseType: 'blob',
             });
@@ -30,14 +30,15 @@ const useSettingStore = create((set) => ({
         token = ""
     }) => {
         try {
-            const response = await axios.get(`http://localhost:3001/api/v1/admin/reset-all-table?tableNames=${tableNames}`, {
-                headers: { Authorization: `Bearer ${token}` }
+            const response = await api({
+                method: "get",
+                url: `/admin/reset-all-table?tableNames=${tableNames}`
             });
             return response.data;
         } catch (error) {
             console.error("Failed to reset tables", error);
             throw error;
-        }
+        };
     },
 
     migrateDatabase: async ({
@@ -45,14 +46,16 @@ const useSettingStore = create((set) => ({
         token = ""
     }) => {
         try {
-            const response = await axios.post(`http://localhost:3001/api/v1/admin/migrate-table`, payload, {
-                headers: { Authorization: `Bearer ${token}` }
+            const response = await api({
+                method: "post",
+                url: `/admin/migrate-table`,
+                data: payload,
             });
             return response.data;
         } catch (error) {
             console.error("Failed to migrate database", error);
             throw error;
-        }
+        };
     },
 
 }));

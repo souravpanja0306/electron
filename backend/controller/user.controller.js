@@ -15,7 +15,7 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.addUser = async (req, res) => {
+module.exports.addUser = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { name, mobile, email, username, password, address_1,
@@ -58,7 +58,7 @@ exports.addUser = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.listUsers = async (req, res) => {
+module.exports.listUsers = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { skip, limit, id } = req.query;
@@ -81,7 +81,7 @@ exports.listUsers = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.getUsers = async (req, res) => {
+module.exports.getUsers = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { id } = req.params;
@@ -108,7 +108,7 @@ exports.getUsers = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.getProfile = async (req, res) => {
+module.exports.getProfile = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const id = req.body.t_userId;
@@ -125,11 +125,11 @@ exports.getProfile = async (req, res) => {
         console.log(`Something went wrong: controller: getProfile: ${error}`);
         response.status = 500;
         response.message = error.message || "Internal Server Error";
-    }
+    };
     return res.status(response.status).json(response);
 };
 
-exports.updateProfile = async (req, res) => {
+module.exports.updateProfile = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const id = req.body.t_userId;
@@ -156,7 +156,7 @@ exports.updateProfile = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.removeUsers = async (req, res) => {
+module.exports.removeUsers = async (req, res) => {
     let response = contents.defaultResponse;
     try {
 

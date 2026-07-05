@@ -1,7 +1,7 @@
 const moment = require("moment");
 const { inrToWords } = require("./InWordConverter");
 
-exports.generateMoneyReceiptHtml = ({ receipt, company, party }) => {
+module.exports.generateMoneyReceiptHtml = ({ receipt, company, party }) => {
     const items = receipt.data || [];
     
     let itemsHtml = items.map((item, index) => `

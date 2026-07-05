@@ -114,7 +114,6 @@ const ViewCompany = () => {
 
     const currentData = companyData?.slice((page - 1) * limit, page * limit) || [];
 
-    console.log("🚀 ~ ViewCompany ~ companyLoading:", companyLoading)
     if (companyLoading) return <CustomLoader />;
 
     return (

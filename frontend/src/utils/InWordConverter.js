@@ -1,4 +1,4 @@
-exports.inrToWords = (num) => {
+module.exports.inrToWords = (num) => {
     const a = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
         "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
         "Sixteen", "Seventeen", "Eighteen", "Nineteen"

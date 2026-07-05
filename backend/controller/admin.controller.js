@@ -20,7 +20,7 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.dumpDB = async (req, res) => {
+module.exports.dumpDB = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         if (!fs.existsSync(dbPath)) {
@@ -37,7 +37,7 @@ exports.dumpDB = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.resetAllTable = async (req, res) => {
+module.exports.resetAllTable = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { tableNames } = req.query;

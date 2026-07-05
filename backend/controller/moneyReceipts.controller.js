@@ -55,7 +55,7 @@ module.exports.printMoneyReceipt = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
-exports.generateMoneyReceiptNo = async (req, res) => {
+module.exports.generateMoneyReceiptNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId, t_mobile, t_username, t_name } = req.body;

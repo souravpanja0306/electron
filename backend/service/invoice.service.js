@@ -1,8 +1,7 @@
 const { db } = require("../database/connection");
 
-exports.insertInvoiceData = async (data) => {
+module.exports.insertInvoiceData = async (data) => {
     try {
-        db.exec(require("../database/schema/invoice.schema"));
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO invoice (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -15,7 +14,7 @@ exports.insertInvoiceData = async (data) => {
     };
 };
 
-exports.findInvoices = async ({
+module.exports.findInvoices = async ({
     id = "",
     created_by = "",
     invoice_no = "",
@@ -27,7 +26,6 @@ exports.findInvoices = async ({
     count = false,
 }) => {
     try {
-        db.exec(require("../database/schema/invoice.schema"));
         let query = "SELECT * FROM invoice WHERE is_deleted = 0";
         let params = [];
 
@@ -90,7 +88,6 @@ module.exports.deleteInvoices = async ({
     id = "",
 }) => {
     try {
-        db.exec(require("../database/schema/invoice.schema"));
         if (id) {
             const result = db
                 .prepare("UPDATE invoice SET is_deleted = 1 WHERE id = ?")
@@ -104,9 +101,8 @@ module.exports.deleteInvoices = async ({
 };
 
 
-exports.updateInvoiceData = async (id, data) => {
+module.exports.updateInvoiceData = async (id, data) => {
     try {
-        db.exec(require("../database/schema/invoice.schema"));
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db

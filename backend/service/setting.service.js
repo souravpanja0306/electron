@@ -1,29 +1,28 @@
 const { db } = require("../database/connection");
 
-module.exports.createParty = async (data) => {
+module.exports.createChallanSetting = async (data) => {
     try {
         const keys = Object.keys(data);
         const result = db
-            .prepare(`INSERT INTO party (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
+            .prepare(`INSERT INTO challan_setting (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
             .run(data);
 
         return result;
     } catch (error) {
-        console.log("Something went wrong: Service: createParty", error);
+        console.log(`Something went wrong: service: createChallanSetting: ${error}`);
         throw error;
     }
 };
 
-module.exports.getParty = async ({
+module.exports.getChallanSetting = async ({
     id = "",
     created_by = "",
-    mobile = "",
-    email = "",
+    company_id = "",
     limit = "",
     skip = "",
 }) => {
     try {
-        let query = "SELECT * FROM party";
+        let query = "SELECT * FROM challan_setting";
         let search_key = [];
         let params = [];
 
@@ -31,13 +30,9 @@ module.exports.getParty = async ({
             search_key.push("id = ?");
             params.push(id);
         };
-        if (mobile) {
-            search_key.push("mobile = ?");
-            params.push(mobile);
-        };
-        if (email) {
-            search_key.push("email = ?");
-            params.push(email);
+        if (company_id) {
+            search_key.push("company_id = ?");
+            params.push(company_id);
         };
         if (created_by) {
             search_key.push("created_by = ?");
@@ -48,7 +43,7 @@ module.exports.getParty = async ({
         else query = `${query}`;
 
         if (limit) {
-            query += " LIMIT ? OFFSET ?";
+            query += " LIMIT ?";
             params.push(Number(limit));
         };
         if (skip) {
@@ -58,35 +53,24 @@ module.exports.getParty = async ({
         let result = db.prepare(query).all(...params);
         return result;
     } catch (error) {
-        console.log("Something went wrong: Service: getParty", error);
+        console.log(`Something went wrong: service: getChallanSetting: ${error}`);
         throw error;
     };
 };
 
-module.exports.deleteParty = async ({
-    ids = [],
+module.exports.updateChallanSetting = async ({
+    id = "",
+    data = {}
 }) => {
-    try {
-        const placeholders = ids.map(() => "?").join(",");
-
-        let result = db.prepare(`DELETE FROM party WHERE id IN (${placeholders})`).run(...ids);
-        return result;
-    } catch (error) {
-        console.log("Something went wrong: Service: deleteParty", error);
-        throw error;
-    };
-};
-
-module.exports.updateParty = async (id, data) => {
     try {
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db
-            .prepare(`UPDATE party SET ${setClause} WHERE id = @id`)
+            .prepare(`UPDATE challan_setting SET ${setClause} WHERE id = @id`)
             .run({ ...data, id });
         return result;
     } catch (error) {
-        console.log("Something went wrong: Service: updateParty", error);
+        console.log("Something went wrong: Service: updateChallanSetting", error);
         throw error;
     };
 };

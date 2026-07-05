@@ -1,8 +1,7 @@
 const { db } = require("../database/connection");
 
-exports.createCompany = async (data) => {
+module.exports.createCompany = async (data) => {
     try {
-        db.exec(require("../database/schema/company.schema"));
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO company (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
@@ -15,7 +14,7 @@ exports.createCompany = async (data) => {
     };
 };
 
-exports.getCompany = async ({
+module.exports.getCompany = async ({
     id = "",
     mobile = "",
     created_by = "",
@@ -24,7 +23,6 @@ exports.getCompany = async ({
     skip = "",
 }) => {
     try {
-        db.exec(require("../database/schema/company.schema"));
         let query = "SELECT * FROM company";
         let search_key = [];
         let params = [];
@@ -65,7 +63,7 @@ exports.getCompany = async ({
     };
 };
 
-exports.deleteCompany = async ({
+module.exports.deleteCompany = async ({
     ids = "",
 }) => {
     try {
@@ -79,9 +77,8 @@ exports.deleteCompany = async ({
     };
 };
 
-exports.updateCompany = async (id, data) => {
+module.exports.updateCompany = async (id, data) => {
     try {
-        db.exec(require("../database/schema/company.schema"));
         const keys = Object.keys(data).filter(key => key !== 'id'); // Exclude id from update fields
         const setClause = keys.map(key => `${key} = @${key}`).join(", ");
 

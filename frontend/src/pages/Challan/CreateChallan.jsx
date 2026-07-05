@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { inrToWords } from '../../utils/InWordConverter';
+import moment from 'moment';
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+
+// Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
-import { inrToWords } from '../../utils/InWordConverter';
-import moment from 'moment';
 
 // Icon...
 import {
@@ -17,8 +21,6 @@ import {
   AiOutlineTable,
   AiOutlineRollback,
 } from "react-icons/ai";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Link, NavLink } from "react-router-dom";
 
 
 // Stores...
@@ -38,17 +40,17 @@ const CreateChallan = () => {
   const { companyData, getAllCompany } = useCompanyStore();
   const { createChallan, generateChallanNo, challanNo, challanLoading } = useChallanStore();
 
-  const getChallanNo = async () => {
-    let result = await generateChallanNo(token);
-    if (result.status === 200) {
-      setForm(prev => ({ ...prev, cn_no: result.body }));
-    }
-  };
+  // const getChallanNo = async () => {
+  //   let result = await generateChallanNo(token);
+  //   if (result.status === 200) {
+  //     setForm(prev => ({ ...prev, cn_no: result.body }));
+  //   }
+  // };
 
   useEffect(() => {
     getAllParty(token);
     getAllCompany(token);
-    getChallanNo();
+    // getChallanNo();
   }, []);
 
   const [data, setData] = useState([
@@ -75,8 +77,15 @@ const CreateChallan = () => {
     data: data,
   });
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+
+    if (e.target.name === "company_id") {
+      let result = await generateChallanNo(token, e.target.value);
+      if (result.status === 200) {
+        setForm(prev => ({ ...prev, cn_no: result.body }));
+      }
+    }
   };
 
   const handleChangeData = (e) => {

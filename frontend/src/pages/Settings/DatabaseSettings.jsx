@@ -22,7 +22,6 @@ const DatabaseSettings = () => {
     const handleDumpDB = async () => {
         try {
             let result = await dumpDatabase();
-            console.log("🚀 ~ handleDumpDB ~ result:", result)
             toast.success("Database backup started.");
         } catch (error) {
             toast.error("Failed to dump database.");

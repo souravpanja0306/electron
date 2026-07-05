@@ -1,8 +1,7 @@
 const { db } = require("../database/connection");
 
-exports.insertChallanData = async (data) => {
+module.exports.insertChallanData = async (data) => {
     try {
-        db.exec(require("../database/schema/challan.schema"));
         const columns = db.prepare("PRAGMA table_info(challan)").all();
         const keys = Object.keys(data);
         const result = db
@@ -16,7 +15,7 @@ exports.insertChallanData = async (data) => {
     };
 };
 
-exports.findChallans = async ({
+module.exports.findChallans = async ({
     id = "",
     created_by = "",
     cn_no = "",
@@ -28,7 +27,6 @@ exports.findChallans = async ({
     count = false,
 }) => {
     try {
-        db.exec(require("../database/schema/challan.schema"));
         let query = "SELECT * FROM challan WHERE is_deleted = 0";
         let params = [];
 
@@ -88,11 +86,10 @@ exports.findChallans = async ({
     };
 };
 
-exports.deleteChallan = async ({
+module.exports.deleteChallan = async ({
     id = "",
 }) => {
     try {
-        db.exec(require("../database/schema/challan.schema"));
         if (id) {
             const result = db
                 .prepare("UPDATE challan SET is_deleted = 1 WHERE id = ?")
@@ -106,9 +103,8 @@ exports.deleteChallan = async ({
 };
 
 
-exports.updateChallanData = async (id, data) => {
+module.exports.updateChallanData = async (id, data) => {
     try {
-        db.exec(require("../database/schema/challan.schema"));
         const keys = Object.keys(data);
         const setClause = keys.map(key => `${key} = @${key}`).join(", ");
         const result = db

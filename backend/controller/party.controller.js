@@ -13,7 +13,7 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
-exports.addParty = async (req, res) => {
+module.exports.addParty = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -52,14 +52,15 @@ exports.addParty = async (req, res) => {
         response.message = "Data created successfully.";
         response.body = result;
     } catch (error) {
-        console.log(error);
-        response.status = 500;
-        response.message = error.message || "Internal Server Error";
+        console.log(`Something went wrong: controller: addParty: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: addParty`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };
 
-exports.listParty = async (req, res) => {
+module.exports.listParty = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -81,14 +82,15 @@ exports.listParty = async (req, res) => {
             response.body = [];
         };
     } catch (error) {
-        console.log(error);
-        response.status = 500;
-        response.message = error.message || "Internal Server Error";
+        console.log(`Something went wrong: controller: listParty: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: listParty`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };
 
-exports.removeParty = async (req, res) => {
+module.exports.removeParty = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
@@ -112,14 +114,15 @@ exports.removeParty = async (req, res) => {
             response.body = [];
         };
     } catch (error) {
-        console.log(error);
-        response.status = 500;
-        response.message = error.message || "Internal Server Error";
+        console.log(`Something went wrong: controller: removeParty: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: removeParty`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };
 
-exports.editParty = async (req, res) => {
+module.exports.editParty = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { id } = req.params;
@@ -168,9 +171,10 @@ exports.editParty = async (req, res) => {
             response.message = "No changes made or party not found.";
         }
     } catch (error) {
-        console.log(error);
-        response.status = 500;
-        response.message = "Internal Server Error";
+        console.log(`Something went wrong: controller: editParty: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : `Something went wrong: controller: editParty`;
+        response.body = error.body ? error.body : "";
     };
     return res.status(response.status).json(response);
 };

@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { baseURL } from "../utils/baseUrl";
-import axios from "axios";
+import api from "../utils/axiosInterceptor";
 
 const useChallanStore = create((set) => ({
     challanData: { body: [] },
@@ -15,16 +14,11 @@ const useChallanStore = create((set) => ({
             if (startDate) queries.push(`startDate=${startDate}`);
             if (endDate) queries.push(`endDate=${endDate}`);
             if (search) queries.push(`search=${search}`);
-            
+
             let queryStr = queries.length ? `?${queries.join("&")}` : "";
-            let result = await axios({
+            let result = await api({
                 method: 'get',
-                url: `${baseURL.challan}list${queryStr}`,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                validateStatus: (status) => status < 500,
+                url: `/challan/list${queryStr}`,
             });
             set({ challanData: result.data, challanLoading: false });
             return result.data;
@@ -34,17 +28,12 @@ const useChallanStore = create((set) => ({
         }
     },
 
-    generateChallanNo: async (token) => {
+    generateChallanNo: async (token, company_id) => {
         try {
             set({ challanLoading: true });
-            let result = await axios({
+            let result = await api({
                 method: 'get',
-                url: `${baseURL.challan}generate-challan-no?types=challan`,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                validateStatus: (status) => status < 500,
+                url: `/challan/generate-challan-no?types=challan&company_id=${company_id}`,
             });
             if (result.data.status === 200) {
                 set({ challanNo: result.data.body, challanLoading: false });
@@ -61,15 +50,10 @@ const useChallanStore = create((set) => ({
     createChallan: async (payload, token) => {
         try {
             set({ challanLoading: true });
-            let result = await axios.request({
+            let result = await api({
                 method: 'post',
-                url: `${baseURL.challan}create`,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                url: `/challan/create`,
                 data: JSON.stringify(payload),
-                validateStatus: (status) => status < 500,
             });
             set({ challanLoading: false });
             return result.data;
@@ -82,14 +66,9 @@ const useChallanStore = create((set) => ({
     deleteChallan: async ({ id = "", token = "" }) => {
         try {
             set({ challanLoading: true });
-            let result = await axios.request({
+            let result = await api({
                 method: 'delete',
-                url: `${baseURL.challan}delete/${id}`,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                validateStatus: (status) => status < 500,
+                url: `/challan/delete/${id}`,
             });
             set({ challanLoading: false });
             return result.data;
@@ -102,15 +81,10 @@ const useChallanStore = create((set) => ({
     updateChallan: async (id, payload, token) => {
         try {
             set({ challanLoading: true });
-            let result = await axios.request({
+            let result = await api({
                 method: 'put',
-                url: `${baseURL.challan}update/${id}`,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                url: `/challan/update/${id}`,
                 data: JSON.stringify(payload),
-                validateStatus: (status) => status < 500,
             });
             set({ challanLoading: false });
             return result.data;
@@ -123,14 +97,9 @@ const useChallanStore = create((set) => ({
     printChallan: async ({ id = "", token = "" }) => {
         try {
             set({ challanLoading: true });
-            let result = await axios({
+            let result = await api({
                 method: 'get',
-                url: `${baseURL.challan}generate-pdf?id=${id}`,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                validateStatus: (status) => status < 500,
+                url: `/challan/generate-pdf?id=${id}`,
             });
             set({ challanLoading: false });
             return result.data;
