@@ -21,6 +21,7 @@
       "licenseService.js",
       "backend/**/*",
       "frontend/build/**/*",
+      "!backend/database/dev.db",
       "public/**/*",
       "package.json"
     ],

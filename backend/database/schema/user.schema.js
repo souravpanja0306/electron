@@ -8,6 +8,7 @@ module.exports = `
     username TEXT UNIQUE,
     password TEXT,
     machine_id TEXT,
+    license_key TEXT,
 
     address_1 TEXT,
     address_2 TEXT,

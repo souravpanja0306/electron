@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
+const { ObjectId } = require("mongoose");
 
 const licenseSchema = new mongoose.Schema(
     {
-        user_id: { type: String, required: true },
+        user_id: { type: ObjectId, required: true },
         license_key: { type: String, required: true, unique: true, index: true },
         machine_id: { type: String, required: true, unique: true, index: true },
         plan: { type: String, enum: ["FREE", "PRO", "ENTERPRISE"], default: "FREE" },

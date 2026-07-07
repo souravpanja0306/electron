@@ -111,6 +111,8 @@ module.exports.insertUsersInMongodb = async (data) => {
 module.exports.findUsersInMongodb = async ({
     machine_id = "",
     username = "",
+    email = "",
+    mobile = "",
 }) => {
     try {
         let search_key = {};

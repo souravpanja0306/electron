@@ -58,18 +58,19 @@ module.exports.signup = async (req, res) => {
         if (!password) return errorHandler(res, 400, "Password Required.");
         if (!machineId) return errorHandler(res, 400, "machineId Required.");
 
-        let isMachineIdExist = await UserService.getUsers({ machine_id: machineId });
+        let isMachineIdExist = await UserService.findUsersInMongodb({ machine_id: machineId });
         if (isMachineIdExist.length) return errorHandler(res, 409, "This Machine is already registered. You cannot create new account with this machine.");
 
-        let isEmailExist = await UserService.getUsers({ email: email });
+        let isEmailExist = await UserService.findUsersInMongodb({ email: email });
         if (isEmailExist.length) return errorHandler(res, 409, "Email is already registered.");
 
-        let isMobileExist = await UserService.getUsers({ mobile: mobile });
+        let isMobileExist = await UserService.findUsersInMongodb({ mobile: mobile });
         if (isMobileExist.length) return errorHandler(res, 409, "Mobile is already registered.");
 
-        let isUsernameExist = await UserService.getUsers({ username: username });
+        let isUsernameExist = await UserService.findUsersInMongodb({ username: username });
         if (isUsernameExist.length) return errorHandler(res, 409, "Username already taken, try another.");
 
+        let license_key = generateLicenseKey();
         let newData = {
             name: name,
             mobile: mobile,
@@ -77,18 +78,17 @@ module.exports.signup = async (req, res) => {
             username: username,
             password: password,
             machine_id: machineId,
+            license_key: license_key,
         };
-        let result = await UserService.insertUsers(newData);
-        if (result) {
-            let mongoResult = await UserService.insertUsersInMongodb(newData)
-
+        let mongoResult = await UserService.insertUsersInMongodb(newData);
+        if (mongoResult) {
             // Create FREE 1 year license
             const startDate = new Date();
             const expiryDate = new Date();
             expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
             let newLicenseData = {
-                license_key: generateLicenseKey(),
+                license_key: license_key,
                 machine_id: machineId ? machineId : "",
                 user_id: mongoResult.id ? mongoResult.id : "",
                 plan: "FREE",
@@ -98,22 +98,34 @@ module.exports.signup = async (req, res) => {
                 is_active: true
             };
             let licenseData = await LicenseService.createLicense(newLicenseData);
+            if (licenseData) {
 
-            let tokenData = {
-                TOKEN_UID: result.id,
-                TOKEN_MOBILE: result.mobile,
-                TONEN_USERNAME: result.username,
-                TONEN_NAME: result.name,
+                let result = await UserService.insertUsers(newData);
+                let tokenData = {
+                    TOKEN_UID: result.id,
+                    TOKEN_MOBILE: result.mobile,
+                    TONEN_USERNAME: result.username,
+                    TONEN_NAME: result.name,
+                };
+                let token = jwt.sign(tokenData, "secretOrPrivateKey");
+
+                response.status = 200;
+                response.message = "Sign-up successful.";
+                response.body = {
+                    license_key: licenseData && licenseData.license_key ? licenseData.license_key : "",
+                    name: result.name,
+                    id: result.id,
+                    token: token,
+                };
             };
-            let token = jwt.sign(tokenData, "secretOrPrivateKey");
-
-            response.status = 200;
-            response.message = "Sign-up successful.";
+        } else {
+            response.status = 202;
+            response.message = "Something went wrong, please try again.";
             response.body = {
-                license_key: licenseData && licenseData.license_key ? licenseData.license_key : "",
-                name: result.name,
-                id: result.id,
-                token: token,
+                license_key: "",
+                name: "",
+                id: "",
+                token: "",
             };
         };
     } catch (error) {

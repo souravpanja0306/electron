@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema(
         email: { type: String, required: true },
         username: { type: String, required: true, unique: true },
         password: { type: String, required: true },
-        machine_id: { type: String, required: true },
+        machine_id: { type: String, required: true, unique: true, index: true },
+        license_key: { type: String, required: true, unique: true, index: true },
         last_activity: { type: Date, default: Date.now }
     },
     {
