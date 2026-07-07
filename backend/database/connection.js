@@ -32,7 +32,6 @@ const isNewDatabase = !fs.existsSync(dbPath);
 const dir = path.dirname(dbPath);
 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-console.log("🚀 ~ dir:", dir)
 const db = new Database(dbPath);
 
 if (isNewDatabase) {

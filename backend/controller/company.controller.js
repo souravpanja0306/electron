@@ -183,18 +183,6 @@ module.exports.updateCompany = async (req, res) => {
             return res.status(response.status).json(response);
         };
 
-        let createFolder = "./uploads/company/"
-        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
-
-        let oldpath = req.file.path;
-        let file_date = moment().format("DD-MM-YYYY");
-        let random_number = Math.floor(Math.random() * 10000000000 + 1);
-        let fileName = `${random_number}_${file_date}_${req.file.originalname}`
-        let filePath = `./uploads/company/${fileName}`;
-        fs.renameSync(oldpath, filePath, (err) => {
-            if (err) console.log(err)
-        });
-
         const updateData = {
             company_name: req.body.company_name ? req.body.company_name : "",
             email: req.body.email ? req.body.email : "",
@@ -215,7 +203,21 @@ module.exports.updateCompany = async (req, res) => {
             branch: req.body.branch ? req.body.branch : "",
             account_no: req.body.account_no ? req.body.account_no : "",
         };
-        if (req.file) updateData["logo"] = fileName;
+
+        let createFolder = "./uploads/company/"
+        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+
+        if (req.file) {
+            let oldpath = req.file.path;
+            let file_date = moment().format("DD-MM-YYYY");
+            let random_number = Math.floor(Math.random() * 10000000000 + 1);
+            let fileName = `${random_number}_${file_date}_${req.file.originalname}`
+            let filePath = `./uploads/company/${fileName}`;
+            fs.renameSync(oldpath, filePath, (err) => {
+                if (err) console.log(err)
+            });
+            updateData["logo"] = fileName;
+        };
 
         let result = await CompanyService.updateCompany(id, updateData);
 

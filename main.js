@@ -24,8 +24,8 @@ app.whenReady().then(() => {
         icon: iconPath,
         title: "Zero® ERP — Complete Solution",
     });
-    win.loadURL("http://localhost:3000/");
-    // win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
+    // win.loadURL("http://localhost:3000/");
+    win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
 
     win.webContents.openDevTools(); // For Permanents for Developments.
     globalShortcut.register("Control+Shift+I", () => {

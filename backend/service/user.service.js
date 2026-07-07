@@ -118,6 +118,8 @@ module.exports.findUsersInMongodb = async ({
         let search_key = {};
         if (machine_id) search_key["machine_id"] = machine_id;
         if (username) search_key["username"] = username;
+        if (email) search_key["email"] = email;
+        if (mobile) search_key["mobile"] = mobile;
 
         let result = await UserModel.find(search_key);
         return result;

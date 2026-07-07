@@ -21,7 +21,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.log("🚀 ~ error:", error)
         if (error.response?.status === 401) {
             window.api?.clearAll();
             window.location.href = "/signin";

@@ -28,6 +28,13 @@
     "win": {
       "target": "nsis",
       "icon": "./public/icon/zero.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ZeroERP"
     }
   },
   "dependencies": {
