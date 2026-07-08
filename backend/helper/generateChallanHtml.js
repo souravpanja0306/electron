@@ -1,4 +1,5 @@
 const moment = require("moment");
+const { app } = require("electron");
 
 module.exports.generateChallanHtml = ({ challan, company, terms }) => {
     const items = challan.data || [];

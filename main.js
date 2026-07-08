@@ -70,11 +70,7 @@ const bodyParser = require('body-parser');
 const { connectMongo } = require("./backend/database/connection");
 
 // ENV CONFIG...
-dotenv.config({
-    path: path.join(__dirname, ".env"),
-    quiet: true
-});
-
+dotenv.config({ path: path.join(__dirname, ".env"), quiet: true });
 connectMongo();
 
 exp.use(cors());
@@ -106,7 +102,10 @@ exp.listen(process.env.PORT, () => {
     console.log(`Server started at http://localhost:${process.env.PORT}/`);
 });
 
-exp.use("/uploads", express.static(__dirname + "/uploads"));
+const uploadPath = app.isPackaged
+    ? path.join(app.getPath("userData"), "uploads")
+    : path.join(__dirname, "uploads");
+exp.use("/uploads", express.static(uploadPath));
 
 // error handler middleware
 exp.use(function (err, req, res, next) {

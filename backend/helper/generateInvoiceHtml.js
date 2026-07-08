@@ -1,5 +1,6 @@
 const moment = require("moment");
 const { inrToWords } = require("./InWordConverter");
+const { app } = require("electron");
 
 module.exports.generateInvoiceHtml = ({ invoice, company }) => {
     const items = invoice.data || [];

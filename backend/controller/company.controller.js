@@ -1,6 +1,8 @@
 // Package...
 const moment = require("moment");
 const fs = require("fs");
+const path = require("path");
+const { app } = require("electron");
 
 // Contents...
 const contents = require("../content/contents");
@@ -26,21 +28,11 @@ module.exports.addCompany = async (req, res) => {
         let isEmailExist = await CompanyService.getCompany({ mobile: req.body.email, created_by: t_userId });
         if (isEmailExist.length) return errorHandler(res, 409, "Email Id already registered.");
 
-        let createFolder = "./uploads/company/"
-        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+        const companyFolder = app.isPackaged
+            ? path.join(app.getPath("userData"), "uploads", "company")
+            : path.join(__dirname, "../../uploads/company");
+        if (!fs.existsSync(companyFolder)) fs.mkdirSync(companyFolder, { recursive: true });
 
-        let fileName = "";
-        if (req.file) {
-            let oldpath = req.file.path;
-            let file_date = moment().format("DD-MM-YYYY");
-            let random_number = Math.floor(Math.random() * 10000000000 + 1);
-            fileName = `${random_number}_${file_date}_${req.file.originalname}`
-            let filePath = `./uploads/company/${fileName}`;
-
-            fs.renameSync(oldpath, filePath, (err) => {
-                if (err) console.log(err)
-            });
-        };
         let finalData = {
             company_name: req.body.company_name,
             email: req.body.email,
@@ -60,9 +52,22 @@ module.exports.addCompany = async (req, res) => {
             ifse: req.body.ifse,
             branch: req.body.branch,
             account_no: req.body.account_no,
-            logo: fileName,
+            logo: "",
             created_by: t_userId,
         };
+        if (req.file) {
+            let oldpath = req.file.path;
+            let file_date = moment().format("DD-MM-YYYY");
+            let random_number = Math.floor(Math.random() * 10000000000 + 1);
+            let fileName = `${random_number}_${file_date}_${req.file.originalname}`
+            let filePath = path.join(companyFolder, fileName);
+
+            fs.renameSync(oldpath, filePath, (err) => {
+                if (err) console.log(err)
+            });
+            finalData["logo"] = fileName
+        };
+
 
         let result = await CompanyService.createCompany(finalData);
 
@@ -204,15 +209,18 @@ module.exports.updateCompany = async (req, res) => {
             account_no: req.body.account_no ? req.body.account_no : "",
         };
 
-        let createFolder = "./uploads/company/"
-        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+        const companyFolder = app.isPackaged
+            ? path.join(app.getPath("userData"), "uploads", "company")
+            : path.join(__dirname, "../../uploads/company");
+        if (!fs.existsSync(companyFolder)) fs.mkdirSync(companyFolder, { recursive: true });
+
 
         if (req.file) {
             let oldpath = req.file.path;
             let file_date = moment().format("DD-MM-YYYY");
             let random_number = Math.floor(Math.random() * 10000000000 + 1);
             let fileName = `${random_number}_${file_date}_${req.file.originalname}`
-            let filePath = `./uploads/company/${fileName}`;
+            let filePath = path.join(companyFolder, fileName);
             fs.renameSync(oldpath, filePath, (err) => {
                 if (err) console.log(err)
             });

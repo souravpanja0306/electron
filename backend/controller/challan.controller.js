@@ -1,5 +1,6 @@
 const moment = require("moment");
 const fs = require('fs');
+const { app } = require("electron");
 const contents = require("../content/contents");
 const ChallanService = require("../service/challan.service");
 const SettingService = require("../service/setting.service");

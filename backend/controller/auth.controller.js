@@ -2,6 +2,7 @@
 const moment = require("moment");
 const jwt = require("jsonwebtoken")
 const crypto = require("crypto");
+const { app } = require("electron");
 
 // Contents...
 const contents = require("../content/contents");

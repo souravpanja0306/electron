@@ -1,5 +1,6 @@
 // Package...
 const moment = require("moment");
+const { app } = require("electron");
 
 // Contents...
 const contents = require("../content/contents");
@@ -19,7 +20,7 @@ const errorHandler = (res, status, message) => {
 module.exports.keyValidate = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-     
+
     } catch (error) {
         console.log(`Something went wrong: controller: keyValidate: ${error}`);
         response.status = error.status ? error.status : 500;

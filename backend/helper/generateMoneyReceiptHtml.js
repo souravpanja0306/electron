@@ -1,9 +1,10 @@
 const moment = require("moment");
 const { inrToWords } = require("./InWordConverter");
+const { app } = require("electron");
 
 module.exports.generateMoneyReceiptHtml = ({ receipt, company, party }) => {
     const items = receipt.data || [];
-    
+
     let itemsHtml = items.map((item, index) => `
         <tr>
             <td style="text-align:center;">${index + 1}</td>

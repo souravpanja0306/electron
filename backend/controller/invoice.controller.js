@@ -1,6 +1,7 @@
 // Package...
 const moment = require("moment");
 const fs = require('fs');
+const { app } = require("electron");
 
 // Contents...
 const contents = require("../content/contents");

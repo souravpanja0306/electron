@@ -1,6 +1,8 @@
 // Package...
 const moment = require("moment");
 const fs = require('fs');
+const path = require("path");
+const { app } = require("electron");
 
 // Contents...
 const contents = require("../content/contents");
@@ -224,10 +226,12 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
             </tr>
             `
         };
-        console.log(descriptions, "descriptionsdescriptions")
 
-        let createFolder = "./uploads/money_receipt_pdf/";
-        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder);
+        const createFolder = app.isPackaged
+            ? path.join(app.getPath("userData"), "uploads", "money_receipt_pdf")
+            : path.join(__dirname, "../../uploads/money_receipt_pdf");
+        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder, { recursive: true });
+
 
         const browser = await getBrowser();
         const page = await browser.newPage();
@@ -315,7 +319,7 @@ module.exports.generateMoneyReceiptPdf = async (req, res) => {
         );
 
         await page.pdf({
-            path: `./uploads/money_receipt_pdf/${result[0].receipt_no}_${moment().format("DD-MM-YYYY")}.pdf`,
+            path: path.join(`${createFolder}/${result[0].receipt_no}_${moment().format("DD-MM-YYYY")}.pdf`),
             format: "A4",
             printBackground: true
         });

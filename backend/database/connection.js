@@ -23,7 +23,7 @@ const connectMongo = async () => {
 };
 
 const dbPath = app.isPackaged
-    ? "D:\\Downloads\\app.db"
+    ? path.join(app.getPath("userData"), "app.db")
     : path.join(__dirname, "dev.db");
 
 const isNewDatabase = !fs.existsSync(dbPath);
