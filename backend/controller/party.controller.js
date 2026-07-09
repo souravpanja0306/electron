@@ -19,11 +19,11 @@ module.exports.addParty = async (req, res) => {
     try {
         const { t_userId } = req.body;
 
-        let isMobileExist = await PartyService.getParty({ mobile: req.body.mobile });
-        if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
+        // let isMobileExist = await PartyService.getParty({ mobile: req.body.mobile });
+        // if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
 
-        let isEmailExist = await PartyService.getParty({ email: req.body.email });
-        if (isEmailExist.length) return errorHandler(res, 409, "Email already registered.");
+        // let isEmailExist = await PartyService.getParty({ email: req.body.email });
+        // if (isEmailExist.length) return errorHandler(res, 409, "Email already registered.");
 
         let finalData = {
             company_name: req.body.company_name,

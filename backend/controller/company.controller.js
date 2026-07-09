@@ -22,11 +22,11 @@ module.exports.addCompany = async (req, res) => {
     try {
         const { t_userId } = req.body;
 
-        let isMobileExist = await CompanyService.getCompany({ mobile: req.body.mobile, created_by: t_userId });
-        if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
+        // let isMobileExist = await CompanyService.getCompany({ mobile: req.body.mobile, created_by: t_userId });
+        // if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
 
-        let isEmailExist = await CompanyService.getCompany({ mobile: req.body.email, created_by: t_userId });
-        if (isEmailExist.length) return errorHandler(res, 409, "Email Id already registered.");
+        // let isEmailExist = await CompanyService.getCompany({ mobile: req.body.email, created_by: t_userId });
+        // if (isEmailExist.length) return errorHandler(res, 409, "Email Id already registered.");
 
         const companyFolder = app.isPackaged
             ? path.join(app.getPath("userData"), "uploads", "company")
