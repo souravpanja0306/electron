@@ -285,12 +285,6 @@ const CreateInvoice = () => {
                         placeholder="Select Company"
                         required
                       />
-                      <Link
-                        to="/add-company?back=true"
-                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
-                      >
-                        + New
-                      </Link>
                     </div>
                   </div>
 

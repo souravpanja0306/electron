@@ -1,12 +1,14 @@
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
+import { Toaster, toast } from 'sonner';
 
 
 const ChangePassword = () => {
   return (
 
     <>
+      <Toaster />
       {/* Custom Title Bar */}
       <div className="titlebar border-b border-slate-600 w-full h-10 bg-slate-950 text-white flex items-center justify-between p-2 shadow-md">
         <div className="flex items-center gap-2">

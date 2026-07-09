@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import useAuthStore from '../../store/AuthStore';
 import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 
@@ -71,6 +71,7 @@ const Signup = () => {
     };
     return (
         <>
+            <Toaster />
             {/* Custom Title Bar */}
             <div className="titlebar border-b border-slate-600 w-full h-10 bg-slate-950 text-white flex items-center justify-between p-2 shadow-md">
                 <div className="flex items-center gap-2">

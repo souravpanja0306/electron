@@ -465,13 +465,13 @@ const CreateChallan = () => {
                   />
                 </div>
                 <div className='flex items-center justify-between w-full gap-1'>
-                  <label className='text-xs w-[20%]'>Additonal Note</label>
+                  <label className='text-xs w-[20%]'>Additonal Info</label>
                   <textarea
                     className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                     name="note"
                     rows="4"
                     onChange={handleChange}
-                    placeholder="Note"
+                    placeholder="Info"
                   />
                 </div>
               </div>
