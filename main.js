@@ -27,7 +27,7 @@ app.whenReady().then(() => {
     // win.loadURL("http://localhost:3000/");
     win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
 
-    win.webContents.openDevTools(); // For Permanents for Developments.
+    // win.webContents.openDevTools(); // For Permanents for Developments.
     globalShortcut.register("Control+Shift+I", () => {
         win.webContents.openDevTools();
     });

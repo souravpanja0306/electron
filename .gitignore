@@ -2,5 +2,6 @@ node_modules/
 **/node_modules/
 **/build/
 backend/database/app.db
+backend/database/dev.db
 uploads/
 dist/

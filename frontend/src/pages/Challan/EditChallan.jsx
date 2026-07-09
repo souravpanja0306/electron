@@ -75,6 +75,10 @@ const EditChallan = () => {
                     to_loc: item.to_loc || "",
                     truck_no: item.truck_no || "",
                     way_bill_no: item.way_bill_no || "",
+                    way_bill_date: item.way_bill_date || "",
+                    container: item.container || "",
+                    booking_number: item.booking_number || "",
+                    cha: item.cha || "",
                     note: item.note || "",
                     total_amount: item.total_amount || 0,
                     data: item.data || [],
@@ -189,9 +193,9 @@ const EditChallan = () => {
                     <div onClick={handlePrint}>
                         <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
                     </div>
-                    <div>
+                    {/* <div onClick={handleDelete}>
                         <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
-                    </div>
+                    </div> */}
                 </ActionArea>
 
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-1'>
@@ -439,6 +443,17 @@ const EditChallan = () => {
                                     />
                                 </div>
                                 <div className='flex items-center justify-between w-full gap-1'>
+                                    <label className='text-xs w-[20%]'>Way Bill Date</label>
+                                    <input
+                                        className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        type="date"
+                                        name="way_bill_date"
+                                        value={form.way_bill_date}
+                                        onChange={handleChange}
+                                        placeholder="Way Bill Date"
+                                    />
+                                </div>
+                                <div className='flex items-center justify-between w-full gap-1'>
                                     <label className='text-xs w-[20%]'>Truck No</label>
                                     <input
                                         className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
@@ -457,14 +472,50 @@ const EditChallan = () => {
                         <PageTitle>Additional Remarks</PageTitle>
                         <MainArea>
                             <div className='flex flex-col w-full gap-1 p-1'>
-                                <textarea
-                                    className="p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                                    name="note"
-                                    rows="2"
-                                    value={form.note}
-                                    onChange={handleChange}
-                                    placeholder="Note"
-                                />
+                                <div className='flex items-center justify-between w-full gap-1'>
+                                    <label className='text-xs w-[20%]'>Container</label>
+                                    <input
+                                        className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        type="text"
+                                        name="container"
+                                        value={form.container}
+                                        onChange={handleChange}
+                                        placeholder="Container"
+                                    />
+                                </div>
+                                <div className='flex items-center justify-between w-full gap-1'>
+                                    <label className='text-xs w-[20%]'>CHA</label>
+                                    <input
+                                        className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        type="text"
+                                        name="cha"
+                                        value={form.cha}
+                                        onChange={handleChange}
+                                        placeholder="CHA"
+                                    />
+                                </div>
+                                <div className='flex items-center justify-between w-full gap-1'>
+                                    <label className='text-xs w-[20%]'>Booking Number</label>
+                                    <input
+                                        className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        type="text"
+                                        name="booking_number"
+                                        value={form.booking_number}
+                                        onChange={handleChange}
+                                        placeholder="Booking Number"
+                                    />
+                                </div>
+                                <div className='flex items-center justify-between w-full gap-1'>
+                                    <label className='text-xs w-[20%]'>Additonal Note</label>
+                                    <textarea
+                                        className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                                        name="note"
+                                        rows="2"
+                                        value={form.note}
+                                        onChange={handleChange}
+                                        placeholder="Note"
+                                    />
+                                </div>
                             </div>
                         </MainArea>
                     </div>

@@ -129,7 +129,7 @@ const ViewMoneyReceipts = () => {
                             </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <div className="flex items-center gap-1">
+                            {/* <div className="flex items-center gap-1">
                                 <label className="text-xs font-semibold">From:</label>
                                 <input
                                     type="date"
@@ -156,7 +156,7 @@ const ViewMoneyReceipts = () => {
                                 value={filters.search}
                                 onChange={handleFilterChange}
                                 className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs w-32 md:w-48"
-                            />
+                            /> */}
                             <div onClick={handleRefresh}>
                                 <CustomButton title={"Refresh"} color={"blue"}><AiOutlineSync /></CustomButton>
                             </div>

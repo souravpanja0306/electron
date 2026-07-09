@@ -35,7 +35,7 @@ const EditMoneyReceipts = () => {
     const { moneyReceipts, getAllMoneyReceipts, deleteMoneyReceipts, printMoneyReceipt, updateMoneyReceipts, loading } = useMoneyReceiptStore();
     const { companyData, getAllCompany } = useCompanyStore();
     const { parties, getAllParty } = usePartyStore();
-    const {  token } = useAuthStore();
+    const { token } = useAuthStore();
 
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
@@ -153,18 +153,20 @@ const EditMoneyReceipts = () => {
     };
 
     const handleDelete = async () => {
-        try {
-            if (!receiptId) return;
-            let result = await deleteMoneyReceipts({ id: receiptId, token: token });
-            if (result.status === 200) {
-                toast.success(result.message);
-                navigate("/view-money-receipts");
-            } else {
-                toast.error(result.message);
+        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
+            try {
+                if (!receiptId) return;
+                let result = await deleteMoneyReceipts({ id: receiptId, token: token });
+                if (result.status === 200) {
+                    toast.success(result.message);
+                    navigate("/view-money-receipts");
+                } else {
+                    toast.error(result.message);
+                };
+            } catch (error) {
+                console.log(error);
+                throw error;
             };
-        } catch (error) {
-            console.log(error);
-            throw error;
         };
     };
 
