@@ -29,6 +29,9 @@ import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore";
 import useGstStore from "../../store/GstStore";
 
+// Service...
+import { handleEnter } from "../../service/MainService";
+
 const CreateInvoice = () => {
   const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
   const { invoiceData, createInvoice, generateInvoiceNo, invoiceNo, printInvoice, invoiceLoading } = useInvoiceStore();
@@ -338,10 +341,12 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
                       type="date"
+                      name="date"
                       value={invoiceDetails.date}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, date: e.target.value })
                       }
+                      onKeyDown={(e) => handleEnter({ event: e, name: "placeOfSupply" })}
                       required
                     />
                   </div>
@@ -350,6 +355,7 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600 bg-slate-50"
                       type="text"
+                      name="invoiceNo"
                       value={invoiceDetails.invoiceNo}
                       readOnly
                       required
@@ -359,11 +365,13 @@ const CreateInvoice = () => {
                     <label className='text-xs w-[25%]'>Place of Supply</label>
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                      type="text"
+                      name="placeOfSupply"
                       value={invoiceDetails.placeOfSupply ? invoiceDetails.placeOfSupply : "Kolkata"}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, placeOfSupply: e.target.value })
                       }
-                      type="text"
+                      onKeyDown={(e) => handleEnter({ event: e, name: "description" })}
                     />
                   </div>
                 </div>
@@ -383,14 +391,14 @@ const CreateInvoice = () => {
                   <th className='w-24'>Rate</th>
                   <th className='w-24'>Subtotal</th>
                   <th className='w-24'>Tax (%)</th>
-                  {isSameState ? (
+                  {/* {isSameState ? (
                     <>
                       <th className='w-20'>CGST</th>
                       <th className='w-20'>SGST</th>
                     </>
                   ) : (
                     <th className='w-20'>IGST</th>
-                  )}
+                  )} */}
                   <th className='w-24'>Grand Total</th>
                   <th className='w-12'>#</th>
                 </tr>
@@ -419,13 +427,16 @@ const CreateInvoice = () => {
                           <input
                             className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 capitalize"
                             value={item.description}
-                            onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "description" })}
                             type="text"
+                            name="description"
+                            onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "description" })}
+                            onKeyDown={(e) => handleEnter({ event: e, name: "hsn", index: index })}
                           />
                         </td>
                         <td className=''>
                           <div className='flex flex-col w-full gap-1'>
                             <select
+                              name="hsn"
                               className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 "
                               defaultValue=""
                               onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "hsn" })}
@@ -443,6 +454,7 @@ const CreateInvoice = () => {
                           <input
                             className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                             value={item.quantity}
+                            name="quantity"
                             onChange={(e) => handleChange({ value: e.target.value, id: item.id, key: "quantity" })}
                             type='number'
                             onFocus={(e) => e.target.select()}
@@ -485,13 +497,13 @@ const CreateInvoice = () => {
                                 </select>
                                 : <Link
                                   to="/create-gst?back=true"
-                                  className="text-center h-8 p-1 rounded w-full text-slate-900 border hover:bg-blue-600 hover:text-white border-slate-400 dark:border-slate-600">
+                                  className="bg-white text-center h-8 p-1 rounded w-full text-slate-900 border hover:bg-blue-600 hover:text-white border-slate-400 dark:border-slate-600">
                                   + New
                                 </Link>
                             }
                           </div>
                         </td>
-                        {isSameState ? (
+                        {/* {isSameState ? (
                           <>
                             <td className=''>
                               <input
@@ -516,7 +528,7 @@ const CreateInvoice = () => {
                               readOnly
                             />
                           </td>
-                        )}
+                        )} */}
                         <td className=''>
                           <input
                             className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none font-bold"
@@ -556,10 +568,12 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
                       type="text"
+                      type="ewayBill"
                       value={invoiceDetails.ewayBill}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, ewayBill: e.target.value })
                       }
+                      onKeyDown={(e) => handleEnter({ event: e, name: "transporter" })}
                     />
                   </div>
                   <div className='flex justify-between items-center w-full gap-1'>
@@ -567,10 +581,12 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
                       type="text"
+                      type="transporter"
                       value={invoiceDetails.transporter}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, transporter: e.target.value })
                       }
+                      onKeyDown={(e) => handleEnter({ event: e, name: "lorry_no" })}
                     />
                   </div>
                   <div className='flex justify-between items-center w-full gap-1'>
@@ -578,10 +594,12 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
                       type="text"
+                      name="lorry_no"
                       value={invoiceDetails.lorry_no}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, lorry_no: e.target.value })
                       }
+                      onKeyDown={(e) => handleEnter({ event: e, name: "lorry_no" })}
                     />
                   </div>
                   <div className='flex justify-between items-center w-full gap-1'>
@@ -589,10 +607,12 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
                       type="text"
+                      name="lr_no"
                       value={invoiceDetails.lr_no}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, lr_no: e.target.value })
                       }
+                      onKeyDown={(e) => handleEnter({ event: e, name: "lorry_no" })}
                     />
                   </div>
                 </div>
