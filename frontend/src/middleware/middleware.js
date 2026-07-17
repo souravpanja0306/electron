@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import useAuthStore from "../store/AuthStore";
 
 export const Middleware = ({ children }) => {
-    const { token } = useAuthStore();
+    const { authToken, token } = useAuthStore();
     const [theme, setTheme] = useState("light");
     const [loading, setLoading] = useState(true);
 
@@ -15,6 +15,7 @@ export const Middleware = ({ children }) => {
     };
 
     const checkAuth = async () => {
+        await authToken();
         setLoading(false);
     };
 

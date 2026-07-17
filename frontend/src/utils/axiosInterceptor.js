@@ -23,7 +23,7 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             window.api?.clearAll();
-            window.location.href = "/signin";
+            window.location.hash = "/signin";
         };
         return Promise.reject(error);
     },

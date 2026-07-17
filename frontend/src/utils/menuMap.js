@@ -105,6 +105,16 @@ const MenuMap = {
         },
         {
             type: "main",
+            title: "CHA",
+            url: "#",
+            icon: <AiOutlineEdit />,
+            submenu: [
+                { title: "Create CHA", url: "/add-cha", icon: <AiOutlineFileAdd /> },
+                { title: "View CHA", url: "/view-cha", icon: <AiOutlineDatabase /> },
+            ]
+        },
+        {
+            type: "main",
             title: "HSN-SAC",
             url: "#",
             icon: <AiOutlineEdit />,

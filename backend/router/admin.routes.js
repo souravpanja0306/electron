@@ -82,4 +82,29 @@ router.delete(
     AdminController.deleteGST
 );
 
+// CHA routes
+router.post(
+    "/create-cha",
+    middleware.isAuthenticated,
+    AdminController.createCHA
+);
+
+router.get(
+    "/get-cha",
+    middleware.isAuthenticated,
+    AdminController.getCHA
+);
+
+router.put(
+    "/update-cha",
+    middleware.isAuthenticated,
+    AdminController.updateCHA
+);
+
+router.delete(
+    "/delete-cha/:id",
+    middleware.isAuthenticated,
+    AdminController.deleteCHA
+);
+
 module.exports = router;

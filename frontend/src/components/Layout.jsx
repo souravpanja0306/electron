@@ -31,14 +31,14 @@ const Layout = () => {
     const navigate = useNavigate();
     const [openMenuIndex, setOpenMenuIndex] = useState();
     const [currentMenu, setCurrentMenu] = useState(MenuMap["home"]);
-    const [activeMenu, setActiveManu] = useState();
+    const [activeMenu, setActiveMenu] = useState();
     const [sideBar, setSideBar] = useState(true);
     const { authToken } = useAuthStore(); // Store...
 
     const getCurrentMenu = async () => {
         let currentMenuValue = await window.api?.getItem("currentMenu");
         if (currentMenuValue) {
-            setActiveManu(currentMenuValue);
+            setActiveMenu(currentMenuValue);
             setOpenMenuIndex(currentMenuValue);
             setCurrentMenu(MenuMap[currentMenuValue] || []);
         };
@@ -52,7 +52,7 @@ const Layout = () => {
     const changeMenu = ({ menu = "" }) => {
         if (menu) {
             setSideBar(true)
-            setActiveManu(menu);
+            setActiveMenu(menu);
             setCurrentMenu(MenuMap[menu] || []);
             window.api?.setItem("currentMenu", menu);
             setOpenMenuIndex(null);

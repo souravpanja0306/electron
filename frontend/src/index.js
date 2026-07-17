@@ -46,7 +46,12 @@ import PartyEdit from './pages/Master/PartyMaster/PartyEdit';
 import Documentation from './pages/Documentation';
 import ContactUs from './pages/ContactUs';
 
+import ChaCreate from './pages/Master/ChaMaster/ChaCreate';
+import ChaView from './pages/Master/ChaMaster/ChaView';
+import ChaEdit from './pages/Master/ChaMaster/ChaEdit';
+
 import { Middleware } from './middleware/middleware';
+import Modal from './components/CustomModal';
 
 const router = createHashRouter([
   {
@@ -95,6 +100,11 @@ const router = createHashRouter([
       { path: "/company", element: <CompanyMaster /> },
       { path: "/edit-company/:id", element: <CompanyViewDetails /> },
       { path: "/view-company-details/:id", element: <CompanyViewDetails /> },
+
+      // CHA
+      { path: "/add-cha", element: <ChaCreate /> },
+      { path: "/view-cha", element: <ChaView /> },
+      { path: "/edit-cha/:id", element: <ChaEdit /> },
 
       // Challans
       { path: "/create-challan", element: <CreateChallan /> },

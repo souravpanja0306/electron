@@ -76,6 +76,26 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, classNa
 
   return (
     <div className={`relative ${className}`} ref={wrapperRef} onKeyDown={handleKeyDown}>
+      <input
+        name={name}
+        value={value || ''}
+        onChange={() => {}}
+        required={required}
+        tabIndex="-1"
+        style={{
+          position: 'absolute',
+          opacity: 0,
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          border: 0,
+          pointerEvents: 'none'
+        }}
+        onFocus={() => setIsOpen(true)}
+      />
       <div
         className={`h-8 px-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white flex items-center justify-between cursor-pointer ${required && !value ? 'border-slate-400' : ''}`}
         onClick={() => setIsOpen(!isOpen)}

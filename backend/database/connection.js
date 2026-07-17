@@ -45,4 +45,7 @@ if (isNewDatabase) {
     db.exec(require("../database/schema/settingChallanSchema"));
 };
 
+// Ensure cha table is created
+db.exec(require("../database/schema/cha.schema"));
+
 module.exports = { connectMongo, db, dbPath };

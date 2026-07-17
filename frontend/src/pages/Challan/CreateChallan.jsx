@@ -11,6 +11,7 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
+import Modal from '../../components/CustomModal';
 
 // Icon...
 import {
@@ -27,12 +28,14 @@ import useCompanyStore from "../../store/CompanyStore";
 import useAuthStore from '../../store/AuthStore';
 import usePartyStore from "../../store/PartyStore"
 import useChallanStore from "../../store/ChallanStore";
+import useChaStore from "../../store/ChaStore";
 
 // Service...
 import { handleEnter } from "../../service/MainService";
 
 
 const CreateChallan = () => {
+  const [chaModal, isChaModal] = useState(false);
   const { token } = useAuthStore();
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
@@ -41,6 +44,44 @@ const CreateChallan = () => {
   const { parties, getAllParty } = usePartyStore();
   const { companyData, getAllCompany } = useCompanyStore();
   const { createChallan, generateChallanNo, challanNo, challanLoading } = useChallanStore();
+  const { chaData, getAllCha, createCha } = useChaStore();
+
+  const [chaForm, setChaForm] = useState({
+    cha_name: "",
+    cha_mobile: "",
+    cha_address: "",
+  });
+
+  const handleChaChange = (e) => {
+    setChaForm({ ...chaForm, [e.target.name]: e.target.value });
+  };
+
+  const handleChaSubmit = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      if (!chaForm.cha_name) {
+        toast.error("CHA Name is required.");
+        return;
+      }
+      let payload = {
+        name: chaForm.cha_name,
+        mobile: chaForm.cha_mobile,
+        address: chaForm.cha_address,
+      };
+      let result = await createCha(payload, token);
+      if (result.status === 200) {
+        toast.success(result.message);
+        setChaForm({ cha_name: "", cha_mobile: "", cha_address: "" });
+        isChaModal(false);
+        getAllCha(token);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+      console.log(error);
+    }
+  };
 
   // const getChallanNo = async () => {
   //   let result = await generateChallanNo(token);
@@ -52,6 +93,7 @@ const CreateChallan = () => {
   useEffect(() => {
     getAllParty(token);
     getAllCompany(token);
+    getAllCha(token);
     // getChallanNo();
   }, []);
 
@@ -143,10 +185,21 @@ const CreateChallan = () => {
     };
   };
 
-  const { printChallan } = useChallanStore();
-  const printInvoice = async (e) => {
-    if (e) e.preventDefault();
-  };
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        handleSubmitForm(e);
+      };
+
+      if (e.ctrlKey && e.key === 'i') {
+        e.preventDefault();
+        navigate("/view-challan");
+      };
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [form, data]);
 
   return (
     <>
@@ -167,9 +220,6 @@ const CreateChallan = () => {
           <Link to="/view-challan">
             <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
           </Link>
-          {/* <div onClick={printInvoice}>
-            <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
-          </div> */}
         </ActionArea>
         <form>
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-1'>
@@ -474,14 +524,22 @@ const CreateChallan = () => {
                   </div>
                   <div className='flex items-center justify-between w-full gap-1'>
                     <label className='text-xs w-[20%]'>CHA</label>
-                    <input
-                      className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                      type="text"
-                      name="cha"
-                      onChange={handleChange}
-                      onKeyDown={(e) => handleEnter({ event: e, name: "booking_number" })}
-                      placeholder="CHA"
-                    />
+                    <div className='flex justify-between w-[80%] gap-1'>
+                      <SearchableSelect
+                        className="w-full"
+                        name="cha"
+                        value={form.cha}
+                        onChange={handleChange}
+                        options={chaData?.map(item => ({ id: item.id, label: item.name }))}
+                        placeholder="Select CHA"
+                        required
+                      />
+                      <button
+                        onClick={() => isChaModal(true)}
+                        type="button"
+                        className="w-10% px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap"
+                      ><AiOutlinePlusSquare /></button>
+                    </div>
                   </div>
                   <div className='flex items-center justify-between w-full gap-1'>
                     <label className='text-xs w-[20%]'>Booking Number</label>
@@ -510,6 +568,55 @@ const CreateChallan = () => {
           </div >
         </form>
       </div >
+
+      {/* Create CHA */}
+      <Modal isOpen={chaModal} onClose={() => isChaModal(false)} title="Create New CHA">
+        <form onSubmit={handleChaSubmit}>
+          <MainArea>
+            <div className='grid gap-2 w-full p-1'>
+              <div className='flex items-center justify-between w-full gap-1'>
+                <label className='text-xs w-[20%]'>CHA Name</label>
+                <input
+                  className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="cha_name"
+                  value={chaForm.cha_name}
+                  onChange={handleChaChange}
+                  onKeyDown={(e) => handleEnter({ event: e, name: "cha_mobile" })}
+                  placeholder="CHA Name"
+                />
+              </div>
+              <div className='flex items-center justify-between w-full gap-1'>
+                <label className='text-xs w-[20%]'>CHA Mobile</label>
+                <input
+                  className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="cha_mobile"
+                  value={chaForm.cha_mobile}
+                  onChange={handleChaChange}
+                  onKeyDown={(e) => handleEnter({ event: e, name: "cha_address" })}
+                  placeholder="CHA Mobile"
+                />
+              </div>
+              <div className='flex items-center justify-between w-full gap-1'>
+                <label className='text-xs w-[20%]'>Address (optional)</label>
+                <input
+                  className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="cha_address"
+                  value={chaForm.cha_address}
+                  onChange={handleChaChange}
+                  onKeyDown={(e) => handleEnter({ event: e, name: "cha_submit" })}
+                  placeholder="Address (optional)"
+                />
+              </div>
+              <div className='w-full flex justify-end' name="cha_submit" onClick={handleChaSubmit}>
+                <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+              </div>
+            </div>
+          </MainArea>
+        </form>
+      </Modal>
     </>
   )
 }

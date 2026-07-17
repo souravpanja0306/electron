@@ -28,6 +28,7 @@ import useCompanyStore from "../../store/CompanyStore";
 import useAuthStore from '../../store/AuthStore';
 import usePartyStore from "../../store/PartyStore"
 import useChallanStore from "../../store/ChallanStore";
+import useChaStore from "../../store/ChaStore";
 
 
 const EditChallan = () => {
@@ -41,6 +42,7 @@ const EditChallan = () => {
     const { parties, getAllParty } = usePartyStore();
     const { companyData, getAllCompany } = useCompanyStore();
     const { updateChallan, getAllChallan, challanLoading, printChallan } = useChallanStore();
+    const { chaData, getAllCha } = useChaStore();
 
     const [data, setData] = useState([]);
     const [form, setForm] = useState({
@@ -97,6 +99,7 @@ const EditChallan = () => {
     useEffect(() => {
         getAllParty(token);
         getAllCompany(token);
+        getAllCha(token);
         if (id) {
             fetchChallanData();
         }
@@ -485,14 +488,17 @@ const EditChallan = () => {
                                 </div>
                                 <div className='flex items-center justify-between w-full gap-1'>
                                     <label className='text-xs w-[20%]'>CHA</label>
-                                    <input
-                                        className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                                        type="text"
-                                        name="cha"
-                                        value={form.cha}
-                                        onChange={handleChange}
-                                        placeholder="CHA"
-                                    />
+                                    <div className='w-[80%]'>
+                                        <SearchableSelect
+                                            className="w-full"
+                                            name="cha"
+                                            value={form.cha}
+                                            onChange={handleChange}
+                                            options={chaData?.map(item => ({ id: item.id, label: item.name }))}
+                                            placeholder="Select CHA"
+                                            required
+                                        />
+                                    </div>
                                 </div>
                                 <div className='flex items-center justify-between w-full gap-1'>
                                     <label className='text-xs w-[20%]'>Booking Number</label>

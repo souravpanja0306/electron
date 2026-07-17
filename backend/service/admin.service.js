@@ -217,3 +217,93 @@ module.exports.deleteGST = async (id) => {
         throw error;
     };
 };
+
+module.exports.createCHA = async (data) => {
+    try {
+        const keys = Object.keys(data);
+        const result = db
+            .prepare(`INSERT INTO cha (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)
+            .run(data);
+
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: createCHA: ${error}`);
+        throw error;
+    };
+};
+
+module.exports.findCHA = async ({
+    id = "",
+    created_by = "",
+    name = "",
+    mobile = "",
+    limit = "",
+    skip = "",
+    count = false,
+}) => {
+    try {
+        let query = "SELECT * FROM cha WHERE is_deleted = 0";
+        let params = [];
+
+        if (id) {
+            query += " AND id = ?";
+            params.push(id);
+        };
+
+        if (created_by) {
+            query += " AND created_by = ?";
+            params.push(created_by);
+        };
+
+        if (name) {
+            query += " AND name LIKE ?";
+            params.push(`%${name}%`);
+        };
+
+        if (mobile) {
+            query += " AND mobile = ?";
+            params.push(mobile);
+        };
+
+        if (limit && skip) {
+            query += " LIMIT ? OFFSET ?";
+            params.push(Number(limit), Number(skip));
+        };
+        if (count) {
+            let countQuery = "SELECT COUNT(*) AS total FROM cha WHERE is_deleted = 0;";
+            let result = db.prepare(countQuery).all(...params);
+            return result[0].total;
+        };
+        let result = db.prepare(query).all(...params);
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: findCHA: ${error}`);
+        throw error;
+    };
+};
+
+module.exports.updateCHA = async (id, data) => {
+    try {
+        const keys = Object.keys(data);
+        const setClause = keys.map(k => `${k} = @${k}`).join(", ");
+        const result = db
+            .prepare(`UPDATE cha SET ${setClause} WHERE id = @id`)
+            .run({ ...data, id });
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: updateCHA: ${error}`);
+        throw error;
+    };
+};
+
+module.exports.deleteCHA = async (id) => {
+    try {
+        const result = db
+            .prepare("UPDATE cha SET is_deleted = 1 WHERE id = ?")
+            .run(id);
+        return result;
+    } catch (error) {
+        console.log(`Something went wrong: service: deleteCHA: ${error}`);
+        throw error;
+    };
+};
