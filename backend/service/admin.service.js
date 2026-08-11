@@ -5,9 +5,37 @@ module.exports.resetTableData = async ({
 }) => {
     try {
         let result = await db.exec(`DROP TABLE IF EXISTS ${tableNames}`);
+
+        db.exec(require("../database/schema/gst.schema"));
+        db.exec(require("../database/schema/challan.schema"));
+        db.exec(require("../database/schema/moneyReceipts.schema"));
+        db.exec(require("../database/schema/company.schema"));
+        db.exec(require("../database/schema/user.schema"));
+        db.exec(require("../database/schema/party.schema"));
+        db.exec(require("../database/schema/invoice.schema"));
+        db.exec(require("../database/schema/settingChallanSchema"));
+        db.exec(require("../database/schema/cha.schema"));
+
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: resetTableData: ${error}`);
+        throw error;
+    };
+};
+
+module.exports.getAllCollectionData = async () => {
+    try {
+        const statement = db.prepare(
+            `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`
+        );
+        const rows = statement.all();
+        const collectionNames = rows.map(row => row.name);
+        return {
+            collections: collectionNames,
+            totalCollections: collectionNames.length
+        };
+    } catch (error) {
+        console.log(`Something went wrong: service: getAllCollectionData: ${error}`);
         throw error;
     };
 };

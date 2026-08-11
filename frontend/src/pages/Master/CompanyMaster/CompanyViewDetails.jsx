@@ -104,10 +104,7 @@ const CompanyViewDetails = () => {
                 formData.append(key, data[key]);
             });
             if (logo) formData.append('logo', logo);
-            for (const [key, value] of formData.entries()) {
-                console.log("🚀 ~ handleSubmit ~ formData:", key, value)
-            };
-
+            
             let result = await updateCompany(id, formData, token);
             if ((result.status) === 200) {
                 toast.success(result.message);

@@ -25,7 +25,8 @@ const PartyCreate = () => {
     const back = searchParams.get("back");
 
     const navigate = useNavigate();
-
+    const [logoPreview, setLogoPreview] = useState(null);
+    const [logo, setLogo] = useState(null);
     const [alart, setAlart] = useState({ show: false });
     const [data, setData] = useState({
         company_name: "",
@@ -78,12 +79,21 @@ const PartyCreate = () => {
                     branch: "",
                     account_no: ""
                 });
+                setLogo(null);
+                setLogoPreview(null);
             } else {
                 toast.success(result.message);
             };
         } catch (error) {
             toast.success("Something went wrong!");
         };
+    };
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setLogo(file);
+            setLogoPreview(URL.createObjectURL(file));
+        }
     };
 
     useEffect(() => {
@@ -201,29 +211,34 @@ const PartyCreate = () => {
                         </MainArea>
                         <MainArea>
                             <div className='flex flex-col w-full gap-1'>
-                                <PageTitle>Preview</PageTitle>
+                                <PageTitle>Business Icon/Logo</PageTitle>
                                 <hr />
-                                <div className='flex w-full p-1'>
-                                    <AiOutlineIdcard className='text-9xl' />
-                                    <div className='p-2 flex flex-col justify-center'>
-                                        <div className='flex gap-1'>
-                                            <span className='font-bold text-sm'>Company Name : </span>
-                                            <p className='text-slate-500 text-sm'>{(data.company_name).toUpperCase()}</p>
-                                        </div>
-                                        <div className='flex gap-1'>
-                                            <span className='font-bold text-sm'>Name : </span>
-                                            <p className='text-slate-500 text-sm'>{(data.owner).toUpperCase()}</p>
-                                        </div>
-                                        <div className='flex gap-1'>
-                                            <span className='font-bold text-sm'>Email : </span>
-                                            <p className='text-slate-500 text-sm'>{(data.email).toUpperCase()}</p>
-                                        </div>
-                                        <div className='flex gap-1'>
-                                            <span className='font-bold text-sm'>Mobile : </span>
-                                            <p className='text-slate-500 text-sm'>{(data.mobile).toUpperCase()}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <table className="w-full text-sm">
+                                    <tbody>
+                                        <tr className="dark:bg-slate-800 flex justify-between items-center">
+                                            <td className="rounded flex flex-col justify-center items-center p-1 w-36 h-36 border border-slate-300 dark:border-slate-600 text-xs">
+                                                {logoPreview ? (
+                                                    <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-contain" />
+                                                ) : (
+                                                    <>
+                                                        <span className="font-medium text-slate-600 dark:text-slate-300">
+                                                            Image Size
+                                                        </span>
+                                                        <span className="text-slate-400">512 × 512</span>
+                                                    </>
+                                                )}
+                                            </td>
+                                            <td className="p-1 w-full">
+                                                <label className="rounded flex flex-col items-center justify-center h-36 border border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-blue-600 hover:bg-blue-100 dark:hover:bg-slate-900 transition">
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                                                        {logo ? logo.name : "Click to upload image"}
+                                                    </span>
+                                                    <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                                                </label>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </MainArea>
                     </div>

@@ -25,7 +25,7 @@ const ContactUs = () => {
             </tbody>
           </table>
           <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 text-center text-xs text-gray-400">
-            © 2026 Zero® ERP. &nbsp;·&nbsp; All rights reserved
+            © 2026 ZeroERP. &nbsp;·&nbsp; All rights reserved
           </div>
         </div>
       </div>

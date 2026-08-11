@@ -22,6 +22,11 @@ router.get(
     AdminController.resetAllTable
 );
 
+router.get(
+    "/get-all-collection",
+    AdminController.getAllCollection
+);
+
 router.post(
     "/migrate-table",
     AdminController.migrateTable

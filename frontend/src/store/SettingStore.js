@@ -27,14 +27,28 @@ const useSettingStore = create((set) => ({
 
     resetAllTables: async ({
         tableNames = "",
-        token = ""
     }) => {
         try {
-            const response = await api({
-                method: "get",
-                url: `/admin/reset-all-table?tableNames=${tableNames}`
-            });
-            return response.data;
+            if (tableNames == "all") {
+                const DBtables = await api({
+                    method: "get",
+                    url: `/admin/get-all-collection`
+                });
+                if (DBtables.data.status == 200 && DBtables.data.body.collections.length) {
+                    for (let item of DBtables.data.body.collections) {
+                        if (item == "users") continue;
+
+                        const response = await api({
+                            method: "get",
+                            url: `/admin/reset-all-table?tableNames=${tableNames == "all" ? item : tableNames}`,
+                        });
+                    };
+                };
+            };
+            return {
+                statys: 200,
+                message: "Tables reset successfully"
+            };
         } catch (error) {
             console.error("Failed to reset tables", error);
             throw error;

@@ -59,7 +59,11 @@ const usePartyStore = create((set) => ({
             set({ partyLoading: true });
             const result = await api({
                 method: "put",
-                url: `/party/party-update/${id}`,
+                url: `http://localhost:3001/api/v1/party/party-update/${id}`,
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": `Bearer ${token}`,
+                },
                 data: payload,
             });
             set({ partyLoading: false });

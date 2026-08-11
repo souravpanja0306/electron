@@ -167,8 +167,8 @@ const MoneyReceipts = () => {
                         <MainArea>
                             <div className='flex flex-col w-full gap-2 p-1'>
                                 <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Company</label>
-                                    <div className='flex items-center gap-1 w-[75%]'>
+                                    <label className='text-xs w-[20%]'>Company</label>
+                                    <div className='flex items-center gap-1 w-[80%]'>
                                         <SearchableSelect
                                             className="w-full"
                                             name="company_id"
@@ -181,10 +181,10 @@ const MoneyReceipts = () => {
                                     </div>
                                 </div>
                                 <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Recipient</label>
-                                    <div className='flex items-center gap-1 w-[75%]'>
+                                    <label className='text-xs w-[20%]'>Recipient</label>
+                                    <div className='flex items-center gap-1 w-[80%]'>
                                         <SearchableSelect
-                                            className="w-full"
+                                            className="w-[80%]"
                                             name="party_id"
                                             value={form.party_id}
                                             onChange={(e) => setForm({ ...form, party_id: e.target.value })}
@@ -194,9 +194,9 @@ const MoneyReceipts = () => {
                                         />
                                         <Link
                                             to="/add-company?back=true"
-                                            className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
+                                            className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap w-[20%]"
                                         >
-                                            + New
+                                            <AiOutlinePlusSquare />
                                         </Link>
                                     </div>
                                 </div>

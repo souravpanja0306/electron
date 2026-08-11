@@ -247,7 +247,7 @@ const CreateChallan = () => {
                       <label className='text-xs w-[20%]'>Consignor</label>
                       <div className='flex items-center gap-1 w-[80%]'>
                         <SearchableSelect
-                          className="w-full"
+                          className="w-[80%]"
                           name="consignor_id"
                           value={form.consignor_id}
                           onChange={handleChange}
@@ -257,9 +257,9 @@ const CreateChallan = () => {
                         />
                         <Link
                           to="/add-party?back=true"
-                          className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
+                          className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap w-[20%]"
                         >
-                          + New
+                          <AiOutlinePlusSquare />
                         </Link>
                       </div>
                     </div>
@@ -268,7 +268,7 @@ const CreateChallan = () => {
                       <label className='text-xs w-[20%]'>Consignee</label>
                       <div className='flex items-center gap-1 w-[80%]'>
                         <SearchableSelect
-                          className="w-full"
+                          className="w-[80%]"
                           name="consignee_id"
                           value={form.consignee_id}
                           onChange={handleChange}
@@ -278,9 +278,9 @@ const CreateChallan = () => {
                         />
                         <Link
                           to="/add-party?back=true"
-                          className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
+                          className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap w-[20%]"
                         >
-                          + New
+                          <AiOutlinePlusSquare />
                         </Link>
                       </div>
                     </div>

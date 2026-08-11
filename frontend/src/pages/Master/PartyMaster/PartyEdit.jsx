@@ -27,7 +27,8 @@ const PartyEdit = () => {
     const { id } = useParams();
 
     const navigate = useNavigate();
-
+    const [logo, setLogo] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
     const [alart, setAlart] = useState({ show: false });
     const [data, setData] = useState({
         company_name: "",
@@ -74,26 +75,42 @@ const PartyEdit = () => {
                     branch: partyData.branch || "",
                     account_no: partyData.account_no || ""
                 });
+                if (partyData.logo) setLogoPreview(`${partyData.logo}`);
             } else {
                 setAlart({ show: true, title: "Error", type: "error", message: result.message || "Party not found." });
-            }
-        }
+            };
+        };
     };
 
     useEffect(() => {
         fetchPartyData();
     }, []);
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setLogo(file);
+            setLogoPreview(URL.createObjectURL(file));
+        };
+    };
     const handleSubmit = async (e) => {
         try {
             e.preventDefault();
-            let result = await updateParty(id, data, token);
+            const formData = new FormData();
+            Object.keys(data).forEach(key => {
+                formData.append(key, data[key]);
+            });
+            if (logo) formData.append('logo', logo);
+
+            let result = await updateParty(id, formData, token);
             if ((result.status) === 200) {
                 setAlart({ show: true, title: "Success", type: "success", message: result.message });
                 setTimeout(() => navigate("/party"), 1500);
+                setLogo(null);
+                setLogoPreview(null);
             } else {
                 setAlart({ show: true, title: "Error", type: "error", message: result.message });
-            }
+            };
         } catch (error) {
             console.log(error);
             setAlart({ show: true, title: "Error", type: "error", message: "Something went wrong!" });
@@ -213,26 +230,42 @@ const PartyEdit = () => {
                         </MainArea>
                         <MainArea>
                             <div className='flex flex-col w-full gap-1'>
-                                <PageTitle>Preview</PageTitle>
+                                <PageTitle>Preview & Logo</PageTitle>
                                 <hr />
-                                <div className='flex w-full p-1'>
-                                    <AiOutlineIdcard className='text-9xl' />
-                                    <div className='p-2 flex flex-col justify-center'>
-                                        <div className='flex gap-1'>
-                                            <span className='font-bold text-sm'>Company Name : </span>
-                                            <p className='text-slate-500 text-sm'>{(data.company_name).toUpperCase()}</p>
+                                <div className='flex flex-col sm:flex-row w-full p-1 gap-4 items-center sm:items-start'>
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="rounded flex flex-col justify-center items-center p-1 w-32 h-32 border border-slate-300 dark:border-slate-600 text-xs bg-white overflow-hidden">
+                                            {logoPreview ? (
+                                                <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-contain" />
+                                            ) : (
+                                                <AiOutlineIdcard className='text-7xl text-slate-300' />
+                                            )}
                                         </div>
-                                        <div className='flex gap-1'>
-                                            <span className='font-bold text-sm'>Name : </span>
-                                            <p className='text-slate-500 text-sm'>{(data.owner).toUpperCase()}</p>
+                                        <label className="px-3 py-1 bg-blue-600 text-white text-xs rounded cursor-pointer hover:bg-blue-700 transition">
+                                            Upload Logo
+                                            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                                        </label>
+                                    </div>
+                                    <div className='flex-1 flex flex-col justify-center'>
+                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
+                                            <span className='font-bold text-xs w-24'>Company : </span>
+                                            <p className='text-slate-500 text-xs uppercase'>{data.company_name || "--"}</p>
                                         </div>
-                                        <div className='flex gap-1'>
-                                            <span className='font-bold text-sm'>Email : </span>
-                                            <p className='text-slate-500 text-sm'>{(data.email).toUpperCase()}</p>
+                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
+                                            <span className='font-bold text-xs w-24'>Owner : </span>
+                                            <p className='text-slate-500 text-xs uppercase'>{data.owner || "--"}</p>
                                         </div>
-                                        <div className='flex gap-1'>
-                                            <span className='font-bold text-sm'>Mobile : </span>
-                                            <p className='text-slate-500 text-sm'>{(data.mobile).toUpperCase()}</p>
+                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
+                                            <span className='font-bold text-xs w-24'>Email : </span>
+                                            <p className='text-slate-500 text-xs'>{data.email || "--"}</p>
+                                        </div>
+                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
+                                            <span className='font-bold text-xs w-24'>Mobile : </span>
+                                            <p className='text-slate-500 text-xs'>{data.mobile || "--"}</p>
+                                        </div>
+                                        <div className='flex gap-1 py-1'>
+                                            <span className='font-bold text-xs w-24'>GST : </span>
+                                            <p className='text-slate-500 text-xs uppercase'>{data.gst || "--"}</p>
                                         </div>
                                     </div>
                                 </div>

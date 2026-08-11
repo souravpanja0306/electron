@@ -43,18 +43,12 @@ const Signup = () => {
     };
 
     const handleSubmitSignup = async (e) => {
-        e.preventDefault();
-        if (signinLoading) return;
-
-        if (usernameExists) {
-            return toast.error("Username already taken. Please choose another.");
-        }
-
-        if (!data.machineId) {
-            return toast.error("Hardware ID not found. Please restart the app.");
-        }
-
         try {
+            e.preventDefault();
+            if (signinLoading) return;
+            if (usernameExists) return toast.error("Username already taken. Please choose another.");
+            if (!data.machineId) return toast.error("Hardware ID not found. Please restart the app.");
+
             let result = await signup(data);
             if (result.status === 200) {
                 window.api?.setItem("token", result.body.token);
@@ -66,7 +60,7 @@ const Signup = () => {
             };
         } catch (error) {
             console.error(error);
-            toast.error("An unexpected error occurred. Please try again.");
+            toast.error(error.response.data.message);
         };
     };
     return (

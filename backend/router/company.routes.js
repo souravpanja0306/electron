@@ -44,8 +44,8 @@ router.delete(
 
 router.put(
     "/update-company/:id",
-    middleware.isAuthenticated,
     file.single('logo'),
+    middleware.isAuthenticated,
     CompanyController.updateCompany
 );
 

@@ -43,9 +43,7 @@ if (isNewDatabase) {
     db.exec(require("../database/schema/party.schema"));
     db.exec(require("../database/schema/invoice.schema"));
     db.exec(require("../database/schema/settingChallanSchema"));
+    db.exec(require("../database/schema/cha.schema"));
 };
-
-// Ensure cha table is created
-db.exec(require("../database/schema/cha.schema"));
 
 module.exports = { connectMongo, db, dbPath };
