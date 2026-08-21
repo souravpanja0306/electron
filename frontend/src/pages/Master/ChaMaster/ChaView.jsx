@@ -28,7 +28,7 @@ const ChaView = () => {
     const navigate = useNavigate();
 
     const fetchCha = () => {
-        getAllCha(token);
+        getAllCha();
     };
 
     useEffect(() => {
@@ -139,11 +139,7 @@ const ChaView = () => {
                         <thead>
                             <tr className="border-b border-slate-600 p-1 text-slate-600 dark:text-white text-sm font-semibold">
                                 <th className="p-1 text-start truncate w-16">
-                                    <input
-                                        type="checkbox"
-                                        onChange={handleSelectAll}
-                                        checked={checkedIds.length === chaData.length && chaData.length > 0}
-                                    />
+                                    Select
                                 </th>
                                 <th className="p-1 text-start">Name</th>
                                 <th className="p-1 text-start">Mobile</th>

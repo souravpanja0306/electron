@@ -5,7 +5,7 @@ const useChaStore = create((set) => ({
     chaData: [],
     loading: false,
 
-    getAllCha: async (token) => {
+    getAllCha: async () => {
         try {
             set({ loading: true });
             const result = await api({
@@ -20,13 +20,16 @@ const useChaStore = create((set) => ({
         };
     },
 
-    createCha: async (payload, token) => {
+    createCha: async ({
+        data: data,
+        token: token
+    }) => {
         try {
             set({ loading: true });
             const res = await api({
                 method: "post",
                 url: "/admin/create-cha",
-                data: payload,
+                data: data,
             });
             set({ loading: false });
             return res.data;

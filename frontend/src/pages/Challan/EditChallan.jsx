@@ -99,7 +99,7 @@ const EditChallan = () => {
     useEffect(() => {
         getAllParty(token);
         getAllCompany(token);
-        getAllCha(token);
+        getAllCha();
         if (id) {
             fetchChallanData();
         }

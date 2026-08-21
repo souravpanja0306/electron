@@ -16,7 +16,7 @@ const usePartyStore = create((set) => ({
                 url: "/party/party-create",
                 data: data,
             });
-            set({ parties: result.data, loading: false });
+            set({ loading: false });
             return result.data;
         } catch (error) {
             set({ loading: false });
@@ -72,6 +72,21 @@ const usePartyStore = create((set) => ({
             set({ partyLoading: false });
             throw error;
         }
+    },
+
+    deleteParty: async (id) => {
+        try {
+            set({ partyLoading: true });
+            const result = await api({
+                method: "delete",
+                url: `/party/party-delete/${id}`,
+            });
+            set({ partyLoading: false });
+            return result.data;
+        } catch (error) {
+            set({ partyLoading: false });
+            throw error;
+        };
     },
 }));
 

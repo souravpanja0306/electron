@@ -33,55 +33,32 @@ import useChaStore from "../../store/ChaStore";
 // Service...
 import { handleEnter } from "../../service/MainService";
 
+// Custom Hooks...
+import { usePartyHook } from '../../hooks/usePartyHook';
+import { useChaHook } from '../../hooks/useChaHook';
+
 
 const CreateChallan = () => {
   const [chaModal, isChaModal] = useState(false);
+  const [partyModal, isPartyModal] = useState(false);
   const { token } = useAuthStore();
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const navigate = useNavigate();
 
-  const { parties, getAllParty } = usePartyStore();
   const { companyData, getAllCompany } = useCompanyStore();
   const { createChallan, generateChallanNo, challanNo, challanLoading } = useChallanStore();
-  const { chaData, getAllCha, createCha } = useChaStore();
 
-  const [chaForm, setChaForm] = useState({
-    cha_name: "",
-    cha_mobile: "",
-    cha_address: "",
-  });
-
-  const handleChaChange = (e) => {
-    setChaForm({ ...chaForm, [e.target.name]: e.target.value });
-  };
-
-  const handleChaSubmit = async (e) => {
-    if (e) e.preventDefault();
-    try {
-      if (!chaForm.cha_name) {
-        toast.error("CHA Name is required.");
-        return;
-      }
-      let payload = {
-        name: chaForm.cha_name,
-        mobile: chaForm.cha_mobile,
-        address: chaForm.cha_address,
-      };
-      let result = await createCha(payload, token);
-      if (result.status === 200) {
-        toast.success(result.message);
-        setChaForm({ cha_name: "", cha_mobile: "", cha_address: "" });
-        isChaModal(false);
-        getAllCha(token);
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
-      console.log(error);
+  const { handlePartySubmit, parties, getParty, loading: partyLoading, error: partyError } = usePartyHook({
+    onSuccess: () => {
+      isPartyModal(false);
     }
-  };
+  });
+  const { handleChaSubmit, chaData, getCha, loading: chaLoading, error: chaError } = useChaHook({
+    onSuccess: () => {
+      isChaModal(false);
+    }
+  });
 
   // const getChallanNo = async () => {
   //   let result = await generateChallanNo(token);
@@ -91,9 +68,9 @@ const CreateChallan = () => {
   // };
 
   useEffect(() => {
-    getAllParty(token);
+    getParty();
     getAllCompany(token);
-    getAllCha(token);
+    getCha();
     // getChallanNo();
   }, []);
 
@@ -204,7 +181,6 @@ const CreateChallan = () => {
   return (
     <>
       <PageTitle>Create Challan</PageTitle>
-
       <div className="flex flex-col gap-1">
         <ActionArea>
           {
@@ -255,12 +231,12 @@ const CreateChallan = () => {
                           placeholder="Select Consignor"
                           required
                         />
-                        <Link
-                          to="/add-party?back=true"
+                        <button
+                          onClick={() => isPartyModal(true)}
                           className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap w-[20%]"
                         >
                           <AiOutlinePlusSquare />
-                        </Link>
+                        </button>
                       </div>
                     </div>
 
@@ -276,12 +252,12 @@ const CreateChallan = () => {
                           placeholder="Select Consignee"
                           required
                         />
-                        <Link
-                          to="/add-party?back=true"
+                        <button
+                          onClick={() => isPartyModal(true)}
                           className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap w-[20%]"
                         >
                           <AiOutlinePlusSquare />
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -573,45 +549,142 @@ const CreateChallan = () => {
       <Modal isOpen={chaModal} onClose={() => isChaModal(false)} title="Create New CHA">
         <form onSubmit={handleChaSubmit}>
           <MainArea>
-            <div className='grid gap-2 w-full p-1'>
-              <div className='flex items-center justify-between w-full gap-1'>
-                <label className='text-xs w-[20%]'>CHA Name</label>
+            <div className="grid gap-2 w-full p-1">
+              {chaError && <div className="text-red-500 text-xs">{chaError}</div>}
+
+              {/* CHA Name */}
+              <div className="flex items-center justify-between w-full gap-1">
+                <label className="text-xs w-[20%]">CHA Name</label>
                 <input
                   className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                   type="text"
                   name="cha_name"
-                  value={chaForm.cha_name}
-                  onChange={handleChaChange}
-                  onKeyDown={(e) => handleEnter({ event: e, name: "cha_mobile" })}
+                  onKeyDown={(e) => handleEnter(e, "cha_mobile")}
                   placeholder="CHA Name"
                 />
               </div>
-              <div className='flex items-center justify-between w-full gap-1'>
-                <label className='text-xs w-[20%]'>CHA Mobile</label>
+
+              {/* CHA Mobile */}
+              <div className="flex items-center justify-between w-full gap-1">
+                <label className="text-xs w-[20%]">CHA Mobile</label>
                 <input
                   className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                   type="text"
                   name="cha_mobile"
-                  value={chaForm.cha_mobile}
-                  onChange={handleChaChange}
-                  onKeyDown={(e) => handleEnter({ event: e, name: "cha_address" })}
+                  onKeyDown={(e) => handleEnter(e, "cha_address")}
                   placeholder="CHA Mobile"
                 />
               </div>
-              <div className='flex items-center justify-between w-full gap-1'>
-                <label className='text-xs w-[20%]'>Address (optional)</label>
+
+              {/* Address */}
+              <div className="flex items-center justify-between w-full gap-1">
+                <label className="text-xs w-[20%]">Address (optional)</label>
                 <input
                   className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
                   type="text"
                   name="cha_address"
-                  value={chaForm.cha_address}
-                  onChange={handleChaChange}
-                  onKeyDown={(e) => handleEnter({ event: e, name: "cha_submit" })}
+                  onKeyDown={(e) => handleEnter(e, "cha_submit")}
                   placeholder="Address (optional)"
                 />
               </div>
-              <div className='w-full flex justify-end' name="cha_submit" onClick={handleChaSubmit}>
-                <CustomButton title={"Save (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+
+              {/* Save Button */}
+              <div className="w-full flex justify-end">
+                <CustomButton
+                  type="submit"
+                  name="cha_submit"
+                  title={"Save (Ctrl+S)"}
+                  color={"blue"}
+                  disabled={chaLoading}
+                >
+                  <AiOutlineFileAdd />
+                </CustomButton>
+              </div>
+            </div>
+          </MainArea>
+        </form>
+      </Modal>
+
+      {/* Create Party */}
+      <Modal isOpen={partyModal} onClose={() => isPartyModal(false)} title="Create New Party">
+        <form onSubmit={handlePartySubmit}>
+          <MainArea>
+            <div className="grid gap-2 w-full p-1">
+              {partyError && <div className="text-red-500 text-xs">{partyError}</div>}
+
+              {/* Company Name */}
+              <div className="flex items-center justify-between w-full gap-1">
+                <label className="text-xs w-[20%]">Company Name</label>
+                <input
+                  className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="company_name"
+                  onKeyDown={(e) => handleEnter(e, "owner")}
+                  placeholder="Company Name"
+                />
+              </div>
+
+              {/* Owner */}
+              <div className="flex items-center justify-between w-full gap-1">
+                <label className="text-xs w-[20%]">Owner Name</label>
+                <input
+                  className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="owner"
+                  onKeyDown={(e) => handleEnter(e, "mobile")}
+                  placeholder="Owner Name"
+                />
+              </div>
+
+              {/* Mobile */}
+              <div className="flex items-center justify-between w-full gap-1">
+                <label className="text-xs w-[20%]">Mobile Number</label>
+                <input
+                  className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="mobile"
+                  onKeyDown={(e) => handleEnter(e, "email")}
+                  placeholder="Mobile Number"
+                />
+              </div>
+
+              {/* Email */}
+              <div className="flex items-center justify-between w-full gap-1">
+                <label className="text-xs w-[20%]">Email Address</label>
+                <input
+                  className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="email"
+                  name="email"
+                  onKeyDown={(e) => handleEnter(e, "country")}
+                  placeholder="Email Address"
+                />
+              </div>
+
+              {/* Country */}
+              <div className="flex items-center justify-between w-full gap-1">
+                <label className="text-xs w-[20%]">Country</label>
+                <input
+                  className="h-8 p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
+                  type="text"
+                  name="country"
+                  defaultValue="INDIA"
+                  onKeyDown={(e) => handleEnter(e, "submit_btn")}
+                  placeholder="Country"
+                  readOnly
+                />
+              </div>
+
+              {/* Save Button */}
+              <div className="w-full flex justify-end">
+                <CustomButton
+                  type="submit"
+                  name="submit_btn"
+                  title={"Save (Ctrl+S)"}
+                  color={"blue"}
+                  disabled={partyLoading}
+                >
+                  <AiOutlineFileAdd />
+                </CustomButton>
               </div>
             </div>
           </MainArea>

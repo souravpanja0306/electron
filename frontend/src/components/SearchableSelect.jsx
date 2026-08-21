@@ -79,7 +79,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, classNa
       <input
         name={name}
         value={value || ''}
-        onChange={() => {}}
+        onChange={() => { }}
         required={required}
         tabIndex="-1"
         style={{
@@ -133,10 +133,9 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, classNa
                 <div
                   id={`opt-${name}-${index}`}
                   key={option.id}
-                  className={`p-2 hover:bg-blue-100 dark:hover:bg-slate-700 cursor-pointer truncate text-sm ${
-                    index === activeIndex ? 'bg-blue-200 dark:bg-slate-600' : 
+                  className={`p-2 hover:bg-blue-100 dark:hover:bg-slate-700 cursor-pointer truncate text-sm ${index === activeIndex ? 'bg-blue-200 dark:bg-slate-600' :
                     String(option.id) === String(value) ? 'bg-blue-50 dark:bg-slate-700 font-semibold text-blue-600' : 'dark:text-white'
-                  }`}
+                    }`}
                   onClick={() => handleSelect(option)}
                 >
                   {option.label}

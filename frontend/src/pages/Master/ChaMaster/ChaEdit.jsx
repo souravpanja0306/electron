@@ -30,7 +30,7 @@ const ChaEdit = () => {
 
     useEffect(() => {
         if (!chaData || chaData.length === 0) {
-            getAllCha(token);
+            getAllCha();
         }
     }, []);
 
