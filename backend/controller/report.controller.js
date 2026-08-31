@@ -19,8 +19,8 @@ module.exports.debtors = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId } = req.body;
-        const { party_id } = req.query;
-        const result = await ReportService.getDebtors({ party_id: party_id, created_by: t_userId });
+        const { company_id } = req.query;
+        const result = await ReportService.getDebtors({ company_id, created_by: t_userId });
 
         response.status = 200;
         response.message = "Ledger fetched successfully";
@@ -38,9 +38,9 @@ module.exports.customerLedger = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId } = req.body;
-        const { party_id } = req.query;
+        const { party_id, company_id } = req.query;
 
-        const result = await ReportService.getDebtorsDetails({ party_id: party_id, created_by: t_userId });
+        const result = await ReportService.getDebtorsDetails({ party_id, company_id, created_by: t_userId });
 
         response.status = 200;
         response.message = "Ledger fetched successfully";
@@ -75,6 +75,13 @@ module.exports.dashboardStats = async (req, res) => {
 module.exports.creditors = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
+        const { t_userId } = req.body;
+        const { company_id } = req.query;
+        const result = await ReportService.getCreditors({ company_id, created_by: t_userId });
+
+        response.status = 200;
+        response.message = "Creditor ledger fetched successfully";
+        response.body = result;
 
     } catch (error) {
         console.log(`Something went wrong: controller: creditors: ${error}`);

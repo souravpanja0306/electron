@@ -68,7 +68,7 @@ const CreateChallan = () => {
   // };
 
   useEffect(() => {
-    getParty();
+    getParty({});
     getAllCompany(token);
     getCha();
     // getChallanNo();
@@ -504,7 +504,7 @@ const CreateChallan = () => {
                       <SearchableSelect
                         className="w-full"
                         name="cha"
-                        value={form.cha}
+                        value={parseInt(form.cha)}
                         onChange={handleChange}
                         options={chaData?.map(item => ({ id: item.id, label: item.name }))}
                         placeholder="Select CHA"

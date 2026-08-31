@@ -5,6 +5,7 @@ const contents = require("../content/contents");
 const ChallanService = require("../service/challan.service");
 const SettingService = require("../service/setting.service");
 const PartyService = require("../service/party.service");
+const AdminService = require("../service/admin.service");
 const CompanyService = require("../service/company.service");
 const { generateChallanHtml } = require("../helper/generateChallanHtml");
 
@@ -118,6 +119,7 @@ module.exports.getAllChallans = async (req, res) => {
                 let consignor = await PartyService.getParty({ id: item.consignor_id });
                 let consignee = await PartyService.getParty({ id: item.consignee_id });
                 let company = await CompanyService.getCompany({ id: item.company_id });
+                let cha = await AdminService.findCHA({ id: item.cha });
 
                 let newData = {
                     id: item.id,
@@ -132,7 +134,7 @@ module.exports.getAllChallans = async (req, res) => {
                     way_bill_no: item.way_bill_no || "--",
                     way_bill_date: item.way_bill_date || "--",
                     container: item.container || "--",
-                    cha: item.cha || "--",
+                    cha: cha.length ? cha[0] : null,
                     booking_number: item.booking_number || "--",
                     truck_no: item.truck_no || "--",
                     note: item.note || "--",
@@ -141,7 +143,8 @@ module.exports.getAllChallans = async (req, res) => {
                     created_by: item.created_by,
                     created_at: item.created_at,
                     is_active: item.is_active,
-                    is_deleted: item.is_deleted
+                    is_deleted: item.is_deleted,
+                    invoiced: Boolean(item.invoiced)
                 };
                 finalData.push(newData);
             }
@@ -223,7 +226,8 @@ module.exports.updateChallan = async (req, res) => {
             truck_no,
             note,
             total_amount: total_amount || 0,
-            data: JSON.stringify(data)
+            data: JSON.stringify(data),
+            invoiced: 0
         };
 
         let result = await ChallanService.updateChallanData(id, finalData);

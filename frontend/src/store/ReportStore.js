@@ -30,13 +30,14 @@ const useReportStore = create((set) => ({
 
     getDebtors: async ({
         id = "",
-        token = ""
+        token = "",
+        company_id = ""
     }) => {
         try {
             set({ reportLoading: true });
             const result = await api({
                 method: "get",
-                url: `/report/debtors`,
+                url: `/report/debtors${company_id ? `?company_id=${company_id}` : ""}`,
             });
             if (result.data.status === 200) {
                 set({ reportData: result.data.body, reportLoading: false });
@@ -48,15 +49,33 @@ const useReportStore = create((set) => ({
         };
     },
 
+    getCreditors: async ({ token = "", company_id = "" }) => {
+        try {
+            set({ reportLoading: true });
+            const result = await api({
+                method: "get",
+                url: `/report/creditors${company_id ? `?company_id=${company_id}` : ""}`,
+            });
+            if (result.data.status === 200) {
+                set({ reportData: result.data.body, reportLoading: false });
+            }
+            return result.data;
+        } catch (error) {
+            set({ reportLoading: false });
+            throw error;
+        }
+    },
+
     getDebtorsDetails: async ({
         id = "",
-        token = ""
+        token = "",
+        company_id = ""
     }) => {
         try {
             set({ debtorDetailsLoading: true });
             const result = await api({
                 method: "get",
-                url: `/report/customer-ledger?party_id=${id}`,
+                url: `/report/customer-ledger?party_id=${id}${company_id ? `&company_id=${company_id}` : ""}`,
             });
             if (result.data.status === 200) {
                 set({ debtorDetails: result.data.body, debtorDetailsLoading: false });

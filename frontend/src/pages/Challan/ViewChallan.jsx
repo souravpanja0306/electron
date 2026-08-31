@@ -11,7 +11,8 @@ import {
     AiOutlineFilter,
     AiOutlineDelete,
     AiOutlineEdit,
-    AiOutlineRollback
+    AiOutlineRollback,
+    AiOutlineDiff
 } from "react-icons/ai";
 
 // Components...
@@ -97,6 +98,18 @@ const ViewChallan = () => {
         };
     };
 
+    const handleCreateInvoice = () => {
+        const challan = challanData.body?.find(item => item.id === checkedIds);
+        if (!challan) return;
+        if (challan.invoiced) {
+            toast.info("An invoice has already been created for this challan.");
+            return;
+        }
+        navigate(`/create-invoice?challanId=${checkedIds}&back=true`);
+    };
+
+    const checkedChallan = challanData.body?.find(item => item.id === checkedIds);
+
     useEffect(() => {
         const onKey = (e) => {
             if (e.ctrlKey && e.key === 'n') {
@@ -150,6 +163,15 @@ const ViewChallan = () => {
                             <div onClick={handleDelete} className={`${!checkedIds ? "hidden" : "block"}`}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                             </div>
+                            <div onClick={handleCreateInvoice} className={`${!checkedIds ? "hidden" : "block"}`}>
+                                <CustomButton
+                                    title={checkedChallan?.invoiced ? "Invoice Created" : "Create Invoice"}
+                                    color={checkedChallan?.invoiced ? "green" : "yellow"}
+                                    disabled={checkedChallan?.invoiced}
+                                >
+                                    <AiOutlineDiff />
+                                </CustomButton>
+                            </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                             {/* <div className="flex items-center gap-1">
@@ -201,6 +223,7 @@ const ViewChallan = () => {
                                 <th className="p-1 text-start text-slate-500">To</th>
                                 <th className="p-1 text-start text-slate-500">Truck No</th>
                                 <th className="p-1 text-start text-slate-500">Amount</th>
+                                <th className="p-1 text-start text-slate-500">Invoiced</th>
                                 <th className="p-1 text-center w-16 text-slate-500">#</th>
                             </tr>
                         </thead>
@@ -231,6 +254,11 @@ const ViewChallan = () => {
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.to_loc ? item.to_loc : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.truck_no ? item.truck_no : "--"}</td>
                                                 <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_amount ? `₹ ${item.total_amount}` : "--"}</td>
+                                                <td className="p-1 text-start">
+                                                    <span className={item.invoiced ? "text-green-600 font-medium" : "text-slate-500"}>
+                                                        {item.invoiced ? "Yes" : "No"}
+                                                    </span>
+                                                </td>
                                                 <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
                                                     <button
                                                         onClick={() => handlePrint(item.id)}
@@ -248,7 +276,7 @@ const ViewChallan = () => {
                                 <>
                                     {
                                         <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                            <td className="p-1 text-center text-slate-500" colSpan={11}>No Data Found</td>
+                                            <td className="p-1 text-center text-slate-500" colSpan={12}>No Data Found</td>
                                         </tr>
                                     }
                                 </>

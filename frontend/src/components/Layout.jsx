@@ -131,7 +131,7 @@ const Layout = () => {
                 </div>
 
                 {/* Middle Sidebar */}
-                <div className={`${sideBar ? "w-[240px]" : "w-0 overflow-hidden"} bg-slate-50 dark:bg-slate-900 flex flex-col border-r border-slate-300 dark:border-slate-800 transition-all duration-300 ease-in-out z-10 shadow-sm`}>
+                <div className={`${sideBar ? "w-[240px]" : "w-0 overflow-hidden"} bg-slate-50 dark:bg-slate-900 flex flex-col border-r border-slate-300 dark:border-slate-800 z-10 shadow-sm`}>
                     <div className="p-3 border-b border-slate-200 dark:border-slate-800">
                         <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                             {activeMenu} navigation

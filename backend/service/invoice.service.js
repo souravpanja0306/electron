@@ -18,6 +18,7 @@ module.exports.findInvoices = async ({
     id = "",
     created_by = "",
     invoice_no = "",
+    challan_id = "",
     startDate = "",
     endDate = "",
     search = "",
@@ -42,6 +43,11 @@ module.exports.findInvoices = async ({
         if (invoice_no) {
             query += " AND invoice_no = ?";
             params.push(invoice_no);
+        };
+
+        if (challan_id) {
+            query += " AND challan_id = ?";
+            params.push(challan_id);
         };
 
         if (startDate && endDate) {
@@ -109,6 +115,27 @@ module.exports.updateInvoiceData = async (id, data) => {
             .prepare(`UPDATE invoice SET ${setClause} WHERE id = @id`)
             .run({ ...data, id });
         return result;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    };
+};
+
+module.exports.insertInvoiceFromChallan = async (invoiceData, challanId, createdBy) => {
+    try {
+        return db.transaction(() => {
+            const keys = Object.keys(invoiceData);
+            const invoice = db
+                .prepare(`INSERT INTO invoice (${keys.join(",")}) VALUES (${keys.map(key => "@" + key).join(",")})`)
+                .run(invoiceData);
+
+            const challan = db
+                .prepare("UPDATE challan SET invoiced = 1 WHERE id = ? AND created_by = ? AND is_deleted = 0")
+                .run(challanId, createdBy);
+
+            if (challan.changes !== 1) throw new Error("Source challan not found.");
+            return invoice;
+        })();
     } catch (error) {
         console.log(error);
         throw error;

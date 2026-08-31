@@ -34,6 +34,7 @@ const CustomerLedger = () => {
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
     const party_id = searchParams.get("id");
+    const company_id = searchParams.get("company_id");
     const navigate = useNavigate();
 
     const { debtorDetails, getDebtorsDetails, debtorDetailsLoading } = useReportStore();
@@ -50,7 +51,7 @@ const CustomerLedger = () => {
     });
 
     const getDebtorsData = async () => {
-        let result = await getDebtorsDetails({ token: token, id: party_id });
+        let result = await getDebtorsDetails({ token: token, id: party_id, company_id });
         if (result.body) {
             setDebtors(result.body);
         };

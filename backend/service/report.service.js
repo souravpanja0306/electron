@@ -2,33 +2,46 @@
 const { db } = require("../database/connection");
 
 module.exports.getDebtors = async ({
-    party_id = ""
+    created_by = "",
+    company_id = ""
 }) => {
     try {
-        
-
-        const stmt = db.prepare(`
-            SELECT 
+        const userFilter = created_by ? " AND created_by = ?" : "";
+        const companyFilter = company_id ? " AND company_id = ?" : "";
+        const invoiceParams = [...(created_by ? [created_by] : []), ...(company_id ? [company_id] : [])];
+        const receiptParams = [...(created_by ? [created_by] : []), ...(company_id ? [company_id] : [])];
+        const partyParams = created_by ? [created_by] : [];
+        const rows = db.prepare(`
+            WITH invoice_totals AS (
+                SELECT party_id, SUM(total_amount) AS total_invoice
+                FROM invoice
+                WHERE is_deleted = 0${userFilter}${companyFilter}
+                GROUP BY party_id
+            ), receipt_totals AS (
+                SELECT party_id, SUM(total_value) AS total_payment
+                FROM money_receipts
+                WHERE is_deleted = 0${userFilter}${companyFilter}
+                GROUP BY party_id
+            )
+            SELECT
                 p.id AS party_id,
                 p.company_name,
-                IFNULL(SUM(i.total_amount),0) AS total_invoice,
-                IFNULL(SUM(r.total_value),0) AS total_payment,
-                IFNULL(SUM(i.total_amount),0) - IFNULL(SUM(r.total_value),0) AS total_due
+                COALESCE(i.total_invoice, 0) AS total_invoice,
+                COALESCE(r.total_payment, 0) AS total_payment,
+                COALESCE(i.total_invoice, 0) - COALESCE(r.total_payment, 0) AS total_due
             FROM party p
-            LEFT JOIN invoice i ON p.id = i.party_id
-            LEFT JOIN money_receipts r ON p.id = r.party_id
-            GROUP BY p.id
-        `);
+            LEFT JOIN invoice_totals i ON i.party_id = p.id
+            LEFT JOIN receipt_totals r ON r.party_id = p.id
+            WHERE p.is_deleted = 0${userFilter}
+              AND (COALESCE(i.total_invoice, 0) <> 0 OR COALESCE(r.total_payment, 0) <> 0)
+            ORDER BY total_due DESC, p.company_name COLLATE NOCASE
+        `).all(...invoiceParams, ...receiptParams, ...partyParams);
 
-        const totalStmt = db.prepare(`
-            SELECT 
-                IFNULL((SELECT SUM(total_amount) FROM invoice),0) AS total_invoice,
-                IFNULL((SELECT SUM(total_value) FROM money_receipts),0) AS total_payment,
-                IFNULL((SELECT SUM(total_amount) FROM invoice),0) -
-                IFNULL((SELECT SUM(total_value) FROM money_receipts),0) AS total_due
-        `);
-        const rows = stmt.all();
-        const totals = totalStmt.get();
+        const totals = rows.reduce((summary, row) => ({
+            total_invoice: summary.total_invoice + Number(row.total_invoice || 0),
+            total_payment: summary.total_payment + Number(row.total_payment || 0),
+            total_due: summary.total_due + Number(row.total_due || 0)
+        }), { total_invoice: 0, total_payment: 0, total_due: 0 });
 
         return {
             ledger: rows,
@@ -41,25 +54,34 @@ module.exports.getDebtors = async ({
 };
 
 module.exports.getDebtorsDetails = async ({
-    party_id = ""
+    party_id = "",
+    created_by = "",
+    company_id = ""
 }) => {
     try {
-        const party = db.prepare(`SELECT * FROM party WHERE id = ?`).get(party_id);
+        const party = db.prepare(`SELECT * FROM party WHERE id = ? AND is_deleted = 0${created_by ? " AND created_by = ?" : ""}`).get(...(created_by ? [party_id, created_by] : [party_id]));
+        const userFilter = created_by ? " AND created_by = ?" : "";
+        const companyFilter = company_id ? " AND company_id = ?" : "";
         const stmt = db.prepare(`
-            SELECT invoice_date AS date, 'Invoice #' || invoice_no AS description, total_amount AS dr, 0 AS cr FROM invoice WHERE party_id = ?
+            SELECT id, invoice_date AS date, 'Invoice #' || invoice_no AS description, total_amount AS dr, 0 AS cr, 'invoice' AS entry_type FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}
             UNION ALL
-            SELECT receipt_date AS date, 'Payment #' || receipt_no AS description, 0 AS dr, total_value AS cr FROM money_receipts WHERE party_id = ?
+            SELECT id, receipt_date AS date, 'Payment #' || receipt_no AS description, 0 AS dr, total_value AS cr, 'receipt' AS entry_type FROM money_receipts WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}
             ORDER BY date ASC
         `);
 
         const totalStmt = db.prepare(`
             SELECT 
-                IFNULL((SELECT SUM(total_amount) FROM invoice WHERE party_id = ?), 0) AS total_dr,
-                IFNULL((SELECT SUM(total_value) FROM money_receipts WHERE party_id = ?), 0) AS total_cr
+                IFNULL((SELECT SUM(total_amount) FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_dr,
+                IFNULL((SELECT SUM(total_value) FROM money_receipts WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_cr
         `);
 
-        const totals = totalStmt.get(party_id, party_id);
-        const rows = stmt.all(party_id, party_id);
+        const queryParams = (includePartyId) => [
+            ...(includePartyId ? [party_id] : []),
+            ...(created_by ? [created_by] : []),
+            ...(company_id ? [company_id] : [])
+        ];
+        const totals = totalStmt.get(...queryParams(true), ...queryParams(true));
+        const rows = stmt.all(...queryParams(true), ...queryParams(true));
 
         return {
             party: party,
@@ -76,8 +98,18 @@ module.exports.getDebtorsDetails = async ({
     };
 };
 
-module.exports.getDashboardStats = async () => {
+module.exports.getDashboardStats = async ({ created_by = "" } = {}) => {
     try {
+        const countDocuments = (table) => {
+            let query = `SELECT COUNT(*) AS total FROM ${table} WHERE is_deleted = 0`;
+            const params = [];
+            if (created_by) {
+                query += " AND created_by = ?";
+                params.push(created_by);
+            }
+            return db.prepare(query).get(...params).total;
+        };
+
         // 1. Total Debtors
         const debtorTotals = db.prepare(`
             SELECT 
@@ -124,6 +156,11 @@ module.exports.getDashboardStats = async () => {
         ];
 
         return {
+            documentCounts: {
+                challans: countDocuments("challan"),
+                invoices: countDocuments("invoice"),
+                moneyReceipts: countDocuments("money_receipts")
+            },
             kpi: {
                 totalDebtors,
                 overdueDebtors: debtorAging[3].value, // 90+ days as overdue for now
@@ -140,3 +177,12 @@ module.exports.getDashboardStats = async () => {
         throw error;
     };
 };
+
+module.exports.getCreditors = async () => ({
+    ledger: [],
+    totals: {
+        total_bill: 0,
+        total_payment: 0,
+        total_due: 0
+    }
+});

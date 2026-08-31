@@ -4,6 +4,7 @@ module.exports = `
       
       company_id INTEGER,
       party_id INTEGER,
+      challan_id INTEGER,
 
       ship_to TEXT,
       type TEXT,

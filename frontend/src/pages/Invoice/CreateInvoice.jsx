@@ -28,6 +28,7 @@ import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
 import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore";
 import useGstStore from "../../store/GstStore";
+import useChallanStore from "../../store/ChallanStore";
 
 // Service...
 import { handleEnter } from "../../service/MainService";
@@ -38,10 +39,12 @@ const CreateInvoice = () => {
   const { companyData, getAllCompany } = useCompanyStore();
   const { parties, getAllParty, partyLoading } = usePartyStore();
   const { gstData, getAllGst, gstLoading } = useGstStore();
+  const { getAllChallan } = useChallanStore();
   const { token } = useAuthStore();
 
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
+  const challanId = searchParams.get("challanId");
 
   const navigate = useNavigate();
   let randomNumber = Math.floor(Math.random() * 10000000000);
@@ -96,6 +99,49 @@ const CreateInvoice = () => {
     getAllCompany(token);
     getAllGst(token)
   }, []);
+
+  useEffect(() => {
+    const loadChallanDraft = async () => {
+      if (!challanId) return;
+
+      try {
+        const result = await getAllChallan({ id: challanId, token });
+        const challan = result.body?.[0];
+        if (!challan) {
+          toast.error("Source challan was not found.");
+          navigate("/view-challan");
+          return;
+        }
+        setInvoiceDetails(previous => ({
+          ...previous,
+          challan_id: challan.id,
+          date: challan.date || previous.date,
+          company_id: challan.company_id?.id || "",
+          billTo: challan.consignee_id?.id || "",
+          shipTo: challan.consignee_id?.id || "",
+          ewayBill: challan.way_bill_no === "--" ? "" : challan.way_bill_no || "",
+          lorry_no: challan.truck_no === "--" ? "" : challan.truck_no || "",
+          lr_no: challan.cn_no === "--" ? "" : challan.cn_no || "",
+          placeOfSupply: challan.to_loc === "--" ? "" : challan.to_loc || ""
+        }));
+        setInvoiceFields((challan.data?.length ? challan.data : [{}]).map((item, index) => ({
+          id: Math.floor(Math.random() * 10000000000) + index,
+          sl_no: index + 1,
+          description: item.description || "",
+          hsn: "",
+          quantity: Number(item.packages) || 1,
+          rate: "",
+          total: 0,
+          gst: 0
+        })));
+      } catch (error) {
+        console.log(error);
+        toast.error("Unable to load the source challan.");
+      }
+    };
+
+    loadChallanDraft();
+  }, [challanId]);
 
   const handleAddFields = () => {
     setInvoiceFields([...invoiceFields, {
@@ -275,7 +321,7 @@ const CreateInvoice = () => {
               <MainArea>
                 <div className='flex flex-col w-full gap-2 p-1'>
                   <div className='flex justify-between items-center w-full gap-1'>
-                    <label className='text-xs w-[25%]'>Bill From</label>
+                    <label className='text-xs w-[25%]'>From Company</label>
                     <div className='flex items-center gap-1 w-[75%]'>
                       <SearchableSelect
                         className="w-full"
@@ -315,18 +361,32 @@ const CreateInvoice = () => {
                   </div>
 
                   <div className='flex justify-between items-center w-full gap-1'>
-                    <div className='flex gap-1 items-center w-[25%]'>
-                      <label className='text-xs'>Ship To</label>
-                      <div className='flex gap-1 items-center rounded bg-slate-200 dark:bg-slate-900 px-1 py-0.5'>
-                        <input type='checkbox' className='w-3 h-3' />
-                        <label className='text-[8px]'>Same</label>
+                    <label className='text-xs w-[25%]'>
+                      <span className=''> Ship To</span>
+                      <div className='flex items-center gap-1'>
+                        <span className='text-gray-500'>Same Bill To</span>
+                        <input type="checkbox" checked={invoiceDetails.shipTo === invoiceDetails.billTo} onChange={(e) => setInvoiceDetails({ ...invoiceDetails, shipTo: e.target.checked ? invoiceDetails.billTo : "" })} />
                       </div>
+                    </label>
+                    <div className='flex items-center gap-1 w-[75%]'>
+                      <SearchableSelect
+                        className="w-full"
+                        name="shipTo"
+                        value={invoiceDetails.shipTo}
+                        onChange={(e) =>
+                          setInvoiceDetails({ ...invoiceDetails, shipTo: e.target.value })
+                        }
+                        options={party?.map(item => ({ id: item.id, label: item.company_name }))}
+                        placeholder="Select Party"
+                        required
+                      />
+                      <Link
+                        to="/add-party?back=true"
+                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
+                      >
+                        + New
+                      </Link>
                     </div>
-                    <textarea
-                      className="p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                      rows="2"
-                      placeholder="Shipping Address"
-                    />
                   </div>
                 </div>
               </MainArea>
@@ -568,7 +628,6 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
                       type="text"
-                      type="ewayBill"
                       value={invoiceDetails.ewayBill}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, ewayBill: e.target.value })
@@ -581,7 +640,6 @@ const CreateInvoice = () => {
                     <input
                       className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
                       type="text"
-                      type="transporter"
                       value={invoiceDetails.transporter}
                       onChange={(e) =>
                         setInvoiceDetails({ ...invoiceDetails, transporter: e.target.value })

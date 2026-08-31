@@ -80,7 +80,7 @@ const EditChallan = () => {
                     way_bill_date: item.way_bill_date || "",
                     container: item.container || "",
                     booking_number: item.booking_number || "",
-                    cha: item.cha || "",
+                    cha: item.cha?.id || "",
                     note: item.note || "",
                     total_amount: item.total_amount || 0,
                     data: item.data || [],

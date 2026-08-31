@@ -46,4 +46,16 @@ if (isNewDatabase) {
     db.exec(require("../database/schema/cha.schema"));
 };
 
+// Keep existing SQLite installations compatible with schema additions.
+const invoiceColumns = db.prepare("PRAGMA table_info(invoice)").all();
+if (invoiceColumns.length && !invoiceColumns.some(column => column.name === "challan_id")) {
+    db.exec("ALTER TABLE invoice ADD COLUMN challan_id INTEGER");
+};
+db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_invoice_active_challan ON invoice(challan_id) WHERE challan_id IS NOT NULL AND is_deleted = 0");
+
+const challanColumns = db.prepare("PRAGMA table_info(challan)").all();
+if (challanColumns.length && !challanColumns.some(column => column.name === "invoiced")) {
+    db.exec("ALTER TABLE challan ADD COLUMN invoiced INTEGER DEFAULT 0");
+};
+
 module.exports = { connectMongo, db, dbPath };

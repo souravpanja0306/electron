@@ -11,6 +11,7 @@ const PartyService = require("../service/party.service");
 const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
 const CompanyService = require("../service/company.service");
+const ChallanService = require("../service/challan.service");
 const { generateInvoiceHtml } = require("../helper/generateInvoiceHtml");
 
 const errorHandler = (res, status, message) => {
@@ -69,7 +70,7 @@ module.exports.createInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId, t_mobile, t_username, t_name, company_id, type, invoiceNo,
-            date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, gst
+            date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, lorry_no, lr_no, challan_id
         } = req.body;
 
         if (!billTo) return errorHandler(res, 400, "Please select Party.");
@@ -80,6 +81,14 @@ module.exports.createInvoice = async (req, res) => {
 
         let isInvoiceNumberExist = await InvoiceService.findInvoices(search_key);
         if (isInvoiceNumberExist.length) return errorHandler(res, 409, "Invoice Number Already Exists.");
+
+        if (challan_id) {
+            const challans = await ChallanService.findChallans({ id: challan_id, created_by: t_userId });
+            if (!challans.length) return errorHandler(res, 404, "Source challan not found.");
+
+            const existingInvoice = await InvoiceService.findInvoices({ challan_id });
+            if (existingInvoice.length) return errorHandler(res, 409, "An invoice already exists for this challan.");
+        };
 
         // Fetch company and party to get states for tax calculation
         let partyResult = await PartyService.getParty({ id: billTo });
@@ -122,7 +131,11 @@ module.exports.createInvoice = async (req, res) => {
             invoice_date: date,
             transporter: transporter,
             eway_bill: ewayBill,
+            lorry_no: lorry_no,
+            lr_no: lr_no,
+            ship_to: shipTo,
             party_id: billTo,
+            challan_id: challan_id || null,
             created_by: t_userId,
             total_amount: totalValue,
             total_quantity: totalQty,
@@ -132,7 +145,9 @@ module.exports.createInvoice = async (req, res) => {
             placeOfSupply: placeOfSupply,
             data: JSON.stringify(data)
         };
-        let result = await InvoiceService.insertInvoiceData(finalData);
+        let result = challan_id
+            ? await InvoiceService.insertInvoiceFromChallan(finalData, challan_id, t_userId)
+            : await InvoiceService.insertInvoiceData(finalData);
 
         response.status = 200;
         response.message = "Data created successfully.";

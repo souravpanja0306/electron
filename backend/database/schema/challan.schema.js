@@ -15,7 +15,7 @@ module.exports = `
       way_bill_no TEXT,
       way_bill_date TEXT,
       container TEXT,
-      cha TEXT,
+      cha INTEGER,
       booking_number TEXT,
       truck_no TEXT,
       note TEXT,
@@ -27,6 +27,7 @@ module.exports = `
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       
       is_active INTEGER DEFAULT 1,
-      is_deleted INTEGER DEFAULT 0
+      is_deleted INTEGER DEFAULT 0,
+      invoiced INTEGER DEFAULT 0
     );
 `
