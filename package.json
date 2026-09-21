@@ -1,5 +1,5 @@
 {
-  "name": "ZeroERP",
+  "name": "MyERP",
   "version": "1.0.0",
   "description": "A desktop billing and transport logistics management application built with Electron, React, and SQLite.",
   "license": "ISC",
@@ -13,7 +13,7 @@
   },
   "build": {
     "appId": "com.company.billing",
-    "productName": "ZeroERP",
+    "productName": "MyERP",
     "files": [
       ".env",
       "main.js",
@@ -35,7 +35,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "ZeroERP"
+      "shortcutName": "MyERP"
     }
   },
   "dependencies": {

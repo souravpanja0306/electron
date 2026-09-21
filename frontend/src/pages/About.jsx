@@ -6,8 +6,8 @@ const About = () => {
         { label: 'Version', value: 'v2.4.1' },
         { label: 'Release Date', value: '15 May 2025' },
         { label: 'Launch Date', value: '01 Jan 2023' },
-        { label: 'Company', value: '© 2026 Zero® ERP' },
-        { label: 'Software', value: 'Zero®' },
+        { label: 'Company', value: '© 2026 MyERP' },
+        { label: 'Software', value: 'My' },
     ];
 
     return (
@@ -19,7 +19,7 @@ const About = () => {
                             📄
                         </div>
                         <div>
-                            <p className="text-base font-bold text-gray-900">Zero® ERP</p>
+                            <p className="text-base font-bold text-gray-900">MyERP</p>
                             <p className="text-xs text-gray-400 mt-0.5">Complete ERP Solution</p>
                         </div>
                     </div>
@@ -34,7 +34,7 @@ const About = () => {
                         </tbody>
                     </table>
                     <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 text-center text-xs text-gray-400">
-                        © 2026 Zero® ERP. &nbsp;·&nbsp; All rights reserved
+                        © 2026 MyERP. &nbsp;·&nbsp; All rights reserved
                     </div>
                 </div>
             </div>

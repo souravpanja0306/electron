@@ -22,7 +22,7 @@ app.whenReady().then(() => {
             nodeIntegration: false
         },
         icon: iconPath,
-        title: "Zero® ERP — Complete Solution",
+        title: "MyERP — Complete Solution",
     });
     win.loadURL("http://localhost:3000/");
     // win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
