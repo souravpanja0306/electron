@@ -15,6 +15,7 @@ module.exports = `
       lorry_no TEXT,
       lr_no TEXT,
       placeOfSupply TEXT,
+      terms_and_conditions TEXT,
       data TEXT,
       total_amount INTEGER DEFAULT 0,
       total_quantity INTEGER DEFAULT 0,

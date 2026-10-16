@@ -115,3 +115,47 @@ module.exports.editChallanSetting = async (req, res) => {
     };
     return res.status(response.status).json(response);
 };
+
+module.exports.saveInvoiceSetting = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { company_id, invoice_prefix, invoice_suffix, invoice_start_number, terms_and_conditions } = req.body;
+        if (!company_id) return errorHandler(res, 400, "Please select a company.");
+
+        const data = {
+            company_id: Number(company_id),
+            invoice_prefix: String(invoice_prefix || "INV-"),
+            invoice_suffix: String(invoice_suffix || ""),
+            invoice_start_number: Math.max(1, Number(invoice_start_number) || 1),
+            terms_and_conditions: String(terms_and_conditions || ""),
+        };
+        const existing = await SettingService.getInvoiceSetting({ company_id: data.company_id });
+        const result = existing.length
+            ? await SettingService.updateInvoiceSetting({ id: existing[0].id, data })
+            : await SettingService.createInvoiceSetting(data);
+
+        response.status = 200;
+        response.message = existing.length ? "Invoice settings updated successfully." : "Invoice settings saved successfully.";
+        response.body = result;
+    } catch (error) {
+        console.log(`Something went wrong: controller: saveInvoiceSetting: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+module.exports.listInvoiceSetting = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { company_id } = req.query;
+        if (!company_id) return errorHandler(res, 400, "Company is required.");
+        const result = await SettingService.getInvoiceSetting({ company_id: Number(company_id) });
+        response.status = 200;
+        response.message = "Invoice settings fetched successfully.";
+        response.body = result;
+    } catch (error) {
+        console.log(`Something went wrong: controller: listInvoiceSetting: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};

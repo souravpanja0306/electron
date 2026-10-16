@@ -7,12 +7,12 @@ const useInvoiceStore = create((set) => ({
     invoiceLoading: false,
     invoiceNo: "",
 
-    generateInvoiceNo: async ({ token, types }) => {
+    generateInvoiceNo: async ({ token, types, company_id = "" }) => {
         try {
             set({ invoiceLoading: true });
             let result = await api({
                 method: 'get',
-                url: `/invoice/generate-invoice-no?types=${types}`,
+                url: `/invoice/generate-invoice-no?types=${types}${company_id ? `&company_id=${company_id}` : ""}`,
             });
             if (result.data.status === 200) {
                 set({ invoiceNo: result.data.body });

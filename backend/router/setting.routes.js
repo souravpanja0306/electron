@@ -29,4 +29,16 @@ router.get(
     SettingController.listChallanSetting
 );
 
+router.post(
+    "/invoice-setting",
+    middleware.isAuthenticated,
+    SettingController.saveInvoiceSetting
+);
+
+router.get(
+    "/invoice-setting",
+    middleware.isAuthenticated,
+    SettingController.listInvoiceSetting
+);
+
 module.exports = router;

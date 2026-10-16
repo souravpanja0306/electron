@@ -12,6 +12,7 @@ const AuthService = require("../service/auth.service")
 const InvoiceService = require("../service/invoice.service");
 const CompanyService = require("../service/company.service");
 const ChallanService = require("../service/challan.service");
+const SettingService = require("../service/setting.service");
 const { generateInvoiceHtml } = require("../helper/generateInvoiceHtml");
 
 const errorHandler = (res, status, message) => {
@@ -22,7 +23,7 @@ module.exports.generateInvoiceNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId, t_mobile, t_username, t_name } = req.body;
-        const { types } = req.query;
+        const { types, company_id } = req.query;
         if (!types) {
             response.status = 400;
             response.message = "Type required";
@@ -30,9 +31,13 @@ module.exports.generateInvoiceNo = async (req, res) => {
             return res.status(response.status).json(response);
         };
         let type = "";
-        if (types == "proforma") type = "PRO";
-        if (types == "invoice") type = "INV";
-        const date = moment().format("DDMMYYYY");
+        if (types == "proforma") type = "PRO-";
+        if (types == "invoice") type = "INV-";
+        const settings = company_id ? await SettingService.getInvoiceSetting({ company_id: Number(company_id) }) : [];
+        const setting = settings[0];
+        const prefix = types === "invoice" && setting ? setting.invoice_prefix : type;
+        const suffix = types === "invoice" && setting ? setting.invoice_suffix : "";
+        const startNumber = types === "invoice" && setting ? Math.max(1, Number(setting.invoice_start_number) || 1) : 1;
 
         const existsCheck = async ({
             type = ""
@@ -40,9 +45,10 @@ module.exports.generateInvoiceNo = async (req, res) => {
             let search_key = {};
             if (t_userId) search_key["created_by"] = t_userId;
 
+            if (company_id) search_key["company_id"] = Number(company_id);
             let count = await InvoiceService.findInvoices({ ...search_key, count: true });
             while (true) {
-                const invoiceNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
+                const invoiceNo = `${prefix}${(startNumber + count).toString().padStart(6, "0")}${suffix}`;
                 search_key["invoice_no"] = invoiceNo;
 
                 const exists = await InvoiceService.findInvoices(search_key);
@@ -124,6 +130,7 @@ module.exports.createInvoice = async (req, res) => {
             };
         };
 
+        const invoiceSettings = await SettingService.getInvoiceSetting({ company_id: Number(company_id) });
         let finalData = {
             company_id: company_id,
             type: type,
@@ -143,6 +150,7 @@ module.exports.createInvoice = async (req, res) => {
             total_sgst: totalSGST,
             total_igst: totalIGST,
             placeOfSupply: placeOfSupply,
+            terms_and_conditions: invoiceSettings[0]?.terms_and_conditions || "",
             data: JSON.stringify(data)
         };
         let result = challan_id

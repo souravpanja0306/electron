@@ -351,7 +351,7 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
         <div class="bank-col">
            <td style="width:50%; background:#f5f5f5;">
                 <span class="lbl">Remarks / Note</span>
-                    Goods are transported at owner's risk. Claims for damage or shortage must be reported at the time of delivery. This is not a tax invoice. Subject to City jurisdiction only.
+                    ${invoice.terms_and_conditions || "Goods are transported at owner's risk. Claims for damage or shortage must be reported at the time of delivery. This is not a tax invoice. Subject to City jurisdiction only."}
             </td>
         </div>
         <div class="sig-col">

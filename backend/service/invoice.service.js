@@ -18,6 +18,7 @@ module.exports.findInvoices = async ({
     id = "",
     created_by = "",
     invoice_no = "",
+    company_id = "",
     challan_id = "",
     startDate = "",
     endDate = "",
@@ -43,6 +44,11 @@ module.exports.findInvoices = async ({
         if (invoice_no) {
             query += " AND invoice_no = ?";
             params.push(invoice_no);
+        };
+
+        if (company_id) {
+            query += " AND company_id = ?";
+            params.push(company_id);
         };
 
         if (challan_id) {

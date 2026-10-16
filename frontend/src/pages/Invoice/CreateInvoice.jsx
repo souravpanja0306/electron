@@ -4,6 +4,7 @@ import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
+import Modal from '../../components/CustomModal';
 import SearchableSelect from '../../components/SearchableSelect';
 import { inrToWords } from '../../utils/InWordConverter';
 import moment from 'moment';
@@ -37,7 +38,7 @@ const CreateInvoice = () => {
   const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
   const { invoiceData, createInvoice, generateInvoiceNo, invoiceNo, printInvoice, invoiceLoading } = useInvoiceStore();
   const { companyData, getAllCompany } = useCompanyStore();
-  const { parties, getAllParty, partyLoading } = usePartyStore();
+  const { parties, getAllParty, createParty, partyLoading } = usePartyStore();
   const { gstData, getAllGst, gstLoading } = useGstStore();
   const { getAllChallan } = useChallanStore();
   const { token } = useAuthStore();
@@ -61,6 +62,10 @@ const CreateInvoice = () => {
   const [alart, setAlart] = useState({ show: false });
   const [isSameState, setIsSameState] = useState(true);
   const [party, setParty] = useState([]);
+  const [partyModal, setPartyModal] = useState(false);
+  const [partyModalFor, setPartyModalFor] = useState("billTo");
+  const [partyModalLoading, setPartyModalLoading] = useState(false);
+  const [partyModalError, setPartyModalError] = useState("");
   const [invoiceDetails, setInvoiceDetails] = useState({
     type: "tax",
     invoiceNo: "",
@@ -83,8 +88,37 @@ const CreateInvoice = () => {
     if (result.body.length) setParty(result.body);
   };
 
-  const generateInvoiceNumber = async () => {
-    let result = await generateInvoiceNo({ token, types: "invoice" });
+  const openPartyModal = (field) => {
+    setPartyModalFor(field);
+    setPartyModalError("");
+    setPartyModal(true);
+  };
+
+  const handleCreateParty = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+    setPartyModalLoading(true);
+    setPartyModalError("");
+    try {
+      const result = await createParty({ data, token });
+      if (Number(result.status) !== 200) throw new Error(result.message || "Unable to create party.");
+      const refreshedParties = await getAllParty(token);
+      const nextParties = refreshedParties.body || [];
+      setParty(nextParties);
+      const newPartyId = result.body?.lastInsertRowid;
+      if (newPartyId) setInvoiceDetails((current) => ({ ...current, [partyModalFor]: String(newPartyId) }));
+      setPartyModal(false);
+      toast.success("Party created successfully.");
+    } catch (error) {
+      setPartyModalError(error.response?.data?.message || error.message || "Unable to create party.");
+    } finally {
+      setPartyModalLoading(false);
+    }
+  };
+
+  const generateInvoiceNumber = async (company_id = "") => {
+    let result = await generateInvoiceNo({ token, types: "invoice", company_id });
     if (result.status === 200) {
       setInvoiceDetails(prev => ({
         ...prev,
@@ -99,6 +133,10 @@ const CreateInvoice = () => {
     getAllCompany(token);
     getAllGst(token)
   }, []);
+
+  useEffect(() => {
+    if (invoiceDetails.company_id) generateInvoiceNumber(invoiceDetails.company_id);
+  }, [invoiceDetails.company_id]);
 
   useEffect(() => {
     const loadChallanDraft = async () => {
@@ -351,12 +389,7 @@ const CreateInvoice = () => {
                         placeholder="Select Party"
                         required
                       />
-                      <Link
-                        to="/add-party?back=true"
-                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
-                      >
-                        + New
-                      </Link>
+                      <button type="button" onClick={() => openPartyModal("billTo")} className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"><AiOutlinePlusSquare /></button>
                     </div>
                   </div>
 
@@ -380,12 +413,7 @@ const CreateInvoice = () => {
                         placeholder="Select Party"
                         required
                       />
-                      <Link
-                        to="/add-party?back=true"
-                        className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
-                      >
-                        + New
-                      </Link>
+                      <button type="button" onClick={() => openPartyModal("shipTo")} className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"><AiOutlinePlusSquare /></button>
                     </div>
                   </div>
                 </div>
@@ -738,6 +766,22 @@ const CreateInvoice = () => {
           </div>
         </form>
       </div>
+
+      <Modal isOpen={partyModal} onClose={() => setPartyModal(false)} title="Create New Party">
+        <form onSubmit={handleCreateParty}>
+          <MainArea>
+            <div className="grid w-full gap-2 p-1">
+              {partyModalError && <div className="text-xs text-red-500">{partyModalError}</div>}
+              <div className="flex items-center justify-between gap-1"><label className="w-[20%] text-xs">Company Name</label><input className="h-8 w-[80%] rounded border border-slate-400 p-1 text-slate-900 dark:border-slate-600" name="company_name" placeholder="Company Name" required /></div>
+              <div className="flex items-center justify-between gap-1"><label className="w-[20%] text-xs">Owner Name</label><input className="h-8 w-[80%] rounded border border-slate-400 p-1 text-slate-900 dark:border-slate-600" name="owner" placeholder="Owner Name" /></div>
+              <div className="flex items-center justify-between gap-1"><label className="w-[20%] text-xs">Mobile Number</label><input className="h-8 w-[80%] rounded border border-slate-400 p-1 text-slate-900 dark:border-slate-600" name="mobile" placeholder="Mobile Number" /></div>
+              <div className="flex items-center justify-between gap-1"><label className="w-[20%] text-xs">Email Address</label><input className="h-8 w-[80%] rounded border border-slate-400 p-1 text-slate-900 dark:border-slate-600" type="email" name="email" placeholder="Email Address" /></div>
+              <input type="hidden" name="country" defaultValue="INDIA" />
+              <div className="flex justify-end"><CustomButton type="submit" title="Save" color="blue" disabled={partyModalLoading}><AiOutlineFileAdd /></CustomButton></div>
+            </div>
+          </MainArea>
+        </form>
+      </Modal>
     </>
   )
 }

@@ -42,14 +42,21 @@ if (isNewDatabase) {
     db.exec(require("../database/schema/user.schema"));
     db.exec(require("../database/schema/party.schema"));
     db.exec(require("../database/schema/invoice.schema"));
+    db.exec(require("../database/schema/invoiceSetting.schema"));
     db.exec(require("../database/schema/settingChallanSchema"));
     db.exec(require("../database/schema/cha.schema"));
 };
+
+// This is safe for both fresh and existing installations.
+db.exec(require("../database/schema/invoiceSetting.schema"));
 
 // Keep existing SQLite installations compatible with schema additions.
 const invoiceColumns = db.prepare("PRAGMA table_info(invoice)").all();
 if (invoiceColumns.length && !invoiceColumns.some(column => column.name === "challan_id")) {
     db.exec("ALTER TABLE invoice ADD COLUMN challan_id INTEGER");
+};
+if (invoiceColumns.length && !invoiceColumns.some(column => column.name === "terms_and_conditions")) {
+    db.exec("ALTER TABLE invoice ADD COLUMN terms_and_conditions TEXT");
 };
 db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_invoice_active_challan ON invoice(challan_id) WHERE challan_id IS NOT NULL AND is_deleted = 0");
 

@@ -74,3 +74,24 @@ module.exports.updateChallanSetting = async ({
         throw error;
     };
 };
+
+module.exports.createInvoiceSetting = async (data) => {
+    const keys = Object.keys(data);
+    return db.prepare(`INSERT INTO invoice_setting (${keys.join(",")}) VALUES (${keys.map(key => `@${key}`).join(",")})`).run(data);
+};
+
+module.exports.getInvoiceSetting = async ({ company_id = "" }) => {
+    let query = "SELECT * FROM invoice_setting";
+    const params = [];
+    if (company_id) {
+        query += " WHERE company_id = ?";
+        params.push(company_id);
+    };
+    return db.prepare(query).all(...params);
+};
+
+module.exports.updateInvoiceSetting = async ({ id, data }) => {
+    const keys = Object.keys(data);
+    const setClause = keys.map(key => `${key} = @${key}`).join(", ");
+    return db.prepare(`UPDATE invoice_setting SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = @id`).run({ ...data, id });
+};
