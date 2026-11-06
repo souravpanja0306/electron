@@ -8,7 +8,7 @@ import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import CustomButton from '../../components/CustomButton';
 import InvoiceForm from '../../components/InvoiceForm';
-import { PartyQuickAddModal } from '../../components/FormKit';
+import { PartyQuickAddModal, ChaQuickAddModal, HsnQuickAddModal } from '../../components/FormKit';
 
 // Icon...
 import {
@@ -31,6 +31,9 @@ import { newInvoiceRow, toInvoicePayloadItems } from '../../utils/invoiceTotals'
 import { errorMessage } from '../../utils/format';
 import useShortcuts from "../../hooks/useShortcuts";
 import usePartyQuickAdd from "../../hooks/usePartyQuickAdd";
+import { useChaHook } from "../../hooks/useChaHook";
+import useFormFieldSettings from "../../hooks/useFormFieldSettings";
+import useHsnQuickAdd from "../../hooks/useHsnQuickAdd";
 
 // The list API returns "--" for empty challan fields (for display).
 const clean = (value) => (value === "--" || value === null || value === undefined ? "" : value);
@@ -47,6 +50,8 @@ const emptyDetails = (company_id = "") => ({
   placeOfSupply: "",
   lorry_no: "",
   lr_no: "",
+  container: "",
+  cha: "",
   challan_id: "",
 });
 
@@ -79,9 +84,18 @@ const CreateInvoice = () => {
     },
   });
 
+  const [chaModal, setChaModal] = useState(false);
+  const { handleChaSubmit, chaData, getCha, loading: chaLoading, error: chaError } = useChaHook({
+    onSuccess: () => setChaModal(false),
+  });
+
+  const { showCha } = useFormFieldSettings();
+  const hsnAdd = useHsnQuickAdd({ token });
+
   const partyList = parties?.body || [];
 
   useEffect(() => {
+    getCha();
     getAllParty(token);
     getAllCompany(token);
     getAllGst(token);
@@ -142,6 +156,8 @@ const CreateInvoice = () => {
           ewayBill: clean(challan.way_bill_no),
           lorry_no: clean(challan.truck_no),
           lr_no: clean(challan.cn_no),
+          container: clean(challan.container),
+          cha: challan.cha?.id || "",
           placeOfSupply: clean(challan.to_loc),
         }));
         setSameShip(true);
@@ -193,6 +209,8 @@ const CreateInvoice = () => {
       ...details,
       shipTo: sameShip ? details.billTo : (details.shipTo || details.billTo),
       challan_id: details.challan_id || undefined,
+      // CHA switched off in settings: don't save one.
+      ...(showCha ? {} : { cha: "" }),
       data: toInvoicePayloadItems(filled),
     };
 
@@ -225,7 +243,7 @@ const CreateInvoice = () => {
   useShortcuts({
     s: (e) => handleSubmitForm(e),
     i: () => navigate("/view-invoice"),
-  }, !partyAdd.isOpen);
+  }, !partyAdd.isOpen && !chaModal && !hsnAdd.isOpen);
 
   return (
     <>
@@ -261,6 +279,10 @@ const CreateInvoice = () => {
           gstData={gstData}
           hsnData={hsnData}
           onAddParty={partyAdd.open}
+        onAddHsn={hsnAdd.open}
+          chaData={chaData}
+          onAddCha={() => setChaModal(true)}
+          showCha={showCha}
           notice={sourceChallanNo ? (
             <div className="rounded border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/40 px-3 py-2 text-xs text-blue-800 dark:text-blue-200">
               Creating an invoice from challan <strong>{sourceChallanNo}</strong>. Party, transport details and items were copied from it. Add the rates and GST before saving.
@@ -270,6 +292,8 @@ const CreateInvoice = () => {
       </div>
 
       <PartyQuickAddModal {...partyAdd.modalProps} />
+      <ChaQuickAddModal isOpen={chaModal} onClose={() => setChaModal(false)} onSubmit={handleChaSubmit} loading={chaLoading} error={chaError} />
+    <HsnQuickAddModal {...hsnAdd.modalProps} />
     </>
   );
 };

@@ -25,6 +25,7 @@ import useChallanStore from "../../store/ChallanStore";
 import { usePartyHook } from '../../hooks/usePartyHook';
 import { useChaHook } from '../../hooks/useChaHook';
 import useShortcuts from "../../hooks/useShortcuts";
+import useFormFieldSettings from "../../hooks/useFormFieldSettings";
 
 const newRow = () => ({
   id: Math.floor(Math.random() * 10000000000),
@@ -83,6 +84,8 @@ const CreateChallan = () => {
     total_amount: 0,
     data: data,
   });
+
+  const { showCha } = useFormFieldSettings();
 
   const selectCompany = async (companyId) => {
     setForm(prev => ({ ...prev, company_id: companyId }));
@@ -143,6 +146,8 @@ const CreateChallan = () => {
         toast.warning("Consignor and Consignee are the same party.");
       };
       let payload = { ...form, data: data };
+      // CHA switched off in settings: don't save one.
+      if (!showCha) payload = { ...payload, cha: "" };
       let result = await createChallan(payload, token);
       if (result.status === 200) {
         toast.success(result.message);
@@ -193,6 +198,7 @@ const CreateChallan = () => {
           chaData={chaData}
           onAddParty={() => isPartyModal(true)}
           onAddCha={() => isChaModal(true)}
+          showCha={showCha}
         />
       </div>
 

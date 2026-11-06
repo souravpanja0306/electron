@@ -101,6 +101,9 @@ module.exports.generateChallanPdf = async (req, res) => {
         let challanSetting = await SettingService.getChallanSetting({ company_id: challan.company_id });
         let company = companies.length ? companies[0] : {};
 
+        // Same CHA switch as the forms (Invoice / Challan settings).
+        challan.show_cha = (await SettingService.getUserShowCha({ user_id: challan.created_by })) ? 1 : 0;
+
         const html = generateChallanHtml({ challan, company, terms: challanSetting.length ? challanSetting[0].terms : "" });
 
         response.status = 200;

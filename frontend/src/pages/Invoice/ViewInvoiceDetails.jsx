@@ -17,7 +17,7 @@ import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import CustomButton from '../../components/CustomButton';
 import InvoiceForm from '../../components/InvoiceForm';
-import { PartyQuickAddModal } from '../../components/FormKit';
+import { PartyQuickAddModal, ChaQuickAddModal, HsnQuickAddModal } from '../../components/FormKit';
 
 // Stores...
 import useInvoiceStore from '../../store/InvoiceStore';
@@ -32,6 +32,9 @@ import { newInvoiceRow, toInvoicePayloadItems } from '../../utils/invoiceTotals'
 import { errorMessage, openPrintWindow } from '../../utils/format';
 import useShortcuts from "../../hooks/useShortcuts";
 import usePartyQuickAdd from "../../hooks/usePartyQuickAdd";
+import { useChaHook } from "../../hooks/useChaHook";
+import useFormFieldSettings from "../../hooks/useFormFieldSettings";
+import useHsnQuickAdd from "../../hooks/useHsnQuickAdd";
 
 const ViewInvoiceDetails = () => {
     const navigate = useNavigate();
@@ -57,7 +60,9 @@ const ViewInvoiceDetails = () => {
         shipTo: "",
         placeOfSupply: "",
         lorry_no: "",
-        lr_no: ""
+        lr_no: "",
+        container: "",
+        cha: "",
     });
     const [items, setItems] = useState([newInvoiceRow()]);
     const [sameShip, setSameShip] = useState(true);
@@ -71,6 +76,14 @@ const ViewInvoiceDetails = () => {
             setDetails(prev => ({ ...prev, [field]: id }));
         },
     });
+
+    const [chaModal, setChaModal] = useState(false);
+    const { handleChaSubmit, chaData, getCha, loading: chaLoading, error: chaError } = useChaHook({
+        onSuccess: () => setChaModal(false),
+    });
+
+    const { showCha } = useFormFieldSettings();
+    const hsnAdd = useHsnQuickAdd({ token });
 
     const partyList = parties?.body || [];
 
@@ -91,7 +104,9 @@ const ViewInvoiceDetails = () => {
                     shipTo: item.ship_to || billTo,
                     placeOfSupply: item.placeOfSupply || "",
                     lorry_no: item.lorry_no || "",
-                    lr_no: item.lr_no || ""
+                    lr_no: item.lr_no || "",
+                    container: item.container || "",
+                    cha: item.cha?.id || "",
                 });
                 setSameShip(!item.ship_to || String(item.ship_to) === String(billTo));
                 setFromChallan(Boolean(item.challan_id));
@@ -112,6 +127,7 @@ const ViewInvoiceDetails = () => {
     };
 
     useEffect(() => {
+        getCha();
         getAllParty(token);
         getAllCompany(token);
         getAllGst(token);
@@ -157,6 +173,8 @@ const ViewInvoiceDetails = () => {
             placeOfSupply: details.placeOfSupply,
             lorry_no: details.lorry_no,
             lr_no: details.lr_no,
+            container: details.container,
+            cha: details.cha,
             data: toInvoicePayloadItems(filled),
         };
 
@@ -216,7 +234,7 @@ const ViewInvoiceDetails = () => {
         p: () => handlePrint(),
         d: () => handleDelete(),
         i: () => navigate("/view-invoice"),
-    }, !partyAdd.isOpen);
+    }, !partyAdd.isOpen && !chaModal && !hsnAdd.isOpen);
 
     return (
         <>
@@ -262,6 +280,10 @@ const ViewInvoiceDetails = () => {
                     gstData={gstData}
                     hsnData={hsnData}
                     onAddParty={partyAdd.open}
+          onAddHsn={hsnAdd.open}
+                    chaData={chaData}
+                    onAddCha={() => setChaModal(true)}
+                    showCha={showCha}
                     notice={fromChallan ? (
                         <div className="rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
                             This invoice was created from a challan. Changes here don't change the challan.
@@ -271,6 +293,8 @@ const ViewInvoiceDetails = () => {
             </div>
 
             <PartyQuickAddModal {...partyAdd.modalProps} />
+            <ChaQuickAddModal isOpen={chaModal} onClose={() => setChaModal(false)} onSubmit={handleChaSubmit} loading={chaLoading} error={chaError} />
+      <HsnQuickAddModal {...hsnAdd.modalProps} />
         </>
     );
 };

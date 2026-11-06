@@ -22,6 +22,9 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
+// Fields are shown unless explicitly switched off (older clients don't send the flag).
+const toShowFlag = (value) => (value === false || value === 0 || value === "0" || value === "false" ? 0 : 1);
+
 module.exports.addChallanSetting = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
@@ -142,6 +145,37 @@ module.exports.saveTheme = async (req, res) => {
         response.body = { theme };
     } catch (error) {
         console.log(`Something went wrong: controller: saveTheme: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+// Field visibility shared by Create Invoice and Create Challan (currently: CHA).
+module.exports.getFieldSettings = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const showCha = await SettingService.getUserShowCha({ user_id: req.body.t_userId });
+        response.status = 200;
+        response.message = "Field settings fetched successfully.";
+        response.body = { show_cha: showCha ? 1 : 0 };
+    } catch (error) {
+        console.log(`Something went wrong: controller: getFieldSettings: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+module.exports.saveFieldSettings = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { t_userId, show_cha } = req.body;
+        const value = toShowFlag(show_cha);
+        await SettingService.saveUserShowCha({ user_id: t_userId, show_cha: value });
+        response.status = 200;
+        response.message = "Field settings saved successfully.";
+        response.body = { show_cha: value };
+    } catch (error) {
+        console.log(`Something went wrong: controller: saveFieldSettings: ${error}`);
         return errorHandler(res, 500, "Internal Server Error");
     };
     return res.status(response.status).json(response);

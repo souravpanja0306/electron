@@ -14,6 +14,8 @@ module.exports = `
       transporter TEXT,
       lorry_no TEXT,
       lr_no TEXT,
+      container TEXT,
+      cha INTEGER,
       placeOfSupply TEXT,
       terms_and_conditions TEXT,
       data TEXT,

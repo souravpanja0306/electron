@@ -11,6 +11,7 @@ import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import SearchableSelect from '../../components/SearchableSelect';
 import { inputCls, labelCls, Required } from '../../components/FormKit';
+import ChaVisibilitySetting from '../../components/ChaVisibilitySetting';
 
 // Stores...
 import useCompanyStore from '../../store/CompanyStore';
@@ -152,6 +153,8 @@ const InvoiceSettings = () => {
                             className={`${inputCls} h-auto py-1 resize-y`}
                         />
                     </SettingCard>
+
+                    <ChaVisibilitySetting />
 
                     <div className="rounded border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
                         More settings coming soon…

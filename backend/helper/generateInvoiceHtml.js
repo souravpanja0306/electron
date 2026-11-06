@@ -292,7 +292,9 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
                 <span class="lbl">Dispatch Details</span>
                 Place of Supply: <strong>${invoice.placeOfSupply || '--'}</strong><br/>
                 Transporter: ${invoice.transporter || '--'}<br/>
-                Vehicle No: ${invoice.lorry_no || '--'}
+                Truck No: ${invoice.lorry_no || '--'}<br/>
+                Container No: ${invoice.container || '--'}
+                ${invoice.show_cha !== 0 && invoice.cha ? `<br/>CHA: ${invoice.cha}` : ''}
             </td>
         </tr>
     </table>

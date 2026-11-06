@@ -36,7 +36,7 @@ const hsnOptions = (hsnData, current) => {
  * Shared invoice form (Create and Edit). Purely presentational: the page owns the state.
  *
  * `details` keys: company_id, billTo, shipTo, invoiceNo, date, placeOfSupply,
- *                 ewayBill, transporter, lorry_no, lr_no
+ *                 ewayBill, transporter, lorry_no (truck no), lr_no, container, cha
  * `onItemChange(id, patch)` merges `patch` into the row with that id.
  */
 const InvoiceForm = ({
@@ -54,6 +54,10 @@ const InvoiceForm = ({
   gstData,
   hsnData,
   onAddParty,
+  onAddHsn,
+  chaData,
+  onAddCha,
+  showCha = true,
   notice,
 }) => {
   const partyList = parties || [];
@@ -225,31 +229,19 @@ const InvoiceForm = ({
                         />
                       </td>
                       <td className="px-0.5">
-                        {hasHsnMaster ? (
-                          <select
-                            name="hsn"
-                            className={cellCls}
-                            value={item.hsn || ""}
-                            onChange={(e) => handleHsnChange(item, e.target.value)}
-                            onKeyDown={(e) => handleEnter({ event: e, name: "quantity", index })}
-                            aria-label={`HSN, row ${index + 1}`}
-                          >
-                            <option value="">Select</option>
-                            {hsnOptions(hsnData, item.hsn).map(o => (
-                              <option key={o.value} value={o.value}>{o.label}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            name="hsn"
-                            className={cellCls}
-                            value={item.hsn || ""}
-                            onChange={(e) => onItemChange(item.id, { hsn: e.target.value })}
-                            onKeyDown={(e) => handleEnter({ event: e, name: "quantity", index })}
-                            placeholder="HSN"
-                            aria-label={`HSN, row ${index + 1}`}
-                          />
-                        )}
+                        <select
+                          name="hsn"
+                          className={cellCls}
+                          value={item.hsn || ""}
+                          onChange={(e) => handleHsnChange(item, e.target.value)}
+                          onKeyDown={(e) => handleEnter({ event: e, name: "quantity", index })}
+                          aria-label={`HSN/SAC, row ${index + 1}`}
+                        >
+                          <option value="">{hasHsnMaster ? "Select" : "No codes"}</option>
+                          {hsnOptions(hsnData, item.hsn).map(o => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
                       </td>
                       <td className="px-0.5">
                         <input
@@ -321,9 +313,12 @@ const InvoiceForm = ({
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <AddRowButton onClick={onAddRow} />
+            {onAddHsn && <AddRowButton onClick={onAddHsn} label="Add HSN/SAC" />}
             {!hasHsnMaster && (
               <span className="text-xs text-slate-500 dark:text-slate-400">
-                No HSN/SAC codes yet — <Link to="/create-hsn-sac?back=true" className="text-blue-600 dark:text-blue-400 hover:underline">add them</Link> to pick from a list.
+                {onAddHsn
+                  ? "No HSN/SAC codes in the master yet — use Add HSN/SAC to add one."
+                  : <>No HSN/SAC codes yet — <Link to="/create-hsn-sac?back=true" className="text-blue-600 dark:text-blue-400 hover:underline">add them</Link> to pick from a list.</>}
               </span>
             )}
             {!(gstData || []).length && (
@@ -363,7 +358,7 @@ const InvoiceForm = ({
                   placeholder="Transporter"
                 />
               </Field>
-              <Field label="Lorry No">
+              <Field label="Truck No">
                 <input
                   className={`${inputCls} uppercase`}
                   type="text"
@@ -371,7 +366,7 @@ const InvoiceForm = ({
                   value={details.lorry_no}
                   onChange={onDetailChange}
                   onKeyDown={(e) => handleEnter({ event: e, name: "lr_no" })}
-                  placeholder="Lorry No"
+                  placeholder="Truck No"
                 />
               </Field>
               <Field label="LR No">
@@ -381,9 +376,31 @@ const InvoiceForm = ({
                   name="lr_no"
                   value={details.lr_no}
                   onChange={onDetailChange}
+                  onKeyDown={(e) => handleEnter({ event: e, name: "container" })}
                   placeholder="LR No"
                 />
               </Field>
+              <Field label="Container">
+                <input
+                  className={`${inputCls} uppercase`}
+                  type="text"
+                  name="container"
+                  value={details.container || ""}
+                  onChange={onDetailChange}
+                  placeholder="Container No"
+                />
+              </Field>
+              {showCha && <Field label="CHA">
+                <SearchableSelect
+                  className="flex-1 min-w-0"
+                  name="cha"
+                  value={details.cha || ""}
+                  onChange={onDetailChange}
+                  options={(chaData || []).map(item => ({ id: item.id, label: item.name }))}
+                  placeholder="Select CHA"
+                />
+                {onAddCha && <AddButton onClick={onAddCha} title="Add new CHA" />}
+              </Field>}
             </div>
           </MainArea>
         </div>

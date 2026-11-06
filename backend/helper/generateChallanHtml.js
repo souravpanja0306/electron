@@ -366,7 +366,7 @@ module.exports.generateChallanHtml = ({ challan, company, terms }) => {
                     <span class="lbl">Additional Details</span>
                     Container No: ${challan.container || '--'}<br />
                     Booking No: ${challan.booking_number || '--'}<br />
-                    CHA: ${challan.cha || '--'}<br />
+                    ${challan.show_cha !== 0 ? `CHA: ${challan.cha || '--'}<br />` : ''}
                     ${challan.note || '--'}<br />
                 </td>
             </tr>

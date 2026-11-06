@@ -42,6 +42,18 @@ router.get(
 );
 
 router.get(
+    "/field-settings",
+    middleware.isAuthenticated,
+    SettingController.getFieldSettings
+);
+
+router.put(
+    "/field-settings",
+    middleware.isAuthenticated,
+    SettingController.saveFieldSettings
+);
+
+router.get(
     "/theme",
     middleware.isAuthenticated,
     SettingController.getTheme

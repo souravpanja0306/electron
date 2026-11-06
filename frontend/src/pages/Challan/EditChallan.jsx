@@ -25,6 +25,7 @@ import useChallanStore from "../../store/ChallanStore";
 import { usePartyHook } from '../../hooks/usePartyHook';
 import { useChaHook } from '../../hooks/useChaHook';
 import useShortcuts from "../../hooks/useShortcuts";
+import useFormFieldSettings from "../../hooks/useFormFieldSettings";
 
 const newRow = () => ({
     id: Math.floor(Math.random() * 10000000000),
@@ -80,6 +81,8 @@ const EditChallan = () => {
         total_amount: 0,
         data: [],
     });
+
+    const { showCha } = useFormFieldSettings();
 
     const fetchChallanData = async () => {
         try {
@@ -240,6 +243,7 @@ const EditChallan = () => {
                     chaData={chaData}
                     onAddParty={() => isPartyModal(true)}
                     onAddCha={() => isChaModal(true)}
+                    showCha={showCha}
                 />
             </div>
 

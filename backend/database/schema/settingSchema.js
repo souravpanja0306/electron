@@ -4,6 +4,7 @@ module.exports = `
     user_id INTEGER NOT NULL UNIQUE,
 
     theme TEXT NOT NULL DEFAULT 'light' CHECK (theme IN ('light', 'dark')),
+    show_cha INTEGER DEFAULT 1,
 
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP

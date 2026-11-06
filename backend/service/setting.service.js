@@ -87,6 +87,19 @@ module.exports.saveUserTheme = async ({ user_id, theme }) => {
     `).run({ user_id, theme });
 };
 
+// CHA field is shown unless the user switched it off.
+module.exports.getUserShowCha = async ({ user_id }) => {
+    const row = db.prepare("SELECT show_cha FROM user_setting WHERE user_id = ?").get(user_id);
+    return !row || row.show_cha !== 0;
+};
+
+module.exports.saveUserShowCha = async ({ user_id, show_cha }) => {
+    return db.prepare(`
+        INSERT INTO user_setting (user_id, show_cha) VALUES (@user_id, @show_cha)
+        ON CONFLICT(user_id) DO UPDATE SET show_cha = @show_cha, updated_at = CURRENT_TIMESTAMP
+    `).run({ user_id, show_cha });
+};
+
 module.exports.createInvoiceSetting = async (data) => {
     const keys = Object.keys(data);
     return db.prepare(`INSERT INTO invoice_setting (${keys.join(",")}) VALUES (${keys.map(key => `@${key}`).join(",")})`).run(data);

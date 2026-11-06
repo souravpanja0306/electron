@@ -34,6 +34,7 @@ const ChallanForm = ({
   chaData,
   onAddParty,
   onAddCha,
+  showCha = true,
 }) => {
   const partyOptions = parties?.body?.map(item => ({ id: item.id, label: item.company_name })) || [];
   const totalPackages = data.reduce((sum, row) => sum + (Number(row.packages) || 0), 0);
@@ -316,11 +317,11 @@ const ChallanForm = ({
                   name="container"
                   value={form.container}
                   onChange={onChange}
-                  onKeyDown={(e) => handleEnter({ event: e, name: "cha" })}
+                  onKeyDown={(e) => handleEnter({ event: e, name: showCha ? "cha" : "booking_number" })}
                   placeholder="Container"
                 />
               </Field>
-              <Field label="CHA">
+              {showCha && <Field label="CHA">
                 <SearchableSelect
                   className="flex-1 min-w-0"
                   name="cha"
@@ -330,7 +331,7 @@ const ChallanForm = ({
                   placeholder="Select CHA"
                 />
                 {onAddCha && <AddButton onClick={onAddCha} title="Add new CHA" />}
-              </Field>
+              </Field>}
               <Field label="Booking Number">
                 <input
                   className={inputCls}

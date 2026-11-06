@@ -59,11 +59,23 @@ if (invoiceColumns.length && !invoiceColumns.some(column => column.name === "cha
 if (invoiceColumns.length && !invoiceColumns.some(column => column.name === "terms_and_conditions")) {
     db.exec("ALTER TABLE invoice ADD COLUMN terms_and_conditions TEXT");
 };
+if (invoiceColumns.length && !invoiceColumns.some(column => column.name === "container")) {
+    db.exec("ALTER TABLE invoice ADD COLUMN container TEXT");
+};
+if (invoiceColumns.length && !invoiceColumns.some(column => column.name === "cha")) {
+    db.exec("ALTER TABLE invoice ADD COLUMN cha INTEGER");
+};
 db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_invoice_active_challan ON invoice(challan_id) WHERE challan_id IS NOT NULL AND is_deleted = 0");
 
 const challanColumns = db.prepare("PRAGMA table_info(challan)").all();
 if (challanColumns.length && !challanColumns.some(column => column.name === "invoiced")) {
     db.exec("ALTER TABLE challan ADD COLUMN invoiced INTEGER DEFAULT 0");
+};
+
+// "Show CHA field" switch (Invoice / Challan settings), one value per user.
+const userSettingColumns = db.prepare("PRAGMA table_info(user_setting)").all();
+if (userSettingColumns.length && !userSettingColumns.some(column => column.name === "show_cha")) {
+    db.exec("ALTER TABLE user_setting ADD COLUMN show_cha INTEGER DEFAULT 1");
 };
 
 module.exports = { connectMongo, db, dbPath };

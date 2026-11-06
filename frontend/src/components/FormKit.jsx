@@ -6,6 +6,7 @@ import {
 } from "react-icons/ai";
 
 import CustomButton from './CustomButton';
+import CustomToggle from './CustomToggle';
 import Modal from './CustomModal';
 import { handleEnter } from '../service/MainService';
 
@@ -49,6 +50,28 @@ export const StackedField = ({ label, required, children }) => (
   <div className="flex flex-col gap-1 w-full min-w-0">
     <label className={labelCls}>{label}{required && <Required />}</label>
     {children}
+  </div>
+);
+
+/**
+ * On/off setting card: heading + what it does on the left, toggle on the right
+ * (left side = off, right side = on). Same look on every settings page.
+ */
+export const ToggleSetting = ({ title, description, value, onChange, disabled, offLabel = "Hide", onLabel = "Show" }) => (
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
+    <div>
+      <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{title}</p>
+      {description && <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>}
+    </div>
+    <div className={disabled ? "opacity-50 pointer-events-none" : ""} aria-disabled={disabled || undefined}>
+      <CustomToggle
+        value={Boolean(value)}
+        onChange={onChange}
+        option={[offLabel, onLabel]}
+        activeColor="blue"
+        inactiveColor="slate"
+      />
+    </div>
   </div>
 );
 
@@ -133,6 +156,37 @@ export const ChaQuickAddModal = ({ isOpen, onClose, onSubmit, loading, error }) 
             onKeyDown={(e) => handleEnter({ event: e, name: "cha_submit" })} placeholder="Address (optional)" />
         </Field>
         <ModalActions onCancel={onClose} submitName="cha_submit" loading={loading} />
+      </div>
+    </form>
+  </Modal>
+);
+
+/** Quick-add dialog for an HSN/SAC code (saved to the HSN/SAC master). */
+export const HsnQuickAddModal = ({ isOpen, onClose, onSubmit, loading, error }) => (
+  <Modal isOpen={isOpen} onClose={onClose} title="Add HSN / SAC">
+    <form onSubmit={onSubmit} autoComplete="off">
+      <div className="grid gap-3 w-full p-1">
+        {error && <div className="text-red-500 text-xs">{error}</div>}
+        <Field label="Type" required>
+          <select className={inputCls} name="hsn_type" defaultValue="HSN"
+            onKeyDown={(e) => handleEnter({ event: e, name: "hsn_code" })}>
+            <option value="HSN">HSN (Goods)</option>
+            <option value="SAC">SAC (Services)</option>
+          </select>
+        </Field>
+        <Field label="Code" required>
+          <input className={inputCls} type="text" name="hsn_code" required autoFocus
+            onKeyDown={(e) => handleEnter({ event: e, name: "hsn_gst_rate" })} placeholder="e.g. 8421" />
+        </Field>
+        <Field label="GST Rate (%)">
+          <input className={inputCls} type="number" name="hsn_gst_rate" min="0" step="any"
+            onKeyDown={(e) => handleEnter({ event: e, name: "hsn_description" })} placeholder="e.g. 18" />
+        </Field>
+        <Field label="Description">
+          <input className={inputCls} type="text" name="hsn_description"
+            onKeyDown={(e) => handleEnter({ event: e, name: "hsn_submit" })} placeholder="Description (optional)" />
+        </Field>
+        <ModalActions onCancel={onClose} submitName="hsn_submit" loading={loading} />
       </div>
     </form>
   </Modal>

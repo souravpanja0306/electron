@@ -13,6 +13,7 @@ const InvoiceService = require("../service/invoice.service");
 const CompanyService = require("../service/company.service");
 const ChallanService = require("../service/challan.service");
 const SettingService = require("../service/setting.service");
+const AdminService = require("../service/admin.service");
 const { generateInvoiceHtml } = require("../helper/generateInvoiceHtml");
 
 const errorHandler = (res, status, message) => {
@@ -133,7 +134,7 @@ module.exports.createInvoice = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
         const { t_userId, t_mobile, t_username, t_name, company_id, type, invoiceNo,
-            date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, lorry_no, lr_no, challan_id
+            date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, lorry_no, lr_no, challan_id, container, cha
         } = req.body;
 
         if (!company_id) return errorHandler(res, 400, "Please select Company.");
@@ -169,6 +170,8 @@ module.exports.createInvoice = async (req, res) => {
             eway_bill: toText(ewayBill),
             lorry_no: toText(lorry_no),
             lr_no: toText(lr_no),
+            container: toText(container),
+            cha: cha ? cha : null,
             ship_to: shipTo || billTo,
             party_id: billTo,
             challan_id: challan_id || null,
@@ -211,6 +214,8 @@ module.exports.getAllInvoice = async (req, res) => {
 
                 let billTo = await PartyService.getParty({ id: item.party_id });
                 let company = await CompanyService.getCompany({ id: item.company_id });
+                // findCHA() with an empty id returns every CHA, so only look up when one is set
+                let cha = item.cha ? await AdminService.findCHA({ id: item.cha }) : [];
                 let newData = {
                     id: item.id ? item.id : "",
                     company_id: company.length ? company[0] : "",
@@ -231,6 +236,8 @@ module.exports.getAllInvoice = async (req, res) => {
                     total_igst: toNumber(item.total_igst),
                     lorry_no: item.lorry_no ? item.lorry_no : "",
                     lr_no: item.lr_no ? item.lr_no : "",
+                    container: item.container ? item.container : "",
+                    cha: cha.length ? cha[0] : null,
                     created_by: item.created_by ? item.created_by : "",
                     created_at: item.created_at ? item.created_at : "",
                     is_active: item.is_active ? item.is_active : "",
@@ -309,7 +316,7 @@ module.exports.invoiceUpdate = async (req, res) => {
     try {
         const { t_userId } = req.body;
         const { id, company_id, type, invoice_no, invoice_date, transporter, eway_bill, party_id, ship_to,
-            placeOfSupply, data, lorry_no, lr_no } = req.body;
+            placeOfSupply, data, lorry_no, lr_no, container, cha } = req.body;
 
         if (!id) return errorHandler(res, 400, "Invoice ID is required.");
         if (!company_id) return errorHandler(res, 400, "Please select Company.");
@@ -345,6 +352,8 @@ module.exports.invoiceUpdate = async (req, res) => {
             ship_to: ship_to || party_id,
             lorry_no: toText(lorry_no),
             lr_no: toText(lr_no),
+            container: toText(container),
+            cha: cha ? cha : null,
             ...totals,
             placeOfSupply: toText(placeOfSupply),
             data: JSON.stringify(items)
@@ -387,6 +396,13 @@ module.exports.generateInvoicePdf = async (req, res) => {
         let party = await PartyService.getParty({ id: invoice.party_id });
         invoice.party_id = party.length ? party[0] : null;
         invoice.data = invoice.data ? JSON.parse(invoice.data) : [];
+
+        // Show the CHA's name on the print, not its numeric id
+        let chaList = invoice.cha ? await AdminService.findCHA({ id: invoice.cha }) : [];
+        invoice.cha = chaList.length ? chaList[0].name : "";
+
+        // Same CHA switch as the forms (Invoice / Challan settings).
+        invoice.show_cha = (await SettingService.getUserShowCha({ user_id: invoice.created_by })) ? 1 : 0;
 
         // Print with the invoice's own company (was always the first company)
         let companies = invoice.company_id ? await CompanyService.getCompany({ id: invoice.company_id }) : [];

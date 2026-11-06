@@ -13,6 +13,7 @@ import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
 import SearchableSelect from '../../components/SearchableSelect';
 import { inputCls } from '../../components/FormKit';
+import ChaVisibilitySetting from '../../components/ChaVisibilitySetting';
 
 // Stores...
 import useAuthStore from '../../store/AuthStore';
@@ -69,6 +70,9 @@ const ChallanSettings = () => {
                     terms: saved.terms || "",
                     remarks: saved.remarks || "",
                 });
+            } else {
+                // Nothing saved for this company yet: show the defaults, not the previous company's values.
+                setData({ company_id: company_id, ...emptySettings });
             };
         } catch (error) {
             console.log(error);
@@ -91,7 +95,7 @@ const ChallanSettings = () => {
                     suffix: data.suffix,
                     starting: data.starting,
                     terms: data.terms,
-                    remarks: data.remarks
+                    remarks: data.remarks,
                 },
             });
             if (response.data.status === 200) {
@@ -197,6 +201,8 @@ const ChallanSettings = () => {
                             className={`${inputCls} h-auto py-1 resize-y`}
                         />
                     </div>
+
+                    <ChaVisibilitySetting />
 
                     <div className="rounded border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
                         More settings coming soon…
