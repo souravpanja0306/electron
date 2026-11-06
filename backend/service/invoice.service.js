@@ -101,10 +101,17 @@ module.exports.deleteInvoices = async ({
 }) => {
     try {
         if (id) {
-            const result = db
-                .prepare("UPDATE invoice SET is_deleted = 1 WHERE id = ?")
-                .run(id);
-            return { deleted: result.changes };
+            return db.transaction(() => {
+                const invoice = db.prepare("SELECT challan_id FROM invoice WHERE id = ?").get(id);
+                const result = db
+                    .prepare("UPDATE invoice SET is_deleted = 1 WHERE id = ?")
+                    .run(id);
+                // Free the source challan so an invoice can be created for it again
+                if (result.changes && invoice?.challan_id) {
+                    db.prepare("UPDATE challan SET invoiced = 0 WHERE id = ?").run(invoice.challan_id);
+                }
+                return { deleted: result.changes };
+            })();
         };
     } catch (error) {
         console.log(error);

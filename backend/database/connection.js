@@ -49,6 +49,7 @@ if (isNewDatabase) {
 
 // This is safe for both fresh and existing installations.
 db.exec(require("../database/schema/invoiceSetting.schema"));
+db.exec(require("../database/schema/settingSchema"));
 
 // Keep existing SQLite installations compatible with schema additions.
 const invoiceColumns = db.prepare("PRAGMA table_info(invoice)").all();

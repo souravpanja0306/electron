@@ -3,16 +3,12 @@ import { useEffect, useState } from "react";
 
 // Store...
 import useAuthStore from "../store/AuthStore";
+import useThemeStore from "../store/ThemeStore";
 
 export const Middleware = ({ children }) => {
     const { authToken, token } = useAuthStore();
-    const [theme, setTheme] = useState("light");
+    const { loadCachedTheme, loadTheme } = useThemeStore();
     const [loading, setLoading] = useState(true);
-
-    const getThemeData = async () => {
-        const getTheme = await window.api?.getItem("theme");
-        if (getTheme) setTheme(getTheme)
-    };
 
     const checkAuth = async () => {
         await authToken();
@@ -20,17 +16,14 @@ export const Middleware = ({ children }) => {
     };
 
     useEffect(() => {
+        loadCachedTheme(); // instant, avoids a flash while the DB value loads
         checkAuth();
-        getThemeData();
     }, []);
 
+    // Once signed in, the theme stored in the database wins.
     useEffect(() => {
-        if (theme === "dark") {
-            document.documentElement.classList.add("dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-        }
-    }, [theme]);
+        if (token) loadTheme();
+    }, [token]);
 
     if (loading) {
         return null; // Or a loading spinner

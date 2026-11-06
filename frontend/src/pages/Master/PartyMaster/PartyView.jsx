@@ -20,6 +20,7 @@ import {
 
 // Hooks...
 import { usePartyHook } from '../../../hooks/usePartyHook';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const ViewParty = () => {
     const [page, setPage] = useState(1);
@@ -36,21 +37,17 @@ const ViewParty = () => {
     };
 
     const navigate = useNavigate();
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                navigate("/add-party");
-            };
-
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                // handleDeleteParty()
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, []);
+    useShortcuts({
+        n: () => navigate("/add-party"),
+        d: () => {
+            if (!checkedIds) return toast.warning("Please select which one you want to delete.");
+            return handleDeleteParty(checkedIds);
+        },
+        e: () => {
+            if (!checkedIds) return toast.warning("Please select which one you want to edit.");
+            navigate(`/edit-party/${checkedIds}`);
+        },
+    });
 
     const limit = 10;
     const total = parties?.body?.length || 0;

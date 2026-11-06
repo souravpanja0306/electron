@@ -16,12 +16,22 @@ import { Link, useNavigate } from "react-router-dom";
 import useChallanStore from "../../../store/ChallanStore";
 import useAuthStore from '../../../store/AuthStore';
 import useHsnSacStore from "../../../store/HsnSacStore";
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const ViewHsnSac = () => {
     const { token } = useAuthStore();
     const { hsnData, getAllHsnSac, deleteHsnSac, loading } = useHsnSacStore();
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
+
+    useShortcuts({
+        n: () => navigate("/create-hsn-sac"),
+        d: () => handleDelete(),
+        e: () => {
+            if (!checkedIds) return toast.error("Please select a record to edit.");
+            navigate(`/create-hsn-sac?id=${checkedIds}`);
+        },
+    });
 
     useEffect(() => {
         getAllHsnSac(token);

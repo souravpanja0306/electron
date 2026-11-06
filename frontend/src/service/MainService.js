@@ -6,10 +6,12 @@ module.exports.handleEnter = ({
     if (event.key === "Enter") {
         event.preventDefault();
         const form = event.target.form;
-        if (form.elements[name].length > 0) {
-            form.elements[name][index]?.focus();
+        const target = form?.elements?.[name];
+        if (!target) return;
+        if (target.length > 0) {
+            target[index]?.focus();
         } else {
-            form.elements[name]?.focus();
+            target.focus();
         };
     };
 };

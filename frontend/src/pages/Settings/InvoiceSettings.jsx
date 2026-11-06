@@ -2,20 +2,30 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 
 // Icons...
-import { AiOutlineDownload, AiOutlineDelete, AiOutlineFileAdd } from 'react-icons/ai';
+import { AiOutlineFileAdd } from 'react-icons/ai';
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
-import CustomToggle from '../../components/CustomToggle';
 import CustomButton from '../../components/CustomButton';
+import SearchableSelect from '../../components/SearchableSelect';
+import { inputCls, labelCls, Required } from '../../components/FormKit';
 
 // Stores...
-import useAuthStore from '../../store/AuthStore';
 import useCompanyStore from '../../store/CompanyStore';
-import SearchableSelect from '../../components/SearchableSelect';
 import api from '../../utils/axiosInterceptor';
+import useShortcuts from "../../hooks/useShortcuts";
+
+const SettingCard = ({ title, description, children }) => (
+    <div className="flex flex-col gap-3 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
+        <div>
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{title}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
+        </div>
+        {children}
+    </div>
+);
 
 const InvoiceSettings = () => {
     const { companyData, getAllCompany } = useCompanyStore();
@@ -60,7 +70,9 @@ const InvoiceSettings = () => {
         setData((current) => ({ ...current, [name]: value }));
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e) => {
+        if (e?.preventDefault) e.preventDefault();
+        if (loading) return;
         if (!data.company_id) {
             toast.error("Please select a company.");
             return;
@@ -69,7 +81,7 @@ const InvoiceSettings = () => {
         try {
             const response = await api.post("/setting/invoice-setting", {
                 ...data,
-                invoice_start_number: Number(data.invoice_start_number),
+                invoice_start_number: Math.max(1, Number(data.invoice_start_number) || 1),
             });
             toast.success(response.data.message);
         } catch (error) {
@@ -79,47 +91,72 @@ const InvoiceSettings = () => {
         }
     };
 
+    useShortcuts({
+        s: (e) => handleSubmit(e),
+    });
+
+    // Mirrors the backend: prefix + (start + existing invoices for the company) padded to 6 + suffix.
+    const preview = `${data.invoice_prefix || ""}${String(Math.max(1, Number(data.invoice_start_number) || 1)).padStart(6, "0")}${data.invoice_suffix || ""}`;
+
     return (
         <div className="flex flex-col gap-1">
+            <PageTitle>Invoice Setup</PageTitle>
+
             <ActionArea>
                 <CustomButton title="Save (Ctrl+S)" color="blue" onClick={handleSubmit} disabled={loading}><AiOutlineFileAdd /></CustomButton>
             </ActionArea>
 
-            <PageTitle>Invoice Setup</PageTitle>
             <MainArea>
-                <div className="flex w-full max-w-xl flex-col gap-1">
-                    <div className="flex items-center gap-1">
-                        <label className="w-[20%] text-xs">Company</label>
+                <form onSubmit={handleSubmit} className="w-full max-w-2xl flex flex-col gap-3 p-2" autoComplete="off">
+                    <div className="flex flex-col sm:flex-row sm:items-center w-full gap-1">
+                        <label className={`${labelCls} sm:w-32 sm:shrink-0`}>Company<Required /></label>
                         <SearchableSelect
-                            className="w-[80%]"
+                            className="w-full"
                             name="company_id"
                             value={data.company_id}
                             onChange={handleChange}
-                            options={companyData.map((company) => ({ id: company.id, label: company.company_name }))}
+                            options={(companyData || []).map((company) => ({ id: company.id, label: company.company_name }))}
                             placeholder="Select Company"
                             required
                         />
                     </div>
 
-                    <div className="rounded border border-slate-300 bg-white p-3 dark:border-slate-600 dark:bg-slate-900">
-                        <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Invoice Number Format</p>
-                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">The next invoice number is generated after you choose this company.</p>
-                        <div className="mt-3 grid grid-cols-1 gap-1 sm:grid-cols-3">
-                            <input name="invoice_prefix" value={data.invoice_prefix} onChange={handleChange} placeholder="Prefix" className="h-8 rounded border border-slate-400 bg-slate-50 px-2 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
-                            <input name="invoice_start_number" value={data.invoice_start_number} onChange={handleChange} type="number" min="1" placeholder="Starting number" className="h-8 rounded border border-slate-400 bg-slate-50 px-2 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
-                            <input name="invoice_suffix" value={data.invoice_suffix} onChange={handleChange} placeholder="Suffix" className="h-8 rounded border border-slate-400 bg-slate-50 px-2 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
+                    <SettingCard title="Invoice Number Format" description="Each company has its own invoice number series.">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div className="flex flex-col gap-1">
+                                <label className={labelCls} htmlFor="invoice_prefix">Prefix</label>
+                                <input id="invoice_prefix" name="invoice_prefix" value={data.invoice_prefix} onChange={handleChange} placeholder="e.g. INV-" className={inputCls} />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className={labelCls} htmlFor="invoice_start_number">Starting Number</label>
+                                <input id="invoice_start_number" name="invoice_start_number" value={data.invoice_start_number} onChange={handleChange} type="number" min="1" className={inputCls} />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className={labelCls} htmlFor="invoice_suffix">Suffix</label>
+                                <input id="invoice_suffix" name="invoice_suffix" value={data.invoice_suffix} onChange={handleChange} placeholder="e.g. /26-27" className={inputCls} />
+                            </div>
                         </div>
-                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Preview: {data.invoice_prefix || "INV-"}{String(Number(data.invoice_start_number) || 1).padStart(6, "0")}{data.invoice_suffix}</p>
-                    </div>
+                        <div className="rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+                            First invoice number: <span className="font-mono font-semibold text-slate-800 dark:text-slate-100">{preview}</span>
+                            <span className="ml-1 text-slate-500 dark:text-slate-400">(later ones continue from your existing invoices)</span>
+                        </div>
+                    </SettingCard>
 
-                    <div className="flex flex-col gap-1 rounded border border-slate-300 bg-white p-3 dark:border-slate-600 dark:bg-slate-900">
-                        <div><p className="text-sm font-medium text-slate-800 dark:text-slate-100">Terms &amp; Conditions</p><p className="text-xs text-slate-500 dark:text-slate-400">Default text available for your invoice documents.</p></div>
-                        <textarea name="terms_and_conditions" value={data.terms_and_conditions} onChange={handleChange} rows={4} placeholder="e.g. Goods once sold will not be taken back..." className="resize-none rounded border border-slate-400 bg-slate-50 p-2 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-white" />
-                    </div>
+                    <SettingCard title="Terms & Conditions" description="Printed on every new invoice for this company.">
+                        <textarea
+                            name="terms_and_conditions"
+                            value={data.terms_and_conditions}
+                            onChange={handleChange}
+                            rows={4}
+                            placeholder="e.g. Goods once sold will not be taken back..."
+                            className={`${inputCls} h-auto py-1 resize-y`}
+                        />
+                    </SettingCard>
+
                     <div className="rounded border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
                         More settings coming soon…
                     </div>
-                </div>
+                </form>
             </MainArea>
         </div>
     );

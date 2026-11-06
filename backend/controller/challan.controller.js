@@ -13,6 +13,62 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
+const toText = (value) => (value === undefined || value === null ? "" : String(value).trim());
+
+// Normalises the item rows and recomputes the total on the server so the stored
+// total can never disagree with the stored line items.
+const normaliseItems = (data) => {
+    let rows = data;
+    if (typeof rows === "string") {
+        try { rows = JSON.parse(rows); } catch (e) { rows = []; }
+    }
+    if (!Array.isArray(rows)) rows = [];
+
+    const items = rows
+        .map((row, index) => ({
+            id: row?.id ?? Date.now() + index,
+            packages: row?.packages ?? "",
+            description: toText(row?.description),
+            weight: row?.weight ?? "",
+            amount: row?.amount ?? "",
+        }))
+        .filter((row) => row.description !== "" || row.packages !== "" || row.weight !== "" || row.amount !== "");
+
+    const total = items.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+    return { items, total: Math.round(total * 100) / 100 };
+};
+
+// Fields shared by create and update.
+const buildChallanFields = (body) => {
+    const { items, total } = normaliseItems(body.data);
+    return {
+        company_id: body.company_id,
+        consignor_id: body.consignor_id,
+        consignee_id: body.consignee_id,
+        cn_no: toText(body.cn_no),
+        date: toText(body.date),
+        from_loc: toText(body.from_loc),
+        to_loc: toText(body.to_loc),
+        invoice_no: toText(body.invoice_no),
+        way_bill_no: toText(body.way_bill_no),
+        way_bill_date: toText(body.way_bill_date),
+        container: toText(body.container),
+        cha: body.cha ? body.cha : null,
+        booking_number: toText(body.booking_number),
+        truck_no: toText(body.truck_no),
+        note: toText(body.note),
+        total_amount: total,
+        data: JSON.stringify(items),
+    };
+};
+
+const validateChallanFields = (fields) => {
+    if (!fields.company_id) return "Company is required.";
+    if (!fields.consignor_id || !fields.consignee_id) return "Consignor and Consignee are required.";
+    if (!fields.cn_no) return "C/N Number is required.";
+    return null;
+};
+
 module.exports.generateChallanPdf = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
@@ -33,6 +89,12 @@ module.exports.generateChallanPdf = async (req, res) => {
         challan.consignor_id = consignor.length ? consignor[0] : null;
         challan.consignee_id = consignee.length ? consignee[0] : null;
         challan.data = challan.data ? JSON.parse(challan.data) : [];
+
+        // Show the CHA's name on the print, not its numeric id
+        if (challan.cha) {
+            let chaList = await AdminService.findCHA({ id: challan.cha });
+            challan.cha = chaList.length ? chaList[0].name : "";
+        }
 
         // Get company
         let companies = await CompanyService.getCompany({ id: challan.company_id });
@@ -57,37 +119,18 @@ module.exports.generateChallanPdf = async (req, res) => {
 module.exports.createChallan = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-        const { t_userId, company_id, consignor_id, consignee_id, cn_no, date, from_loc, to_loc,
-            invoice_no, way_bill_no, way_bill_date, container, cha, booking_number, truck_no, note, data
-        } = req.body;
+        const { t_userId } = req.body;
 
-        if (!consignor_id || !consignee_id) return errorHandler(res, 400, "Consignor and Consignee are required.");
+        const fields = buildChallanFields(req.body);
+        const invalid = validateChallanFields(fields);
+        if (invalid) return errorHandler(res, 400, invalid);
 
-        if (cn_no) {
-            let isCnExist = await ChallanService.findChallans({ cn_no: cn_no });
-            if (isCnExist.length) return errorHandler(res, 409, "C/N Number Already Exists.");
-        }
+        let dupKey = { cn_no: fields.cn_no };
+        if (t_userId) dupKey["created_by"] = t_userId.toString();
+        let isCnExist = await ChallanService.findChallans(dupKey);
+        if (isCnExist.length) return errorHandler(res, 409, "C/N Number Already Exists.");
 
-        let finalData = {
-            company_id,
-            consignor_id,
-            consignee_id,
-            cn_no,
-            date,
-            from_loc,
-            to_loc,
-            invoice_no,
-            way_bill_no,
-            way_bill_date,
-            container,
-            cha,
-            booking_number,
-            truck_no,
-            note,
-            total_amount: req.body.total_amount || 0,
-            created_by: t_userId,
-            data: JSON.stringify(data)
-        };
+        let finalData = { ...fields, created_by: t_userId };
 
         let result = await ChallanService.insertChallanData(finalData);
 
@@ -119,7 +162,8 @@ module.exports.getAllChallans = async (req, res) => {
                 let consignor = await PartyService.getParty({ id: item.consignor_id });
                 let consignee = await PartyService.getParty({ id: item.consignee_id });
                 let company = await CompanyService.getCompany({ id: item.company_id });
-                let cha = await AdminService.findCHA({ id: item.cha });
+                // findCHA() with an empty id returns every CHA, so only look up when one is set
+                let cha = item.cha ? await AdminService.findCHA({ id: item.cha }) : [];
 
                 let newData = {
                     id: item.id,
@@ -175,6 +219,9 @@ module.exports.deleteChallan = async (req, res) => {
 
         let checkChallan = await ChallanService.findChallans(search_key);
         if (!checkChallan.length) return errorHandler(res, 404, "Challan not found.");
+        if (checkChallan[0].invoiced) {
+            return errorHandler(res, 409, "This challan has an invoice. Delete the invoice first.");
+        }
 
         let result = await ChallanService.deleteChallan({ id });
         if (result.deleted) {
@@ -197,11 +244,10 @@ module.exports.updateChallan = async (req, res) => {
     try {
         const { t_userId } = req.body;
         const { id } = req.params;
-        const { company_id, consignor_id, consignee_id, cn_no, date, from_loc, to_loc,
-            invoice_no, way_bill_no, way_bill_date, container, cha, booking_number, truck_no, note, data, total_amount
-        } = req.body;
 
-        if (!consignor_id || !consignee_id) return errorHandler(res, 400, "Consignor and Consignee are required.");
+        const fields = buildChallanFields(req.body);
+        const invalid = validateChallanFields(fields);
+        if (invalid) return errorHandler(res, 400, invalid);
 
         let search_key = { id };
         if (t_userId) search_key["created_by"] = t_userId.toString();
@@ -209,28 +255,16 @@ module.exports.updateChallan = async (req, res) => {
         let checkChallan = await ChallanService.findChallans(search_key);
         if (!checkChallan.length) return errorHandler(res, 404, "Challan not found.");
 
-        let finalData = {
-            company_id,
-            consignor_id,
-            consignee_id,
-            cn_no,
-            date,
-            from_loc,
-            to_loc,
-            invoice_no,
-            way_bill_no,
-            way_bill_date,
-            container,
-            cha,
-            booking_number,
-            truck_no,
-            note,
-            total_amount: total_amount || 0,
-            data: JSON.stringify(data),
-            invoiced: 0
-        };
+        // C/N number must stay unique, ignoring this challan itself.
+        let dupKey = { cn_no: fields.cn_no };
+        if (t_userId) dupKey["created_by"] = t_userId.toString();
+        let sameCn = await ChallanService.findChallans(dupKey);
+        if (sameCn.some((item) => String(item.id) !== String(id))) {
+            return errorHandler(res, 409, "C/N Number Already Exists.");
+        }
 
-        let result = await ChallanService.updateChallanData(id, finalData);
+        // `invoiced` is deliberately not touched here: it is owned by the invoice flow.
+        let result = await ChallanService.updateChallanData(id, fields);
 
         if (result.changes > 0) {
             response.status = 200;

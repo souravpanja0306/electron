@@ -41,4 +41,16 @@ router.get(
     SettingController.listInvoiceSetting
 );
 
+router.get(
+    "/theme",
+    middleware.isAuthenticated,
+    SettingController.getTheme
+);
+
+router.put(
+    "/theme",
+    middleware.isAuthenticated,
+    SettingController.saveTheme
+);
+
 module.exports = router;

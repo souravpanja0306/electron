@@ -1,277 +1,206 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from 'sonner';
 
 // Icon...
 import {
     AiOutlineFileAdd,
-    AiOutlineSync,
     AiOutlinePrinter,
-    AiOutlineDownload,
-    AiOutlineFilter,
-    AiOutlineDelete
+    AiOutlineDelete,
+    AiOutlineEdit,
+    AiOutlineRollback,
 } from "react-icons/ai";
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
-import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
-import CustomLoader from "../../components/CustomLoader";
+import { ListFilters, ListTable, Pagination, Badge, paginate, rowCls, thCls } from '../../components/ListKit';
 
 // Stores...
 import useInvoiceStore from '../../store/InvoiceStore';
-import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
-import useCompanyStore from "../../store/CompanyStore";
-import usePartyStore from "../../store/PartyStore"
 import useAuthStore from '../../store/AuthStore';
 
+// Utils / hooks...
+import { invoiceGrandTotal } from '../../utils/invoiceTotals';
+import { errorMessage, formatINR, openPrintWindow } from '../../utils/format';
+import useShortcuts from "../../hooks/useShortcuts";
+import useListFilters from "../../hooks/useListFilters";
 
 const ViewInvoices = () => {
-    const { moneyReceipts, moneyReceiptNo, createMoneyReceipts, generateMoneyReceiptNo, loading } = useMoneyReceiptStore();
     const { invoiceData, getAllInvoice, deleteInvoice, printInvoice, invoiceLoading } = useInvoiceStore();
-    const { companyData, getAllCompany } = useCompanyStore();
-    const { parties, getAllParty, partyLoading } = usePartyStore();
     const { token } = useAuthStore();
-
     const navigate = useNavigate();
-    const [alart, setAlart] = useState({ show: false });
-    const [page, setPage] = useState(1);
-    const [filters, setFilters] = useState({
-        startDate: "",
-        endDate: "",
-        search: ""
-    });
-
-    useEffect(() => {
-        getAllInvoice({ token: token, ...filters });
-    }, [filters]);
-
-    const handleFilterChange = (e) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
-    };
+    const [searchParams] = useSearchParams();
+    const back = searchParams.get("back");
 
     const [checkedIds, setCheckedIds] = useState(null);
-    const handleChecked = (e, id) => {
+
+    const { filters, onFilterChange, page, setPage, reload, reset } = useListFilters((applied) => {
         setCheckedIds(null);
-        if (e.target.checked) setCheckedIds(id);
+        return getAllInvoice({ token, ...applied }).catch((error) => {
+            console.log(error);
+            toast.error(errorMessage(error, "Could not load invoices."));
+        });
+    });
+
+    const rows = invoiceData?.body || [];
+    const paging = paginate(rows, page);
+    const totalAmount = rows.reduce((sum, item) => sum + invoiceGrandTotal(item), 0);
+    const hasSelection = checkedIds != null;
+    const checkedInvoice = rows.find(item => item.id === checkedIds);
+
+    const toggleChecked = (id) => setCheckedIds(prev => (prev === id ? null : id));
+
+    const handleEdit = () => {
+        if (!hasSelection) return toast.warning("Please select which one you want to edit.");
+        navigate(`/view-invoice/details?id=${checkedIds}&back=true`);
     };
 
     const handleDelete = async () => {
-        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
-            try {
-                if (checkedIds == null) toast("Please select which one you want to delete.");
-                let result = await deleteInvoice({ id: checkedIds, token: token });
-                if (result) {
-                    getAllInvoice({ token: token });
-                };
-                toast(result.message);
-            } catch (error) {
-                console.log(error);
-            };
-        };
-    };
-
-    const handleRefresh = () => {
-        getAllInvoice({ token: token });
-        toast.info("Data refreshed.");
+        if (!hasSelection) return toast.warning("Please select which one you want to delete.");
+        const message = checkedInvoice?.challan_id
+            ? "Delete this invoice? Its challan will become available for a new invoice. This cannot be undone."
+            : "Are you sure you want to delete this record? This cannot be undone.";
+        if (!window.confirm(message)) return;
+        try {
+            const result = await deleteInvoice({ id: checkedIds, token: token });
+            if (result.status === 200) {
+                toast.success(result.message);
+                await reload();
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error(errorMessage(error));
+        }
     };
 
     const handlePrint = async (id) => {
+        if (!id) return toast.warning("Please select which one you want to print.");
         try {
-            let result = await printInvoice({ id, token });
-            if (result.status === 200) {
-                const newWindow = window.open();
-                newWindow.document.write(result.body.html);
-                toast.info("PDF generated.");
-            } else {
-                toast.error(result.message);
-            };
+            const result = await printInvoice({ id, token });
+            if (result.status !== 200) return toast.error(result.message);
+            if (!openPrintWindow(result.body.html)) return toast.error("Pop-up blocked. Allow pop-ups to print.");
+            toast.info("Generating Print View...");
         } catch (error) {
             console.log(error);
-            toast.error("Something went wrong!");
-        };
+            toast.error(errorMessage(error));
+        }
     };
 
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                navigate("/create-invoice");
-            };
+    const handleRefresh = () => {
+        reset();
+        toast.info("Data refreshed.");
+    };
 
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                handleDelete()
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [checkedIds]);
+    useShortcuts({
+        n: () => navigate("/create-invoice"),
+        d: () => handleDelete(),
+        e: () => handleEdit(),
+        p: () => handlePrint(checkedIds),
+    });
 
-    const limit = 10;
-    const total = invoiceData.body?.length || 0;
-    const totalPages = Math.ceil(total / limit);
-
-    const start = total === 0 ? 0 : (page - 1) * limit + 1;
-    const end = Math.min(page * limit, total);
-
-    if (invoiceLoading) return <CustomLoader />;
     return (
         <>
-            <PageTitle>View All Invoice</PageTitle>
+            <PageTitle>View All Invoices</PageTitle>
             <div className='flex flex-col gap-1'>
                 <ActionArea>
-                    <div className="flex flex-col md:flex-row justify-between w-full gap-2">
-                        <div className="flex gap-1">
+                    <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between w-full gap-2">
+                        <div className="flex flex-wrap gap-1">
+                            {back && (
+                                <div onClick={() => navigate(-1)}>
+                                    <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                                </div>
+                            )}
                             <Link to="/create-invoice">
                                 <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
-                            <Link to={`/view-invoice/details?id=${checkedIds}&back=true`} className={`${!checkedIds ? "hidden" : "block"}`}>
-                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
-                            </Link>
-                            <div onClick={(e) => handleDelete(e)} className={`${!checkedIds ? "hidden" : "block"}`}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                            <div onClick={handleEdit}>
+                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"} disabled={!hasSelection}><AiOutlineEdit /></CustomButton>
+                            </div>
+                            <div onClick={() => hasSelection && handlePrint(checkedIds)}>
+                                <CustomButton title={"Print (Ctrl+P)"} color={"blue"} disabled={!hasSelection}><AiOutlinePrinter /></CustomButton>
+                            </div>
+                            <div onClick={() => hasSelection && handleDelete()}>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"} disabled={!hasSelection}><AiOutlineDelete /></CustomButton>
                             </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            {/* <div className="flex items-center gap-1">
-                                <label className="text-xs font-semibold">From:</label>
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    value={filters.startDate}
-                                    onChange={handleFilterChange}
-                                    className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs"
-                                />
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <label className="text-xs font-semibold">To:</label>
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    value={filters.endDate}
-                                    onChange={handleFilterChange}
-                                    className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs"
-                                />
-                            </div>
-                            <input
-                                type="text"
-                                name="search"
-                                placeholder="Search Invoice No, Lorry..."
-                                value={filters.search}
-                                onChange={handleFilterChange}
-                                className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs w-32 md:w-48"
-                            /> */}
-                            <div onClick={handleRefresh}>
-                                <CustomButton title={"Refresh"} color={"blue"}><AiOutlineSync /></CustomButton>
-                            </div>
-                        </div>
+                        <ListFilters
+                            filters={filters}
+                            onChange={onFilterChange}
+                            onRefresh={handleRefresh}
+                            searchPlaceholder="Search invoice no, lorry, LR, transporter..."
+                        />
                     </div>
                 </ActionArea>
 
-                <MainArea>
-                    <table className="table-fixed w-full overflow-auto">
-                        <thead>
-                            <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
-                                <th className="p-1 text-start text-slate-500">Select</th>
-                                <th className="p-1 text-start text-slate-500">Invoice No</th>
-                                <th className="p-1 text-start text-slate-500">Bill To</th>
-                                <th className="p-1 text-start text-slate-500">Date</th>
-                                <th className="p-1 text-start text-slate-500">Quantity</th>
-                                <th className="p-1 text-start text-slate-500">SGST</th>
-                                <th className="p-1 text-start text-slate-500">CGST</th>
-                                <th className="p-1 text-start text-slate-500">IGST</th>
-                                <th className="p-1 text-start text-slate-500">Total</th>
-                                <th className="p-1 text-start text-slate-500">Trasnporter</th>
-                                <th className="p-1 text-center w-16 text-slate-500">#</th>
+                <ListTable
+                    minWidth="min-w-[1000px]"
+                    colSpan={10}
+                    loading={invoiceLoading}
+                    isEmpty={!rows.length}
+                    emptyText="No invoices found."
+                    head={<>
+                        <th className={`${thCls} text-center w-12`}>Select</th>
+                        <th className={`${thCls} text-left`}>Invoice No</th>
+                        <th className={`${thCls} text-left`}>Date</th>
+                        <th className={`${thCls} text-left`}>Company</th>
+                        <th className={`${thCls} text-left`}>Bill To</th>
+                        <th className={`${thCls} text-left`}>Lorry No</th>
+                        <th className={`${thCls} text-right`}>Taxable</th>
+                        <th className={`${thCls} text-right`}>Tax</th>
+                        <th className={`${thCls} text-right`}>Grand Total</th>
+                        <th className={`${thCls} text-center w-14`}>Print</th>
+                    </>}
+                >
+                    {paging.pageRows.map((item) => {
+                        const selected = checkedIds === item.id;
+                        const tax = (Number(item.total_cgst) || 0) + (Number(item.total_sgst) || 0) + (Number(item.total_igst) || 0);
+                        return (
+                            <tr key={item.id} onClick={() => toggleChecked(item.id)} className={rowCls(selected)}>
+                                <td className="p-2 text-center" onClick={(e) => e.stopPropagation()}>
+                                    <input
+                                        type="checkbox"
+                                        aria-label={`Select invoice ${item.invoice_no}`}
+                                        checked={selected}
+                                        onChange={() => toggleChecked(item.id)}
+                                    />
+                                </td>
+                                <td className="p-2 max-w-40 truncate font-medium" onClick={(e) => e.stopPropagation()}>
+                                    <Link to={`/view-invoice/details?id=${item.id}&back=true`} className="text-blue-700 dark:text-blue-400 hover:underline" title="Open invoice">
+                                        {item.invoice_no || "--"}
+                                    </Link>
+                                    {item.challan_id ? <span className="ml-2"><Badge tone="slate">Challan</Badge></span> : null}
+                                </td>
+                                <td className="p-2 whitespace-nowrap">{item.invoice_date || "--"}</td>
+                                <td className="p-2 max-w-44 truncate capitalize" title={item.company_id?.company_name}>{item.company_id?.company_name || "--"}</td>
+                                <td className="p-2 max-w-44 truncate capitalize" title={item.party_id?.company_name}>{item.party_id?.company_name || "--"}</td>
+                                <td className="p-2 whitespace-nowrap uppercase">{item.lorry_no || "--"}</td>
+                                <td className="p-2 text-right whitespace-nowrap tabular-nums">{formatINR(item.total_amount)}</td>
+                                <td className="p-2 text-right whitespace-nowrap tabular-nums">{formatINR(tax)}</td>
+                                <td className="p-2 text-right whitespace-nowrap tabular-nums font-semibold">{formatINR(invoiceGrandTotal(item))}</td>
+                                <td className="p-2 text-center">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); handlePrint(item.id); }}
+                                        className="p-1 rounded text-xl text-slate-500 dark:text-slate-300 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
+                                        title="Print"
+                                        aria-label={`Print invoice ${item.invoice_no}`}
+                                    >
+                                        <AiOutlinePrinter />
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {invoiceData.body && invoiceData.body.length
-                                ?
-                                <>
-                                    {invoiceData?.body?.map((item, index) => {
-                                        return (
-                                            <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                                <td className="p-1 text-start truncate capitalize">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={checkedIds === item.id}
-                                                        onChange={(e) => handleChecked(e, item.id)}
-                                                    />
-                                                </td>
-                                                <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
-                                                    <Link to={`/view-invoice/details?id=${item.id}&back=true`}>
-                                                        {item.invoice_no ? item.invoice_no : "--"}
-                                                    </Link>
-                                                </td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.party_id ? item.party_id.company_name : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.invoice_date ? item.invoice_date : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_quantity ? item.total_quantity : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_sgst ? item.total_sgst : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_cgst ? item.total_cgst : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_igst ? item.total_igst : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_amount ? (parseFloat(item.total_amount)).toFixed(2) : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.transporter ? item.transporter : "--"}</td>
-                                                <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
-                                                    <button
-                                                        onClick={() => handlePrint(item.id)}
-                                                        className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
-                                                        title="Download"
-                                                    >
-                                                        <AiOutlinePrinter />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                </>
-                                :
-                                <>
-                                    {
-                                        <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                            <td className="p-1 text-center" colSpan={11}>No Data Found</td>
-                                        </tr>
-                                    }
-                                </>
-                            }
-                        </tbody>
-                    </table>
-                </MainArea>
+                        );
+                    })}
+                </ListTable>
 
-                {/* Pagination */}
-                <MainArea>
-                    <div className="w-full flex justify-between items-center text-sm">
-                        <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
-                        <div className="flex items-center gap-1">
-                            <button
-                                disabled={page === 1 || total === 0}
-                                onClick={() => setPage(page - 1)}
-                                className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
-                                Prev
-                            </button>
-                            {totalPages > 0 && [...Array(totalPages)].map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setPage(i + 1)}
-                                    className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                disabled={page === totalPages || total === 0}
-                                onClick={() => setPage(page + 1)}
-                                className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
-                                Next
-                            </button>
-                        </div>
-                    </div>
-                </MainArea>
-            </div >
+                <Pagination paging={paging} onPage={setPage} totalAmount={totalAmount} />
+            </div>
         </>
-    )
-}
+    );
+};
 
-export default ViewInvoices
+export default ViewInvoices;

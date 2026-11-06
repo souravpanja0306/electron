@@ -15,6 +15,7 @@ import SearchableSelect from '../../../components/SearchableSelect';
 // Stores...
 import useCompanyStore from '../../../store/CompanyStore';
 import useAuthStore from '../../../store/AuthStore';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const CompanyCreate = () => {
     const { token } = useAuthStore();
@@ -99,21 +100,10 @@ const CompanyCreate = () => {
         };
     };
 
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                // handleSubmit(e);
-            };
-
-            if (e.ctrlKey && e.key === 'i') {
-                e.preventDefault();
-                navigate("/party");
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, []);
+    useShortcuts({
+        s: (e) => handleSubmit(e),
+        i: () => navigate("/company"),
+    });
 
 
     return (

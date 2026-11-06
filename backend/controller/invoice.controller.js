@@ -19,6 +19,63 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
+const toText = (value) => (value === undefined || value === null ? "" : String(value).trim());
+const toNumber = (value) => Number(value) || 0;
+
+// Parses the item rows and drops rows the user left completely empty.
+const normaliseInvoiceItems = (data) => {
+    let rows = data;
+    if (typeof rows === "string") {
+        try { rows = JSON.parse(rows); } catch (e) { rows = []; }
+    }
+    if (!Array.isArray(rows)) return [];
+
+    return rows
+        .filter((row) => row && (toText(row.description) || toNumber(row.quantity) || toNumber(row.rate)))
+        .map((row, index) => {
+            const quantity = toNumber(row.quantity);
+            const rate = toNumber(row.rate);
+            const gst = toNumber(row.gst);
+            const taxable = quantity * rate;
+            return {
+                id: row.id ?? Date.now() + index,
+                sl_no: index + 1,
+                description: toText(row.description),
+                hsn: toText(row.hsn),
+                quantity,
+                rate,
+                gst,
+                total: Math.round(taxable * (1 + gst / 100) * 100) / 100,
+            };
+        });
+};
+
+// CGST+SGST when company and party are in the same state, otherwise IGST.
+// The frontend mirrors this rule in utils/invoiceTotals.js; keep them in sync.
+const calculateInvoiceTotals = async ({ items, company_id, party_id }) => {
+    const partyResult = await PartyService.getParty({ id: party_id });
+    const companyResult = await CompanyService.getCompany({ id: company_id });
+
+    const partyState = partyResult.length ? (partyResult[0].state || "").toLowerCase().trim() : "";
+    const companyState = companyResult.length ? (companyResult[0].state || "").toLowerCase().trim() : "";
+    const sameState = partyState === companyState;
+
+    const totals = { total_quantity: 0, total_amount: 0, total_cgst: 0, total_sgst: 0, total_igst: 0 };
+    for (const item of items) {
+        const subtotal = item.quantity * item.rate;
+        const taxAmount = subtotal * (item.gst / 100);
+        totals.total_quantity += item.quantity;
+        totals.total_amount += subtotal;
+        if (sameState) {
+            totals.total_cgst += taxAmount / 2;
+            totals.total_sgst += taxAmount / 2;
+        } else {
+            totals.total_igst += taxAmount;
+        }
+    }
+    return totals;
+};
+
 module.exports.generateInvoiceNo = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
@@ -79,11 +136,15 @@ module.exports.createInvoice = async (req, res) => {
             date, data, transporter, ewayBill, billTo, shipTo, placeOfSupply, lorry_no, lr_no, challan_id
         } = req.body;
 
-        if (!billTo) return errorHandler(res, 400, "Please select Party.");
         if (!company_id) return errorHandler(res, 400, "Please select Company.");
+        if (!billTo) return errorHandler(res, 400, "Please select Party.");
+        if (!toText(invoiceNo)) return errorHandler(res, 400, "Invoice Number is required.");
 
-        let search_key = {};
-        if (invoiceNo) search_key["invoice_no"] = invoiceNo;
+        const items = normaliseInvoiceItems(data);
+        if (!items.length) return errorHandler(res, 400, "Add at least one item.");
+
+        let search_key = { invoice_no: toText(invoiceNo) };
+        if (t_userId) search_key["created_by"] = t_userId.toString();
 
         let isInvoiceNumberExist = await InvoiceService.findInvoices(search_key);
         if (isInvoiceNumberExist.length) return errorHandler(res, 409, "Invoice Number Already Exists.");
@@ -96,62 +157,26 @@ module.exports.createInvoice = async (req, res) => {
             if (existingInvoice.length) return errorHandler(res, 409, "An invoice already exists for this challan.");
         };
 
-        // Fetch company and party to get states for tax calculation
-        let partyResult = await PartyService.getParty({ id: billTo });
-        let companyResult = await CompanyService.getCompany({ id: company_id });
-
-        let partyState = partyResult.length ? (partyResult[0].state || "").toLowerCase().trim() : "";
-        let companyState = companyResult.length ? (companyResult[0].state || "").toLowerCase().trim() : "";
-
-        let totalQty = 0;
-        let totalValue = 0;
-        let totalSGST = 0;
-        let totalCGST = 0;
-        let totalIGST = 0;
-
-        if (data.length) {
-            for (let item of data) {
-                let qty = parseFloat(item.quantity || 0);
-                let rate = parseFloat(item.rate || 0);
-                let gstRate = parseFloat(item.gst || 0);
-                let subtotal = qty * rate;
-
-                totalQty += qty;
-                totalValue += subtotal;
-
-                let taxAmount = subtotal * (gstRate / 100);
-
-                if (partyState === companyState) {
-                    totalCGST += taxAmount / 2;
-                    totalSGST += taxAmount / 2;
-                } else {
-                    totalIGST += taxAmount;
-                }
-            };
-        };
+        const totals = await calculateInvoiceTotals({ items, company_id, party_id: billTo });
 
         const invoiceSettings = await SettingService.getInvoiceSetting({ company_id: Number(company_id) });
         let finalData = {
             company_id: company_id,
-            type: type,
-            invoice_no: invoiceNo,
-            invoice_date: date,
-            transporter: transporter,
-            eway_bill: ewayBill,
-            lorry_no: lorry_no,
-            lr_no: lr_no,
-            ship_to: shipTo,
+            type: type || "tax",
+            invoice_no: toText(invoiceNo),
+            invoice_date: toText(date),
+            transporter: toText(transporter),
+            eway_bill: toText(ewayBill),
+            lorry_no: toText(lorry_no),
+            lr_no: toText(lr_no),
+            ship_to: shipTo || billTo,
             party_id: billTo,
             challan_id: challan_id || null,
             created_by: t_userId,
-            total_amount: totalValue,
-            total_quantity: totalQty,
-            total_cgst: totalCGST,
-            total_sgst: totalSGST,
-            total_igst: totalIGST,
-            placeOfSupply: placeOfSupply,
+            ...totals,
+            placeOfSupply: toText(placeOfSupply),
             terms_and_conditions: invoiceSettings[0]?.terms_and_conditions || "",
-            data: JSON.stringify(data)
+            data: JSON.stringify(items)
         };
         let result = challan_id
             ? await InvoiceService.insertInvoiceFromChallan(finalData, challan_id, t_userId)
@@ -193,15 +218,17 @@ module.exports.getAllInvoice = async (req, res) => {
                     invoice_no: item.invoice_no ? item.invoice_no : "",
                     eway_bill: item.eway_bill ? item.eway_bill : "",
                     party_id: billTo.length ? billTo[0] : "",
+                    ship_to: item.ship_to ? item.ship_to : "",
+                    challan_id: item.challan_id || null,
                     transporter: item.transporter ? item.transporter : "",
                     placeOfSupply: item.placeOfSupply ? item.placeOfSupply : "",
-                    data: item.data ? JSON.parse(item.data) : "",
+                    data: item.data ? JSON.parse(item.data) : [],
                     invoice_date: item.invoice_date ? item.invoice_date : "",
-                    total_amount: item.total_amount ? item.total_amount : "",
-                    total_quantity: item.total_quantity ? item.total_quantity : "",
-                    total_sgst: item.total_sgst ? item.total_sgst : "",
-                    total_cgst: item.total_cgst ? item.total_cgst : "",
-                    total_igst: item.total_igst ? item.total_igst : "",
+                    total_amount: toNumber(item.total_amount),
+                    total_quantity: toNumber(item.total_quantity),
+                    total_sgst: toNumber(item.total_sgst),
+                    total_cgst: toNumber(item.total_cgst),
+                    total_igst: toNumber(item.total_igst),
                     lorry_no: item.lorry_no ? item.lorry_no : "",
                     lr_no: item.lr_no ? item.lr_no : "",
                     created_by: item.created_by ? item.created_by : "",
@@ -280,65 +307,46 @@ module.exports.invoiceExports = async (req, res) => {
 module.exports.invoiceUpdate = async (req, res) => {
     let response = { ...contents.defaultResponse }
     try {
-        const { id, company_id, type, invoice_no, invoice_date, transporter, eway_bill, party_id,
+        const { t_userId } = req.body;
+        const { id, company_id, type, invoice_no, invoice_date, transporter, eway_bill, party_id, ship_to,
             placeOfSupply, data, lorry_no, lr_no } = req.body;
 
         if (!id) return errorHandler(res, 400, "Invoice ID is required.");
-        if (!party_id) return errorHandler(res, 400, "Please select Party.");
         if (!company_id) return errorHandler(res, 400, "Please select Company.");
+        if (!party_id) return errorHandler(res, 400, "Please select Party.");
+        if (!toText(invoice_no)) return errorHandler(res, 400, "Invoice Number is required.");
 
-        let items = typeof data === 'string' ? JSON.parse(data) : data;
+        let ownerKey = { id };
+        if (t_userId) ownerKey["created_by"] = t_userId.toString();
+        const existing = await InvoiceService.findInvoices(ownerKey);
+        if (!existing.length) return errorHandler(res, 404, "Invoice not found.");
 
-        // Fetch company and party to get states for tax calculation
-        let partyResult = await PartyService.getParty({ id: party_id });
-        let companyResult = await CompanyService.getCompany({ id: company_id });
+        // Invoice number must stay unique, ignoring this invoice itself.
+        let dupKey = { invoice_no: toText(invoice_no) };
+        if (t_userId) dupKey["created_by"] = t_userId.toString();
+        const sameNo = await InvoiceService.findInvoices(dupKey);
+        if (sameNo.some((item) => String(item.id) !== String(id))) {
+            return errorHandler(res, 409, "Invoice Number Already Exists.");
+        }
 
-        let partyState = partyResult.length ? (partyResult[0].state || "").toLowerCase().trim() : "";
-        let companyState = companyResult.length ? (companyResult[0].state || "").toLowerCase().trim() : "";
+        const items = normaliseInvoiceItems(data);
+        if (!items.length) return errorHandler(res, 400, "Add at least one item.");
 
-        let totalQty = 0;
-        let totalValue = 0;
-        let totalSGST = 0;
-        let totalCGST = 0;
-        let totalIGST = 0;
-
-        if (items && items.length) {
-            for (let item of items) {
-                let qty = parseFloat(item.quantity || 0);
-                let rate = parseFloat(item.rate || 0);
-                let gstRate = parseFloat(item.gst || 0);
-                let subtotal = qty * rate;
-
-                totalQty += qty;
-                totalValue += subtotal;
-
-                let taxAmount = subtotal * (gstRate / 100);
-
-                if (partyState === companyState) {
-                    totalCGST += taxAmount / 2;
-                    totalSGST += taxAmount / 2;
-                } else {
-                    totalIGST += taxAmount;
-                }
-            };
-        };
+        const totals = await calculateInvoiceTotals({ items, company_id, party_id });
 
         let updateData = {
             company_id: company_id,
-            type: type,
-            invoice_no: invoice_no,
-            invoice_date: invoice_date,
-            transporter: transporter,
-            eway_bill: eway_bill,
+            type: type || existing[0].type || "tax",
+            invoice_no: toText(invoice_no),
+            invoice_date: toText(invoice_date),
+            transporter: toText(transporter),
+            eway_bill: toText(eway_bill),
             party_id: party_id,
-            lorry_no: lorry_no,
-            lr_no: lr_no,
-            total_amount: totalValue,
-            total_quantity: totalQty,
-            total_cgst: totalCGST,
-            total_sgst: totalSGST,
-            total_igst: totalIGST,
-            placeOfSupply: placeOfSupply,
+            ship_to: ship_to || party_id,
+            lorry_no: toText(lorry_no),
+            lr_no: toText(lr_no),
+            ...totals,
+            placeOfSupply: toText(placeOfSupply),
             data: JSON.stringify(items)
         };
 
@@ -380,8 +388,9 @@ module.exports.generateInvoicePdf = async (req, res) => {
         invoice.party_id = party.length ? party[0] : null;
         invoice.data = invoice.data ? JSON.parse(invoice.data) : [];
 
-        // Get company
-        let companies = await CompanyService.getCompany({});
+        // Print with the invoice's own company (was always the first company)
+        let companies = invoice.company_id ? await CompanyService.getCompany({ id: invoice.company_id }) : [];
+        if (!companies.length) companies = await CompanyService.getCompany({});
         let company = companies.length ? companies[0] : {};
 
         const html = generateInvoiceHtml({ invoice, company });

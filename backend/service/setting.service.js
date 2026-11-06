@@ -75,6 +75,18 @@ module.exports.updateChallanSetting = async ({
     };
 };
 
+module.exports.getUserTheme = async ({ user_id }) => {
+    const row = db.prepare("SELECT theme FROM user_setting WHERE user_id = ?").get(user_id);
+    return row ? row.theme : null;
+};
+
+module.exports.saveUserTheme = async ({ user_id, theme }) => {
+    return db.prepare(`
+        INSERT INTO user_setting (user_id, theme) VALUES (@user_id, @theme)
+        ON CONFLICT(user_id) DO UPDATE SET theme = @theme, updated_at = CURRENT_TIMESTAMP
+    `).run({ user_id, theme });
+};
+
 module.exports.createInvoiceSetting = async (data) => {
     const keys = Object.keys(data);
     return db.prepare(`INSERT INTO invoice_setting (${keys.join(",")}) VALUES (${keys.map(key => `@${key}`).join(",")})`).run(data);

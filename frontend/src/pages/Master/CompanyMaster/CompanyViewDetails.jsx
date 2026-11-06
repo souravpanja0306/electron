@@ -18,6 +18,7 @@ import { AiOutlineFileAdd, AiOutlineRollback, AiOutlineIdcard } from "react-icon
 // Store...
 import useCompanyStore from '../../../store/CompanyStore';
 import useAuthStore from '../../../store/AuthStore';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const CompanyViewDetails = () => {
     const { getCompanyById, updateCompany, companyLoading } = useCompanyStore();
@@ -119,21 +120,10 @@ const CompanyViewDetails = () => {
         };
     };
 
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                handleSubmit(e);
-            };
-
-            if (e.ctrlKey && e.key === 'i') {
-                e.preventDefault();
-                navigate("/company");
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [data, id]);
+    useShortcuts({
+        s: (e) => handleSubmit(e),
+        i: () => navigate("/company"),
+    });
 
     if (companyLoading) return <CustomLoader />;
 

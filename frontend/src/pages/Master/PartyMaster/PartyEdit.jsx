@@ -17,6 +17,7 @@ import { AiOutlineFileAdd, AiOutlineRollback, AiOutlineIdcard } from "react-icon
 // Stores...
 import usePartyStore from '../../../store/PartyStore';
 import useAuthStore from '../../../store/AuthStore';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const PartyEdit = () => {
     const { token } = useAuthStore();
@@ -117,21 +118,10 @@ const PartyEdit = () => {
         };
     };
 
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                handleSubmit(e);
-            };
-
-            if (e.ctrlKey && e.key === 'i') {
-                e.preventDefault();
-                navigate("/party");
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [data, id]);
+    useShortcuts({
+        s: (e) => handleSubmit(e),
+        i: () => navigate("/party"),
+    });
 
     if (partyLoading) return <CustomLoader />;
 

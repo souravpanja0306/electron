@@ -116,6 +116,37 @@ module.exports.editChallanSetting = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
+module.exports.getTheme = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const theme = await SettingService.getUserTheme({ user_id: req.body.t_userId });
+        response.status = 200;
+        response.message = "Theme fetched successfully.";
+        response.body = { theme: theme || "light" };
+    } catch (error) {
+        console.log(`Something went wrong: controller: getTheme: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+module.exports.saveTheme = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { t_userId, theme } = req.body;
+        if (!["light", "dark"].includes(theme)) return errorHandler(res, 400, "Theme must be 'light' or 'dark'.");
+
+        await SettingService.saveUserTheme({ user_id: t_userId, theme });
+        response.status = 200;
+        response.message = "Theme saved successfully.";
+        response.body = { theme };
+    } catch (error) {
+        console.log(`Something went wrong: controller: saveTheme: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
 module.exports.saveInvoiceSetting = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {

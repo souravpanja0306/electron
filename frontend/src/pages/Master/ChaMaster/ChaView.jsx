@@ -19,6 +19,7 @@ import CustomButton from '../../../components/CustomButton';
 // Store...
 import useAuthStore from '../../../store/AuthStore';
 import useChaStore from '../../../store/ChaStore';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const ChaView = () => {
     const { token } = useAuthStore();
@@ -73,30 +74,17 @@ const ChaView = () => {
         };
     };
 
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                navigate("/add-cha");
-            };
-
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                handleDelete();
-            };
-
-            if (e.ctrlKey && e.key === 'e') {
-                e.preventDefault();
-                if (checkedIds.length === 1) {
-                    navigate(`/edit-cha/${checkedIds[0]}`);
-                } else {
-                    toast.warning("Please select exactly one CHA to edit.");
-                }
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [checkedIds]);
+    useShortcuts({
+        n: () => navigate("/add-cha"),
+        d: () => {
+            if (!checkedIds.length) return toast.warning("Please select an item to delete.");
+            return handleDelete();
+        },
+        e: () => {
+            if (checkedIds.length !== 1) return toast.warning("Please select exactly one CHA to edit.");
+            navigate(`/edit-cha/${checkedIds[0]}`);
+        },
+    });
 
     const limit = 10;
     const total = chaData?.length || 0;

@@ -1,30 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from 'sonner';
 
 // Icon...
 import {
     AiOutlineFileAdd,
-    AiOutlineSync,
     AiOutlinePrinter,
-    AiOutlineDownload,
-    AiOutlineFilter,
     AiOutlineDelete,
     AiOutlineEdit,
     AiOutlineRollback,
-    AiOutlineDiff
+    AiOutlineDiff,
 } from "react-icons/ai";
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
-import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
-import CustomLoader from "../../components/CustomLoader";
+import { ListFilters, ListTable, Pagination, Badge, paginate, rowCls, thCls } from '../../components/ListKit';
 
 // Stores...
 import useChallanStore from "../../store/ChallanStore";
 import useAuthStore from '../../store/AuthStore';
+
+// Utils / hooks...
+import { errorMessage, formatINR, openPrintWindow } from '../../utils/format';
+import useShortcuts from "../../hooks/useShortcuts";
+import useListFilters from "../../hooks/useListFilters";
 
 const ViewChallan = () => {
     const { token } = useAuthStore();
@@ -33,289 +34,193 @@ const ViewChallan = () => {
     const back = searchParams.get("back");
 
     const { challanData, challanLoading, getAllChallan, deleteChallan, printChallan } = useChallanStore();
-    const [page, setPage] = useState(1);
     const [checkedIds, setCheckedIds] = useState(null);
-    const [filters, setFilters] = useState({
-        startDate: "",
-        endDate: "",
-        search: ""
+
+    const { filters, onFilterChange, page, setPage, reload, reset } = useListFilters((applied) => {
+        setCheckedIds(null);
+        return getAllChallan({ token, ...applied }).catch((error) => {
+            console.log(error);
+            toast.error(errorMessage(error, "Could not load challans."));
+        });
     });
 
-    useEffect(() => {
-        getAllChallan({ token: token, ...filters });
-    }, [filters]);
+    const rows = challanData?.body || [];
+    const paging = paginate(rows, page);
+    const totalAmount = rows.reduce((sum, item) => sum + (Number(item.total_amount) || 0), 0);
+    const hasSelection = checkedIds != null;
+    const checkedChallan = rows.find(item => item.id === checkedIds);
 
-    const handleFilterChange = (e) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
-    };
+    // Clicking a selected row again clears the selection.
+    const toggleChecked = (id) => setCheckedIds(prev => (prev === id ? null : id));
 
-    const handleChecked = (e, id) => {
-        setCheckedIds(null);
-        if (e.target.checked) setCheckedIds(id);
+    const handleEdit = () => {
+        if (!hasSelection) return toast.warning("Please select which one you want to edit.");
+        navigate(`/edit-challan/${checkedIds}?back=true`);
     };
 
     const handleDelete = async () => {
-        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
-            try {
-                if (checkedIds == null) {
-                    toast("Please select which one you want to delete.");
-                    return;
-                }
-                let result = await deleteChallan({ id: checkedIds, token: token });
-                if (result.status === 200) {
-                    getAllChallan({ token: token });
-                    setCheckedIds(null);
-                    toast.success(result.message);
-                } else {
-                    toast.error(result.message);
-                }
-            } catch (error) {
-                console.log(error);
-                toast.error("Something went wrong!");
-            };
-        };
-    };
-
-    const handleRefresh = () => {
-        setFilters({ startDate: "", endDate: "", search: "" });
-        getAllChallan({ token: token });
-        toast.info("Data refreshed.");
+        if (!hasSelection) return toast.warning("Please select which one you want to delete.");
+        if (!window.confirm("Are you sure you want to delete this record? This cannot be undone.")) return;
+        try {
+            const result = await deleteChallan({ id: checkedIds, token: token });
+            if (result.status === 200) {
+                toast.success(result.message);
+                await reload();
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error(errorMessage(error));
+        }
     };
 
     const handlePrint = async (id) => {
+        if (!id) return toast.warning("Please select which one you want to print.");
         try {
-            let result = await printChallan({ id, token });
-            if (result.status === 200) {
-                const newWindow = window.open();
-                newWindow.document.write(result.body.html);
-                toast.info("Generating Print View...");
-            } else {
-                toast.error(result.message);
-            };
+            const result = await printChallan({ id, token });
+            if (result.status !== 200) return toast.error(result.message);
+            if (!openPrintWindow(result.body.html)) return toast.error("Pop-up blocked. Allow pop-ups to print.");
+            toast.info("Generating Print View...");
         } catch (error) {
             console.log(error);
-            toast.error("Something went wrong!");
-        };
+            toast.error(errorMessage(error));
+        }
     };
 
     const handleCreateInvoice = () => {
-        const challan = challanData.body?.find(item => item.id === checkedIds);
-        if (!challan) return;
-        if (challan.invoiced) {
+        if (!checkedChallan) return;
+        if (checkedChallan.invoiced) {
             toast.info("An invoice has already been created for this challan.");
             return;
         }
         navigate(`/create-invoice?challanId=${checkedIds}&back=true`);
     };
 
-    const checkedChallan = challanData.body?.find(item => item.id === checkedIds);
+    const handleRefresh = () => {
+        reset();
+        toast.info("Data refreshed.");
+    };
 
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                navigate("/create-challan");
-            };
-
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                handleDelete()
-            };
-
-            if (e.ctrlKey && e.key === 'e') {
-                e.preventDefault();
-                if (checkedIds) navigate(`/edit-challan/${checkedIds}`);
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [checkedIds]);
-
-    const limit = 10;
-    const total = challanData.body?.length || 0;
-    const totalPages = Math.ceil(total / limit);
-
-    const start = total === 0 ? 0 : (page - 1) * limit + 1;
-    const end = Math.min(page * limit, total);
-
-    if (challanLoading) return <CustomLoader />;
+    useShortcuts({
+        n: () => navigate("/create-challan"),
+        d: () => handleDelete(),
+        e: () => handleEdit(),
+        p: () => handlePrint(checkedIds),
+    });
 
     return (
         <>
             <PageTitle>View All Challans</PageTitle>
             <div className='flex flex-col gap-1'>
                 <ActionArea>
-                    <div className="flex flex-col md:flex-row justify-between w-full gap-2">
-                        <div className="flex gap-1">
-                            {
-                                back ?
-                                    <div onClick={() => navigate(-1)}>
-                                        <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-                                    </div>
-                                    : ""
-                            }
+                    <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between w-full gap-2">
+                        <div className="flex flex-wrap gap-1">
+                            {back && (
+                                <div onClick={() => navigate(-1)}>
+                                    <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                                </div>
+                            )}
                             <Link to="/create-challan">
                                 <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
                             </Link>
-                            <Link to={`/edit-challan/${checkedIds}?back=true`} className={`${!checkedIds ? "hidden" : "block"}`}>
-                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
-                            </Link>
-                            <div onClick={handleDelete} className={`${!checkedIds ? "hidden" : "block"}`}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                            <div onClick={handleEdit}>
+                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"} disabled={!hasSelection}><AiOutlineEdit /></CustomButton>
                             </div>
-                            <div onClick={handleCreateInvoice} className={`${!checkedIds ? "hidden" : "block"}`}>
+                            <div onClick={() => hasSelection && handlePrint(checkedIds)}>
+                                <CustomButton title={"Print (Ctrl+P)"} color={"blue"} disabled={!hasSelection}><AiOutlinePrinter /></CustomButton>
+                            </div>
+                            <div onClick={() => hasSelection && handleCreateInvoice()}>
                                 <CustomButton
                                     title={checkedChallan?.invoiced ? "Invoice Created" : "Create Invoice"}
                                     color={checkedChallan?.invoiced ? "green" : "yellow"}
-                                    disabled={checkedChallan?.invoiced}
+                                    disabled={!hasSelection || checkedChallan?.invoiced}
                                 >
                                     <AiOutlineDiff />
                                 </CustomButton>
                             </div>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            {/* <div className="flex items-center gap-1">
-                                <label className="text-xs font-semibold">From:</label>
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    value={filters.startDate}
-                                    onChange={handleFilterChange}
-                                    className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs"
-                                />
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <label className="text-xs font-semibold">To:</label>
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    value={filters.endDate}
-                                    onChange={handleFilterChange}
-                                    className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs"
-                                />
-                            </div>
-                            <input
-                                type="text"
-                                name="search"
-                                placeholder="Search C/N, Truck..."
-                                value={filters.search}
-                                onChange={handleFilterChange}
-                                className="h-8 p-1 rounded border border-slate-300 dark:border-slate-600 text-xs w-32 md:w-48"
-                            /> */}
-                            <div onClick={handleRefresh}>
-                                <CustomButton title={"Refresh"} color={"blue"}><AiOutlineSync /></CustomButton>
+                            <div onClick={() => hasSelection && handleDelete()}>
+                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"} disabled={!hasSelection}><AiOutlineDelete /></CustomButton>
                             </div>
                         </div>
+                        <ListFilters
+                            filters={filters}
+                            onChange={onFilterChange}
+                            onRefresh={handleRefresh}
+                            searchPlaceholder="Search C/N, truck, from, to..."
+                        />
                     </div>
                 </ActionArea>
 
-                <MainArea>
-                    <table className="table-fixed w-full overflow-auto">
-                        <thead>
-                            <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
-                                <th className="p-1 text-start text-slate-500 w-16">Select</th>
-                                <th className="p-1 text-start text-slate-500">Company</th>
-                                <th className="p-1 text-start text-slate-500">C/N No</th>
-                                <th className="p-1 text-start text-slate-500">Consignor</th>
-                                <th className="p-1 text-start text-slate-500">Consignee</th>
-                                <th className="p-1 text-start text-slate-500">Date</th>
-                                <th className="p-1 text-start text-slate-500">From</th>
-                                <th className="p-1 text-start text-slate-500">To</th>
-                                <th className="p-1 text-start text-slate-500">Truck No</th>
-                                <th className="p-1 text-start text-slate-500">Amount</th>
-                                <th className="p-1 text-start text-slate-500">Invoiced</th>
-                                <th className="p-1 text-center w-16 text-slate-500">#</th>
+                <ListTable
+                    minWidth="min-w-[980px]"
+                    colSpan={12}
+                    loading={challanLoading}
+                    isEmpty={!rows.length}
+                    emptyText="No challans found."
+                    head={<>
+                        <th className={`${thCls} text-center w-12`}>Select</th>
+                        <th className={`${thCls} text-left`}>C/N No</th>
+                        <th className={`${thCls} text-left`}>Date</th>
+                        <th className={`${thCls} text-left`}>Company</th>
+                        <th className={`${thCls} text-left`}>Consignor</th>
+                        <th className={`${thCls} text-left`}>Consignee</th>
+                        <th className={`${thCls} text-left`}>From</th>
+                        <th className={`${thCls} text-left`}>To</th>
+                        <th className={`${thCls} text-left`}>Truck No</th>
+                        <th className={`${thCls} text-right`}>Amount</th>
+                        <th className={`${thCls} text-center`}>Invoiced</th>
+                        <th className={`${thCls} text-center w-14`}>Print</th>
+                    </>}
+                >
+                    {paging.pageRows.map((item) => {
+                        const selected = checkedIds === item.id;
+                        return (
+                            <tr key={item.id} onClick={() => toggleChecked(item.id)} className={rowCls(selected)}>
+                                <td className="p-2 text-center" onClick={(e) => e.stopPropagation()}>
+                                    <input
+                                        type="checkbox"
+                                        aria-label={`Select challan ${item.cn_no}`}
+                                        checked={selected}
+                                        onChange={() => toggleChecked(item.id)}
+                                    />
+                                </td>
+                                <td className="p-2 max-w-40 truncate font-medium" onClick={(e) => e.stopPropagation()}>
+                                    <Link to={`/edit-challan/${item.id}?back=true`} className="text-blue-700 dark:text-blue-400 hover:underline" title="Open challan">
+                                        {item.cn_no || "--"}
+                                    </Link>
+                                </td>
+                                <td className="p-2 whitespace-nowrap">{item.date || "--"}</td>
+                                <td className="p-2 max-w-44 truncate capitalize" title={item.company_id?.company_name}>{item.company_id?.company_name || "--"}</td>
+                                <td className="p-2 max-w-44 truncate capitalize" title={item.consignor_id?.company_name}>{item.consignor_id?.company_name || "--"}</td>
+                                <td className="p-2 max-w-44 truncate capitalize" title={item.consignee_id?.company_name}>{item.consignee_id?.company_name || "--"}</td>
+                                <td className="p-2 max-w-32 truncate capitalize">{item.from_loc || "--"}</td>
+                                <td className="p-2 max-w-32 truncate capitalize">{item.to_loc || "--"}</td>
+                                <td className="p-2 whitespace-nowrap uppercase">{item.truck_no || "--"}</td>
+                                <td className="p-2 text-right whitespace-nowrap tabular-nums">{formatINR(item.total_amount)}</td>
+                                <td className="p-2 text-center">
+                                    <Badge tone={item.invoiced ? "green" : "slate"}>{item.invoiced ? "Yes" : "No"}</Badge>
+                                </td>
+                                <td className="p-2 text-center">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); handlePrint(item.id); }}
+                                        className="p-1 rounded text-xl text-slate-500 dark:text-slate-300 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
+                                        title="Print"
+                                        aria-label={`Print challan ${item.cn_no}`}
+                                    >
+                                        <AiOutlinePrinter />
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {challanData.body && challanData.body.length
-                                ?
-                                <>
-                                    {challanData?.body?.map((item, index) => {
-                                        return (
-                                            <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer text-sm">
-                                                <td className="p-1 text-start truncate capitalize">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={checkedIds === item.id}
-                                                        onChange={(e) => handleChecked(e, item.id)}
-                                                    />
-                                                </td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.company_id ? item.company_id.company_name : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
-                                                    <Link to={`/edit-challan/${item.id}?back=true`}>
-                                                        {item.cn_no ? item.cn_no : "--"}
-                                                    </Link>
-                                                </td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.consignor_id ? item.consignor_id.company_name : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.consignee_id ? item.consignee_id.company_name : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.date ? item.date : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.from_loc ? item.from_loc : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.to_loc ? item.to_loc : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.truck_no ? item.truck_no : "--"}</td>
-                                                <td className="p-1 text-start truncate capitalize text-slate-500">{item.total_amount ? `₹ ${item.total_amount}` : "--"}</td>
-                                                <td className="p-1 text-start">
-                                                    <span className={item.invoiced ? "text-green-600 font-medium" : "text-slate-500"}>
-                                                        {item.invoiced ? "Yes" : "No"}
-                                                    </span>
-                                                </td>
-                                                <td className="flex justify-center items-center gap-1 p-1 text-center w-16 truncate capitalize ">
-                                                    <button
-                                                        onClick={() => handlePrint(item.id)}
-                                                        className="p-1 rounded text-xl text-slate-500 hover:text-yellow-500 hover:bg-yellow-500/10 active:text-yellow-700 transition"
-                                                        title="Print"
-                                                    >
-                                                        <AiOutlinePrinter />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                </>
-                                :
-                                <>
-                                    {
-                                        <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                            <td className="p-1 text-center text-slate-500" colSpan={12}>No Data Found</td>
-                                        </tr>
-                                    }
-                                </>
-                            }
-                        </tbody>
-                    </table>
-                </MainArea>
+                        );
+                    })}
+                </ListTable>
 
-                {/* Pagination */}
-                <MainArea>
-                    <div className="w-full flex justify-between items-center text-sm">
-                        <div className="text-slate-600 dark:text-slate-300">Showing {start} to {end} of {total}</div>
-                        <div className="flex items-center gap-1">
-                            <button
-                                disabled={page === 1 || total === 0}
-                                onClick={() => setPage(page - 1)}
-                                className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
-                                Prev
-                            </button>
-                            {totalPages > 0 && [...Array(totalPages)].map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setPage(i + 1)}
-                                    className={`px-2 py-1 rounded border ${page === i + 1 ? "bg-blue-500 text-white border-blue-500" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600"}`}>
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                disabled={page === totalPages || total === 0}
-                                onClick={() => setPage(page + 1)}
-                                className="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-200 dark:hover:bg-slate-600 disabled:opacity-40">
-                                Next
-                            </button>
-                        </div>
-                    </div>
-                </MainArea>
+                <Pagination paging={paging} onPage={setPage} totalAmount={totalAmount} />
             </div>
         </>
-    )
-}
+    );
+};
 
-export default ViewChallan
+export default ViewChallan;
