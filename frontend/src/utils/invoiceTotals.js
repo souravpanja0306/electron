@@ -22,20 +22,28 @@ export const lineAmounts = (item) => {
     return { quantity, rate, gstRate, taxable, tax, total: taxable + tax };
 };
 
+const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+
+// Rounded to paise exactly like the backend: CGST and SGST are each half the tax.
 export const computeInvoiceTotals = (items, sameState) => {
-    const totals = { quantity: 0, taxable: 0, cgst: 0, sgst: 0, igst: 0, grand: 0 };
+    let quantity = 0;
+    let taxable = 0;
+    let tax = 0;
     for (const item of items) {
-        const { quantity, taxable, tax } = lineAmounts(item);
-        totals.quantity += quantity;
-        totals.taxable += taxable;
-        if (sameState) {
-            totals.cgst += tax / 2;
-            totals.sgst += tax / 2;
-        } else {
-            totals.igst += tax;
-        }
+        const line = lineAmounts(item);
+        quantity += line.quantity;
+        taxable += line.taxable;
+        tax += line.tax;
     }
-    totals.grand = totals.taxable + totals.cgst + totals.sgst + totals.igst;
+    const half = round2(tax / 2);
+    const totals = {
+        quantity: round2(quantity),
+        taxable: round2(taxable),
+        cgst: sameState ? half : 0,
+        sgst: sameState ? half : 0,
+        igst: sameState ? 0 : round2(tax),
+    };
+    totals.grand = round2(totals.taxable + totals.cgst + totals.sgst + totals.igst);
     return totals;
 };
 

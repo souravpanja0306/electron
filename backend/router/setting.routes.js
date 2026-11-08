@@ -1,68 +1,17 @@
-// Package...
+"use strict";
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const path = require("path");
-const { app } = require("electron");
-const fs = require("fs");
-const uploadPath = app.isPackaged
-    ? path.join(app.getPath("userData"), "uploads", "main")
-    : path.join(__dirname, "../../uploads/main");
-if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
-const file = multer({ dest: uploadPath });
-
-// Controllers...
+const middleware = require("../middleware/middleware");
 const SettingController = require("../controller/setting.controller");
 
-// Middleware...
-const middleware = require("../middleware/middleware");
-
-router.post(
-    "/add-challan-setting",
-    middleware.isAuthenticated,
-    SettingController.addChallanSetting
-);
-
-router.get(
-    "/get-challan-setting",
-    middleware.isAuthenticated,
-    SettingController.listChallanSetting
-);
-
-router.post(
-    "/invoice-setting",
-    middleware.isAuthenticated,
-    SettingController.saveInvoiceSetting
-);
-
-router.get(
-    "/invoice-setting",
-    middleware.isAuthenticated,
-    SettingController.listInvoiceSetting
-);
-
-router.get(
-    "/field-settings",
-    middleware.isAuthenticated,
-    SettingController.getFieldSettings
-);
-
-router.put(
-    "/field-settings",
-    middleware.isAuthenticated,
-    SettingController.saveFieldSettings
-);
-
-router.get(
-    "/theme",
-    middleware.isAuthenticated,
-    SettingController.getTheme
-);
-
-router.put(
-    "/theme",
-    middleware.isAuthenticated,
-    SettingController.saveTheme
-);
+const auth = middleware.isAuthenticated;
+router.post("/add-challan-setting", auth, SettingController.addChallanSetting);
+router.get("/get-challan-setting", auth, SettingController.listChallanSetting);
+router.post("/invoice-setting", auth, SettingController.saveInvoiceSetting);
+router.get("/invoice-setting", auth, SettingController.listInvoiceSetting);
+router.get("/field-settings", auth, SettingController.getFieldSettings);
+router.put("/field-settings", auth, SettingController.saveFieldSettings);
+router.get("/theme", auth, SettingController.getTheme);
+router.put("/theme", auth, SettingController.saveTheme);
 
 module.exports = router;

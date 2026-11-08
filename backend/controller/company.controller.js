@@ -1,248 +1,120 @@
-// Package...
-const moment = require("moment");
-const fs = require("fs");
-const path = require("path");
-const { app } = require("electron");
+// Services / helpers...
+const CompanyService = require("../service/company.service");
+const { errorHandler, ok, toId, serverError } = require("../helper/http");
+const { pickBusiness, validateBusiness, countReferences, describeReferences } = require("../helper/business");
+const { saveLogo, removeLogo, discardUpload } = require("../helper/upload");
+const { uploadUrl } = require("../helper/html");
 
-// Contents...
-const contents = require("../content/contents");
+const withLogoUrl = (company) => ({ ...company, logo: uploadUrl("company", company.logo) });
 
-// Services...
-const PartyService = require("../service/party.service");
-const AuthService = require("../service/auth.service");
-const CompanyService = require("../service/company.service")
-const InvoiceService = require("../service/invoice.service");
-
-const errorHandler = (res, status, message) => {
-    return res.status(status).json({ status, message, body: [] });
-};
+// The company with this id, if it belongs to the signed-in user.
+const findOwnCompany = async (id, userId) => (await CompanyService.getCompany({ id, created_by: userId }))[0] || null;
 
 module.exports.addCompany = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-
-        // let isMobileExist = await CompanyService.getCompany({ mobile: req.body.mobile, created_by: t_userId });
-        // if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
-
-        // let isEmailExist = await CompanyService.getCompany({ mobile: req.body.email, created_by: t_userId });
-        // if (isEmailExist.length) return errorHandler(res, 409, "Email Id already registered.");
-
-        const companyFolder = app.isPackaged
-            ? path.join(app.getPath("userData"), "uploads", "company")
-            : path.join(__dirname, "../../uploads/company");
-        if (!fs.existsSync(companyFolder)) fs.mkdirSync(companyFolder, { recursive: true });
-
-        let finalData = {
-            company_name: req.body.company_name,
-            email: req.body.email,
-            mobile: req.body.mobile,
-            owner: req.body.owner,
-            address_1: req.body.address_1,
-            address_2: req.body.address_2,
-            city: req.body.city,
-            state: req.body.state,
-            district: req.body.district,
-            pincode: req.body.pincode,
-            country: req.body.country,
-            gst: req.body.gst,
-            pan: req.body.pan,
-            trade_licence: req.body.trade_licence,
-            bank: req.body.bank,
-            ifse: req.body.ifse,
-            branch: req.body.branch,
-            account_no: req.body.account_no,
-            logo: "",
-            created_by: t_userId,
-        };
-        if (req.file) {
-            let oldpath = req.file.path;
-            let file_date = moment().format("DD-MM-YYYY");
-            let random_number = Math.floor(Math.random() * 10000000000 + 1);
-            let fileName = `${random_number}_${file_date}_${req.file.originalname}`
-            let filePath = path.join(companyFolder, fileName);
-
-            fs.renameSync(oldpath, filePath, (err) => {
-                if (err) console.log(err)
-            });
-            finalData["logo"] = fileName
+        const data = pickBusiness(req.body);
+        const invalid = validateBusiness(data, "Company name");
+        if (invalid) {
+            discardUpload(req.file);
+            return errorHandler(res, 400, invalid);
         };
 
+        const finalData = { ...data, logo: "", created_by: t_userId };
+        if (req.file) finalData.logo = saveLogo(req.file, "company");
 
-        let result = await CompanyService.createCompany(finalData);
-
-        response.status = 200;
-        response.message = "Data created successfully.";
-        response.body = result;
+        const result = await CompanyService.createCompany(finalData);
+        return ok(res, "Company created successfully.", { ...result, id: Number(result.lastInsertRowid) });
     } catch (error) {
-        console.log(`Something went wrong: controller: addCompany: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: addCompany`;
-        response.body = error.body ? error.body : "";
+        discardUpload(req.file);
+        return serverError(res, "controller: addCompany", error, "Could not create the company.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.getCompany = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id } = req.query;
-
-        let search_key = {};
-        if (id) search_key["id"] = id;
-        if (t_userId) search_key["created_by"] = t_userId;
-
-        let result = await CompanyService.getCompany(search_key);
-
-        if (result.length) {
-            result.map((item) => {
-                item["logo"] = `http://localhost:3001/uploads/company/${item.logo}`;
-            });
-            response.status = 200;
-            response.message = "Data fetched succesfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "Data not found.";
-            response.body = [];
+        const search_key = { created_by: t_userId };
+        if (req.query.id) {
+            const id = toId(req.query.id);
+            if (!id) return errorHandler(res, 400, "Invalid company ID.");
+            search_key.id = id;
         };
+
+        const result = await CompanyService.getCompany(search_key);
+        if (!result.length) return res.status(202).json({ status: 202, message: "Data not found.", body: [] });
+        return ok(res, "Data fetched successfully.", result.map(withLogoUrl));
     } catch (error) {
-        console.log(`Something went wrong: controller: getCompany: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: getCompany`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: getCompany", error, "Could not load companies.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.getCompanyById = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { t_userId } = req.body;
-        const { id } = req.params;
-
-        let search_key = {};
-        if (id) search_key["id"] = id;
-        if (t_userId) search_key["created_by"] = t_userId;
-
-        let result = await CompanyService.getCompany(search_key);
-
-        if (result.length) {
-            response.status = 200;
-            response.message = "Data fetched succesfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "Data not found.";
-            response.body = [];
-        };
+        const id = toId(req.params.id);
+        if (!id) return errorHandler(res, 400, "Invalid company ID.");
+        const company = await findOwnCompany(id, req.body.t_userId);
+        if (!company) return res.status(202).json({ status: 202, message: "Data not found.", body: [] });
+        return ok(res, "Data fetched successfully.", [withLogoUrl(company)]);
     } catch (error) {
-        console.log(`Something went wrong: controller: getCompany: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: getCompany`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: getCompanyById", error, "Could not load the company.");
     };
-    return res.status(response.status).json(response);
 };
 
+/** Body: { ids: [1, 2] }. Only the user's own companies, and only ones no document uses. */
 module.exports.removeCompany = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { ids } = req.body;
-        if (!ids) {
-            response.status = 400;
-            response.message = "IDs are required";
-            response.body = [];
-            return res.status(response.status).json(response);
+        const { t_userId } = req.body;
+        const raw = Array.isArray(req.body.ids) ? req.body.ids : [req.body.ids];
+        const ids = [...new Set(raw.map(toId).filter(Boolean))];
+        if (!ids.length) return errorHandler(res, 400, "IDs are required.");
+
+        const companies = [];
+        for (const id of ids) {
+            const company = await findOwnCompany(id, t_userId);
+            if (!company) return errorHandler(res, 404, "Company not found.");
+            const usedBy = describeReferences(countReferences("company", id));
+            if (usedBy) return errorHandler(res, 409, `"${company.company_name}" is used on ${usedBy}. Delete those first, or keep the company.`);
+            companies.push(company);
         };
 
-        let result = await CompanyService.deleteCompany({ ids: ids });
-
-        if (result.changes > 0) {
-            response.status = 200;
-            response.message = "Data deleted succesfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "Data not found.";
-            response.body = [];
-        };
+        const result = await CompanyService.deleteCompany({ ids });
+        companies.forEach((company) => removeLogo(company.logo, "company"));
+        return ok(res, "Company deleted successfully.", result);
     } catch (error) {
-        console.log(`Something went wrong: controller: removeCompany: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: removeCompany`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: removeCompany", error, "Could not delete the company.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.updateCompany = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { id } = req.params;
+        const id = toId(req.params.id);
         if (!id) {
-            response.status = 400;
-            response.message = "Company ID is required";
-            response.body = [];
-            return res.status(response.status).json(response);
+            discardUpload(req.file);
+            return errorHandler(res, 400, "Company ID is required.");
         };
 
-        const updateData = {
-            company_name: req.body.company_name ? req.body.company_name : "",
-            email: req.body.email ? req.body.email : "",
-            mobile: req.body.mobile ? req.body.mobile : "",
-            owner: req.body.owner ? req.body.owner : "",
-            address_1: req.body.address_1 ? req.body.address_1 : "",
-            address_2: req.body.address_2 ? req.body.address_2 : "",
-            city: req.body.city ? req.body.city : "",
-            state: req.body.state ? req.body.state : "",
-            district: req.body.district ? req.body.district : "",
-            pincode: req.body.pincode ? req.body.pincode : "",
-            country: req.body.country ? req.body.country : "INDIA",
-            gst: req.body.gst ? req.body.gst : "",
-            pan: req.body.pan ? req.body.pan : "",
-            trade_licence: req.body.trade_licence ? req.body.trade_licence : "",
-            bank: req.body.bank ? req.body.bank : "",
-            ifse: req.body.ifse ? req.body.ifse : "",
-            branch: req.body.branch ? req.body.branch : "",
-            account_no: req.body.account_no ? req.body.account_no : "",
+        const company = await findOwnCompany(id, req.body.t_userId);
+        if (!company) {
+            discardUpload(req.file);
+            return errorHandler(res, 404, "Company not found.");
         };
 
-        const companyFolder = app.isPackaged
-            ? path.join(app.getPath("userData"), "uploads", "company")
-            : path.join(__dirname, "../../uploads/company");
-        if (!fs.existsSync(companyFolder)) fs.mkdirSync(companyFolder, { recursive: true });
-
-
-        if (req.file) {
-            let oldpath = req.file.path;
-            let file_date = moment().format("DD-MM-YYYY");
-            let random_number = Math.floor(Math.random() * 10000000000 + 1);
-            let fileName = `${random_number}_${file_date}_${req.file.originalname}`
-            let filePath = path.join(companyFolder, fileName);
-            fs.renameSync(oldpath, filePath, (err) => {
-                if (err) console.log(err)
-            });
-            updateData["logo"] = fileName;
+        const data = pickBusiness(req.body);
+        const invalid = validateBusiness(data, "Company name");
+        if (invalid) {
+            discardUpload(req.file);
+            return errorHandler(res, 400, invalid);
         };
 
-        let result = await CompanyService.updateCompany(id, updateData);
+        if (req.file) data.logo = saveLogo(req.file, "company");
+        else if (req.body.remove_logo === "1") data.logo = "";
 
-        if (result.changes > 0) {
-            response.status = 200;
-            response.message = "Company updated successfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "Company not found or no changes made.";
-            response.body = [];
-        };
+        const result = await CompanyService.updateCompany(id, data);
+        if ("logo" in data && company.logo && company.logo !== data.logo) removeLogo(company.logo, "company");
+        return ok(res, "Company updated successfully.", result);
     } catch (error) {
-        console.log(`Something went wrong: controller: updateCompany: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: updateCompany`;
-        response.body = error.body ? error.body : "";
+        discardUpload(req.file);
+        return serverError(res, "controller: updateCompany", error, "Could not update the company.");
     };
-    return res.status(response.status).json(response);
 };

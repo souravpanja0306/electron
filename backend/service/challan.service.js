@@ -2,7 +2,6 @@ const { db } = require("../database/connection");
 
 module.exports.insertChallanData = async (data) => {
     try {
-        const columns = db.prepare("PRAGMA table_info(challan)").all();
         const keys = Object.keys(data);
         const result = db
             .prepare(`INSERT INTO challan (${keys.join(",")}) VALUES (${keys.map(k => "@" + k).join(",")})`)

@@ -1,72 +1,98 @@
+const Database = require("better-sqlite3");
+const fs = require("fs");
 const { db } = require("../database/connection");
 
-module.exports.resetTableData = async ({
-    tableNames = "",
-}) => {
-    try {
-        let result = await db.exec(`DROP TABLE IF EXISTS ${tableNames}`);
-
-        db.exec(require("../database/schema/gst.schema"));
-        db.exec(require("../database/schema/challan.schema"));
-        db.exec(require("../database/schema/moneyReceipts.schema"));
-        db.exec(require("../database/schema/company.schema"));
-        db.exec(require("../database/schema/user.schema"));
-        db.exec(require("../database/schema/party.schema"));
-        db.exec(require("../database/schema/invoice.schema"));
-        db.exec(require("../database/schema/settingChallanSchema"));
-        db.exec(require("../database/schema/cha.schema"));
-
-        return result;
-    } catch (error) {
-        console.log(`Something went wrong: service: resetTableData: ${error}`);
-        throw error;
-    };
+/*
+ * Data reset. Only these fixed table names are ever touched (never user input), rows are
+ * deleted rather than tables dropped, and the user account + preferences are always kept.
+ */
+const RESET_SCOPES = {
+    // Documents only: masters and numbering settings stay.
+    transactions: ["invoice", "challan", "money_receipts"],
+    // All business data. Keeps `users` and `user_setting` (theme, field visibility).
+    all: [
+        "invoice", "challan", "money_receipts",
+        "party", "company", "cha", "gst", "hsn_sac", "vendor",
+        "invoice_setting", "challan_setting",
+    ],
 };
 
-module.exports.getAllCollectionData = async () => {
-    try {
-        const statement = db.prepare(
-            `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`
-        );
-        const rows = statement.all();
-        const collectionNames = rows.map(row => row.name);
-        return {
-            collections: collectionNames,
-            totalCollections: collectionNames.length
-        };
-    } catch (error) {
-        console.log(`Something went wrong: service: getAllCollectionData: ${error}`);
+module.exports.RESET_SCOPES = RESET_SCOPES;
+
+/** Deletes every row in the scope's tables (one transaction) and restarts their ID counters. */
+module.exports.resetBusinessData = ({ scope }) => {
+    const tables = RESET_SCOPES[scope];
+    if (!tables) {
+        const error = new Error("Unknown reset scope.");
+        error.status = 400;
         throw error;
     };
+    const existing = new Set(
+        db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((row) => row.name)
+    );
+    const hasSequence = existing.has("sqlite_sequence");
+
+    return db.transaction(() => {
+        const deleted = {};
+        for (const table of tables) {
+            if (!existing.has(table)) continue;
+            deleted[table] = db.prepare(`DELETE FROM "${table}"`).run().changes;
+            if (hasSequence) db.prepare("DELETE FROM sqlite_sequence WHERE name = ?").run(table);
+        };
+        return deleted;
+    })();
 };
 
-module.exports.migrateTableData = async (data) => {
-    try {
-        const migratedFields = [];
+/** Row counts for the tables shown on the Database settings page. */
+module.exports.getDataSummary = () => {
+    const existing = new Set(
+        db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((row) => row.name)
+    );
+    const summary = {};
+    for (const table of RESET_SCOPES.all) {
+        summary[table] = existing.has(table) ? db.prepare(`SELECT COUNT(*) AS n FROM "${table}"`).get().n : 0;
+    };
+    return summary;
+};
 
-        for (const table of data) {
-            const { table_name, fields } = table;
-            const columns = db.prepare(`PRAGMA table_info(${table_name})`).all();
+/** Consistent snapshot of the live database (safe while the app is writing). */
+module.exports.backupDatabase = (destination) => db.backup(destination);
 
-            for (const field of fields) {
-                const { field_name, field_type } = field;
+const SQLITE_HEADER = "SQLite format 3\u0000";
+const REQUIRED_TABLES = ["users", "company", "party", "invoice", "challan"];
 
-                const exists = columns.some(
-                    column => column.name === field_name
-                );
-                if (!exists) {
-                    db.prepare(`ALTER TABLE ${table_name} ADD COLUMN ${field_name} ${field_type}`).run();
-                    migratedFields.push({
-                        table_name,
-                        field_name,
-                    });
-                };
-            };
-        };
-        return migratedFields;;
-    } catch (error) {
-        console.log(`Something went wrong: service: migrateTableData: ${error}`);
+/**
+ * Checks that `filePath` is an intact MyERP database. Throws an error with
+ * `status = 400` and a user-facing message when it isn't.
+ */
+module.exports.verifyBackupFile = (filePath) => {
+    const fail = (message) => {
+        const error = new Error(message);
+        error.status = 400;
         throw error;
+    };
+
+    const handle = fs.openSync(filePath, "r");
+    const header = Buffer.alloc(16);
+    try {
+        fs.readSync(handle, header, 0, 16, 0);
+    } finally {
+        fs.closeSync(handle);
+    };
+    if (header.toString("latin1") !== SQLITE_HEADER) fail("This file is not a MyERP database backup.");
+
+    let probe;
+    try {
+        probe = new Database(filePath, { readonly: true, fileMustExist: true });
+    } catch (error) {
+        fail("This backup file could not be opened.");
+    };
+    try {
+        if (probe.pragma("integrity_check", { simple: true }) !== "ok") fail("This backup file is damaged.");
+        const tables = new Set(probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((row) => row.name));
+        if (REQUIRED_TABLES.some((table) => !tables.has(table))) fail("This file is not a MyERP database backup.");
+    } finally {
+        probe.close();
     };
 };
 
@@ -117,6 +143,8 @@ module.exports.findHSNSAC = async ({
             params.push(code);
         };
 
+        query += " ORDER BY code";
+
         if (limit && skip) {
             query += " LIMIT ? OFFSET ?";
             params.push(Number(limit), Number(skip));
@@ -134,13 +162,13 @@ module.exports.findHSNSAC = async ({
     };
 };
 
-module.exports.updateHSNSAC = async (id, data) => {
+module.exports.updateHSNSAC = async (id, data, created_by) => {
     try {
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db
-            .prepare(`UPDATE hsn_sac SET ${setClause} WHERE id = @id`)
-            .run({ ...data, id });
+            .prepare(`UPDATE hsn_sac SET ${setClause} WHERE id = @id AND created_by = @created_by AND is_deleted = 0`)
+            .run({ ...data, id, created_by });
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: updateHSNSAC: ${error}`);
@@ -148,11 +176,11 @@ module.exports.updateHSNSAC = async (id, data) => {
     };
 };
 
-module.exports.deleteHSNSAC = async (id) => {
+module.exports.deleteHSNSAC = async (id, created_by) => {
     try {
         const result = db
-            .prepare("UPDATE hsn_sac SET is_deleted = 1 WHERE id = ?")
-            .run(id);
+            .prepare("UPDATE hsn_sac SET is_deleted = 1 WHERE id = ? AND created_by = ? AND is_deleted = 0")
+            .run(id, created_by);
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: deleteHSNSAC: ${error}`);
@@ -196,10 +224,12 @@ module.exports.findGST = async ({
             params.push(created_by);
         };
 
-        if (total_rate) {
+        if (total_rate !== "" && total_rate !== null && total_rate !== undefined) {
             query += " AND total_rate = ?";
-            params.push(total_rate);
+            params.push(Number(total_rate));
         };
+
+        query += " ORDER BY total_rate";
 
         if (limit && skip) {
             query += " LIMIT ? OFFSET ?";
@@ -218,14 +248,14 @@ module.exports.findGST = async ({
     };
 };
 
-module.exports.updateGST = async (id, data) => {
+module.exports.updateGST = async (id, data, created_by) => {
     try {
 
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db
-            .prepare(`UPDATE gst SET ${setClause} WHERE id = @id`)
-            .run({ ...data, id });
+            .prepare(`UPDATE gst SET ${setClause} WHERE id = @id AND created_by = @created_by AND is_deleted = 0`)
+            .run({ ...data, id, created_by });
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: updateGST: ${error}`);
@@ -233,12 +263,12 @@ module.exports.updateGST = async (id, data) => {
     };
 };
 
-module.exports.deleteGST = async (id) => {
+module.exports.deleteGST = async (id, created_by) => {
     try {
 
         const result = db
-            .prepare("UPDATE gst SET is_deleted = 1 WHERE id = ?")
-            .run(id);
+            .prepare("UPDATE gst SET is_deleted = 1 WHERE id = ? AND created_by = ? AND is_deleted = 0")
+            .run(id, created_by);
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: deleteGST: ${error}`);
@@ -264,6 +294,7 @@ module.exports.findCHA = async ({
     id = "",
     created_by = "",
     name = "",
+    exact_name = "",
     mobile = "",
     limit = "",
     skip = "",
@@ -288,6 +319,11 @@ module.exports.findCHA = async ({
             params.push(`%${name}%`);
         };
 
+        if (exact_name) {
+            query += " AND name = ? COLLATE NOCASE";
+            params.push(exact_name);
+        };
+
         if (mobile) {
             query += " AND mobile = ?";
             params.push(mobile);
@@ -310,13 +346,13 @@ module.exports.findCHA = async ({
     };
 };
 
-module.exports.updateCHA = async (id, data) => {
+module.exports.updateCHA = async (id, data, created_by) => {
     try {
         const keys = Object.keys(data);
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db
-            .prepare(`UPDATE cha SET ${setClause} WHERE id = @id`)
-            .run({ ...data, id });
+            .prepare(`UPDATE cha SET ${setClause} WHERE id = @id AND created_by = @created_by AND is_deleted = 0`)
+            .run({ ...data, id, created_by });
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: updateCHA: ${error}`);
@@ -324,11 +360,11 @@ module.exports.updateCHA = async (id, data) => {
     };
 };
 
-module.exports.deleteCHA = async (id) => {
+module.exports.deleteCHA = async (id, created_by) => {
     try {
         const result = db
-            .prepare("UPDATE cha SET is_deleted = 1 WHERE id = ?")
-            .run(id);
+            .prepare("UPDATE cha SET is_deleted = 1 WHERE id = ? AND created_by = ? AND is_deleted = 0")
+            .run(id, created_by);
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: deleteCHA: ${error}`);

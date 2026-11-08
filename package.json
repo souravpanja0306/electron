@@ -23,6 +23,8 @@
       "frontend/build/**/*",
       "uploads/main/**/*",
       "!backend/database/dev.db",
+      "!backend/database/.jwt-secret",
+      "!backend/database/*.bak",
       "public/**/*",
       "package.json"
     ],

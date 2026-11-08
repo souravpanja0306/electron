@@ -52,24 +52,6 @@ const useMoneyReceiptStore = create((set) => ({
         return result.data;
     },
 
-    downloadMoneyReceipts: async ({
-        id = "",
-        token = ""
-    }) => {
-        try {
-            set({ downloadLoading: true });
-            const result = await api({
-                method: "get",
-                url: `/money-receipt/generate-money-receipt-pdf/${id}`,
-            });
-            set({ downloadLoading: false });
-            return result.data;
-        } catch (error) {
-            set({ downloadLoading: false });
-            throw error;
-        };
-    },
-
     createMoneyReceipts: async ({
         payload = "",
         token = ""

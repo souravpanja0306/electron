@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import api from "../utils/axiosInterceptor";
-import axios from "axios";
 
 
 const useCompanyStore = create((set) => ({
@@ -12,7 +11,7 @@ const useCompanyStore = create((set) => ({
             set({ companyLoading: true });
             const result = await api({
                 method: "post",
-                url: "http://localhost:3001/api/v1/company/create-company",
+                url: "/company/create-company",
                 headers: {
                     "Content-Type": "multipart/form-data",
                     "Authorization": `Bearer ${token}`,
@@ -88,9 +87,9 @@ const useCompanyStore = create((set) => ({
     updateCompany: async (id, payload, token) => {
         try {
             set({ companyLoading: true });
-            const result = await axios({
+            const result = await api({
                 method: "put",
-                url: `http://localhost:3001/api/v1/company/update-company/${id}`,
+                url: `/company/update-company/${id}`,
                 headers: {
                     "Content-Type": "multipart/form-data",
                     "Authorization": `Bearer ${token}`,

@@ -1,115 +1,37 @@
-// Package...
+"use strict";
 const express = require("express");
-const router = express.Router()
+const router = express.Router();
+const middleware = require("../middleware/middleware");
+const os = require("os");
 const multer = require("multer");
-const path = require("path");
-const { app } = require("electron");
-const fs = require("fs");
-const uploadPath = app.isPackaged
-    ? path.join(app.getPath("userData"), "uploads", "main")
-    : path.join(__dirname, "../../uploads/main");
-if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
-const file = multer({ dest: uploadPath });
-
-// Controllers...
+// Backups are verified, then staged; they never land in the served uploads folder.
+const restoreUpload = multer({ dest: os.tmpdir(), limits: { fileSize: 500 * 1024 * 1024, files: 1 } });
 const AdminController = require("../controller/admin.controller");
 
-// Middleware...
-const middleware = require("../middleware/middleware");
+const auth = middleware.isAuthenticated;
 
-router.get(
-    "/reset-all-table",
-    AdminController.resetAllTable
-);
+// Database backup / restore / reset (Settings > Database).
+router.get("/dump-db", auth, AdminController.dumpDB);
+router.post("/restore-db", auth, restoreUpload.single("backup"), AdminController.restoreDB);
+router.post("/reset-data", auth, AdminController.resetData);
+router.get("/data-summary", auth, AdminController.dataSummary);
 
-router.get(
-    "/get-all-collection",
-    AdminController.getAllCollection
-);
+// HSN / SAC master
+router.post("/create-hsn-code", auth, AdminController.createHsnSac);
+router.get("/get-hsn-code", auth, AdminController.getHsnSac);
+router.put("/update-hsn-code", auth, AdminController.updateHsnSac);
+router.delete("/delete-hsn-code/:id", auth, AdminController.deleteHsnSac);
 
-router.post(
-    "/migrate-table",
-    AdminController.migrateTable
-);
+// GST master
+router.post("/create-gst", auth, AdminController.createGST);
+router.get("/get-all-gst", auth, AdminController.getGST);
+router.put("/update-gst", auth, AdminController.updateGST);
+router.delete("/delete-gst/:id", auth, AdminController.deleteGST);
 
-router.get(
-    "/dump-db",
-    AdminController.dumpDB
-);
-
-// HSN Create...
-router.post(
-    "/create-hsn-code",
-    middleware.isAuthenticated,
-    AdminController.createHsnSac
-);
-
-router.get(
-    "/get-hsn-code",
-    middleware.isAuthenticated,
-    AdminController.getHsnSac
-);
-
-router.put(
-    "/update-hsn-code",
-    middleware.isAuthenticated,
-    AdminController.updateHsnSac
-);
-
-router.delete(
-    "/delete-hsn-code/:id",
-    middleware.isAuthenticated,
-    AdminController.deleteHsnSac
-);
-
-// GST setup
-router.post(
-    "/create-gst",
-    middleware.isAuthenticated,
-    AdminController.createGST
-);
-
-router.get(
-    "/get-all-gst",
-    middleware.isAuthenticated,
-    AdminController.getGST
-);
-
-router.put(
-    "/update-gst",
-    middleware.isAuthenticated,
-    AdminController.updateGST
-);
-
-router.delete(
-    "/delete-gst/:id",
-    middleware.isAuthenticated,
-    AdminController.deleteGST
-);
-
-// CHA routes
-router.post(
-    "/create-cha",
-    middleware.isAuthenticated,
-    AdminController.createCHA
-);
-
-router.get(
-    "/get-cha",
-    middleware.isAuthenticated,
-    AdminController.getCHA
-);
-
-router.put(
-    "/update-cha",
-    middleware.isAuthenticated,
-    AdminController.updateCHA
-);
-
-router.delete(
-    "/delete-cha/:id",
-    middleware.isAuthenticated,
-    AdminController.deleteCHA
-);
+// CHA master
+router.post("/create-cha", auth, AdminController.createCHA);
+router.get("/get-cha", auth, AdminController.getCHA);
+router.put("/update-cha", auth, AdminController.updateCHA);
+router.delete("/delete-cha/:id", auth, AdminController.deleteCHA);
 
 module.exports = router;

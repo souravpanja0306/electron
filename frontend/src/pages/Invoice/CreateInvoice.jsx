@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import moment from 'moment';
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import CustomButton from '../../components/CustomButton';
 import InvoiceForm from '../../components/InvoiceForm';
-import { PartyQuickAddModal, ChaQuickAddModal, HsnQuickAddModal } from '../../components/FormKit';
+import { PartyQuickAddModal, ChaQuickAddModal, HsnQuickAddModal, Notice } from '../../components/FormKit';
 
 // Icon...
 import {
+  AiOutlineInfoCircle,
   AiOutlineFileAdd,
   AiOutlineTable,
   AiOutlineRollback,
@@ -249,19 +250,13 @@ const CreateInvoice = () => {
     <>
       <PageTitle>Create Tax Invoice</PageTitle>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <ActionArea>
           {back && (
-            <div onClick={() => navigate(-1)}>
-              <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-            </div>
+            <CustomButton onClick={() => navigate(-1)} title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
           )}
-          <div onClick={handleSubmitForm}>
-            <CustomButton title={"Save (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineFileAdd /></CustomButton>
-          </div>
-          <Link to="/view-invoice">
-            <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-          </Link>
+          <CustomButton onClick={handleSubmitForm} title={"Save (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineFileAdd /></CustomButton>
+          <CustomButton onClick={() => navigate("/view-invoice")} title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
         </ActionArea>
 
         <InvoiceForm
@@ -279,21 +274,19 @@ const CreateInvoice = () => {
           gstData={gstData}
           hsnData={hsnData}
           onAddParty={partyAdd.open}
-        onAddHsn={hsnAdd.open}
+          onAddHsn={hsnAdd.open}
           chaData={chaData}
           onAddCha={() => setChaModal(true)}
           showCha={showCha}
           notice={sourceChallanNo ? (
-            <div className="rounded border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/40 px-3 py-2 text-xs text-blue-800 dark:text-blue-200">
-              Creating an invoice from challan <strong>{sourceChallanNo}</strong>. Party, transport details and items were copied from it. Add the rates and GST before saving.
-            </div>
+            <Notice tone="info" icon={<AiOutlineInfoCircle />}>Creating an invoice from challan <strong>{sourceChallanNo}</strong>. Party, transport details and items were copied from it. Add the rates and GST before saving.</Notice>
           ) : null}
         />
       </div>
 
       <PartyQuickAddModal {...partyAdd.modalProps} />
       <ChaQuickAddModal isOpen={chaModal} onClose={() => setChaModal(false)} onSubmit={handleChaSubmit} loading={chaLoading} error={chaError} />
-    <HsnQuickAddModal {...hsnAdd.modalProps} />
+      <HsnQuickAddModal {...hsnAdd.modalProps} />
     </>
   );
 };

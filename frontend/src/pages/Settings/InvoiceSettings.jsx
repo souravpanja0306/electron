@@ -1,166 +1,147 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner';
-
-// Icons...
-import { AiOutlineFileAdd } from 'react-icons/ai';
+import { AiOutlineSave } from 'react-icons/ai';
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
-import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
-import SearchableSelect from '../../components/SearchableSelect';
-import { inputCls, labelCls, Required } from '../../components/FormKit';
 import ChaVisibilitySetting from '../../components/ChaVisibilitySetting';
+import {
+    SettingsPanel, SettingsSection, SaveBar, CompanyPicker, NumberFormatEditor, TextAreaWithCount,
+} from '../../components/SettingsKit';
 
-// Stores...
+// Stores / hooks...
 import useCompanyStore from '../../store/CompanyStore';
+import useAuthStore from '../../store/AuthStore';
 import api from '../../utils/axiosInterceptor';
 import useShortcuts from "../../hooks/useShortcuts";
+import useForm from "../../hooks/useForm";
+import { errorMessage } from '../../utils/format';
 
-const SettingCard = ({ title, description, children }) => (
-    <div className="flex flex-col gap-3 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-        <div>
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{title}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
-        </div>
-        {children}
-    </div>
-);
+const DEFAULTS = { invoice_prefix: "INV-", invoice_suffix: "", invoice_start_number: "1", terms_and_conditions: "" };
+
+const validator = (d) => {
+    const errors = {};
+    if (!(Number(d.invoice_start_number) >= 1)) errors.invoice_start_number = "Start from 1 or higher.";
+    return errors;
+};
 
 const InvoiceSettings = () => {
-    const { companyData, getAllCompany } = useCompanyStore();
-    const [data, setData] = useState({
-        company_id: "",
-        invoice_prefix: "INV-",
-        invoice_suffix: "",
-        invoice_start_number: 1,
-        terms_and_conditions: "",
-    });
+    const { token } = useAuthStore();
+    const { companyData, getAllCompany, companyLoading } = useCompanyStore();
+    const [companyId, setCompanyId] = useState("");
     const [loading, setLoading] = useState(false);
+    const form = useForm(DEFAULTS, validator);
+    const { data, set, errors } = form;
 
+    useEffect(() => { getAllCompany(token); }, []);
+
+    // Load this company's saved settings (or defaults when none are saved yet).
     useEffect(() => {
-        getAllCompany();
-    }, []);
+        if (!companyId) return;
+        let alive = true;
+        setLoading(true);
+        api.get(`/setting/invoice-setting?company_id=${companyId}`)
+            .then((response) => {
+                if (!alive) return;
+                const saved = response.data.body?.[0];
+                form.load({
+                    invoice_prefix: saved?.invoice_prefix ?? DEFAULTS.invoice_prefix,
+                    invoice_suffix: saved?.invoice_suffix ?? "",
+                    invoice_start_number: String(saved?.invoice_start_number ?? 1),
+                    terms_and_conditions: saved?.terms_and_conditions ?? "",
+                });
+            })
+            .catch((error) => alive && toast.error(errorMessage(error, "Unable to load invoice settings.")))
+            .finally(() => alive && setLoading(false));
+        return () => { alive = false; };
+    }, [companyId]);
 
-    useEffect(() => {
-        const loadSettings = async () => {
-            if (!data.company_id) return;
-            setLoading(true);
-            try {
-                const response = await api.get(`/setting/invoice-setting?company_id=${data.company_id}`);
-                const settings = response.data.body?.[0];
-                setData((current) => ({
-                    ...current,
-                    invoice_prefix: settings?.invoice_prefix ?? "INV-",
-                    invoice_suffix: settings?.invoice_suffix ?? "",
-                    invoice_start_number: settings?.invoice_start_number ?? 1,
-                    terms_and_conditions: settings?.terms_and_conditions ?? "",
-                }));
-            } catch (error) {
-                toast.error(error.response?.data?.message || "Unable to load invoice settings.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadSettings();
-    }, [data.company_id]);
-
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        setData((current) => ({ ...current, [name]: value }));
+    const changeCompany = (id) => {
+        if (id === companyId) return;
+        if (form.dirty && !window.confirm("Discard unsaved changes for this company?")) return;
+        setCompanyId(id);
     };
 
-    const handleSubmit = async (e) => {
-        if (e?.preventDefault) e.preventDefault();
-        if (loading) return;
-        if (!data.company_id) {
-            toast.error("Please select a company.");
-            return;
-        }
-        setLoading(true);
+    const save = form.submit(async (d) => {
+        if (!companyId) return toast.error("Please select a company.");
         try {
             const response = await api.post("/setting/invoice-setting", {
-                ...data,
-                invoice_start_number: Math.max(1, Number(data.invoice_start_number) || 1),
+                company_id: companyId,
+                ...d,
+                invoice_start_number: Math.max(1, Number(d.invoice_start_number) || 1),
             });
-            toast.success(response.data.message);
+            if (response.data?.status === 200) {
+                toast.success(response.data.message || "Invoice settings saved.");
+                form.markSaved();
+            } else {
+                toast.error(response.data?.message || "Unable to save invoice settings.");
+            }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Unable to save invoice settings.");
-        } finally {
-            setLoading(false);
+            toast.error(errorMessage(error, "Unable to save invoice settings."));
         }
-    };
-
-    useShortcuts({
-        s: (e) => handleSubmit(e),
     });
 
+    useShortcuts({ s: (e) => companyId && save(e) });
+
+    const onChange = (e) => set({ [e.target.name]: e.target.value });
     // Mirrors the backend: prefix + (start + existing invoices for the company) padded to 6 + suffix.
     const preview = `${data.invoice_prefix || ""}${String(Math.max(1, Number(data.invoice_start_number) || 1)).padStart(6, "0")}${data.invoice_suffix || ""}`;
+    const disabled = !companyId || loading;
 
     return (
         <div className="flex flex-col gap-1">
-            <PageTitle>Invoice Setup</PageTitle>
+            <PageTitle>Invoice Settings</PageTitle>
 
             <ActionArea>
-                <CustomButton title="Save (Ctrl+S)" color="blue" onClick={handleSubmit} disabled={loading}><AiOutlineFileAdd /></CustomButton>
+                <CustomButton title={form.saving ? "Saving..." : "Save (Ctrl+S)"} color="blue" onClick={save} disabled={disabled || form.saving || !form.dirty}>
+                    <AiOutlineSave />
+                </CustomButton>
             </ActionArea>
 
-            <MainArea>
-                <form onSubmit={handleSubmit} className="w-full max-w-2xl flex flex-col gap-3 p-2" autoComplete="off">
-                    <div className="flex flex-col sm:flex-row sm:items-center w-full gap-1">
-                        <label className={`${labelCls} sm:w-32 sm:shrink-0`}>Company<Required /></label>
-                        <SearchableSelect
-                            className="w-full"
-                            name="company_id"
-                            value={data.company_id}
-                            onChange={handleChange}
-                            options={(companyData || []).map((company) => ({ id: company.id, label: company.company_name }))}
-                            placeholder="Select Company"
-                            required
+            <CompanyPicker companies={companyData || []} value={companyId} onChange={changeCompany} loading={companyLoading} />
+
+            <form onSubmit={save} autoComplete="off" className={`transition-opacity ${disabled ? "opacity-60 pointer-events-none" : ""}`} aria-busy={loading}>
+                <SettingsPanel>
+                    <SettingsSection
+                        title="Invoice numbering"
+                        description="Each company has its own series. Numbers are padded to 6 digits and continue from the invoices you already have."
+                    >
+                        <NumberFormatEditor
+                            names={{ prefix: "invoice_prefix", start: "invoice_start_number", suffix: "invoice_suffix" }}
+                            values={{ prefix: data.invoice_prefix, start: data.invoice_start_number, suffix: data.invoice_suffix }}
+                            errors={{ start: errors.invoice_start_number }}
+                            onChange={onChange}
+                            preview={preview}
+                            previewNote="First invoice number"
                         />
-                    </div>
+                    </SettingsSection>
 
-                    <SettingCard title="Invoice Number Format" description="Each company has its own invoice number series.">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <div className="flex flex-col gap-1">
-                                <label className={labelCls} htmlFor="invoice_prefix">Prefix</label>
-                                <input id="invoice_prefix" name="invoice_prefix" value={data.invoice_prefix} onChange={handleChange} placeholder="e.g. INV-" className={inputCls} />
-                            </div>
-                            <div className="flex flex-col gap-1">
-                                <label className={labelCls} htmlFor="invoice_start_number">Starting Number</label>
-                                <input id="invoice_start_number" name="invoice_start_number" value={data.invoice_start_number} onChange={handleChange} type="number" min="1" className={inputCls} />
-                            </div>
-                            <div className="flex flex-col gap-1">
-                                <label className={labelCls} htmlFor="invoice_suffix">Suffix</label>
-                                <input id="invoice_suffix" name="invoice_suffix" value={data.invoice_suffix} onChange={handleChange} placeholder="e.g. /26-27" className={inputCls} />
-                            </div>
-                        </div>
-                        <div className="rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
-                            First invoice number: <span className="font-mono font-semibold text-slate-800 dark:text-slate-100">{preview}</span>
-                            <span className="ml-1 text-slate-500 dark:text-slate-400">(later ones continue from your existing invoices)</span>
-                        </div>
-                    </SettingCard>
-
-                    <SettingCard title="Terms & Conditions" description="Printed on every new invoice for this company.">
-                        <textarea
-                            name="terms_and_conditions"
+                    <SettingsSection
+                        title="Terms & conditions"
+                        description="Printed at the bottom of every new invoice for this company. You can still edit it on each invoice."
+                    >
+                        <TextAreaWithCount
+                            id="f-terms_and_conditions"
                             value={data.terms_and_conditions}
-                            onChange={handleChange}
-                            rows={4}
-                            placeholder="e.g. Goods once sold will not be taken back..."
-                            className={`${inputCls} h-auto py-1 resize-y`}
+                            onChange={(e) => set({ terms_and_conditions: e.target.value })}
+                            placeholder={"1. Payment due within 30 days.\n2. Subject to local jurisdiction."}
                         />
-                    </SettingCard>
+                    </SettingsSection>
+                </SettingsPanel>
+            </form>
 
+            <SettingsPanel>
+                <SettingsSection
+                    title="Form fields"
+                    description="Applies to every company, and to both Create Invoice and Create Challan. Saved instantly."
+                >
                     <ChaVisibilitySetting />
+                </SettingsSection>
+            </SettingsPanel>
 
-                    <div className="rounded border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
-                        More settings coming soon…
-                    </div>
-                </form>
-            </MainArea>
+            <SaveBar dirty={form.dirty && !disabled} saving={form.saving} onSave={save} onDiscard={form.reset} />
         </div>
     );
 };

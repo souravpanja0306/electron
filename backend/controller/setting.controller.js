@@ -1,122 +1,78 @@
-// Package...
-const moment = require("moment");
-const fs = require("fs");
-const path = require("path");
-const { app } = require("electron");
-
-// Contents...
+// Services / helpers...
+const SettingService = require("../service/setting.service");
+const CompanyService = require("../service/company.service");
 const contents = require("../content/contents");
-
-// Services...
-const UserService = require("../service/user.service");
-const AdminService = require("../service/admin.service")
-const PartyService = require("../service/party.service");
-const AuthService = require("../service/auth.service")
-const InvoiceService = require("../service/invoice.service");
-const SettingService = require("../service/setting.service")
-
-// DB Connection...
-const { dbPath } = require("../database/connection");
-
-const errorHandler = (res, status, message) => {
-    return res.status(status).json({ status, message, body: [] });
-};
+const { errorHandler, str, toId } = require("../helper/http");
 
 // Fields are shown unless explicitly switched off (older clients don't send the flag).
 const toShowFlag = (value) => (value === false || value === 0 || value === "0" || value === "false" ? 0 : 1);
 
-module.exports.addChallanSetting = async (req, res) => {
-    let response = { ...contents.defaultResponse };
-    try {
-        const { company_id, prefix, suffix, starting, terms, remarks } = req.body;
+// The company id, if it belongs to the signed-in user.
+const ownCompanyId = async (company_id, userId) => {
+    const id = toId(company_id);
+    if (!id) return null;
+    const rows = await CompanyService.getCompany({ id, created_by: userId });
+    return rows.length ? id : null;
+};
 
-        let finalData = {
-            company_id: company_id,
-            prefix: prefix,
-            suffix: suffix,
-            starting: starting,
-            terms: terms,
-            remarks: remarks,
+const MAX_AFFIX = 20;
+
+/** Body: { company_id, prefix, suffix, starting, terms, remarks } — one row per company. */
+module.exports.addChallanSetting = async (req, res) => {
+    try {
+        const company_id = await ownCompanyId(req.body.company_id, req.body.t_userId);
+        if (!company_id) return errorHandler(res, 400, "Please select a company.");
+
+        const prefix = str(req.body.prefix);
+        const suffix = str(req.body.suffix);
+        const startingText = str(req.body.starting);
+        const starting = startingText === "" ? 0 : Number(startingText);
+        if (prefix.length > MAX_AFFIX || suffix.length > MAX_AFFIX) return errorHandler(res, 400, `Prefix and suffix can be up to ${MAX_AFFIX} characters.`);
+        if (!Number.isInteger(starting) || starting < 0) return errorHandler(res, 400, "Starting number must be 0 or a whole number above 0.");
+
+        const finalData = {
+            company_id,
+            prefix,
+            suffix,
+            starting,
+            terms: str(req.body.terms),
+            remarks: str(req.body.remarks),
         };
-        let isExist = await SettingService.getChallanSetting({ company_id: company_id });
-        if (isExist.length) {
-            const result = await SettingService.updateChallanSetting({
-                id: isExist[0].id,
-                data: finalData
-            });
-            if (result) {
-                response.status = 200;
-                response.message = "Challan setting updated successfully.";
-                response.body = result;
-            } else {
-                response.status = 202;
-                response.message = "Something went wrong, please try again.";
-                response.body = [];
-            };
-        } else {
-            const result = await SettingService.createChallanSetting(finalData);
-            if (result) {
-                response.status = 200;
-                response.message = "Challan setting added successfully.";
-                response.body = result;
-            } else {
-                response.status = 202;
-                response.message = "Something went wrong, please try again.";
-                response.body = [];
-            };
-        };
+        const existing = await SettingService.getChallanSetting({ company_id });
+        const result = existing.length
+            ? await SettingService.updateChallanSetting({ id: existing[0].id, data: finalData })
+            : await SettingService.createChallanSetting(finalData);
+        return res.status(200).json({
+            status: 200,
+            message: existing.length ? "Challan setting updated successfully." : "Challan setting added successfully.",
+            body: result,
+        });
     } catch (error) {
         console.log(`Something went wrong: controller: addChallanSetting: ${error}`);
         return errorHandler(res, 500, "Internal Server Error");
     };
-    return res.status(response.status).json(response);
 };
 
+/** Query: company_id (optional). Without it, the settings of all the user's companies. */
 module.exports.listChallanSetting = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { company_id } = req.query;
-
-        let search_key = {};
-        if (company_id) search_key["company_id"] = parseInt(company_id);
-
-        const result = await SettingService.getChallanSetting(search_key);
-        if (result.length) {
-            response.status = 200;
-            response.message = "Challan settings fetched successfully.";
-            response.body = result;
+        const { t_userId } = req.body;
+        let result;
+        if (req.query.company_id) {
+            const company_id = await ownCompanyId(req.query.company_id, t_userId);
+            if (!company_id) return errorHandler(res, 404, "Company not found.");
+            result = await SettingService.getChallanSetting({ company_id });
         } else {
-            response.status = 202;
-            response.message = "Something went wrong, please try again.";
-            response.body = [];
+            const companies = await CompanyService.getCompany({ created_by: t_userId });
+            const ids = new Set(companies.map((c) => c.id));
+            result = (await SettingService.getChallanSetting({})).filter((row) => ids.has(row.company_id));
         };
+        if (!result.length) return res.status(202).json({ status: 202, message: "No challan settings saved yet.", body: [] });
+        return res.status(200).json({ status: 200, message: "Challan settings fetched successfully.", body: result });
     } catch (error) {
         console.log(`Something went wrong: controller: listChallanSetting: ${error}`);
         return errorHandler(res, 500, "Internal Server Error");
     };
-    return res.status(response.status).json(response);
-};
-
-module.exports.editChallanSetting = async (req, res) => {
-    let response = { ...contents.defaultResponse };
-    try {
-        const { id } = req.params;
-
-        const result = await SettingService.updateChallanSetting(id, req.body);
-        if (result) {
-            response.status = 200;
-            response.message = "Challan setting updated successfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "Something went wrong, please try again.";
-            response.body = [];
-        };
-    } catch (error) {
-        console.log(`Something went wrong: controller: editChallanSetting: ${error}`);
-        return errorHandler(res, 500, "Internal Server Error");
-    };
-    return res.status(response.status).json(response);
 };
 
 module.exports.getTheme = async (req, res) => {
@@ -184,15 +140,21 @@ module.exports.saveFieldSettings = async (req, res) => {
 module.exports.saveInvoiceSetting = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-        const { company_id, invoice_prefix, invoice_suffix, invoice_start_number, terms_and_conditions } = req.body;
+        const company_id = await ownCompanyId(req.body.company_id, req.body.t_userId);
         if (!company_id) return errorHandler(res, 400, "Please select a company.");
 
+        const invoice_prefix = str(req.body.invoice_prefix) || "INV-";
+        const invoice_suffix = str(req.body.invoice_suffix);
+        const start = Number(str(req.body.invoice_start_number) || 1);
+        if (invoice_prefix.length > MAX_AFFIX || invoice_suffix.length > MAX_AFFIX) return errorHandler(res, 400, `Prefix and suffix can be up to ${MAX_AFFIX} characters.`);
+        if (!Number.isInteger(start) || start < 1) return errorHandler(res, 400, "Start number must be a whole number, 1 or higher.");
+
         const data = {
-            company_id: Number(company_id),
-            invoice_prefix: String(invoice_prefix || "INV-"),
-            invoice_suffix: String(invoice_suffix || ""),
-            invoice_start_number: Math.max(1, Number(invoice_start_number) || 1),
-            terms_and_conditions: String(terms_and_conditions || ""),
+            company_id,
+            invoice_prefix,
+            invoice_suffix,
+            invoice_start_number: start,
+            terms_and_conditions: str(req.body.terms_and_conditions),
         };
         const existing = await SettingService.getInvoiceSetting({ company_id: data.company_id });
         const result = existing.length
@@ -212,9 +174,10 @@ module.exports.saveInvoiceSetting = async (req, res) => {
 module.exports.listInvoiceSetting = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
-        const { company_id } = req.query;
-        if (!company_id) return errorHandler(res, 400, "Company is required.");
-        const result = await SettingService.getInvoiceSetting({ company_id: Number(company_id) });
+        if (!req.query.company_id) return errorHandler(res, 400, "Company is required.");
+        const company_id = await ownCompanyId(req.query.company_id, req.body.t_userId);
+        if (!company_id) return errorHandler(res, 404, "Company not found.");
+        const result = await SettingService.getInvoiceSetting({ company_id });
         response.status = 200;
         response.message = "Invoice settings fetched successfully.";
         response.body = result;

@@ -179,29 +179,17 @@ const EditMoneyReceipts = () => {
     return (
         <>
             <PageTitle>Edit Money Receipt{details.receipt_no ? ` — ${details.receipt_no}` : ""}</PageTitle>
-            <div className='flex flex-col gap-1'>
+            <div className="flex flex-col gap-2">
                 <ActionArea>
                     <div className="flex flex-wrap justify-between w-full gap-1">
                         <div className="flex flex-wrap gap-1">
-                            <div onClick={() => navigate(-1)}>
-                                <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-                            </div>
-                            <div onClick={handleUpdate}>
-                                <CustomButton title={"Update (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineSave /></CustomButton>
-                            </div>
-                            <div onClick={handlePrint}>
-                                <CustomButton title={"Print (Ctrl+P)"} color={"blue"}><AiOutlinePrinter /></CustomButton>
-                            </div>
-                            <div onClick={() => navigate("/view-money-receipts")}>
-                                <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-                            </div>
-                            <div onClick={handleDelete}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
-                            </div>
+                            <CustomButton onClick={() => navigate(-1)} title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                            <CustomButton onClick={handleUpdate} title={"Update (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineSave /></CustomButton>
+                            <CustomButton onClick={handlePrint} title={"Print (Ctrl+P)"} color={"slate"}><AiOutlinePrinter /></CustomButton>
+                            <CustomButton onClick={() => navigate("/view-money-receipts")} title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
+                            <CustomButton onClick={handleDelete} title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                         </div>
-                        <div onClick={() => fetchReceiptData()}>
-                            <CustomButton title={"Reload"} color={"blue"}><AiOutlineSync /></CustomButton>
-                        </div>
+                        <CustomButton onClick={() => fetchReceiptData()} title={"Reload"} color={"slate"}><AiOutlineSync /></CustomButton>
                     </div>
                 </ActionArea>
 

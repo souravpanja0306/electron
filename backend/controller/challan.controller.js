@@ -1,345 +1,250 @@
-const moment = require("moment");
-const fs = require('fs');
-const { app } = require("electron");
-const contents = require("../content/contents");
+// Services / helpers...
 const ChallanService = require("../service/challan.service");
 const SettingService = require("../service/setting.service");
-const PartyService = require("../service/party.service");
-const AdminService = require("../service/admin.service");
-const CompanyService = require("../service/company.service");
 const { generateChallanHtml } = require("../helper/generateChallanHtml");
+const { errorHandler, ok, str, toId, round2, isYmd, parseJsonArray, serverError } = require("../helper/http");
+const { checkLinks, loadById, pick } = require("../helper/records");
 
-const errorHandler = (res, status, message) => {
-    return res.status(status).json({ status, message, body: [] });
-};
-
-const toText = (value) => (value === undefined || value === null ? "" : String(value).trim());
-
-// Normalises the item rows and recomputes the total on the server so the stored
-// total can never disagree with the stored line items.
+// Rows the user left completely empty are dropped; the total is recomputed on the server
+// so the stored total can never disagree with the stored lines.
 const normaliseItems = (data) => {
-    let rows = data;
-    if (typeof rows === "string") {
-        try { rows = JSON.parse(rows); } catch (e) { rows = []; }
-    }
-    if (!Array.isArray(rows)) rows = [];
-
-    const items = rows
+    const items = parseJsonArray(data)
         .map((row, index) => ({
             id: row?.id ?? Date.now() + index,
-            packages: row?.packages ?? "",
-            description: toText(row?.description),
-            weight: row?.weight ?? "",
-            amount: row?.amount ?? "",
+            packages: str(row?.packages),
+            description: str(row?.description),
+            weight: str(row?.weight),
+            amount: str(row?.amount),
         }))
-        .filter((row) => row.description !== "" || row.packages !== "" || row.weight !== "" || row.amount !== "");
-
+        .filter((row) => row.description || row.packages || row.weight || row.amount);
     const total = items.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
-    return { items, total: Math.round(total * 100) / 100 };
+    return { items, total: round2(total) };
 };
 
 // Fields shared by create and update.
 const buildChallanFields = (body) => {
     const { items, total } = normaliseItems(body.data);
     return {
-        company_id: body.company_id,
-        consignor_id: body.consignor_id,
-        consignee_id: body.consignee_id,
-        cn_no: toText(body.cn_no),
-        date: toText(body.date),
-        from_loc: toText(body.from_loc),
-        to_loc: toText(body.to_loc),
-        invoice_no: toText(body.invoice_no),
-        way_bill_no: toText(body.way_bill_no),
-        way_bill_date: toText(body.way_bill_date),
-        container: toText(body.container),
-        cha: body.cha ? body.cha : null,
-        booking_number: toText(body.booking_number),
-        truck_no: toText(body.truck_no),
-        note: toText(body.note),
+        company_id: toId(body.company_id),
+        consignor_id: toId(body.consignor_id),
+        consignee_id: toId(body.consignee_id),
+        cn_no: str(body.cn_no),
+        date: str(body.date),
+        from_loc: str(body.from_loc),
+        to_loc: str(body.to_loc),
+        invoice_no: str(body.invoice_no),
+        way_bill_no: str(body.way_bill_no),
+        way_bill_date: str(body.way_bill_date),
+        container: str(body.container),
+        cha: toId(body.cha),
+        booking_number: str(body.booking_number),
+        truck_no: str(body.truck_no).toUpperCase(),
+        note: str(body.note),
         total_amount: total,
         data: JSON.stringify(items),
+        // Internal: not a column.
+        _items: items,
     };
 };
 
-const validateChallanFields = (fields) => {
+// `existing`: the saved challan when updating (its CHA may since have been removed from the master).
+const validateChallanFields = (fields, userId, existing = null) => {
     if (!fields.company_id) return "Company is required.";
     if (!fields.consignor_id || !fields.consignee_id) return "Consignor and Consignee are required.";
     if (!fields.cn_no) return "C/N Number is required.";
-    return null;
+    if (fields.date && !isYmd(fields.date)) return "Enter a valid challan date.";
+    if (fields.way_bill_date && !isYmd(fields.way_bill_date)) return "Enter a valid way bill date.";
+    if (fields._items.some((row) => row.amount && !(Number(row.amount) >= 0))) return "Amounts must be zero or more.";
+    return checkLinks({
+        userId,
+        company_id: fields.company_id,
+        parties: [{ id: fields.consignor_id, label: "Consignor" }, { id: fields.consignee_id, label: "Consignee" }],
+        cha: existing && fields.cha === existing.cha ? null : fields.cha,
+    });
+};
+
+const withoutInternal = ({ _items, ...fields }) => fields;
+
+// The challan with this id, if it belongs to the signed-in user.
+const findOwnChallan = async (id, userId) => (await ChallanService.findChallans({ id, created_by: userId }))[0] || null;
+
+// C/N numbers are unique per user (the generator counts all of the user's challans).
+const cnTaken = async (cn_no, userId, exceptId) => {
+    const same = await ChallanService.findChallans({ cn_no, created_by: userId });
+    return same.some((item) => String(item.id) !== String(exceptId));
 };
 
 module.exports.generateChallanPdf = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id } = req.query;
+        const id = toId(req.query.id);
         if (!id) return errorHandler(res, 400, "Challan ID is required.");
 
-        let search_key = { id };
-        if (t_userId) search_key["created_by"] = t_userId;
+        const challan = await findOwnChallan(id, t_userId);
+        if (!challan) return errorHandler(res, 404, "Challan not found.");
 
-        let challans = await ChallanService.findChallans(search_key);
-        if (!challans.length) return errorHandler(res, 404, "Challan not found.");
-        let challan = challans[0];
+        const parties = loadById("party", [challan.consignor_id, challan.consignee_id]);
+        const company = pick(loadById("company", [challan.company_id]), challan.company_id) || {};
+        const cha = challan.cha ? pick(loadById("cha", [challan.cha]), challan.cha) : null;
+        const challanSetting = await SettingService.getChallanSetting({ company_id: challan.company_id });
 
-        // Hydrate relations
-        let consignor = await PartyService.getParty({ id: challan.consignor_id });
-        let consignee = await PartyService.getParty({ id: challan.consignee_id });
-        challan.consignor_id = consignor.length ? consignor[0] : null;
-        challan.consignee_id = consignee.length ? consignee[0] : null;
-        challan.data = challan.data ? JSON.parse(challan.data) : [];
-
-        // Show the CHA's name on the print, not its numeric id
-        if (challan.cha) {
-            let chaList = await AdminService.findCHA({ id: challan.cha });
-            challan.cha = chaList.length ? chaList[0].name : "";
-        }
-
-        // Get company
-        let companies = await CompanyService.getCompany({ id: challan.company_id });
-        let challanSetting = await SettingService.getChallanSetting({ company_id: challan.company_id });
-        let company = companies.length ? companies[0] : {};
-
-        // Same CHA switch as the forms (Invoice / Challan settings).
-        challan.show_cha = (await SettingService.getUserShowCha({ user_id: challan.created_by })) ? 1 : 0;
-
-        const html = generateChallanHtml({ challan, company, terms: challanSetting.length ? challanSetting[0].terms : "" });
-
-        response.status = 200;
-        response.message = "PDF generated successfully.";
-        response.body = {
-            html: html
-        };
+        const html = generateChallanHtml({
+            challan: {
+                ...challan,
+                consignor_id: pick(parties, challan.consignor_id),
+                consignee_id: pick(parties, challan.consignee_id),
+                data: parseJsonArray(challan.data),
+                // Show the CHA's name on the print, not its numeric id.
+                cha: cha?.name || "",
+                // Same CHA switch as the forms (Invoice / Challan settings).
+                show_cha: (await SettingService.getUserShowCha({ user_id: challan.created_by })) ? 1 : 0,
+            },
+            company,
+            terms: challanSetting[0]?.terms || "",
+        });
+        return ok(res, "PDF generated successfully.", { html });
     } catch (error) {
-        console.log(`Something went wrong: controller: generateChallanPdf: ${error}`);
-        response.status = 500;
-        response.message = error.message || "Something went wrong: controller: generateChallanPdf";
-    }
-    return res.status(response.status).json(response);
+        return serverError(res, "controller: generateChallanPdf", error, "Could not prepare the challan for printing.");
+    };
 };
 
 module.exports.createChallan = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-
         const fields = buildChallanFields(req.body);
-        const invalid = validateChallanFields(fields);
+        const invalid = validateChallanFields(fields, t_userId);
         if (invalid) return errorHandler(res, 400, invalid);
+        if (await cnTaken(fields.cn_no, t_userId)) return errorHandler(res, 409, "C/N Number Already Exists.");
 
-        let dupKey = { cn_no: fields.cn_no };
-        if (t_userId) dupKey["created_by"] = t_userId.toString();
-        let isCnExist = await ChallanService.findChallans(dupKey);
-        if (isCnExist.length) return errorHandler(res, 409, "C/N Number Already Exists.");
-
-        let finalData = { ...fields, created_by: t_userId };
-
-        let result = await ChallanService.insertChallanData(finalData);
-
-        response.status = 200;
-        response.message = "Challan created successfully.";
-        response.body = result;
+        const result = await ChallanService.insertChallanData({ ...withoutInternal(fields), created_by: t_userId });
+        return ok(res, "Challan created successfully.", { ...result, id: Number(result.lastInsertRowid) });
     } catch (error) {
-        console.log(`Something went wrong: controller: createChallan: ${error}`);
-        response.status = 500;
-        response.message = error.message || "Something went wrong: controller: createChallan";
-    }
-    return res.status(response.status).json(response);
+        return serverError(res, "controller: createChallan", error, "Could not save the challan.");
+    };
 };
 
 module.exports.getAllChallans = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id, startDate, endDate, search } = req.query;
+        const search_key = {
+            created_by: t_userId,
+            startDate: isYmd(req.query.startDate) ? req.query.startDate : "",
+            endDate: isYmd(req.query.endDate) ? req.query.endDate : "",
+            search: str(req.query.search),
+        };
+        if (req.query.id) {
+            const id = toId(req.query.id);
+            if (!id) return errorHandler(res, 400, "Invalid challan ID.");
+            search_key.id = id;
+        };
 
-        let search_key = { startDate, endDate, search };
-        if (id) search_key["id"] = id;
-        if (t_userId) search_key["created_by"] = t_userId.toString();
+        const result = await ChallanService.findChallans(search_key);
+        if (!result.length) return res.status(202).json({ status: 202, message: "Data not found.", body: [] });
 
-        let result = await ChallanService.findChallans(search_key);
-        if (result.length) {
-            let finalData = [];
-            for (let item of result) {
-                let consignor = await PartyService.getParty({ id: item.consignor_id });
-                let consignee = await PartyService.getParty({ id: item.consignee_id });
-                let company = await CompanyService.getCompany({ id: item.company_id });
-                // findCHA() with an empty id returns every CHA, so only look up when one is set
-                let cha = item.cha ? await AdminService.findCHA({ id: item.cha }) : [];
+        // One query per related table instead of four per challan.
+        const parties = loadById("party", result.flatMap((item) => [item.consignor_id, item.consignee_id]));
+        const companies = loadById("company", result.map((item) => item.company_id));
+        const chas = loadById("cha", result.map((item) => item.cha));
 
-                let newData = {
-                    id: item.id,
-                    company_id: company.length ? company[0] : null,
-                    consignor_id: consignor.length ? consignor[0] : null,
-                    consignee_id: consignee.length ? consignee[0] : null,
-                    cn_no: item.cn_no || "--",
-                    date: item.date || "--",
-                    from_loc: item.from_loc || "--",
-                    to_loc: item.to_loc || "--",
-                    invoice_no: item.invoice_no || "--",
-                    way_bill_no: item.way_bill_no || "--",
-                    way_bill_date: item.way_bill_date || "--",
-                    container: item.container || "--",
-                    cha: cha.length ? cha[0] : null,
-                    booking_number: item.booking_number || "--",
-                    truck_no: item.truck_no || "--",
-                    note: item.note || "--",
-                    total_amount: item.total_amount || 0,
-                    data: item.data ? JSON.parse(item.data) : [],
-                    created_by: item.created_by,
-                    created_at: item.created_at,
-                    is_active: item.is_active,
-                    is_deleted: item.is_deleted,
-                    invoiced: Boolean(item.invoiced)
-                };
-                finalData.push(newData);
-            }
-            response.status = 200;
-            response.message = "Data fetched successfully.";
-            response.body = finalData;
-        } else {
-            response.status = 202;
-            response.message = "Data not found.";
-            response.body = [];
-        }
+        const finalData = result.map((item) => ({
+            id: item.id,
+            company_id: pick(companies, item.company_id),
+            consignor_id: pick(parties, item.consignor_id),
+            consignee_id: pick(parties, item.consignee_id),
+            cn_no: item.cn_no || "",
+            date: item.date || "",
+            from_loc: item.from_loc || "",
+            to_loc: item.to_loc || "",
+            invoice_no: item.invoice_no || "",
+            way_bill_no: item.way_bill_no || "",
+            way_bill_date: item.way_bill_date || "",
+            container: item.container || "",
+            cha: pick(chas, item.cha),
+            booking_number: item.booking_number || "",
+            truck_no: item.truck_no || "",
+            note: item.note || "",
+            total_amount: Number(item.total_amount) || 0,
+            data: parseJsonArray(item.data),
+            created_by: item.created_by,
+            created_at: item.created_at,
+            is_active: item.is_active,
+            is_deleted: item.is_deleted,
+            invoiced: Boolean(item.invoiced),
+        }));
+        return ok(res, "Data fetched successfully.", finalData);
     } catch (error) {
-        console.log(`Something went wrong: controller: getAllChallans: ${error}`);
-        response.status = 500;
-        response.message = error.message || "Something went wrong: controller: getAllChallans";
-    }
-    return res.status(response.status).json(response);
+        return serverError(res, "controller: getAllChallans", error, "Could not load challans.");
+    };
 };
 
 module.exports.deleteChallan = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id } = req.params;
+        const id = toId(req.params.id);
+        if (!id) return errorHandler(res, 400, "Challan ID is required.");
 
-        let search_key = { id };
-        if (t_userId) search_key["created_by"] = t_userId.toString();
+        const challan = await findOwnChallan(id, t_userId);
+        if (!challan) return errorHandler(res, 404, "Challan not found.");
+        if (challan.invoiced) return errorHandler(res, 409, "This challan has an invoice. Delete the invoice first.");
 
-        let checkChallan = await ChallanService.findChallans(search_key);
-        if (!checkChallan.length) return errorHandler(res, 404, "Challan not found.");
-        if (checkChallan[0].invoiced) {
-            return errorHandler(res, 409, "This challan has an invoice. Delete the invoice first.");
-        }
-
-        let result = await ChallanService.deleteChallan({ id });
-        if (result.deleted) {
-            response.status = 200;
-            response.message = "Challan deleted successfully.";
-        } else {
-            response.status = 202;
-            response.message = "Something went wrong!";
-        }
+        const result = await ChallanService.deleteChallan({ id });
+        if (!result?.deleted) return errorHandler(res, 404, "Challan not found.");
+        return ok(res, "Challan deleted successfully.");
     } catch (error) {
-        console.log(`Something went wrong: controller: deleteChallan: ${error}`);
-        response.status = 500;
-        response.message = error.message || "Something went wrong: controller: deleteChallan";
-    }
-    return res.status(response.status).json(response);
+        return serverError(res, "controller: deleteChallan", error, "Could not delete the challan.");
+    };
 };
 
 module.exports.updateChallan = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id } = req.params;
+        const id = toId(req.params.id);
+        if (!id) return errorHandler(res, 400, "Challan ID is required.");
+
+        const challan = await findOwnChallan(id, t_userId);
+        if (!challan) return errorHandler(res, 404, "Challan not found.");
 
         const fields = buildChallanFields(req.body);
-        const invalid = validateChallanFields(fields);
+        const invalid = validateChallanFields(fields, t_userId, challan);
         if (invalid) return errorHandler(res, 400, invalid);
-
-        let search_key = { id };
-        if (t_userId) search_key["created_by"] = t_userId.toString();
-
-        let checkChallan = await ChallanService.findChallans(search_key);
-        if (!checkChallan.length) return errorHandler(res, 404, "Challan not found.");
-
-        // C/N number must stay unique, ignoring this challan itself.
-        let dupKey = { cn_no: fields.cn_no };
-        if (t_userId) dupKey["created_by"] = t_userId.toString();
-        let sameCn = await ChallanService.findChallans(dupKey);
-        if (sameCn.some((item) => String(item.id) !== String(id))) {
-            return errorHandler(res, 409, "C/N Number Already Exists.");
-        }
+        if (await cnTaken(fields.cn_no, t_userId, id)) return errorHandler(res, 409, "C/N Number Already Exists.");
 
         // `invoiced` is deliberately not touched here: it is owned by the invoice flow.
-        let result = await ChallanService.updateChallanData(id, fields);
-
-        if (result.changes > 0) {
-            response.status = 200;
-            response.message = "Challan updated successfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "Challan not found or no changes made.";
-        }
+        const result = await ChallanService.updateChallanData(id, withoutInternal(fields));
+        if (!result.changes) return res.status(202).json({ status: 202, message: "Challan not found or no changes made.", body: [] });
+        return ok(res, "Challan updated successfully.", result);
     } catch (error) {
-        console.log(`Something went wrong: controller: updateChallan: ${error}`);
-        response.status = 500;
-        response.message = error.message || "Something went wrong: controller: updateChallan";
-    }
-    return res.status(response.status).json(response);
+        return serverError(res, "controller: updateChallan", error, "Could not update the challan.");
+    };
 };
 
+/** Next C/N number: prefix + (existing challans + 1 + starting offset), padded to 6, + suffix. */
 module.exports.generateChallanNo = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { types, company_id } = req.query;
-        if (!types) {
-            response.status = 400;
-            response.message = "Type required";
-            response.body = [];
-            return res.status(response.status).json(response);
-        };
+        if (!str(req.query.types)) return errorHandler(res, 400, "Type required");
+        const company_id = toId(req.query.company_id);
+
         let prefix = "";
-        let starting = 0;
         let suffix = "";
-
-        let isExist = await SettingService.getChallanSetting({ company_id: company_id });
-        if (isExist.length) {
-            prefix = isExist[0].prefix;
-            starting = isExist[0].starting;
-            suffix = isExist[0].suffix;
-        };
-
-        const existsCheck = async ({
-            prefix = "",
-            starting = "",
-            suffix = ""
-        }) => {
-            let search_key = {};
-            if (t_userId) search_key["created_by"] = t_userId;
-
-            let count = await ChallanService.findChallans({ ...search_key, count: true });
-            while (true) {
-                const challanNo = `${prefix ? prefix : ""}${(count + 1 + parseInt(starting)).toString().padStart(6, "0")}${suffix ? suffix : ""}`;
-                search_key["cn_no"] = challanNo;
-                const exists = await ChallanService.findChallans(search_key);
-                if (!exists.length) return challanNo;
-                count++;
+        let starting = 0;
+        if (company_id) {
+            const setting = (await SettingService.getChallanSetting({ company_id }))[0];
+            if (setting) {
+                prefix = setting.prefix || "";
+                suffix = setting.suffix || "";
+                starting = Math.max(0, parseInt(setting.starting, 10) || 0);
             };
         };
 
-        let result = await existsCheck({
-            prefix: prefix,
-            starting: starting,
-            suffix: suffix
-        });
-
-        if (result) {
-            response.status = 200;
-            response.message = "Challan Number Generated Successfully.";
-            response.body = result;
+        let count = await ChallanService.findChallans({ created_by: t_userId, count: true });
+        for (let attempt = 0; attempt < 10000; attempt++) {
+            const challanNo = `${prefix}${String(count + 1 + starting).padStart(6, "0")}${suffix}`;
+            if (!(await cnTaken(challanNo, t_userId))) return ok(res, "Challan Number Generated Successfully.", challanNo);
+            count++;
         };
+        return errorHandler(res, 409, "Could not find a free C/N number. Check the challan number settings.");
     } catch (error) {
-        console.log(`Something went wrong: controller: generateChallanNo: ${error}`);
-        response.status = 500;
-        response.message = error.message || "Internal Server Error";
+        return serverError(res, "controller: generateChallanNo", error, "Could not generate the C/N number.");
     };
-    return res.status(response.status).json(response);
 };

@@ -1,15 +1,20 @@
 const moment = require("moment");
 const { inrToWords } = require("./InWordConverter");
-const { app } = require("electron");
+const { esc, escObj, money, uploadUrl } = require("./html");
 
-module.exports.generateMoneyReceiptHtml = ({ receipt, company, party }) => {
-    const items = receipt.data || [];
+// Every text value is HTML-escaped before it reaches the template (see helper/html.js).
+module.exports.generateMoneyReceiptHtml = ({ receipt: rawReceipt, company: rawCompany, party: rawParty }) => {
+    const receipt = escObj(rawReceipt);
+    const company = escObj(rawCompany);
+    const party = escObj(rawParty);
+    const logoSrc = esc(uploadUrl("company", rawCompany?.logo));
+    const items = (rawReceipt.data || []).map(escObj);
 
     let itemsHtml = items.map((item, index) => `
         <tr>
             <td style="text-align:center;">${index + 1}</td>
             <td>${item.description || ''}</td>
-            <td style="text-align:right;">${parseFloat(item.amount || 0).toFixed(2)}</td>
+            <td style="text-align:right;">${money(item.amount)}</td>
         </tr>
     `).join('');
 
@@ -19,7 +24,7 @@ module.exports.generateMoneyReceiptHtml = ({ receipt, company, party }) => {
         itemsHtml += `<tr><td></td><td></td><td></td></tr>`;
     }
 
-    const totalAmount = parseFloat(receipt.total_value || 0);
+    const totalAmount = Number(receipt.total_value) || 0;
     const amountInWords = inrToWords(totalAmount);
 
     const formattedDate = receipt.receipt_date
@@ -269,7 +274,7 @@ module.exports.generateMoneyReceiptHtml = ({ receipt, company, party }) => {
                 ${company.gst ? `<div class="company-sub">GSTIN: <strong>${company.gst}</strong></div>` : ''}
             </div>
             <div class="header-right">
-                ${company.logo ? `<img src="http://localhost:3001/uploads/company/${company.logo}" alt="Logo"
+                ${company.logo ? `<img src="${logoSrc}" alt="Logo"
                     style="max-height:70px; max-width:160px; object-fit:contain;" />` : `<div
                     style="width:160px; height:70px; border:1px dashed #aaa; display:flex; align-items:center; justify-content:center; font-size:9px; color:#aaa; text-align:center;">
                     LOGO</div>`}
@@ -319,7 +324,7 @@ module.exports.generateMoneyReceiptHtml = ({ receipt, company, party }) => {
         <!-- TOTAL ROW -->
         <div class="total-row">
             <span>Total Amount Received</span>
-            <span>₹ ${totalAmount.toFixed(2)}</span>
+            <span>₹ ${money(totalAmount)}</span>
         </div>
 
         <!-- WORDS ROW -->

@@ -1,151 +1,101 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from 'sonner';
 
 // Icons...
-import { AiOutlineFileAdd, AiOutlineRollback } from "react-icons/ai";
+import { AiOutlineSave, AiOutlineRollback, AiOutlineTable } from "react-icons/ai";
 
 // Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
-import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
+import CustomLoader from '../../../components/CustomLoader';
+import MainArea from '../../../components/MainArea';
+import ChaForm, { EMPTY_CHA, chaValidator, toChaData } from '../../../components/ChaForm';
+import { focusNextOnEnter } from '../../../components/FormKit';
 
-// Store...
+// Store / hooks...
 import useAuthStore from '../../../store/AuthStore';
 import useChaStore from '../../../store/ChaStore';
 import useShortcuts from "../../../hooks/useShortcuts";
+import useForm from "../../../hooks/useForm";
+import { trimAll } from '../../../utils/validators';
 
 const ChaEdit = () => {
     const { token } = useAuthStore();
     const { chaData, updateCha, getAllCha } = useChaStore();
     const navigate = useNavigate();
+    const { id } = useParams();
+    const [status, setStatus] = useState("loading"); // loading | ready | missing
+
+    const duplicateOf = (name) =>
+        (chaData || []).some((c) => String(c.id) !== String(id) && (c.name || "").trim().toLowerCase() === name);
+    const form = useForm(EMPTY_CHA, chaValidator({ duplicateOf }));
+
+    // Always fetch fresh so we never edit a stale copy.
+    useEffect(() => {
+        let alive = true;
+        getAllCha().then((result) => {
+            if (!alive) return;
+            const record = (result?.body || []).find((item) => String(item.id) === String(id));
+            if (record) {
+                form.load(toChaData(record));
+                setStatus("ready");
+            } else {
+                setStatus("missing");
+                toast.error("CHA not found.");
+            }
+        });
+        return () => { alive = false; };
+    }, [id]);
+
+    const save = form.submit(async (data) => {
+        const result = await updateCha({ ...trimAll(data), id }, token);
+        if (result?.status === 200) {
+            toast.success(result.message || "CHA updated.");
+            form.markSaved();
+            navigate("/view-cha");
+        } else {
+            toast.error(result?.message || "Could not update the CHA.");
+        }
+    });
 
     useShortcuts({
-        s: (e) => handleSubmit(e),
-    });
-    const { id } = useParams();
-
-    const [data, setData] = useState({
-        id: "",
-        name: "",
-        mobile: "",
-        address: ""
+        s: (e) => status === "ready" && save(e),
+        i: () => navigate("/view-cha"),
     });
 
-    useEffect(() => {
-        if (!chaData || chaData.length === 0) {
-            getAllCha();
-        }
-    }, []);
-
-    useEffect(() => {
-        if (chaData && chaData.length > 0 && id) {
-            const found = chaData.find((item) => item.id == id);
-            if (found) {
-                setData({
-                    id: found.id,
-                    name: found.name || "",
-                    mobile: found.mobile || "",
-                    address: found.address || ""
-                });
-            }
-        }
-    }, [chaData, id]);
-
-    const handleSubmit = async (e) => {
-        try {
-            if (e) e.preventDefault();
-            if (!data.name || data.name === "") {
-                toast.warning("CHA Name Required.");
-                return;
-            };
-
-            let result = await updateCha(data, token);
-            if (result && result.status === 200) {
-                toast.success(result.message || "CHA Updated Successfully");
-                navigate("/view-cha");
-            } else {
-                toast.error(result.message || "Failed to update CHA");
-            };
-        } catch (error) {
-            toast.error("Something went wrong!");
-        };
-    };
+    if (status === "loading") return <CustomLoader />;
 
     return (
         <>
             <PageTitle>Edit CHA</PageTitle>
-
             <div className='flex flex-col gap-1'>
                 <ActionArea>
                     <div onClick={() => navigate(-1)}>
                         <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
                     </div>
-                    <div onClick={(e) => handleSubmit(e)}>
-                        <CustomButton title={"Update (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
-                    </div>
+                    {status === "ready" && (
+                        <CustomButton type="submit" form="cha-form" title={form.saving ? "Saving..." : "Save (Ctrl+S)"} color={"blue"} disabled={form.saving || !form.dirty}>
+                            <AiOutlineSave />
+                        </CustomButton>
+                    )}
+                    <Link to="/view-cha">
+                        <CustomButton title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
+                    </Link>
                 </ActionArea>
 
-                <form className='flex flex-col gap-1'>
+                {status === "missing" ? (
                     <MainArea>
-                        <div className='flex flex-col w-full sm:w-1/2 gap-1'>
-                            <PageTitle>CHA Details</PageTitle>
-                            <hr />
-                            <table className="w-full text-sm">
-                                <tbody>
-                                    <tr className="dark:bg-slate-800">
-                                        <td className="p-1 min-w-36">CHA Name</td>
-                                        <td className="p-1 min-w-36">
-                                            <input
-                                                placeholder='CHA Name'
-                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                value={data.name}
-                                                type="text"
-                                                onChange={(e) =>
-                                                    setData({ ...data, name: e.target.value })
-                                                }
-                                                required
-                                            />
-                                        </td>
-                                    </tr>
-                                    <tr className="dark:bg-slate-800">
-                                        <td className="p-1 min-w-36">Mobile</td>
-                                        <td className="p-1 min-w-36">
-                                            <input
-                                                placeholder='Mobile'
-                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                value={data.mobile}
-                                                maxLength={10}
-                                                type="tel"
-                                                onChange={(e) =>
-                                                    setData({
-                                                        ...data,
-                                                        mobile: e.target.value.replace(/\D/g, ""),
-                                                    })
-                                                }
-                                            />
-                                        </td>
-                                    </tr>
-                                    <tr className="dark:bg-slate-800">
-                                        <td className="p-1 min-w-36">Address</td>
-                                        <td className="p-1 min-w-36">
-                                            <input
-                                                placeholder='Address'
-                                                className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                value={data.address}
-                                                type="text"
-                                                onChange={(e) =>
-                                                    setData({ ...data, address: e.target.value })
-                                                }
-                                            />
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div className="w-full p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                            This CHA could not be found. It may have been deleted.
                         </div>
                     </MainArea>
-                </form>
+                ) : (
+                    <form id="cha-form" onSubmit={save} onKeyDown={focusNextOnEnter} noValidate autoComplete="off">
+                        <ChaForm form={form} />
+                    </form>
+                )}
             </div>
         </>
     )

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const SearchableSelect = ({ options, value, onChange, placeholder, name, className, required }) => {
+const SearchableSelect = ({ options, value, onChange, placeholder, name, className, required, id, invalid, onBlur }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
   const wrapperRef = useRef(null);
   const inputRef = useRef(null);
+  const triggerRef = useRef(null);
 
   const selectedOption = options?.find(opt => String(opt.id) === String(value));
 
@@ -35,6 +36,8 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, classNa
     onChange({ target: { name, value: option.id } });
     setIsOpen(false);
     setSearchTerm('');
+    // Keep keyboard users in place: focus returns to the picker, not the page body.
+    setTimeout(() => triggerRef.current?.focus(), 0);
   };
 
   const handleKeyDown = (e) => {
@@ -63,6 +66,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, classNa
       }
     } else if (e.key === 'Escape') {
       setIsOpen(false);
+      triggerRef.current?.focus();
     }
   };
 
@@ -97,15 +101,24 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, classNa
         onFocus={() => setIsOpen(true)}
       />
       <div
-        className={`h-8 px-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-white flex items-center justify-between cursor-pointer ${required && !value ? 'border-slate-400' : ''}`}
+        ref={triggerRef}
+        id={id}
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls={`${id || name}-listbox`}
+        aria-invalid={invalid || undefined}
+        aria-describedby={invalid && id ? `${id}-error` : undefined}
+        className={`h-8 px-1 rounded w-full text-slate-900 border bg-white dark:bg-slate-900 dark:text-slate-100 flex items-center justify-between cursor-pointer transition-colors focus:outline-none ${isOpen ? 'border-blue-500 ring-2 ring-blue-500/25' : invalid ? 'border-red-500 focus:ring-2 focus:ring-red-500/25' : 'border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25'}`}
         onClick={() => setIsOpen(!isOpen)}
+        onBlur={onBlur}
         tabIndex="0"
       >
         <span className="truncate text-sm p-1">
-          {selectedOption ? selectedOption.label : <span className="text-slate-400">{placeholder}</span>}
+          {selectedOption ? selectedOption.label : <span className="text-slate-400 dark:text-slate-500">{placeholder}</span>}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform text-slate-500 mr-1 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 transition-transform text-slate-400 mr-1 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -115,26 +128,28 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, classNa
       </div>
 
       {isOpen && (
-        <div className="absolute z-[100] w-full mt-1 bg-white dark:bg-slate-800 border border-slate-400 dark:border-slate-600 rounded shadow-xl max-h-60 flex flex-col overflow-hidden">
-          <div className="p-1 border-b border-slate-400 dark:border-slate-600">
+        <div className="absolute z-[100] w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg shadow-slate-900/10 dark:shadow-black/40 max-h-60 flex flex-col overflow-hidden">
+          <div className="p-1 border-b border-slate-200 dark:border-slate-700">
             <input
               ref={inputRef}
               type="text"
-              className="h-8 px-2 outline-none w-full bg-slate-50 dark:bg-slate-900 rounded text-sm dark:text-white"
+              className="h-8 px-2 outline-none focus:!shadow-none w-full bg-slate-50 dark:bg-slate-900 rounded text-sm text-slate-900 dark:text-slate-100"
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onClick={(e) => e.stopPropagation()}
             />
           </div>
-          <div className="overflow-y-auto">
+          <div className="overflow-y-auto" role="listbox" id={`${id || name}-listbox`}>
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option, index) => (
                 <div
                   id={`opt-${name}-${index}`}
                   key={option.id}
-                  className={`p-2 hover:bg-blue-100 dark:hover:bg-slate-700 cursor-pointer truncate text-sm ${index === activeIndex ? 'bg-blue-200 dark:bg-slate-600' :
-                    String(option.id) === String(value) ? 'bg-blue-50 dark:bg-slate-700 font-semibold text-blue-600' : 'dark:text-white'
+                  role="option"
+                  aria-selected={String(option.id) === String(value)}
+                  className={`p-2 cursor-pointer truncate text-sm transition-colors ${index === activeIndex ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white' :
+                    String(option.id) === String(value) ? 'bg-blue-50 dark:bg-blue-500/15 font-semibold text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60'
                     }`}
                   onClick={() => handleSelect(option)}
                 >
@@ -142,7 +157,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, classNa
                 </div>
               ))
             ) : (
-              <div className="p-2 text-slate-500 text-sm text-center">No results found</div>
+              <div className="p-2 text-slate-500 dark:text-slate-400 text-sm text-center">No results found</div>
             )}
           </div>
         </div>

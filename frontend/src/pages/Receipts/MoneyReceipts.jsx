@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { toast } from 'sonner';
@@ -137,19 +137,13 @@ const MoneyReceipts = () => {
         <>
             <PageTitle>Create Money Receipt</PageTitle>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
                 <ActionArea>
                     {back && (
-                        <div onClick={() => navigate(-1)}>
-                            <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-                        </div>
+                        <CustomButton onClick={() => navigate(-1)} title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
                     )}
-                    <div onClick={handleSubmitForm}>
-                        <CustomButton title={"Save (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineSave /></CustomButton>
-                    </div>
-                    <Link to="/view-money-receipts">
-                        <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-                    </Link>
+                    <CustomButton onClick={handleSubmitForm} title={"Save (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineSave /></CustomButton>
+                    <CustomButton onClick={() => navigate("/view-money-receipts")} title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
                 </ActionArea>
 
                 <ReceiptForm

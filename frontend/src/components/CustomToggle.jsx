@@ -5,17 +5,17 @@ const CustomToggle = ({
     option = [],
     value = false,
     activeColor = "blue",
-    inactiveColor = "blue",
+    inactiveColor = "slate",
 }) => {
     const [on, setOn] = useState(value);
     useEffect(() => setOn(value), [value]);
 
     const COLORS = {
         blue: "bg-blue-600",
-        slate: "bg-slate-600",
+        slate: "bg-slate-300 dark:bg-slate-600",
         red: "bg-red-600",
-        green: "bg-green-600",
-        yellow: "bg-yellow-600",
+        green: "bg-emerald-600",
+        yellow: "bg-amber-500",
     };
     const SendValue = () => {
         setOn(!on)
@@ -27,7 +27,7 @@ const CustomToggle = ({
             <span className="text-xs">{option[0]}</span>
             <div
                 onClick={() => SendValue()}
-                className={`w-12 h-5 rounded-full cursor-pointer p-1 transition ${on ? COLORS[activeColor] : COLORS[inactiveColor]}`}
+                className={`w-12 h-5 rounded-full cursor-pointer p-1 transition-colors ${on ? COLORS[activeColor] : COLORS[inactiveColor]}`}
             >
                 <div className={`h-3 w-3 bg-white rounded-full shadow transition-transform ${on ? "translate-x-7" : "translate-x-0"}`} />
             </div>

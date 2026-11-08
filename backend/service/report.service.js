@@ -1,5 +1,9 @@
-// services/debtor.service.js
+// Reports: debtors, customer ledger, dashboard statistics, sales register.
 const { db } = require("../database/connection");
+
+// What the customer owes for an invoice: taxable value + GST. Must match
+// invoiceGrandTotal() in frontend/src/utils/invoiceTotals.js.
+const GRAND_TOTAL = "(COALESCE(total_amount, 0) + COALESCE(total_cgst, 0) + COALESCE(total_sgst, 0) + COALESCE(total_igst, 0))";
 
 module.exports.getDebtors = async ({
     created_by = "",
@@ -13,7 +17,7 @@ module.exports.getDebtors = async ({
         const partyParams = created_by ? [created_by] : [];
         const rows = db.prepare(`
             WITH invoice_totals AS (
-                SELECT party_id, SUM(total_amount) AS total_invoice
+                SELECT party_id, SUM(${GRAND_TOTAL}) AS total_invoice
                 FROM invoice
                 WHERE is_deleted = 0${userFilter}${companyFilter}
                 GROUP BY party_id
@@ -63,15 +67,15 @@ module.exports.getDebtorsDetails = async ({
         const userFilter = created_by ? " AND created_by = ?" : "";
         const companyFilter = company_id ? " AND company_id = ?" : "";
         const stmt = db.prepare(`
-            SELECT id, invoice_date AS date, 'Invoice #' || invoice_no AS description, total_amount AS dr, 0 AS cr, 'invoice' AS entry_type FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}
+            SELECT id, invoice_date AS date, 'Invoice #' || invoice_no AS description, ${GRAND_TOTAL} AS dr, 0 AS cr, 'invoice' AS entry_type FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}
             UNION ALL
             SELECT id, receipt_date AS date, 'Payment #' || receipt_no AS description, 0 AS dr, total_value AS cr, 'receipt' AS entry_type FROM money_receipts WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}
-            ORDER BY date ASC
+            ORDER BY date ASC, entry_type ASC, id ASC
         `);
 
         const totalStmt = db.prepare(`
             SELECT 
-                IFNULL((SELECT SUM(total_amount) FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_dr,
+                IFNULL((SELECT SUM(${GRAND_TOTAL}) FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_dr,
                 IFNULL((SELECT SUM(total_value) FROM money_receipts WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_cr
         `);
 
@@ -98,79 +102,201 @@ module.exports.getDebtorsDetails = async ({
     };
 };
 
-module.exports.getDashboardStats = async ({ created_by = "" } = {}) => {
+
+/* ------------------------------------------------------------------------ */
+/* Shared helpers                                                            */
+/* ------------------------------------------------------------------------ */
+
+const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const parseYmd = (s) => {
+    const [y, m, d] = String(s).split("-").map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+};
+const isYmd = (s) => /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
+
+/** Default period: the current Indian financial year to today. */
+const resolvePeriod = (from, to) => {
+    const today = new Date();
+    const fyStart = new Date(today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1, 3, 1);
+    const start = isYmd(from) ? from : ymd(fyStart);
+    const end = isYmd(to) ? to : ymd(today);
+    // The previous period has the same length and ends the day before `start`.
+    const days = Math.max(1, Math.round((parseYmd(end) - parseYmd(start)) / 86400000) + 1);
+    const prevEnd = new Date(parseYmd(start)); prevEnd.setDate(prevEnd.getDate() - 1);
+    const prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate() - (days - 1));
+    return { from: start, to: end, prevFrom: ymd(prevStart), prevTo: ymd(prevEnd), days };
+};
+
+/** " AND x.created_by = ? AND x.company_id = ?" + params, for the given table alias. */
+const scope = (alias, { created_by, company_id }) => {
+    let sql = "";
+    const params = [];
+    if (created_by) { sql += ` AND ${alias}.created_by = ?`; params.push(created_by); }
+    if (company_id) { sql += ` AND ${alias}.company_id = ?`; params.push(company_id); }
+    return { sql, params };
+};
+
+const grandOf = (alias) => GRAND_TOTAL.replace(/(total_\w+)/g, `${alias}.$1`);
+const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+
+/* ------------------------------------------------------------------------ */
+/* Dashboard                                                                 */
+/* ------------------------------------------------------------------------ */
+
+const AGING_BUCKETS = [
+    { key: "0_30", label: "0–30 days", min: 0, max: 30 },
+    { key: "31_60", label: "31–60 days", min: 31, max: 60 },
+    { key: "61_90", label: "61–90 days", min: 61, max: 90 },
+    { key: "90_plus", label: "Over 90 days", min: 91, max: Infinity },
+];
+
+/**
+ * Receivables aging with each party's payments applied to its oldest invoices first (FIFO),
+ * so a paid invoice never shows as overdue.
+ */
+const receivablesAging = (filters) => {
+    const inv = scope("i", filters);
+    const rec = scope("r", filters);
+    const invoices = db.prepare(`
+        SELECT i.party_id, i.invoice_date AS date, ${grandOf("i")} AS amount
+        FROM invoice i WHERE i.is_deleted = 0${inv.sql}
+        ORDER BY i.party_id, i.invoice_date, i.id
+    `).all(...inv.params);
+    const paidByParty = new Map(db.prepare(`
+        SELECT r.party_id, SUM(r.total_value) AS paid
+        FROM money_receipts r WHERE r.is_deleted = 0${rec.sql}
+        GROUP BY r.party_id
+    `).all(...rec.params).map((row) => [row.party_id, Number(row.paid) || 0]));
+
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const buckets = AGING_BUCKETS.map((b) => ({ ...b, amount: 0, invoices: 0 }));
+    const partiesWithDues = new Set();
+    let advances = 0;
+
+    const byParty = new Map();
+    for (const row of invoices) {
+        if (!byParty.has(row.party_id)) byParty.set(row.party_id, []);
+        byParty.get(row.party_id).push(row);
+    }
+    for (const [partyId, rows] of byParty) {
+        let credit = paidByParty.get(partyId) || 0;
+        for (const row of rows) {
+            const amount = Number(row.amount) || 0;
+            const applied = Math.min(credit, amount);
+            credit -= applied;
+            const open = round2(amount - applied);
+            if (open <= 0) continue;
+            partiesWithDues.add(partyId);
+            const age = isYmd(row.date) ? Math.max(0, Math.floor((today - parseYmd(row.date)) / 86400000)) : 0;
+            const bucket = buckets.find((b) => age >= b.min && age <= b.max) || buckets[0];
+            bucket.amount += open;
+            bucket.invoices += 1;
+        }
+        advances += credit; // paid more than invoiced
+    }
+    // Receipts from parties with no invoices at all are advances too.
+    for (const [partyId, paid] of paidByParty) if (!byParty.has(partyId)) advances += paid;
+
+    return {
+        buckets: buckets.map(({ key, label, amount, invoices: count }) => ({ key, label, amount: round2(amount), invoices: count })),
+        outstanding: round2(buckets.reduce((sum, b) => sum + b.amount, 0)),
+        partiesWithDues: partiesWithDues.size,
+        advances: round2(advances),
+    };
+};
+
+module.exports.getDashboardStats = async ({ created_by = "", company_id = "", from = "", to = "" } = {}) => {
     try {
-        const countDocuments = (table) => {
-            let query = `SELECT COUNT(*) AS total FROM ${table} WHERE is_deleted = 0`;
-            const params = [];
-            if (created_by) {
-                query += " AND created_by = ?";
-                params.push(created_by);
-            }
-            return db.prepare(query).get(...params).total;
-        };
+        const filters = { created_by, company_id };
+        const period = resolvePeriod(from, to);
+        const inv = scope("i", filters);
+        const rec = scope("r", filters);
+        const chl = scope("c", filters);
 
-        // 1. Total Debtors
-        const debtorTotals = db.prepare(`
-            SELECT 
-                IFNULL(SUM(total_amount), 0) AS total_invoice,
-                IFNULL((SELECT SUM(total_value) FROM money_receipts), 0) AS total_payment
-            FROM invoice
-        `).get();
+        const salesIn = (a, b) => db.prepare(`
+            SELECT COUNT(*) AS count, IFNULL(SUM(${grandOf("i")}), 0) AS total,
+                   IFNULL(SUM(COALESCE(i.total_amount, 0)), 0) AS taxable
+            FROM invoice i WHERE i.is_deleted = 0 AND i.invoice_date BETWEEN ? AND ?${inv.sql}
+        `).get(a, b, ...inv.params);
+        const receiptsIn = (a, b) => db.prepare(`
+            SELECT COUNT(*) AS count, IFNULL(SUM(r.total_value), 0) AS total
+            FROM money_receipts r WHERE r.is_deleted = 0 AND r.receipt_date BETWEEN ? AND ?${rec.sql}
+        `).get(a, b, ...rec.params);
+        const challansIn = (a, b) => db.prepare(`
+            SELECT COUNT(*) AS count, IFNULL(SUM(COALESCE(c.total_amount, 0)), 0) AS total
+            FROM challan c WHERE c.is_deleted = 0 AND c.date BETWEEN ? AND ?${chl.sql}
+        `).get(a, b, ...chl.params);
 
-        const totalDebtors = debtorTotals.total_invoice - debtorTotals.total_payment;
+        const sales = salesIn(period.from, period.to);
+        const prevSales = salesIn(period.prevFrom, period.prevTo);
+        const receipts = receiptsIn(period.from, period.to);
+        const prevReceipts = receiptsIn(period.prevFrom, period.prevTo);
+        const challans = challansIn(period.from, period.to);
 
-        // 2. Debtor Aging
-        const today = new Date().toISOString().split('T')[0];
-        const agingQuery = (daysMin, daysMax = null) => {
-            let dateCondition = "";
-            if (daysMax) {
-                dateCondition = `invoice_date BETWEEN date('now', '-${daysMax} days') AND date('now', '-${daysMin} days')`;
-            } else {
-                dateCondition = `invoice_date <= date('now', '-${daysMin} days')`;
-            }
+        // Challans not yet billed (all time): work done but not invoiced.
+        const unbilled = db.prepare(`
+            SELECT COUNT(*) AS count, IFNULL(SUM(COALESCE(c.total_amount, 0)), 0) AS total
+            FROM challan c WHERE c.is_deleted = 0 AND COALESCE(c.invoiced, 0) = 0${chl.sql}
+        `).get(...chl.params);
 
-            return db.prepare(`
-                SELECT IFNULL(SUM(total_amount), 0) as amount 
-                FROM invoice 
-                WHERE ${dateCondition}
-            `).get().amount;
-        };
+        // Twelve months up to the end of the period, with empty months filled in.
+        const end = parseYmd(period.to);
+        const months = [];
+        for (let k = 11; k >= 0; k--) {
+            const d = new Date(end.getFullYear(), end.getMonth() - k, 1);
+            months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+        }
+        const firstDay = `${months[0]}-01`;
+        const lastDay = ymd(new Date(end.getFullYear(), end.getMonth() + 1, 0));
+        const salesByMonth = new Map(db.prepare(`
+            SELECT substr(i.invoice_date, 1, 7) AS ym, SUM(${grandOf("i")}) AS total
+            FROM invoice i WHERE i.is_deleted = 0 AND i.invoice_date BETWEEN ? AND ?${inv.sql}
+            GROUP BY ym
+        `).all(firstDay, lastDay, ...inv.params).map((r) => [r.ym, Number(r.total) || 0]));
+        const receiptsByMonth = new Map(db.prepare(`
+            SELECT substr(r.receipt_date, 1, 7) AS ym, SUM(r.total_value) AS total
+            FROM money_receipts r WHERE r.is_deleted = 0 AND r.receipt_date BETWEEN ? AND ?${rec.sql}
+            GROUP BY ym
+        `).all(firstDay, lastDay, ...rec.params).map((r) => [r.ym, Number(r.total) || 0]));
+        const monthly = months.map((ym) => ({ month: ym, sales: round2(salesByMonth.get(ym)), collections: round2(receiptsByMonth.get(ym)) }));
 
-        // Simplified aging for now (just based on invoice date, not considering partial payments per invoice)
-        // In a real scenario, you'd track balance per invoice
-        const debtorAging = [
-            { label: "0–30 Days", value: agingQuery(0, 30) },
-            { label: "31–60 Days", value: agingQuery(31, 60) },
-            { label: "61–90 Days", value: agingQuery(61, 90) },
-            { label: "90+ Days", value: agingQuery(91) },
-        ];
+        const topCustomers = db.prepare(`
+            SELECT i.party_id, COALESCE(p.company_name, 'Unknown party') AS name,
+                   COUNT(*) AS invoices, SUM(${grandOf("i")}) AS total
+            FROM invoice i LEFT JOIN party p ON p.id = i.party_id
+            WHERE i.is_deleted = 0 AND i.invoice_date BETWEEN ? AND ?${inv.sql}
+            GROUP BY i.party_id ORDER BY total DESC LIMIT 5
+        `).all(period.from, period.to, ...inv.params);
 
-        // 3. Creditors (Placeholders since vendor invoices aren't implemented)
-        const totalCreditors = 0;
-        const creditorAging = [
-            { label: "0–30 Days", value: 0 },
-            { label: "31–60 Days", value: 0 },
-            { label: "61–90 Days", value: 0 },
-            { label: "90+ Days", value: 0 },
-        ];
+        const recent = db.prepare(`
+            SELECT * FROM (
+                SELECT 'invoice' AS type, i.id, i.invoice_no AS number, i.invoice_date AS date,
+                       p.company_name AS party, ${grandOf("i")} AS amount, i.created_at
+                FROM invoice i LEFT JOIN party p ON p.id = i.party_id WHERE i.is_deleted = 0${inv.sql}
+                UNION ALL
+                SELECT 'receipt', r.id, r.receipt_no, r.receipt_date, p.company_name, r.total_value, r.created_at
+                FROM money_receipts r LEFT JOIN party p ON p.id = r.party_id WHERE r.is_deleted = 0${rec.sql}
+                UNION ALL
+                SELECT 'challan', c.id, c.cn_no, c.date, p.company_name, c.total_amount, c.created_at
+                FROM challan c LEFT JOIN party p ON p.id = c.consignee_id WHERE c.is_deleted = 0${chl.sql}
+            ) ORDER BY date DESC, created_at DESC LIMIT 8
+        `).all(...inv.params, ...rec.params, ...chl.params);
+
+        const aging = receivablesAging(filters);
 
         return {
-            documentCounts: {
-                challans: countDocuments("challan"),
-                invoices: countDocuments("invoice"),
-                moneyReceipts: countDocuments("money_receipts")
-            },
+            period,
             kpi: {
-                totalDebtors,
-                overdueDebtors: debtorAging[3].value, // 90+ days as overdue for now
-                totalCreditors,
-                overdueCreditors: 0
+                sales: { total: round2(sales.total), count: sales.count, taxable: round2(sales.taxable), tax: round2(sales.total - sales.taxable), previous: round2(prevSales.total) },
+                collections: { total: round2(receipts.total), count: receipts.count, previous: round2(prevReceipts.total) },
+                outstanding: { total: aging.outstanding, parties: aging.partiesWithDues, overdue90: aging.buckets[3].amount, advances: aging.advances },
+                unbilled: { total: round2(unbilled.total), count: unbilled.count },
             },
-            aging: {
-                debtors: debtorAging,
-                creditors: creditorAging
-            },
+            documentCounts: { challans: challans.count, invoices: sales.count, moneyReceipts: receipts.count },
+            monthly,
+            aging: aging.buckets,
+            topCustomers: topCustomers.map((c) => ({ ...c, total: round2(c.total) })),
+            recent,
         };
     } catch (error) {
         console.log("Something went wrong: Service: getDashboardStats", error);
@@ -178,6 +304,38 @@ module.exports.getDashboardStats = async ({ created_by = "" } = {}) => {
     };
 };
 
+/* ------------------------------------------------------------------------ */
+/* Sales register                                                            */
+/* ------------------------------------------------------------------------ */
+
+module.exports.getSalesRegister = async ({ created_by = "", company_id = "", party_id = "", from = "", to = "" } = {}) => {
+    try {
+        const period = resolvePeriod(from, to);
+        const inv = scope("i", { created_by, company_id });
+        const partySql = party_id ? " AND i.party_id = ?" : "";
+        const params = [period.from, period.to, ...inv.params, ...(party_id ? [party_id] : [])];
+
+        const rows = db.prepare(`
+            SELECT i.id, i.invoice_no, i.invoice_date, i.company_id, c.company_name AS company,
+                   i.party_id, p.company_name AS party, p.gst AS party_gst, p.state AS party_state,
+                   COALESCE(i.total_amount, 0) AS taxable, COALESCE(i.total_cgst, 0) AS cgst,
+                   COALESCE(i.total_sgst, 0) AS sgst, COALESCE(i.total_igst, 0) AS igst,
+                   ${grandOf("i")} AS total
+            FROM invoice i
+            LEFT JOIN party p ON p.id = i.party_id
+            LEFT JOIN company c ON c.id = i.company_id
+            WHERE i.is_deleted = 0 AND i.invoice_date BETWEEN ? AND ?${inv.sql}${partySql}
+            ORDER BY i.invoice_date, i.id
+        `).all(...params);
+
+        return { period: { from: period.from, to: period.to }, rows };
+    } catch (error) {
+        console.log("Something went wrong: Service: getSalesRegister", error);
+        throw error;
+    };
+};
+
+// Purchases (supplier bills) are not recorded in MyERP yet, so there are no creditors.
 module.exports.getCreditors = async () => ({
     ledger: [],
     totals: {

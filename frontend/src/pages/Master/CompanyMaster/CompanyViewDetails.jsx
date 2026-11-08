@@ -1,504 +1,125 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useParams } from "react-router-dom";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import StateList from '../../../utils/StateList';
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { AiOutlineSave, AiOutlineRollback, AiOutlineTable } from "react-icons/ai";
 import { toast } from 'sonner';
 
 // Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
-import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
 import CustomLoader from '../../../components/CustomLoader';
-import SearchableSelect from '../../../components/SearchableSelect';
+import MainArea from '../../../components/MainArea';
+import BusinessForm, { EMPTY_BUSINESS, businessValidator, toBusinessData } from '../../../components/BusinessForm';
+import { focusNextOnEnter } from '../../../components/FormKit';
 
-// Icons...
-import { AiOutlineFileAdd, AiOutlineRollback, AiOutlineIdcard } from "react-icons/ai";
-
-// Store...
+// Stores / hooks...
 import useCompanyStore from '../../../store/CompanyStore';
 import useAuthStore from '../../../store/AuthStore';
 import useShortcuts from "../../../hooks/useShortcuts";
+import useForm from "../../../hooks/useForm";
+import useLogoPicker from "../../../hooks/useLogoPicker";
+import { errorMessage } from '../../../utils/format';
 
 const CompanyViewDetails = () => {
-    const { getCompanyById, updateCompany, companyLoading } = useCompanyStore();
+    const { companyData, getAllCompany, updateCompany } = useCompanyStore();
     const { token } = useAuthStore();
-    const [active, setActive] = useState(0);
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
     const { id } = useParams();
-
     const navigate = useNavigate();
+    const [status, setStatus] = useState("loading"); // loading | ready | missing
+    const [savedLogo, setSavedLogo] = useState("");
 
-    const [logo, setLogo] = useState(null);
-    const [logoPreview, setLogoPreview] = useState(null);
-    const [data, setData] = useState({
-        company_name: "",
-        email: "",
-        mobile: "",
-        owner: "",
-        address_1: "",
-        address_2: "",
-        city: "",
-        state: "",
-        district: "",
-        pincode: "",
-        country: "INDIA",
-        gst: "",
-        pan: "",
-        trade_licence: "",
-        bank: "",
-        ifse: "",
-        branch: "",
-        account_no: ""
-    });
+    const duplicateOf = (d) =>
+        (companyData || []).find((c) => String(c.id) !== String(id) && c.gst && c.gst.toUpperCase() === d.gst)?.company_name || "";
+    const form = useForm(EMPTY_BUSINESS, businessValidator({ nameLabel: "Company name", duplicateOf }));
+    const logo = useLogoPicker(savedLogo);
 
-    const fetchCompanyData = async () => {
-        if (id) {
-            const result = await getCompanyById(id, token);
-            if (result.status === 200 && result.body.length > 0) {
-                const companyData = result.body[0];
-                setData({
-                    company_name: companyData.company_name || "",
-                    email: companyData.email || "",
-                    mobile: companyData.mobile || "",
-                    owner: companyData.owner || "",
-                    address_1: companyData.address_1 || "",
-                    address_2: companyData.address_2 || "",
-                    city: companyData.city || "",
-                    state: companyData.state || "",
-                    district: companyData.district || "",
-                    pincode: companyData.pincode || "",
-                    country: companyData.country || "INDIA",
-                    gst: companyData.gst || "",
-                    pan: companyData.pan || "",
-                    trade_licence: companyData.trade_licence || "",
-                    bank: companyData.bank || "",
-                    ifse: companyData.ifse || "",
-                    branch: companyData.branch || "",
-                    account_no: companyData.account_no || ""
-                });
-                if (companyData.logo) setLogoPreview(`${companyData.logo}`);
-
-            } else {
-                toast.error(result.message || "Company not found.");
-            };
-        };
-    };
+    // One request: the full list keeps the store intact (for the GSTIN duplicate check) and holds this record.
     useEffect(() => {
-        fetchCompanyData();
+        let alive = true;
+        (async () => {
+            try {
+                const result = await getAllCompany(token);
+                if (!alive) return;
+                const record = (result?.body || []).find((c) => String(c.id) === String(id));
+                if (record) {
+                    form.load(toBusinessData(record));
+                    setSavedLogo(record.logo || "");
+                    setStatus("ready");
+                } else {
+                    setStatus("missing");
+                    toast.error("Company not found.");
+                }
+            } catch (error) {
+                if (alive) {
+                    setStatus("missing");
+                    toast.error(errorMessage(error, "Could not load the company."));
+                }
+            }
+        })();
+        return () => { alive = false; };
     }, [id]);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setLogo(file);
-            setLogoPreview(URL.createObjectURL(file));
-        };
-    };
-
-    const handleSubmit = async (e) => {
+    const save = form.submit(async (data) => {
         try {
-            e.preventDefault();
             const formData = new FormData();
-            Object.keys(data).forEach(key => {
-                formData.append(key, data[key]);
-            });
-            if (logo) formData.append('logo', logo);
-            
-            let result = await updateCompany(id, formData, token);
-            if ((result.status) === 200) {
-                toast.success(result.message);
+            Object.entries(data).forEach(([key, value]) => formData.append(key, value ?? ""));
+            if (logo.file) formData.append('logo', logo.file);
+
+            const result = await updateCompany(id, formData, token);
+            if (result?.status === 200) {
+                toast.success(result.message || "Company updated.");
+                form.markSaved();
                 if (back) navigate(-1);
                 else navigate("/company");
             } else {
-                toast.error(result.message);
-            };
+                toast.error(result?.message || "Could not update the company.");
+            }
         } catch (error) {
-            console.log(error);
-            toast.error("Something went wrong!");
-        };
-    };
+            toast.error(errorMessage(error, "Could not update the company."));
+        }
+    });
+
+    const changed = form.dirty || Boolean(logo.file);
 
     useShortcuts({
-        s: (e) => handleSubmit(e),
+        s: (e) => status === "ready" && save(e),
         i: () => navigate("/company"),
     });
 
-    if (companyLoading) return <CustomLoader />;
+    if (status === "loading") return <CustomLoader />;
 
     return (
         <>
-            <PageTitle>Company View/Edit Details</PageTitle>
-
+            <PageTitle>Edit Company</PageTitle>
             <div className='flex flex-col gap-1'>
                 <ActionArea>
                     <div onClick={() => navigate(-1)}>
                         <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
                     </div>
-                    <div onClick={(e) => handleSubmit(e)}>
-                        <CustomButton title={"Update (Ctrl+S)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
-                    </div>
+                    {status === "ready" && (
+                        <CustomButton type="submit" form="company-form" title={form.saving ? "Saving..." : "Save (Ctrl+S)"} color={"blue"} disabled={form.saving || !changed}>
+                            <AiOutlineSave />
+                        </CustomButton>
+                    )}
                     <Link to="/company">
-                        <CustomButton title={"View All (Ctrl+I)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                        <CustomButton title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
                     </Link>
                 </ActionArea>
 
-                <form className='flex flex-col gap-1'>
-                    <div className='grid grid-cols-1 lg:grid-cols-2 w-full gap-1'>
-                        <MainArea>
-                            <div className='flex flex-col w-full gap-1'>
-                                <PageTitle>Company Details</PageTitle>
-                                <hr />
-                                <table className="w-full text-sm">
-                                    <tbody>
-                                        <tr className="dark:bg-slate-800">
-                                            <td className="p-1 min-w-36">Company Name</td>
-                                            <td className="p-1 min-w-36">
-                                                <input
-                                                    placeholder='Company Name'
-                                                    className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                    value={data.company_name}
-                                                    type="text"
-                                                    onChange={(e) =>
-                                                        setData({ ...data, company_name: e.target.value })
-                                                    }
-                                                    required
-                                                />
-                                            </td>
-                                        </tr>
-                                        <tr className="dark:bg-slate-800">
-                                            <td className="p-1 min-w-36">Owner</td>
-                                            <td className="p-1 min-w-36">
-                                                <input
-                                                    placeholder='Owner'
-                                                    className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                    value={data.owner}
-                                                    type="text"
-                                                    onChange={(e) =>
-                                                        setData({ ...data, owner: e.target.value })
-                                                    }
-                                                    required
-                                                />
-                                            </td>
-                                        </tr>
-                                        <tr className="dark:bg-slate-800">
-                                            <td className="p-1 min-w-36">Email</td>
-                                            <td className="p-1 min-w-36">
-                                                <input
-                                                    placeholder='Email'
-                                                    className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                    value={data.email}
-                                                    type="email"
-                                                    onChange={(e) =>
-                                                        setData({ ...data, email: e.target.value })
-                                                    }
-                                                    required
-                                                />
-                                            </td>
-                                        </tr>
-                                        <tr className="dark:bg-slate-800">
-                                            <td className="p-1 min-w-36">Mobile</td>
-                                            <td className="p-1 min-w-36">
-                                                <input
-                                                    placeholder='Mobile'
-                                                    className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                    value={data.mobile}
-                                                    maxLength={10}
-                                                    type="tel"
-                                                    onChange={(e) =>
-                                                        setData({
-                                                            ...data,
-                                                            mobile: e.target.value.replace(/\D/g, ""),
-                                                        })
-                                                    }
-                                                    required
-                                                />
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </MainArea>
-                        <MainArea>
-                            <div className='flex flex-col w-full gap-1'>
-                                <PageTitle>Preview & Logo</PageTitle>
-                                <hr />
-                                <div className='flex flex-col sm:flex-row w-full p-1 gap-4 items-center sm:items-start'>
-                                    <div className="flex flex-col items-center gap-2">
-                                        <div className="rounded flex flex-col justify-center items-center p-1 w-32 h-32 border border-slate-300 dark:border-slate-600 text-xs bg-white overflow-hidden">
-                                            {logoPreview ? (
-                                                <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-contain" />
-                                            ) : (
-                                                <AiOutlineIdcard className='text-7xl text-slate-300' />
-                                            )}
-                                        </div>
-                                        <label className="px-3 py-1 bg-blue-600 text-white text-xs rounded cursor-pointer hover:bg-blue-700 transition">
-                                            Upload Logo
-                                            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                                        </label>
-                                    </div>
-                                    <div className='flex-1 flex flex-col justify-center'>
-                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
-                                            <span className='font-bold text-xs w-24'>Company : </span>
-                                            <p className='text-slate-500 text-xs uppercase'>{data.company_name || "--"}</p>
-                                        </div>
-                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
-                                            <span className='font-bold text-xs w-24'>Owner : </span>
-                                            <p className='text-slate-500 text-xs uppercase'>{data.owner || "--"}</p>
-                                        </div>
-                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
-                                            <span className='font-bold text-xs w-24'>Email : </span>
-                                            <p className='text-slate-500 text-xs'>{data.email || "--"}</p>
-                                        </div>
-                                        <div className='flex gap-1 border-b border-slate-100 dark:border-slate-700 py-1'>
-                                            <span className='font-bold text-xs w-24'>Mobile : </span>
-                                            <p className='text-slate-500 text-xs'>{data.mobile || "--"}</p>
-                                        </div>
-                                        <div className='flex gap-1 py-1'>
-                                            <span className='font-bold text-xs w-24'>GST : </span>
-                                            <p className='text-slate-500 text-xs uppercase'>{data.gst || "--"}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </MainArea>
-                    </div>
-
-                    <div className="flex border-slate-700 mt-2">
-                        <span
-                            onClick={() => setActive(0)}
-                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 0 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white rounded-t" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
-                        >Address Details</span>
-                        <span
-                            onClick={() => setActive(1)}
-                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 1 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white rounded-t" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
-                        >Business Details
-                        </span>
-                        <span
-                            onClick={() => setActive(2)}
-                            className={`cursor-pointer px-4 py-2 text-sm font-medium transition ${active === 2 ? "bg-slate-200 dark:bg-slate-900 border-b-2 border-blue-600 text-blue-600 dark:text-white rounded-t" : "text-slate-800 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-200"}`}
-                        >Payment Details</span>
-                    </div>
-                    <div className="">
-                        {active === 0 &&
-                            <MainArea>
-                                <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
-                                    <table className="w-full text-sm">
-                                        <tbody>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">Address 1</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='Address 1'
-                                                        className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.address_1}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, address_1: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">Address 2</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='Address 2'
-                                                        className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.address_2}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, address_2: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">City</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='City'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.city}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, city: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">
-                                                    State
-                                                </td>
-                                                <td className="p-1 min-w-36">
-                                                    <SearchableSelect
-                                                        className="w-full"
-                                                        name="consignee_id"
-                                                        value={data.state}
-                                                        onChange={(e) => setData({ ...data, state: e.target.value })}
-                                                        options={StateList?.map(state => ({ id: state.value, label: state.value }))}
-                                                        placeholder="State"
-                                                        required
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">District</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='District'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.district}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, district: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">Pincode</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='Pincode'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.pincode}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, pincode: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </MainArea>
-                        }
-                        {
-                            active === 1 &&
-                            <MainArea>
-                                <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
-                                    <table className="w-full text-sm">
-                                        <tbody>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">GST</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='GST'
-                                                        className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.gst}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, gst: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">PAN</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='PAN'
-                                                        className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.pan}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, pan: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">Trade Licence</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='Trade Licence'
-                                                        className="w-full rounded p-1 border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.trade_licence}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, trade_licence: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </MainArea>
-                        }
-                        {active === 2 &&
-                            <MainArea>
-                                <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
-                                    <table className="w-full text-sm">
-                                        <tbody>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">Bank Name</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='Bank Name'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.bank}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, bank: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">Branch</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='Branch'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.branch}
-                                                        type="text"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, branch: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">IFSE Code</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='IFSE Code'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.ifse}
-                                                        type="tel"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, ifse: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                            <tr className="dark:bg-slate-800">
-                                                <td className="p-1 min-w-36">Account No</td>
-                                                <td className="p-1 min-w-36">
-                                                    <input
-                                                        placeholder='Account No'
-                                                        className="w-full p-1 rounded border border-slate-300 dark:border-slate-600 text-slate-900"
-                                                        value={data.account_no}
-                                                        type="tel"
-                                                        onChange={(e) =>
-                                                            setData({ ...data, account_no: e.target.value })
-                                                        }
-                                                    />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </MainArea>
-                        }
-                    </div>
-                </form>
-            </div >
+                {status === "missing" ? (
+                    <MainArea>
+                        <div className="w-full p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                            This company could not be found. It may have been deleted.
+                        </div>
+                    </MainArea>
+                ) : (
+                    <form id="company-form" onSubmit={save} onKeyDown={focusNextOnEnter} noValidate autoComplete="off">
+                        <BusinessForm form={form} nameLabel="Company name" logo={logo.props} />
+                    </form>
+                )}
+            </div>
         </>
     )
 }

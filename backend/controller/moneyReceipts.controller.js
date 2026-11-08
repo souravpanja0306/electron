@@ -1,215 +1,156 @@
-// Package...
-const moment = require("moment");
-const fs = require('fs');
-const path = require("path");
-const { app } = require("electron");
-
-// Contents...
-const contents = require("../content/contents");
-
-// Services...
-const PartyService = require("../service/party.service");
-const AuthService = require("../service/auth.service");
-const InvoiceService = require("../service/invoice.service");
-const CompanyService = require("../service/company.service");
+// Services / helpers...
 const MoneyReceiptService = require("../service/moneyReceipt.service");
 const { generateMoneyReceiptHtml } = require("../helper/generateMoneyReceiptHtml");
+const { errorHandler, ok, str, toId, round2, isYmd, parseJsonArray, serverError } = require("../helper/http");
+const { checkLinks, loadById, pick } = require("../helper/records");
 
-const errorHandler = (res, status, message) => {
-    return res.status(status).json({ status, message, body: [] });
-};
-
-const toText = (value) => (value === undefined || value === null ? "" : String(value).trim());
-
-const parseJsonArray = (value) => {
-    if (Array.isArray(value)) return value;
-    if (typeof value === "string") {
-        try {
-            const parsed = JSON.parse(value);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            return [];
-        }
-    }
-    return [];
-};
+const PAYMENT_MODES = ["Cash", "UPI", "Bank Transfer", "Cheque"];
 
 // Drops empty rows and recomputes the total so a blank amount can never store "NaN".
 const normaliseReceiptItems = (data) => {
     const items = parseJsonArray(data)
-        .filter((row) => row && (toText(row.description) || Number(row.amount)))
+        .filter((row) => row && (str(row.description) || Number(row.amount)))
         .map((row, index) => ({
             id: row.id ?? Date.now() + index,
             sl_no: index + 1,
-            description: toText(row.description),
-            amount: Number(row.amount) || 0,
+            description: str(row.description),
+            amount: round2(row.amount),
         }));
     const total = items.reduce((sum, row) => sum + row.amount, 0);
-    return { items, total: Math.round(total * 100) / 100 };
+    return { items, total: round2(total) };
 };
 
-const validateReceipt = ({ company_id, party_id, receipt_no, items }) => {
-    if (!company_id) return "Please select Company.";
-    if (!party_id) return "Please select Party.";
-    if (!toText(receipt_no)) return "Receipt Number is required.";
-    if (!items.length) return "Add at least one payment line.";
-    if (items.some((row) => row.amount < 0)) return "Amounts cannot be negative.";
-    return null;
+/** Validates create / update input. Returns { error } or the clean values. */
+const prepareReceipt = (body, userId) => {
+    const companyId = toId(body.company_id);
+    const partyId = toId(body.party_id);
+    const receipt_no = str(body.receipt_no);
+    const receipt_date = str(body.receipt_date);
+    const { items, total } = normaliseReceiptItems(body.data);
+
+    if (!companyId) return { error: "Please select Company." };
+    if (!partyId) return { error: "Please select Party." };
+    if (!receipt_no) return { error: "Receipt Number is required." };
+    if (!isYmd(receipt_date)) return { error: "Enter a valid receipt date." };
+    if (!items.length) return { error: "Add at least one payment line." };
+    if (items.some((row) => row.amount < 0)) return { error: "Amounts cannot be negative." };
+    if (!(total > 0)) return { error: "Enter the amount received." };
+
+    const linkError = checkLinks({ userId, company_id: companyId, parties: [{ id: partyId, label: "Party" }] });
+    if (linkError) return { error: linkError };
+
+    // Known modes keep their spelling; anything else (older data) is kept as typed.
+    const mode = str(body.payment_mode);
+    const payment_mode = PAYMENT_MODES.find((m) => m.toLowerCase() === mode.toLowerCase()) || mode || "Cash";
+
+    return {
+        data: {
+            company_id: companyId,
+            party_id: partyId,
+            receipt_no,
+            receipt_date,
+            data: JSON.stringify(items),
+            remarks: str(body.remarks),
+            total_value: total,
+            payment_mode,
+            reference: str(body.reference),
+        },
+    };
 };
+
+// Receipt numbers are unique per user (the generator counts all of the user's receipts).
+const numberTaken = async (receipt_no, userId, exceptId) => {
+    const same = await MoneyReceiptService.findMoneyReceipts({ receipt_no, created_by: userId });
+    return same.some((item) => String(item.id) !== String(exceptId));
+};
+
+// The receipt with this id, if it belongs to the signed-in user.
+const findOwnReceipt = async (id, userId) => (await MoneyReceiptService.findMoneyReceipts({ id, created_by: userId }))[0] || null;
 
 module.exports.printMoneyReceipt = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id } = req.query;
+        const id = toId(req.query.id);
         if (!id) return errorHandler(res, 400, "Money Receipt ID is required.");
 
-        let search_key = { id };
-        if (t_userId) search_key["created_by"] = t_userId.toString();
+        const receipt = await findOwnReceipt(id, t_userId);
+        if (!receipt) return errorHandler(res, 404, "Money Receipt not found.");
 
-        let result = await MoneyReceiptService.findMoneyReceipts(search_key);
-        if (!result.length) return errorHandler(res, 404, "Money Receipt not found.");
-        let receipt = result[0];
-
-        // Hydrate relations
-        let parties = await PartyService.getParty({ id: receipt.party_id });
-        let party = parties.length ? parties[0] : {};
-        receipt.data = receipt.data ? JSON.parse(receipt.data) : [];
-
-        // Get company
-        let companies = await CompanyService.getCompany({ id: receipt.company_id });
-        let company = companies.length ? companies[0] : {};
-
-        const html = generateMoneyReceiptHtml({ receipt, company, party });
-
-        response.status = 200;
-        response.message = "HTML generated successfully.";
-        response.body = {
-            html: html
-        };
+        const party = pick(loadById("party", [receipt.party_id]), receipt.party_id) || {};
+        const company = pick(loadById("company", [receipt.company_id]), receipt.company_id) || {};
+        const html = generateMoneyReceiptHtml({
+            receipt: { ...receipt, data: parseJsonArray(receipt.data) },
+            company,
+            party,
+        });
+        return ok(res, "HTML generated successfully.", { html });
     } catch (error) {
-        console.log(`Something went wrong: controller: printMoneyReceipt: ${error}`);
-        response.status = 500;
-        response.message = error.message || "Something went wrong: controller: printMoneyReceipt";
-    }
-    return res.status(response.status).json(response);
+        return serverError(res, "controller: printMoneyReceipt", error, "Could not prepare the receipt for printing.");
+    };
 };
 
 module.exports.generateMoneyReceiptNo = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { t_userId, t_mobile, t_username, t_name } = req.body;
-        const { types } = req.query;
-        if (!types) {
-            response.status = 400;
-            response.message = "Type required";
-            response.body = [];
-            return res.status(response.status).json(response);
+        const { t_userId } = req.body;
+        const types = str(req.query.types);
+        if (!types) return errorHandler(res, 400, "Type required");
+        const prefix = types === "moneyreceipt" ? "MR" : "";
+
+        let count = await MoneyReceiptService.findMoneyReceipts({ created_by: t_userId, count: true });
+        for (let attempt = 0; attempt < 10000; attempt++) {
+            const receiptNo = `${prefix}${String(count + 1).padStart(6, "0")}`;
+            if (!(await numberTaken(receiptNo, t_userId))) return ok(res, "Money Receipt Number Generate Successfully.", receiptNo);
+            count++;
         };
-        let type = "";
-        if (types == "moneyreceipt") type = "MR";
-        const date = moment().format("DDMMYYYY");
-
-        const existsCheck = async ({
-            type = ""
-        }) => {
-            let seearch_key = {};
-            if (t_userId) seearch_key["created_by"] = t_userId;
-
-            let count = await MoneyReceiptService.findMoneyReceipts({ ...seearch_key, count: true });
-            while (true) {
-                const receiptNo = `${type}${(count + 1).toString().padStart(6, "0")}`;
-                seearch_key["receipt_no"] = receiptNo;
-
-                const exists = await MoneyReceiptService.findMoneyReceipts(seearch_key);
-                if (!exists.length) return receiptNo;
-                count++;
-            };
-        };
-
-        let result = await existsCheck({ type: type });
-        if (result) {
-            response.status = 200;
-            response.message = "Money Receipt Number Generate Successfully.";
-            response.body = result;
-        };
+        return errorHandler(res, 409, "Could not find a free receipt number.");
     } catch (error) {
-        console.log(`Something went wrong: controller: generateMoneyReceiptNo: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: generateMoneyReceiptNo`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: generateMoneyReceiptNo", error, "Could not generate the receipt number.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.createMoneyReceipt = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { t_userId, t_mobile, t_username, t_name } = req.body;
-        let { company_id, party_id, receipt_no, receipt_date, data, remarks, payment_mode, reference } = req.body;
+        const { t_userId } = req.body;
+        const prepared = prepareReceipt(req.body, t_userId);
+        if (prepared.error) return errorHandler(res, 400, prepared.error);
+        if (await numberTaken(prepared.data.receipt_no, t_userId)) return errorHandler(res, 409, "Receipt Number Already Exists.");
 
-        const { items, total } = normaliseReceiptItems(data);
-        const invalid = validateReceipt({ company_id, party_id, receipt_no, items });
-        if (invalid) return errorHandler(res, 400, invalid);
-
-        let dupKey = { receipt_no: toText(receipt_no) };
-        if (t_userId) dupKey["created_by"] = t_userId.toString();
-        const existing = await MoneyReceiptService.findMoneyReceipts(dupKey);
-        if (existing.length) return errorHandler(res, 409, "Receipt Number Already Exists.");
-
-        let finalData = {
-            company_id: company_id,
-            party_id: party_id,
-            receipt_no: toText(receipt_no),
-            receipt_date: toText(receipt_date),
-            data: JSON.stringify(items),
-            remarks: toText(remarks),
-            total_value: total,
-            payment_mode: toText(payment_mode) || "Cash",
-            reference: toText(reference),
-            created_by: t_userId,
-        };
-
-        let result = await MoneyReceiptService.insertMoneyReceipts(finalData);
-        if (result) {
-            response.status = 200;
-            response.message = "Money Receipt Created Successfully.";
-            response.body = result;
-        };
+        const result = await MoneyReceiptService.insertMoneyReceipts({ ...prepared.data, created_by: t_userId });
+        return ok(res, "Money Receipt Created Successfully.", { ...result, id: Number(result.lastInsertRowid) });
     } catch (error) {
-        console.log(`Something went wrong: controller: createMoneyReceipt: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: createMoneyReceipt`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: createMoneyReceipt", error, "Could not save the money receipt.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.getMoneyReceipt = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { t_userId, t_mobile, t_username, t_name } = req.body;
-        const { id, startDate, endDate, search } = req.query;
+        const { t_userId } = req.body;
+        const search_key = {
+            created_by: t_userId,
+            startDate: isYmd(req.query.startDate) ? req.query.startDate : "",
+            endDate: isYmd(req.query.endDate) ? req.query.endDate : "",
+            search: str(req.query.search),
+        };
+        if (req.query.id) {
+            const id = toId(req.query.id);
+            if (!id) return errorHandler(res, 400, "Invalid receipt ID.");
+            search_key.id = id;
+        };
 
-        let search_key = { startDate, endDate, search };
-        if (id) search_key["id"] = id;
-        if (t_userId) search_key["created_by"] = t_userId.toString();
+        const result = await MoneyReceiptService.findMoneyReceipts(search_key);
+        if (!result.length) return errorHandler(res, 202, "No money receipts created yet.");
 
-        let result = await MoneyReceiptService.findMoneyReceipts(search_key);
-        if (!result.length) return errorHandler(res, 202, "No money receipts created yet.")
-
-        let finalData = [];
-        for (let item of result) {
-            let party = await PartyService.getParty({ id: item.party_id });
-
-            let newData = {
+        const parties = loadById("party", result.map((item) => item.party_id));
+        const finalData = result.map((item) => {
+            const party = pick(parties, item.party_id);
+            return {
                 id: item.id,
                 company_id: item.company_id,
-                party_id: party.length ? {
-                    id: party[0].id ? party[0].id : "",
-                    name: party[0].company_name ? party[0].company_name : "",
-                    mobile: party[0].mobile ? party[0].mobile : "",
-                    email: party[0].email ? party[0].email : "",
+                party_id: party ? {
+                    id: party.id,
+                    name: party.company_name || "",
+                    mobile: party.mobile || "",
+                    email: party.email || "",
                 } : "",
                 receipt_no: item.receipt_no,
                 receipt_date: item.receipt_date,
@@ -220,257 +161,47 @@ module.exports.getMoneyReceipt = async (req, res) => {
                 total_value: Number(item.total_value) || 0,
                 created_by: item.created_by,
             };
-            finalData.push(newData);
-        };
-        response.status = 200;
-        response.message = "Get Money Receipt All Successfully.";
-        response.body = finalData;
-    } catch (error) {
-        console.log(`Something went wrong: controller: getMoneyReceipt: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: getMoneyReceipt`;
-        response.body = error.body ? error.body : "";
-    };
-    return res.status(response.status).json(response);
-};
-
-
-module.exports.generateMoneyReceiptPdf = async (req, res) => {
-    let response = { ...contents.defaultResponse };
-    try {
-        const { t_userId, t_mobile, t_username, t_name } = req.body;
-        let { id } = req.params;
-        if (!id) {
-            response.status = 200;
-            response.message = "ID required.";
-            response.body = {};
-            return res.status(response.status).json(response);
-        };
-
-        let search_key = {};
-        if (id) search_key["id"] = id;
-        if (t_userId) search_key["created_by"] = t_userId.toString();
-
-        let result = await MoneyReceiptService.findMoneyReceipts(search_key);
-        if (!result.length) return errorHandler(res, 400, "No Data Found");
-
-        let party = await PartyService.getParty({ id: result[0].party_id });
-        if (!party.length) return errorHandler(res, 400, "Party Data Not Found");
-
-        let descriptionTemplete = ``;
-        let descriptions = JSON.parse(result[0].data);
-        for (let item of descriptions) {
-            descriptionTemplete += `
-            <tr>
-              <td style="border:1px solid #000;padding:4px">${item.sl_no}</td>
-              <td style="border:1px solid #000;padding:4px">${item.description}</td>
-              <td style="border:1px solid #000;padding:4px;text-align:right">${item.amount}</td>
-            </tr>
-            `
-        };
-
-        const createFolder = app.isPackaged
-            ? path.join(app.getPath("userData"), "uploads", "money_receipt_pdf")
-            : path.join(__dirname, "../../uploads/money_receipt_pdf");
-        if (!fs.existsSync(createFolder)) fs.mkdirSync(createFolder, { recursive: true });
-
-
-        const browser = await getBrowser();
-        const page = await browser.newPage();
-
-        await page.setContent(`
-                <body style="font-family:Arial;font-size:12px">
-                    <div style="width:700px;margin:auto;border:1px solid #000;padding:10px">
-
-                      <div style="text-align:center;font-weight:bold;margin-bottom:5px">
-                        MONEY RECEIPT
-                      </div>
-
-                      <table style="width:100%;border-collapse:collapse;margin-bottom:5px">
-                        <tr>
-                          <td style="width:60%;vertical-align:top">
-                            <b>Company Name</b><br>
-                            Address Line<br>
-                            GSTIN: 22AAAAA0000A1Z5
-                          </td>
-
-                          <td style="width:40%;vertical-align:top;text-align:right">
-                            Receipt No: ${result[0].receipt_no}<br>
-                            Date: ${result[0].receipt_date}
-                          </td>
-                        </tr>
-                      </table>
-
-                      <table style="width:100%;border-collapse:collapse;border:1px solid #000">
-                        <tr>
-                          <td style="width:50%;border:1px solid #000;padding:6px;vertical-align:top">
-                            <b>Received From:</b><br>
-                            ${party.length && party[0].company_name ? party[0].company_name : ""}<br>
-                            ${party.length && party[0].address_1 ? party[0].address_1 : ""}<br>
-                            ${party.length && party[0].address_2 ? party[0].address_2 : ""}<br>
-                            GSTIN: ${party.length && party[0].gst ? party[0].gst : "NA"}
-                          </td>
-
-                          <td style="width:50%;border:1px solid #000;padding:6px;vertical-align:top">
-                            <b>Payment Details:</b><br>
-                            Payment Mode: Cash / UPI / Bank<br>
-                            Reference No:<br>
-                            Invoice Ref No:<br>
-                            Invoice Date:
-                          </td>
-                        </tr>
-                      </table>
-
-                      <table style="width:100%;border-collapse:collapse;margin-top:5px">
-                        <tr>
-                          <th style="border:1px solid #000;padding:4px">Sl</th>
-                          <th style="border:1px solid #000;padding:4px">Particulars</th>
-                          <th style="border:1px solid #000;padding:4px;text-align:right">Amount</th>
-                        </tr>
-                       ${descriptionTemplete}
-                      </table>
-
-                      <table style="width:100%;margin-top:5px">
-                        <tr>
-                          <td style="text-align:right;font-weight:bold">Total Received</td>
-                          <td style="text-align:right;font-weight:bold">₹ 1180</td>
-                        </tr>
-                      </table>
-
-                      <div style="margin-top:5px">
-                        <b>Amount in Words:</b> One Thousand One Hundred Eighty Only
-                      </div>
-
-                      <table style="width:100%;border-collapse:collapse;border:1px solid #000;margin-top:10px">
-                        <tr>
-                          <td style="width:70%;border:1px solid #000;padding:6px;vertical-align:top">
-                            <b>Note:</b><br>
-                            This is a receipt acknowledging payment received.
-                          </td>
-
-                          <td style="width:30%;border:1px solid #000;padding:6px;vertical-align:top;text-align:right">
-                            <b>For Company Name</b><br><br><br>
-                            Authorised Signatory
-                          </td>
-                        </tr>
-                      </table>
-
-                    </div>
-                </body>
-                    `
-        );
-
-        await page.pdf({
-            path: path.join(`${createFolder}/${result[0].receipt_no}_${moment().format("DD-MM-YYYY")}.pdf`),
-            format: "A4",
-            printBackground: true
         });
-        await page.close();
-
-        response.status = 200;
-        response.message = "Money Receipt Downloaded Successfully.";
-        response.body = {
-            downloadLink: `http://localhost:3001/uploads/money_receipt_pdf/${result[0].receipt_no}_${moment().format("DD-MM-YYYY")}.pdf`
-        };
+        return ok(res, "Get Money Receipt All Successfully.", finalData);
     } catch (error) {
-        console.log(`Something went wrong: controller: generateMoneyReceiptPdf: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: generateMoneyReceiptPdf`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: getMoneyReceipt", error, "Could not load money receipts.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.updateMoneyReceipt = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id, company_id, party_id, receipt_no, receipt_date, data, remarks, payment_mode, reference } = req.body;
-
+        const id = toId(req.body.id);
         if (!id) return errorHandler(res, 400, "Money Receipt ID is required.");
 
-        const { items, total } = normaliseReceiptItems(data);
-        const invalid = validateReceipt({ company_id, party_id, receipt_no, items });
-        if (invalid) return errorHandler(res, 400, invalid);
+        const existing = await findOwnReceipt(id, t_userId);
+        if (!existing) return errorHandler(res, 404, "Money Receipt not found.");
 
-        let search_key = { id };
-        if (t_userId) search_key["created_by"] = t_userId.toString();
+        const prepared = prepareReceipt(req.body, t_userId);
+        if (prepared.error) return errorHandler(res, 400, prepared.error);
+        if (await numberTaken(prepared.data.receipt_no, t_userId, id)) return errorHandler(res, 409, "Receipt Number Already Exists.");
 
-        let checkReceipt = await MoneyReceiptService.findMoneyReceipts(search_key);
-        if (!checkReceipt.length) return errorHandler(res, 404, "Money Receipt not found.");
-
-        // Receipt number must stay unique, ignoring this receipt itself.
-        let dupKey = { receipt_no: toText(receipt_no) };
-        if (t_userId) dupKey["created_by"] = t_userId.toString();
-        const sameNo = await MoneyReceiptService.findMoneyReceipts(dupKey);
-        if (sameNo.some((item) => String(item.id) !== String(id))) {
-            return errorHandler(res, 409, "Receipt Number Already Exists.");
-        }
-
-        let updateData = {
-            company_id: company_id,
-            party_id: party_id,
-            receipt_no: toText(receipt_no),
-            receipt_date: toText(receipt_date),
-            data: JSON.stringify(items),
-            remarks: toText(remarks),
-            total_value: total,
-            payment_mode: toText(payment_mode) || "Cash",
-            reference: toText(reference),
-        };
-
-        let result = await MoneyReceiptService.updateMoneyReceiptData(id, updateData);
-
-        if (result.changes) {
-            response.status = 200;
-            response.message = "Money Receipt Updated Successfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "No changes made or Money Receipt not found.";
-        }
+        const result = await MoneyReceiptService.updateMoneyReceiptData(id, prepared.data);
+        if (!result.changes) return res.status(202).json({ status: 202, message: "No changes made or Money Receipt not found.", body: [] });
+        return ok(res, "Money Receipt Updated Successfully.", result);
     } catch (error) {
-        console.log(`Something went wrong: controller: updateMoneyReceipt: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: updateMoneyReceipt`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: updateMoneyReceipt", error, "Could not update the money receipt.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.deleteMoneyReceipt = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { t_userId, t_mobile, t_username, t_name } = req.body;
-        let { id } = req.params;
-        if (!id) {
-            response.status = 200;
-            response.message = "ID required.";
-            response.body = {};
-            return res.status(response.status).json(response);
-        };
+        const { t_userId } = req.body;
+        const id = toId(req.params.id);
+        if (!id) return errorHandler(res, 400, "ID required.");
 
-        let search_key = {};
-        if (id) search_key["id"] = id;
-        if (t_userId) search_key["created_by"] = t_userId.toString();
+        const receipt = await findOwnReceipt(id, t_userId);
+        if (!receipt) return errorHandler(res, 404, "Money Receipt Not Found");
 
-        let result = await MoneyReceiptService.findMoneyReceipts(search_key);
-        if (result.length) {
-            let results = await MoneyReceiptService.deleteMoneyReceipt({ id: result[0].id });
-
-            response.status = 200;
-            response.message = "Money Receipt Deleted Successfully.";
-            response.body = results;
-        } else {
-            response.status = 404;
-            response.message = "Money Receipt Not Found";
-            response.body = {};
-        };
+        const result = await MoneyReceiptService.deleteMoneyReceipt({ id: receipt.id });
+        if (!result.deleted) return errorHandler(res, 500, "Could not delete the money receipt.");
+        return ok(res, "Money Receipt Deleted Successfully.", result);
     } catch (error) {
-        console.log(`Something went wrong: controller: generateMoneyReceiptPdf: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: generateMoneyReceiptPdf`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: deleteMoneyReceipt", error, "Could not delete the money receipt.");
     };
-    return res.status(response.status).json(response);
 };

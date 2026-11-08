@@ -71,11 +71,19 @@ const MenuMap = {
     "report": [
         {
             type: "main",
+            title: "Sales",
+            url: "#",
+            icon: <AiOutlineFileText />,
+            submenu: [
+                { title: "Sales Register", url: "/sales-reports", icon: <AiOutlineFileSearch /> },
+            ],
+        },
+        {
+            type: "main",
             title: "Ledgers",
             url: "#",
             icon: <AiOutlineDiff />,
             submenu: [
-                // { title: "Party Ladger", url: "/sales-reports", icon: <AiOutlinePlusSquare /> },
                 { title: "Debtors", url: "/debtors", icon: <AiOutlineFileSearch /> },
                 { title: "Creditors", url: "/creditors", icon: <AiOutlineFileSearch /> },
             ],
@@ -154,7 +162,7 @@ const MenuMap = {
             submenu: [
                 { title: "General", url: "/settings", icon: <AiOutlinePicture /> },
                 { title: "Invoice Settings", url: "/invoice-setttings", icon: <AiOutlineFileText /> },
-                { title: "Challan Setiings", url: "/challan-settings", icon: <AiOutlineFileText /> },
+                { title: "Challan Settings", url: "/challan-settings", icon: <AiOutlineFileText /> },
                 { title: "Database", url: "/database-settings", icon: <AiOutlineDatabase /> },
                 { title: "Change Password", url: "/change-password", icon: <AiOutlineLock /> },
             ]

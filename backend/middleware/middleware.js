@@ -1,47 +1,57 @@
-// Package...
-const jwt = require("jsonwebtoken");
-
-// Contents...
-const contents = require("../content/contents");
-
-// Services...
+// Services / helpers...
 const UserService = require("../service/user.service");
+const { verifyUserToken } = require("../helper/authToken");
 
+const unauthorized = (res, message = "Unauthorized") => res.status(401).json({ status: 401, message, body: [] });
+
+// Copies the signed-in user onto req.body, where the controllers read it.
+const applyAuth = (req) => {
+    if (!req.auth) return;
+    if (!req.body || typeof req.body !== "object") req.body = {};
+    req.body.t_userId = req.auth.id;
+    req.body.t_mobile = req.auth.mobile;
+    req.body.t_username = req.auth.username;
+    req.body.t_name = req.auth.name;
+};
+
+/**
+ * Verifies the Bearer token and that the user still exists. The identity is set by the
+ * server only: any t_userId sent by the client is overwritten.
+ */
 module.exports.isAuthenticated = async (req, res, next) => {
-    let response = { ...contents.defaultResponse };
     try {
-        if (!req.body) req.body = {};
         const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            response.status = 401;
-            response.message = "Unauthorized";
-            response.body = [];
-            return res.status(response.status).json(response);
-        };
-        const token = authHeader.split(" ")[1];
+        if (!authHeader || !authHeader.startsWith("Bearer ")) return unauthorized(res);
 
-        const decoded = jwt.verify(token, "secretOrPrivateKey");
-
-        let userExists = await UserService.getUsers({ id: decoded.TOKEN_UID });
-        if (!userExists.length) {
-            response.status = 401;
-            response.message = "Unauthorized";
-            response.body = [];
-            return res.status(response.status).json(response);
+        let decoded;
+        try {
+            decoded = verifyUserToken(authHeader.slice(7).trim());
+        } catch (error) {
+            return unauthorized(res, error.name === "TokenExpiredError" ? "Your session has expired. Please sign in again." : "Unauthorized");
         };
 
-        if (decoded) {
-            req.body.t_userId = decoded.TOKEN_UID;
-            req.body.t_mobile = decoded.TOKEN_MOBILE;
-            req.body.t_username = decoded.TONEN_USERNAME;
-            req.body.t_name = decoded.TONEN_NAME;
-            return next();
+        const users = await UserService.getUsers({ id: decoded.TOKEN_UID });
+        if (!users?.length || users[0].is_deleted) return unauthorized(res);
+
+        req.auth = {
+            id: users[0].id,
+            mobile: users[0].mobile,
+            username: users[0].username,
+            name: users[0].name,
         };
+        applyAuth(req);
+        return next();
     } catch (error) {
         console.log(`Something went wrong: middleware: isAuthenticated: ${error}`);
-        response.status = error.status ? error.status : 401;
-        response.message = error.message ? error.message : `Something went wrong: middleware: isAuthenticated`;
-        response.body = error.body ? error.body : "";
+        return unauthorized(res);
     };
-    return res.status(response.status).json(response);
+};
+
+/**
+ * Multer replaces req.body when it parses a multipart form, so routes that upload a file
+ * run this after the upload to put the signed-in user back.
+ */
+module.exports.restoreAuth = (req, res, next) => {
+    applyAuth(req);
+    next();
 };

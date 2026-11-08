@@ -8,40 +8,51 @@ import { AiOutlineFileAdd, AiOutlineSync, AiOutlineDelete, AiOutlineEdit } from 
 // Components...
 import PageTitle from '../../../components/PageTitle';
 import ActionArea from '../../../components/ActionArea';
-import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-import CustomLoader from "../../../components/CustomLoader";
+import {
+    FilterSidebar, FilterToggleButton, FilterSection, ChipGroup, useFilterPanel,
+    ListTable, Pagination, Badge, paginate, rowCls, thCls, matchText,
+} from '../../../components/ListKit';
 
 // Stores...
 import useGstStore from "../../../store/GstStore";
-import useChallanStore from "../../../store/ChallanStore";
 import useAuthStore from '../../../store/AuthStore';
-import useHsnSacStore from "../../../store/HsnSacStore";
 import useShortcuts from "../../../hooks/useShortcuts";
+import useClientFilters from "../../../hooks/useClientFilters";
+
+const STATUS_OPTIONS = [
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+];
+
+const TYPE_OPTIONS = [
+    { value: "percentage", label: "Percentage" },
+    { value: "fixed", label: "Fixed" },
+];
 
 const GstTable = () => {
     const { token } = useAuthStore();
     const { gstData, getAllGst, deleteGst, gstLoading } = useGstStore();
     const navigate = useNavigate();
-
-    useShortcuts({
-        n: () => navigate("/create-gst"),
-        d: () => handleDelete(),
-        e: () => {
-            if (!checkedIds) return toast.error("Please select a GST record to edit.");
-            navigate(`/create-gst?id=${checkedIds}`);
-        },
-    });
     const [checkedIds, setCheckedIds] = useState(null);
+
+    const panel = useFilterPanel();
+    const { filters, onFilterChange, filtered, page, setPage } = useClientFilters(
+        gstData,
+        { search: "", status: "", type: "" },
+        (item, f) =>
+            matchText(f.search, item.title, item.total_rate, item.cgst, item.sgst, item.igst) &&
+            (!f.status || (f.status === "active" ? Boolean(item.is_active) : !item.is_active)) &&
+            (!f.type || String(item.type || "").toLowerCase() === f.type)
+    );
+    const paging = paginate(filtered, page);
+    const clear = (name) => () => onFilterChange({ target: { name, value: "" } });
 
     useEffect(() => {
         getAllGst(token);
     }, []);
 
-    const handleChecked = (e, id) => {
-        setCheckedIds(null);
-        if (e.target.checked) setCheckedIds(id);
-    };
+    const toggleChecked = (id) => setCheckedIds(prev => (prev === id ? null : id));
 
     const handleDelete = async () => {
         if (!checkedIds) return toast.error("Please select a GST record to delete.");
@@ -61,79 +72,112 @@ const GstTable = () => {
         }
     };
 
-    if (gstLoading) return <CustomLoader />;
+    const handleRefresh = () => {
+        getAllGst(token);
+        toast.info("Data refreshed.");
+    };
+
+    useShortcuts({
+        f: () => panel.openAndFocus(),
+        n: () => navigate("/create-gst"),
+        d: () => handleDelete(),
+        e: () => {
+            if (!checkedIds) return toast.error("Please select a GST record to edit.");
+            navigate(`/create-gst?id=${checkedIds}`);
+        },
+    });
 
     return (
         <>
             <PageTitle>View All GST Settings</PageTitle>
-            <div className='flex flex-col gap-1'>
-                <ActionArea>
-                    <div className="flex justify-between w-full">
-                        <div className="flex gap-1">
-                            <Link to="/create-gst">
-                                <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
-                            </Link>
-                            <div className={`${!checkedIds ? "hidden" : "block"}`} onClick={() => navigate(`/create-gst?id=${checkedIds}`)}>
-                                <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineEdit /></CustomButton>
+            <div className="flex items-start gap-2">
+                <div className='flex flex-col gap-1 flex-1 min-w-0'>
+                    <ActionArea>
+                        <div className="flex flex-wrap items-center justify-between w-full gap-2">
+                            <div className="flex flex-wrap gap-1">
+                                <Link to="/create-gst">
+                                    <CustomButton title={"New (Ctrl+N)"} color={"blue"}><AiOutlineFileAdd /></CustomButton>
+                                </Link>
+                                {checkedIds && (
+                                    <div onClick={() => navigate(`/create-gst?id=${checkedIds}`)}>
+                                        <CustomButton title={"Edit (Ctrl+E)"} color={"blue"}><AiOutlineEdit /></CustomButton>
+                                    </div>
+                                )}
+                                {checkedIds && (
+                                    <div onClick={handleDelete}>
+                                        <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                                    </div>
+                                )}
                             </div>
-                            <div className={`${!checkedIds ? "hidden" : "block"}`} onClick={handleDelete}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
+                            <div className="flex items-center gap-1">
+                                <div onClick={handleRefresh}>
+                                    <CustomButton title={"Refresh"} color={"slate"}><AiOutlineSync /></CustomButton>
+                                </div>
+                                <FilterToggleButton panel={panel} filters={filters} />
                             </div>
                         </div>
-                        <div className="flex gap-1">
-                            <div onClick={() => getAllGst(token)}>
-                                <CustomButton title={"Refresh"} color={"blue"}><AiOutlineSync /></CustomButton>
-                            </div>
-                        </div>
-                    </div>
-                </ActionArea>
+                    </ActionArea>
 
-                <MainArea>
-                    <table className="table-fixed w-full text-sm">
-                        <thead>
-                            <tr className="border-b border-slate-300 dark:border-slate-600 p-1 font-semibold text-slate-600 dark:text-white">
-                                <th className="p-1 text-start w-16">Select</th>
-                                <th className="p-1 text-start">Title</th>
-                                <th className="p-1 text-right">Total %</th>
-                                <th className="p-1 text-right">CGST %</th>
-                                <th className="p-1 text-right">SGST %</th>
-                                <th className="p-1 text-right">IGST %</th>
-                                <th className="p-1 text-center w-24">Type</th>
-                                <th className="p-1 text-center w-24">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {gstData && gstData.length > 0 ? (
-                                gstData.map((item) => (
-                                    <tr key={item.id} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                        <td className="p-1 text-start">
-                                            <input
-                                                type="checkbox"
-                                                onChange={(e) => handleChecked(e, item.id)}
-                                                checked={checkedIds === item.id}
-                                            />
-                                        </td>
-                                        <td className="p-1 text-start truncate">{item.title || "--"}</td>
-                                        <td className="p-1 text-right">{item.total_rate}%</td>
-                                        <td className="p-1 text-right">{item.cgst}%</td>
-                                        <td className="p-1 text-right">{item.sgst}%</td>
-                                        <td className="p-1 text-right">{item.igst}%</td>
-                                        <td className="p-1 text-center capitalize">{item.type || "--"}</td>
-                                        <td className="p-1 text-center">
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] ${item.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                {item.is_active ? "Active" : "Inactive"}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr className="p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                                    <td className="p-1 text-center font-semibold text-slate-500" colSpan={8}>No Data Found</td>
+                    <ListTable
+                        minWidth="min-w-[720px]"
+                        colSpan={8}
+                        loading={gstLoading}
+                        isEmpty={!paging.pageRows.length}
+                        emptyText={gstData?.length ? "No GST records match these filters." : "No GST records found."}
+                        head={<>
+                            <th className={`${thCls} text-center w-12`}>Select</th>
+                            <th className={`${thCls} text-left`}>Title</th>
+                            <th className={`${thCls} text-right`}>Total %</th>
+                            <th className={`${thCls} text-right`}>CGST %</th>
+                            <th className={`${thCls} text-right`}>SGST %</th>
+                            <th className={`${thCls} text-right`}>IGST %</th>
+                            <th className={`${thCls} text-center w-28`}>Type</th>
+                            <th className={`${thCls} text-center w-24`}>Status</th>
+                        </>}
+                    >
+                        {paging.pageRows.map((item) => {
+                            const selected = checkedIds === item.id;
+                            return (
+                                <tr key={item.id} onClick={() => toggleChecked(item.id)} className={rowCls(selected)}>
+                                    <td className="p-2 text-center" onClick={(e) => e.stopPropagation()}>
+                                        <input
+                                            type="checkbox"
+                                            aria-label={`Select ${item.title}`}
+                                            checked={selected}
+                                            onChange={() => toggleChecked(item.id)}
+                                        />
+                                    </td>
+                                    <td className="p-2 max-w-56 truncate font-medium" title={item.title}>{item.title || "--"}</td>
+                                    <td className="p-2 text-right tabular-nums">{item.total_rate}%</td>
+                                    <td className="p-2 text-right tabular-nums">{item.cgst}%</td>
+                                    <td className="p-2 text-right tabular-nums">{item.sgst}%</td>
+                                    <td className="p-2 text-right tabular-nums">{item.igst}%</td>
+                                    <td className="p-2 text-center capitalize">{item.type || "--"}</td>
+                                    <td className="p-2 text-center">
+                                        <Badge tone={item.is_active ? "green" : "red"}>{item.is_active ? "Active" : "Inactive"}</Badge>
+                                    </td>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </MainArea>
+                            );
+                        })}
+                    </ListTable>
+
+                    <Pagination paging={paging} onPage={setPage} />
+                </div>
+                <FilterSidebar
+                    panel={panel}
+                    filters={filters}
+                    onChange={onFilterChange}
+                    searchPlaceholder="Search title or rate..."
+                    resultCount={filtered.length}
+                    showDates={false}
+                >
+                    <FilterSection title="Status" onClear={filters.status ? clear("status") : undefined}>
+                        <ChipGroup name="status" label="Status" value={filters.status} onChange={onFilterChange} options={STATUS_OPTIONS} />
+                    </FilterSection>
+                    <FilterSection title="Type" onClear={filters.type ? clear("type") : undefined}>
+                        <ChipGroup name="type" label="Type" value={filters.type} onChange={onFilterChange} options={TYPE_OPTIONS} />
+                    </FilterSection>
+                </FilterSidebar>
             </div>
         </>
     );

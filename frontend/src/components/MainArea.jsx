@@ -5,8 +5,8 @@ const MainArea = ({
     background
 }) => {
     return (
-        <div className={`flex flex-col w-full rounded border border-slate-300 dark:border-slate-600 ${background} shadow`}>
-            <div className='flex gap-1 p-1 text-slate-500 dark:text-white bg-slate-100 dark:bg-slate-800 rounded'>
+        <div className={`flex flex-col w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm ${background || ""}`}>
+            <div className='flex gap-1 p-1 text-slate-700 dark:text-slate-200 rounded-md'>
                 {children}
             </div>
         </div>

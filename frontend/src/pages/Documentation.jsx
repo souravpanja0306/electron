@@ -87,7 +87,7 @@ const Documentation = () => {
             <div className="flex w-full flex-col gap-4 p-1 text-slate-600 dark:text-slate-100">
               <div className="flex flex-col justify-between gap-3 border-b border-slate-300 pb-3 dark:border-slate-600 sm:flex-row sm:items-center">
                 <div className="flex items-start gap-2">
-                  <Icon className="mt-0.5 text-xl text-blue-600" />
+                  <Icon className="mt-0.5 text-xl text-blue-600 dark:text-blue-400" />
                   <div><p className="text-sm font-semibold">{activeService.shortTitle}</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-300">{activeService.description}</p></div>
                 </div>
                 <Link to={activeService.route}><CustomButton title={activeService.shortTitle} color="blue"><AiOutlinePlus /></CustomButton></Link>
@@ -101,12 +101,12 @@ const Documentation = () => {
                   </ol>
                 </div>
                 <div className="rounded border border-slate-300 bg-white p-3 dark:border-slate-600 dark:bg-slate-700">
-                  <p className="mb-2 flex items-center gap-1 text-xs font-semibold"><AiOutlineCheckCircle className="text-green-600" /> Before you start</p>
+                  <p className="mb-2 flex items-center gap-1 text-xs font-semibold"><AiOutlineCheckCircle className="text-emerald-600 dark:text-emerald-400" /> Before you start</p>
                   <ul className="space-y-2">{activeService.before.map((item) => <li key={item} className="flex gap-2 text-xs"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-blue-600" />{item}</li>)}</ul>
                 </div>
               </div>
 
-              <div className="flex gap-2 border-l-4 border-blue-600 bg-blue-50 p-2 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-100"><AiOutlineSearch className="mt-0.5 shrink-0 text-blue-600" /><p><span className="font-semibold">Helpful tip: </span>{activeService.tip}</p></div>
+              <div className="flex gap-2 border-l-4 border-blue-600 bg-blue-50 p-2 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-100"><AiOutlineSearch className="mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" /><p><span className="font-semibold">Helpful tip: </span>{activeService.tip}</p></div>
             </div>
           </MainArea>
         </div>

@@ -1,221 +1,112 @@
-// Package...
-const moment = require("moment");
-const { app } = require("electron");
-const fs = require("fs");
-const path = require("path");
-
-// Contents...
-const contents = require("../content/contents");
-
-// Services...
+// Services / helpers...
 const PartyService = require("../service/party.service");
-const AuthService = require("../service/auth.service")
-const InvoiceService = require("../service/invoice.service");
+const { errorHandler, ok, toId, serverError } = require("../helper/http");
+const { pickBusiness, validateBusiness, countReferences, describeReferences } = require("../helper/business");
+const { saveLogo, removeLogo, discardUpload } = require("../helper/upload");
+const { uploadUrl } = require("../helper/html");
 
-const errorHandler = (res, status, message) => {
-    return res.status(status).json({ status, message, body: [] });
-};
+const withLogoUrl = (party) => ({ ...party, logo: uploadUrl("party", party.logo) });
+
+// The party with this id, if it belongs to the signed-in user.
+const findOwnParty = async (id, userId) => (await PartyService.getParty({ id, created_by: userId }))[0] || null;
 
 module.exports.addParty = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-
-        // let isMobileExist = await PartyService.getParty({ mobile: req.body.mobile });
-        // if (isMobileExist.length) return errorHandler(res, 409, "Mobile number already registered.");
-
-        // let isEmailExist = await PartyService.getParty({ email: req.body.email });
-        // if (isEmailExist.length) return errorHandler(res, 409, "Email already registered.");
-
-        let finalData = {
-            company_name: req.body.company_name,
-            email: req.body.email,
-            mobile: req.body.mobile,
-            owner: req.body.owner,
-            address_1: req.body.address_1,
-            address_2: req.body.address_2,
-            city: req.body.city,
-            state: req.body.state,
-            district: req.body.district,
-            pincode: req.body.pincode,
-            country: req.body.country,
-            gst: req.body.gst,
-            pan: req.body.pan,
-            trade_licence: req.body.trade_licence,
-            bank: req.body.bank,
-            ifse: req.body.ifse,
-            branch: req.body.branch,
-            account_no: req.body.account_no,
-            created_by: t_userId,
-        };
-        const partyFolder = app.isPackaged
-            ? path.join(app.getPath("userData"), "uploads", "party")
-            : path.join(__dirname, "../../uploads/party");
-        if (!fs.existsSync(partyFolder)) fs.mkdirSync(partyFolder, { recursive: true });
-
-        if (req.file) {
-            let oldpath = req.file.path;
-            let file_date = moment().format("DD-MM-YYYY");
-            let random_number = Math.floor(Math.random() * 10000000000 + 1);
-            let fileName = `${random_number}_${file_date}_${req.file.originalname}`
-            let filePath = path.join(partyFolder, fileName);
-
-            fs.renameSync(oldpath, filePath, (err) => {
-                if (err) console.log(err)
-            });
-            finalData["logo"] = fileName
+        const data = pickBusiness(req.body);
+        const invalid = validateBusiness(data, "Party name");
+        if (invalid) {
+            discardUpload(req.file);
+            return errorHandler(res, 400, invalid);
         };
 
-        let result = await PartyService.createParty(finalData);
+        const finalData = { ...data, created_by: t_userId };
+        if (req.file) finalData.logo = saveLogo(req.file, "party");
 
-        response.status = 200;
-        response.message = "Data created successfully.";
-        response.body = result;
+        const result = await PartyService.createParty(finalData);
+        return ok(res, "Party created successfully.", { ...result, id: Number(result.lastInsertRowid) });
     } catch (error) {
-        console.log(`Something went wrong: controller: addParty: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: addParty`;
-        response.body = error.body ? error.body : "";
+        discardUpload(req.file);
+        return serverError(res, "controller: addParty", error, "Could not create the party.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.listParty = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id } = req.query;
-
-        let search_key = {};
-        if (id) search_key["id"] = id;
-        if (t_userId) search_key["created_by"] = t_userId;
-
-        let result = await PartyService.getParty(search_key);
-
-        if (result.length) {
-            result.map((item) => {
-                item["logo"] = `http://localhost:3001/uploads/party/${item.logo}`;
-            });
-            response.status = 200;
-            response.message = "Data fetched succesfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "Data not found.";
-            response.body = [];
+        const search_key = { created_by: t_userId };
+        if (req.query.id) {
+            const id = toId(req.query.id);
+            if (!id) return errorHandler(res, 400, "Invalid party ID.");
+            search_key.id = id;
         };
+
+        const result = await PartyService.getParty(search_key);
+        if (!result.length) return res.status(202).json({ status: 202, message: "Data not found.", body: [] });
+        return ok(res, "Data fetched successfully.", result.map(withLogoUrl));
     } catch (error) {
-        console.log(`Something went wrong: controller: listParty: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: listParty`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: listParty", error, "Could not load parties.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.removeParty = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
         const { t_userId } = req.body;
-        const { id } = req.params;
+        const id = toId(req.params.id);
         if (!id) return errorHandler(res, 400, "ID is required.");
 
-        let search_key = { id: id };
-        if (t_userId) search_key["created_by"] = t_userId;
+        const party = await findOwnParty(id, t_userId);
+        if (!party) return errorHandler(res, 404, "Party not found.");
 
-        let checkParty = await PartyService.getParty(search_key);
-        if (!checkParty.length) return errorHandler(res, 404, "Party not found.");
+        // Deleting a party that documents still point at would leave them without a party.
+        const usedBy = describeReferences(countReferences("party", id));
+        if (usedBy) return errorHandler(res, 409, `This party is used on ${usedBy}. Delete those first, or keep the party.`);
 
-        let result = await PartyService.deleteParty({ ids: [id] });
-        if (result.changes > 0) {
-            response.status = 200;
-            response.message = "Data deleted succesfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "Data not found.";
-            response.body = [];
-        };
+        const result = await PartyService.deleteParty({ ids: [id] });
+        if (!result.changes) return errorHandler(res, 404, "Party not found.");
+        removeLogo(party.logo, "party");
+        return ok(res, "Party deleted successfully.", result);
     } catch (error) {
-        console.log(`Something went wrong: controller: removeParty: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: removeParty`;
-        response.body = error.body ? error.body : "";
+        return serverError(res, "controller: removeParty", error, "Could not delete the party.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.editParty = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { id } = req.params;
         const { t_userId } = req.body;
-
-        if (!id) return errorHandler(res, 400, "ID is required.");
-
-        let search_key = { id: id };
-        if (t_userId) search_key["created_by"] = t_userId;
-
-        let checkParty = await PartyService.getParty(search_key);
-        if (!checkParty.length) return errorHandler(res, 404, "Party not found.");
-
-        let finalData = {
-            company_name: req.body.company_name,
-            email: req.body.email,
-            mobile: req.body.mobile,
-            owner: req.body.owner,
-            address_1: req.body.address_1,
-            address_2: req.body.address_2,
-            city: req.body.city,
-            state: req.body.state,
-            district: req.body.district,
-            pincode: req.body.pincode,
-            country: req.body.country,
-            gst: req.body.gst,
-            pan: req.body.pan,
-            trade_licence: req.body.trade_licence,
-            bank: req.body.bank,
-            ifse: req.body.ifse,
-            branch: req.body.branch,
-            account_no: req.body.account_no,
-            logo: req.body.logo,
+        const id = toId(req.params.id);
+        if (!id) {
+            discardUpload(req.file);
+            return errorHandler(res, 400, "ID is required.");
         };
 
-        const partyFolder = app.isPackaged
-            ? path.join(app.getPath("userData"), "uploads", "party")
-            : path.join(__dirname, "../../uploads/party");
-        if (!fs.existsSync(partyFolder)) fs.mkdirSync(partyFolder, { recursive: true });
+        const party = await findOwnParty(id, t_userId);
+        if (!party) {
+            discardUpload(req.file);
+            return errorHandler(res, 404, "Party not found.");
+        };
+
+        // Fields the client didn't send keep their saved value.
+        const data = pickBusiness(req.body, { partial: true });
+        const invalid = validateBusiness(data, "Party name");
+        if (invalid) {
+            discardUpload(req.file);
+            return errorHandler(res, 400, invalid);
+        };
 
         if (req.file) {
-            let oldpath = req.file.path;
-            let file_date = moment().format("DD-MM-YYYY");
-            let random_number = Math.floor(Math.random() * 10000000000 + 1);
-            let fileName = `${random_number}_${file_date}_${req.file.originalname}`
-            let filePath = path.join(partyFolder, fileName);
-            fs.renameSync(oldpath, filePath, (err) => {
-                if (err) console.log(err)
-            });
-            finalData["logo"] = fileName;
+            data.logo = saveLogo(req.file, "party");
+        } else if (req.body.remove_logo === "1") {
+            data.logo = "";
         };
 
-        // Remove undefined fields
-        Object.keys(finalData).forEach(key => finalData[key] === undefined && delete finalData[key]);
+        if (!Object.keys(data).length) return res.status(202).json({ status: 202, message: "Nothing to update.", body: [] });
 
-        let result = await PartyService.updateParty(id, finalData);
-
-        if (result.changes > 0) {
-            response.status = 200;
-            response.message = "Data updated successfully.";
-            response.body = result;
-        } else {
-            response.status = 202;
-            response.message = "No changes made or party not found.";
-        }
+        const result = await PartyService.updateParty(id, data);
+        if ("logo" in data && party.logo && party.logo !== data.logo) removeLogo(party.logo, "party");
+        return ok(res, "Party updated successfully.", result);
     } catch (error) {
-        console.log(`Something went wrong: controller: editParty: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: editParty`;
-        response.body = error.body ? error.body : "";
+        discardUpload(req.file);
+        return serverError(res, "controller: editParty", error, "Could not update the party.");
     };
-    return res.status(response.status).json(response);
 };

@@ -1,279 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import useAuthStore from '../../store/AuthStore';
-import { AiOutlineSave, AiOutlineRollback } from "react-icons/ai";
+import { AiOutlineSave, AiOutlineRollback, AiOutlineLock } from "react-icons/ai";
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
-import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
+import CustomLoader from '../../components/CustomLoader';
+import BusinessForm, { EMPTY_BUSINESS, businessValidator } from '../../components/BusinessForm';
+import { StackedField, focusNextOnEnter, inputCls, readOnlyCls } from '../../components/FormKit';
+
+// Store / hooks...
+import useAuthStore from '../../store/AuthStore';
+import useShortcuts from "../../hooks/useShortcuts";
+import useForm from "../../hooks/useForm";
+
+// The shared business form calls the name `company_name`; the users table calls it `name`.
+const fromProfile = (p = {}) => ({
+    ...Object.fromEntries(Object.keys(EMPTY_BUSINESS).map((key) => [key, p?.[key] ?? EMPTY_BUSINESS[key]])),
+    company_name: p?.name ?? "",
+    country: p?.country || "INDIA",
+});
+
+const toProfile = ({ company_name, owner, ...rest }) => ({ ...rest, name: company_name.trim() });
 
 const EditProfile = () => {
-  const navigate = useNavigate();
-  const { profileData, updateProfileData, token } = useAuthStore();
-  const [formData, setFormData] = useState({
-    name: '',
-    mobile: '',
-    email: '',
-    address_1: '',
-    address_2: '',
-    city: '',
-    state: '',
-    district: '',
-    pincode: '',
-    country: '',
-    gst: '',
-    pan: '',
-    trade_licence: '',
-    bank: '',
-    ifse: '',
-    branch: '',
-    account_no: ''
-  });
+    const navigate = useNavigate();
+    const { profileData, getProfileData, updateProfileData } = useAuthStore();
+    const [ready, setReady] = useState(Boolean(profileData));
+    const form = useForm(fromProfile(profileData), businessValidator({ nameLabel: "Full name" }));
 
-  useEffect(() => {
-    if (profileData) {
-      setFormData({
-        name: profileData.name || '',
-        mobile: profileData.mobile || '',
-        email: profileData.email || '',
-        address_1: profileData.address_1 || '',
-        address_2: profileData.address_2 || '',
-        city: profileData.city || '',
-        state: profileData.state || '',
-        district: profileData.district || '',
-        pincode: profileData.pincode || '',
-        country: profileData.country || '',
-        gst: profileData.gst || '',
-        pan: profileData.pan || '',
-        trade_licence: profileData.trade_licence || '',
-        bank: profileData.bank || '',
-        ifse: profileData.ifse || '',
-        branch: profileData.branch || '',
-        account_no: profileData.account_no || ''
-      });
-    }
-  }, [profileData]);
+    // Always edit the latest copy from the server.
+    useEffect(() => {
+        let alive = true;
+        getProfileData().then((result) => {
+            if (!alive) return;
+            if (result?.status === 200) form.load(fromProfile(result.body));
+            else toast.error(result?.message || "Could not load your profile.");
+            setReady(true);
+        });
+        return () => { alive = false; };
+    }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    const save = form.submit(async (data) => {
+        const result = await updateProfileData(toProfile(data));
+        if (result?.status === 200) {
+            toast.success("Profile updated.");
+            form.markSaved();
+            navigate('/profile');
+        } else {
+            toast.error(result?.message || "Failed to update profile");
+        }
+    });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const result = await updateProfileData(formData, token);
-      if (result.status === 200) {
-        toast.success("Profile updated successfully!");
-        navigate('/profile');
-      } else {
-        toast.error(result.message || "Failed to update profile");
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
-  };
+    useShortcuts({
+        s: (e) => ready && save(e),
+        i: () => navigate("/profile"),
+    });
 
-  return (
-    <>
-      <PageTitle>Update Profile</PageTitle>
-      <div className='flex flex-col gap-1'>
-        <ActionArea>
-          <div onClick={() => navigate(-1)}>
-            <CustomButton title="Back" color="slate"><AiOutlineRollback /></CustomButton>
-          </div>
-          <div onClick={handleSubmit}>
-            <CustomButton title="Save Changes" color="blue"><AiOutlineSave /></CustomButton>
-          </div>
-        </ActionArea>
+    if (!ready) return <CustomLoader />;
 
-        <form onSubmit={handleSubmit} className='flex flex-col gap-1'>
-          <MainArea>
-            <div className="p-4 w-full">
-              <h3 className="text-lg font-semibold mb-4 border-b pb-2">Personal Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Full Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Full Name"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Mobile Number</label>
-                  <input
-                    type="text"
-                    name="mobile"
-                    value={formData.mobile}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Mobile Number"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Email Address</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Email Address"
-                    required
-                  />
-                </div>
-              </div>
+    return (
+        <>
+            <PageTitle>Edit Profile</PageTitle>
+            <div className='flex flex-col gap-1'>
+                <ActionArea>
+                    <div onClick={() => navigate(-1)}>
+                        <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                    </div>
+                    <CustomButton type="submit" form="profile-form" title={form.saving ? "Saving..." : "Save (Ctrl+S)"} color={"blue"} disabled={form.saving || !form.dirty}>
+                        <AiOutlineSave />
+                    </CustomButton>
+                    <Link to="/change-password">
+                        <CustomButton title={"Change password"} color={"slate"}><AiOutlineLock /></CustomButton>
+                    </Link>
+                </ActionArea>
+
+                <form id="profile-form" onSubmit={save} onKeyDown={focusNextOnEnter} noValidate autoComplete="off">
+                    <BusinessForm
+                        form={form}
+                        nameLabel="Full name"
+                        hideOwner
+                        autoFocus
+                        basicTitle="Personal details"
+                        basicDescription="Your name and how customers can reach you."
+                        basicExtra={
+                            <StackedField label="Username" htmlFor="f-username" hint="Used to sign in. It can't be changed.">
+                                <input id="f-username" value={profileData?.username ? `@${profileData.username}` : ""} readOnly tabIndex={-1} className={`${inputCls} ${readOnlyCls}`} />
+                            </StackedField>
+                        }
+                    />
+                </form>
             </div>
-          </MainArea>
-
-          <MainArea>
-            <div className="p-4 w-full">
-              <h3 className="text-lg font-semibold mb-4 border-b pb-2">Business & Address Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">GST Number</label>
-                  <input
-                    type="text"
-                    name="gst"
-                    value={formData.gst}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="GST Number"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">PAN Number</label>
-                  <input
-                    type="text"
-                    name="pan"
-                    value={formData.pan}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="PAN Number"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Trade License</label>
-                  <input
-                    type="text"
-                    name="trade_licence"
-                    value={formData.trade_licence}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Trade License"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Address Line 1</label>
-                  <input
-                    type="text"
-                    name="address_1"
-                    value={formData.address_1}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Address Line 1"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Address Line 2</label>
-                  <input
-                    type="text"
-                    name="address_2"
-                    value={formData.address_2}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Address Line 2"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="City"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Pincode</label>
-                  <input
-                    type="text"
-                    name="pincode"
-                    value={formData.pincode}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Pincode"
-                  />
-                </div>
-              </div>
-            </div>
-          </MainArea>
-
-          <MainArea>
-            <div className="p-4 w-full">
-              <h3 className="text-lg font-semibold mb-4 border-b pb-2">Bank Account Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Bank Name</label>
-                  <input
-                    type="text"
-                    name="bank"
-                    value={formData.bank}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Bank Name"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Account Number</label>
-                  <input
-                    type="text"
-                    name="account_no"
-                    value={formData.account_no}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Account Number"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">IFSC Code</label>
-                  <input
-                    type="text"
-                    name="ifse"
-                    value={formData.ifse}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="IFSC Code"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold">Branch</label>
-                  <input
-                    type="text"
-                    name="branch"
-                    value={formData.branch}
-                    onChange={handleChange}
-                    className="p-1 rounded w-[80%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                    placeholder="Branch Name"
-                  />
-                </div>
-              </div>
-            </div>
-          </MainArea>
-        </form>
-      </div>
-    </>
-  );
+        </>
+    );
 };
 
 export default EditProfile;

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 // Icon...
 import {
+  AiOutlineInfoCircle,
     AiOutlineSync,
     AiOutlinePrinter,
     AiOutlineDelete,
@@ -17,7 +18,7 @@ import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import CustomButton from '../../components/CustomButton';
 import InvoiceForm from '../../components/InvoiceForm';
-import { PartyQuickAddModal, ChaQuickAddModal, HsnQuickAddModal } from '../../components/FormKit';
+import { PartyQuickAddModal, ChaQuickAddModal, HsnQuickAddModal, Notice } from '../../components/FormKit';
 
 // Stores...
 import useInvoiceStore from '../../store/InvoiceStore';
@@ -239,29 +240,17 @@ const ViewInvoiceDetails = () => {
     return (
         <>
             <PageTitle>Edit Invoice{details.invoiceNo ? ` — ${details.invoiceNo}` : ""}</PageTitle>
-            <div className='flex flex-col gap-1'>
+            <div className="flex flex-col gap-2">
                 <ActionArea>
                     <div className="flex flex-wrap justify-between w-full gap-1">
                         <div className="flex flex-wrap gap-1">
-                            <div onClick={() => navigate(-1)}>
-                                <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-                            </div>
-                            <div onClick={handleUpdate}>
-                                <CustomButton title={"Update (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineSave /></CustomButton>
-                            </div>
-                            <div onClick={handlePrint}>
-                                <CustomButton title={"Print (Ctrl+P)"} color={"blue"}><AiOutlinePrinter /></CustomButton>
-                            </div>
-                            <div onClick={() => navigate("/view-invoice")}>
-                                <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-                            </div>
-                            <div onClick={handleDelete}>
-                                <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
-                            </div>
+                            <CustomButton onClick={() => navigate(-1)} title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                            <CustomButton onClick={handleUpdate} title={"Update (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineSave /></CustomButton>
+                            <CustomButton onClick={handlePrint} title={"Print (Ctrl+P)"} color={"slate"}><AiOutlinePrinter /></CustomButton>
+                            <CustomButton onClick={() => navigate("/view-invoice")} title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
+                            <CustomButton onClick={handleDelete} title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                         </div>
-                        <div onClick={() => fetchInvoiceData()}>
-                            <CustomButton title={"Reload"} color={"blue"}><AiOutlineSync /></CustomButton>
-                        </div>
+                        <CustomButton onClick={() => fetchInvoiceData()} title={"Reload"} color={"slate"}><AiOutlineSync /></CustomButton>
                     </div>
                 </ActionArea>
 
@@ -280,21 +269,19 @@ const ViewInvoiceDetails = () => {
                     gstData={gstData}
                     hsnData={hsnData}
                     onAddParty={partyAdd.open}
-          onAddHsn={hsnAdd.open}
+                    onAddHsn={hsnAdd.open}
                     chaData={chaData}
                     onAddCha={() => setChaModal(true)}
                     showCha={showCha}
                     notice={fromChallan ? (
-                        <div className="rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
-                            This invoice was created from a challan. Changes here don't change the challan.
-                        </div>
+                        <Notice tone="neutral" icon={<AiOutlineInfoCircle />}>This invoice was created from a challan. Changes here don't change the challan.</Notice>
                     ) : null}
                 />
             </div>
 
             <PartyQuickAddModal {...partyAdd.modalProps} />
             <ChaQuickAddModal isOpen={chaModal} onClose={() => setChaModal(false)} onSubmit={handleChaSubmit} loading={chaLoading} error={chaError} />
-      <HsnQuickAddModal {...hsnAdd.modalProps} />
+            <HsnQuickAddModal {...hsnAdd.modalProps} />
         </>
     );
 };

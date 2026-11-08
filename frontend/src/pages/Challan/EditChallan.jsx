@@ -214,20 +214,12 @@ const EditChallan = () => {
         <>
             <PageTitle>Edit Challan{form.cn_no ? ` — ${form.cn_no}` : ""}</PageTitle>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
                 <ActionArea>
-                    <div onClick={() => navigate(-1)}>
-                        <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-                    </div>
-                    <div onClick={handleSubmitForm}>
-                        <CustomButton title={"Update (Ctrl+S)"} color={"blue"} disabled={challanLoading}><AiOutlineSave /></CustomButton>
-                    </div>
-                    <div onClick={handlePrint}>
-                        <CustomButton title={"Print (Ctrl+P)"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
-                    </div>
-                    <div onClick={() => navigate("/view-challan")}>
-                        <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-                    </div>
+                    <CustomButton onClick={() => navigate(-1)} title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
+                    <CustomButton onClick={handleSubmitForm} title={"Update (Ctrl+S)"} color={"blue"} disabled={challanLoading}><AiOutlineSave /></CustomButton>
+                    <CustomButton onClick={handlePrint} title={"Print (Ctrl+P)"} color={"slate"}><AiOutlinePrinter /></CustomButton>
+                    <CustomButton onClick={() => navigate("/view-challan")} title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
                 </ActionArea>
 
                 <ChallanForm

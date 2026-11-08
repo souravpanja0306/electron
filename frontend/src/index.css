@@ -2,30 +2,150 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Colour system
+ * -------------
+ * Neutrals: slate only. Brand / primary: blue-600. Danger: red-600. Success: emerald. Warning: amber.
+ *
+ * Surfaces            light        dark
+ *   chrome (title/rail) white        slate-950
+ *   menu panel          slate-50     slate-900
+ *   page canvas         slate-100    slate-900
+ *   card / panel        white        slate-800
+ *   input               white        slate-900
+ * Borders             slate-200/300  slate-700/600
+ * Text                slate-900 / 600 (muted) / 400 (placeholder)   slate-100 / 300 / 500
+ */
+
+@layer base {
+    :root {
+        color-scheme: light;
+
+        /* Chart tokens. Validated (CVD + contrast) against the card surface: white / slate-800.
+           Series order is fixed: 1 = Sales, 2 = Collections. Never cycle or recolour by rank. */
+        --series-1: #2a78d6;
+        --series-2: #eb6834;
+        /* Ordinal ramp for receivable age: 0–30 → over 90 days, faint → strong. */
+        --age-1: #86b6ef;
+        --age-2: #5598e7;
+        --age-3: #2a78d6;
+        --age-4: #1c5cab;
+        --chart-grid: #e2e8f0;      /* slate-200 hairline */
+        --chart-axis: #cbd5e1;      /* slate-300 baseline */
+        --chart-tick: #64748b;      /* slate-500 muted ink */
+        --chart-cursor: rgba(15, 23, 42, 0.05);
+        --delta-up: #006300;
+        --delta-down: #b91c1c;
+    }
+
+    /* Native widgets (date pickers, <select> menus, scrollbars) follow the theme. */
+    .dark {
+        color-scheme: dark;
+
+        --series-1: #3987e5;
+        --series-2: #d95926;
+        /* On dark the prominent end is the lighter step. */
+        --age-1: #256abf;
+        --age-2: #3987e5;
+        --age-3: #6da7ec;
+        --age-4: #9ec5f4;
+        --chart-grid: #334155;      /* slate-700 */
+        --chart-axis: #475569;      /* slate-600 */
+        --chart-tick: #94a3b8;      /* slate-400 */
+        --chart-cursor: rgba(255, 255, 255, 0.05);
+        --delta-up: #22c55e;
+        --delta-down: #f87171;
+    }
+
+    body {
+        @apply bg-slate-100 text-slate-900 antialiased dark:bg-slate-900 dark:text-slate-100;
+    }
+
+    /* Default border colour for bare `border` utilities. */
+    :where(*, ::before, ::after) {
+        border-color: theme('colors.slate.200');
+    }
+
+    :where(.dark *, .dark ::before, .dark ::after) {
+        border-color: theme('colors.slate.700');
+    }
+
+    ::selection {
+        background-color: theme('colors.blue.600 / 20%');
+    }
+
+    /* Text-like form controls get a themed surface, even when a page only sets a border. */
+    :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']), select, textarea) {
+        @apply bg-white text-slate-900 transition-colors dark:bg-slate-900 dark:text-slate-100;
+    }
+
+    :where(input, textarea)::placeholder {
+        @apply text-slate-400 dark:text-slate-500;
+    }
+
+    :where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']), select, textarea):focus {
+        outline: none;
+        border-color: theme('colors.blue.500');
+        box-shadow: 0 0 0 3px theme('colors.blue.500 / 25%');
+    }
+
+    :where(input[readonly], input:disabled, select:disabled, textarea:disabled) {
+        @apply bg-slate-50 dark:bg-slate-900/60;
+    }
+
+    :where(input[type='checkbox'], input[type='radio']) {
+        accent-color: theme('colors.blue.600');
+    }
+
+    /* Keyboard focus ring for buttons and links. */
+    :where(button, a, [tabindex]):focus-visible {
+        outline: 2px solid theme('colors.blue.500');
+        outline-offset: 1px;
+    }
+}
+
 .titlebar {
     -webkit-app-region: drag;
 }
 
 .btn,
 .group,
+.no-drag,
 a {
     -webkit-app-region: no-drag;
 }
 
 ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #ffffff;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #64748b;
-    border-radius: 10px;
+    background: theme('colors.slate.300');
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: theme('colors.slate.400');
+    background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: theme('colors.slate.600');
+    background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.slate.500');
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
 }

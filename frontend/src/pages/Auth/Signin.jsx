@@ -41,7 +41,7 @@ const Signin = () => {
     <>
       <Toaster />
       {/* Custom Title Bar */}
-      <div className="titlebar border-b border-slate-600 w-full h-10 bg-slate-950 text-white flex items-center justify-between p-2 shadow-md">
+      <div className="titlebar border-b border-slate-800 w-full h-10 bg-slate-950 text-white flex items-center justify-between p-2 shadow-md">
         <div className="flex items-center gap-2">
           <div className="font-semibold tracking-wide">
             <Link to="#">MyERP</Link>
@@ -54,7 +54,7 @@ const Signin = () => {
                 <button
                   title="Minimize"
                   onClick={() => window.api?.minimize()}
-                  className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">
+                  className="btn p-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
                   <MdHorizontalRule />
                 </button>
               </div>
@@ -62,7 +62,7 @@ const Signin = () => {
                 <button
                   title="Restore"
                   onClick={() => window.api?.maximize()}
-                  className="btn p-2 hover:bg-gray-300 dark:hover:bg-slate-800 hover:rounded hover:text-blue-600">
+                  className="btn p-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
                   <MdCropSquare />
                 </button>
               </div>
@@ -70,7 +70,7 @@ const Signin = () => {
                 <button
                   title="Close"
                   onClick={() => window.api?.close()}
-                  className="btn p-2 hover:bg-red-500 dark:hover:bg-red-500 hover:rounded hover:text-white">
+                  className="btn p-2 rounded text-slate-400 hover:bg-red-600 hover:text-white transition-colors">
                   <MdOutlineClose />
                 </button>
               </div>
@@ -81,7 +81,7 @@ const Signin = () => {
 
       {/* Main Screen */}
       <div className="min-h-[calc(100vh-2.5rem)] w-full bg-slate-900 flex justify-center items-center select-none">
-        <div className="w-[380px] bg-slate-800 rounded-xl shadow-lg shadow-black/40 p-6">
+        <div className="w-[380px] bg-slate-800 border border-slate-700 rounded-xl shadow-lg shadow-black/40 p-6">
 
           <h1 className="text-white text-center text-2xl font-semibold mb-4">
             Sign in

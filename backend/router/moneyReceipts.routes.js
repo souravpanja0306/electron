@@ -1,63 +1,15 @@
 "use strict";
-// Package...
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const path = require("path");
-const { app } = require("electron");
-const fs = require("fs");
-const uploadPath = app.isPackaged
-    ? path.join(app.getPath("userData"), "uploads", "main")
-    : path.join(__dirname, "../../uploads/main");
-if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
-const file = multer({ dest: uploadPath });
-
-// Controllers...
+const middleware = require("../middleware/middleware");
 const MoneyReceiptController = require("../controller/moneyReceipts.controller");
 
-// Middleware...
-const middleware = require("../middleware/middleware");
-
-router.get(
-    "/generate-receipt-no",
-    middleware.isAuthenticated,
-    MoneyReceiptController.generateMoneyReceiptNo
-);
-
-router.post(
-    "/create-money-receipt",
-    middleware.isAuthenticated,
-    MoneyReceiptController.createMoneyReceipt
-);
-
-router.put(
-    "/update-money-receipt",
-    middleware.isAuthenticated,
-    MoneyReceiptController.updateMoneyReceipt
-);
-
-router.get(
-    "/get-money-receipt",
-    middleware.isAuthenticated,
-    MoneyReceiptController.getMoneyReceipt
-);
-
-router.get(
-    "/generate-money-receipt-pdf/:id",
-    middleware.isAuthenticated,
-    MoneyReceiptController.generateMoneyReceiptPdf
-);
-
-router.get(
-    "/print-money-receipt",
-    middleware.isAuthenticated,
-    MoneyReceiptController.printMoneyReceipt
-);
-
-router.delete(
-    "/delete-money-receipt/:id",
-    middleware.isAuthenticated,
-    MoneyReceiptController.deleteMoneyReceipt
-);
+const auth = middleware.isAuthenticated;
+router.get("/generate-receipt-no", auth, MoneyReceiptController.generateMoneyReceiptNo);
+router.post("/create-money-receipt", auth, MoneyReceiptController.createMoneyReceipt);
+router.put("/update-money-receipt", auth, MoneyReceiptController.updateMoneyReceipt);
+router.get("/get-money-receipt", auth, MoneyReceiptController.getMoneyReceipt);
+router.get("/print-money-receipt", auth, MoneyReceiptController.printMoneyReceipt);
+router.delete("/delete-money-receipt/:id", auth, MoneyReceiptController.deleteMoneyReceipt);
 
 module.exports = router;

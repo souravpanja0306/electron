@@ -45,15 +45,11 @@ module.exports.getCompany = async ({
         };
 
         if (search_key.length) query = `${query} WHERE ${search_key.join(" AND ")}`;
-        else query = `${query}`;
-
+        query += " ORDER BY id";
+        
         if (limit) {
             query += " LIMIT ? OFFSET ?";
-            params.push(Number(limit));
-        };
-        if (skip) {
-            query += " OFFSET ?";
-            params.push(Number(skip));
+            params.push(Number(limit), Number(skip) || 0);
         };
         let result = db.prepare(query).all(...params);
         return result;
@@ -69,7 +65,7 @@ module.exports.deleteCompany = async ({
     try {
         const placeholders = ids.map(() => "?").join(",");
 
-        let result = await db.prepare(`DELETE FROM company WHERE id IN (${placeholders})`).run(...ids);
+        let result = db.prepare(`DELETE FROM company WHERE id IN (${placeholders})`).run(...ids);
         return result;
     } catch (error) {
         console.log(error);

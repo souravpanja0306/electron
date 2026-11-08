@@ -1,4 +1,3 @@
-const { db } = require("../database/connection");
 const LicenseModel = require("../database/model/license.model");
 
 module.exports.createLicense = async (data) => {
@@ -10,4 +9,9 @@ module.exports.createLicense = async (data) => {
         console.log(error);
         throw error;
     };
+};
+
+module.exports.deleteLicense = async ({ license_key }) => {
+    if (!license_key) return null;
+    return LicenseModel.deleteOne({ license_key });
 };

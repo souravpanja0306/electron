@@ -1,8 +1,18 @@
 const moment = require("moment");
-const { app } = require("electron");
+const { esc, escObj, multiline, money, uploadUrl } = require("./html");
 
-module.exports.generateChallanHtml = ({ challan, company, terms }) => {
-    const items = challan.data || [];
+// Every text value is HTML-escaped before it reaches the template (see helper/html.js).
+module.exports.generateChallanHtml = ({ challan: rawChallan, company: rawCompany, terms: rawTerms }) => {
+    const challan = {
+        ...escObj(rawChallan),
+        consignor_id: escObj(rawChallan.consignor_id),
+        consignee_id: escObj(rawChallan.consignee_id),
+    };
+    const company = escObj(rawCompany);
+    const logoSrc = esc(uploadUrl("company", rawCompany?.logo));
+    const items = (rawChallan.data || []).map(escObj);
+    const terms = multiline(rawTerms || "") || "--";
+    const noteHtml = multiline(rawChallan.note || "");
 
     let itemsHtml = items.map((item, index) => `
         <tr>
@@ -21,7 +31,10 @@ module.exports.generateChallanHtml = ({ challan, company, terms }) => {
 
     const totalPackages = items.reduce((s, i) => s + (Number(i.packages) || 0), 0);
     const totalWeight = items.reduce((s, i) => s + (Number(i.weight) || 0), 0).toFixed(2);
-    const totalAmount = challan.total_amount || 0;
+    const totalAmount = Number(challan.total_amount) || 0;
+    const wayBillDate = rawChallan.way_bill_date && moment(rawChallan.way_bill_date, "YYYY-MM-DD", true).isValid()
+        ? moment(rawChallan.way_bill_date, "YYYY-MM-DD").format("DD MMM YYYY")
+        : (challan.way_bill_date || '--');
 
     const formattedDate = challan.date
         ? moment(challan.date).format('DD MMM YYYY')
@@ -320,7 +333,7 @@ module.exports.generateChallanHtml = ({ challan, company, terms }) => {
                 ${company.gst ? `<div class="company-sub">GSTIN: <strong>${company.gst}</strong></div>` : ''}
             </div>
             <div class="header-right">
-                ${company.logo ? `<img src="http://localhost:3001/uploads/company/${company.logo}" alt="Logo"
+                ${company.logo ? `<img src="${logoSrc}" alt="Logo"
                     style="max-height:70px; max-width:160px; object-fit:contain;" />` : `<div
                     style="width:160px; height:70px; border:1px dashed #aaa; display:flex; align-items:center; justify-content:center; font-size:9px; color:#aaa; text-align:center;">
                     LOGO<br />160×70</div>`}
@@ -360,14 +373,14 @@ module.exports.generateChallanHtml = ({ challan, company, terms }) => {
                     Invoice No: ${challan.invoice_no || '--'}<br />
                     Truck No: ${challan.truck_no || '--'}<br />
                     Way Bill No: ${challan.way_bill_no || '--'}<br />
-                    Way Bill Date: ${challan.way_bill_date || '--'}<br />
+                    Way Bill Date: ${wayBillDate}<br />
                 </td>
                 <td>
                     <span class="lbl">Additional Details</span>
                     Container No: ${challan.container || '--'}<br />
                     Booking No: ${challan.booking_number || '--'}<br />
                     ${challan.show_cha !== 0 ? `CHA: ${challan.cha || '--'}<br />` : ''}
-                    ${challan.note || '--'}<br />
+                    ${noteHtml ? `Note: ${noteHtml}<br />` : ''}
                 </td>
             </tr>
         </table>
@@ -393,10 +406,11 @@ module.exports.generateChallanHtml = ({ challan, company, terms }) => {
             <tbody>${itemsHtml}</tbody>
             <tfoot>
                 <tr>
-                    <td colspan="2" style="text-align:right; padding:5px 10px;">Total</td>
+                    <td style="text-align:right; padding:5px 10px;">Total</td>
+                    <td style="text-align:center; padding:5px 10px;">${totalPackages || ''}</td>
                     <td></td>
                     <td style="text-align:right; padding:5px 10px;">${totalWeight}</td>
-                    <td style="text-align:right; padding:5px 10px;">${totalAmount.toFixed(2)}</td>
+                    <td style="text-align:right; padding:5px 10px;">${money(totalAmount)}</td>
                 </tr>
             </tfoot>
         </table>

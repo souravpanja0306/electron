@@ -21,6 +21,7 @@ module.exports.insertUsers = async (data) => {
         };
     } catch (error) {
         console.log(`Something went wrong: service: insertUsers: ${error}`)
+        return null;
     };
 };
 
@@ -29,7 +30,6 @@ module.exports.getUsers = async ({
     mobile = "",
     machine_id = "",
     username = "",
-    password = "",
     email = "",
     limit = "",
     skip = "",
@@ -59,10 +59,6 @@ module.exports.getUsers = async ({
             params.push(username);
             search_key.push(`username = ?`)
         };
-        if (password) {
-            params.push(password);
-            search_key.push(`password = ?`)
-        };
         if (search_key.length) query = `${query} WHERE ${search_key.join(" AND ")}`;
         else query = `${query}`;
 
@@ -78,16 +74,21 @@ module.exports.getUsers = async ({
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: getUsers: ${error}`);
+        return [];
     };
 };
 
+// Column names can't be bound as SQL parameters, so only real `users` columns are accepted.
+const USER_COLUMNS = new Set(db.prepare("PRAGMA table_info(users)").all().map((column) => column.name));
+
 module.exports.updateUsers = async (data, id) => {
     try {
-        const keys = Object.keys(data);
+        const keys = Object.keys(data).filter((key) => key !== "id" && USER_COLUMNS.has(key));
+        if (!keys.length) return false;
         const setClause = keys.map(k => `${k} = @${k}`).join(", ");
         const result = db
             .prepare(`UPDATE users SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = @id`)
-            .run({ ...data, id });
+            .run({ ...Object.fromEntries(keys.map((key) => [key, data[key]])), id });
 
         return result.changes > 0;
     } catch (error) {
@@ -134,14 +135,16 @@ module.exports.updateUsersInMongodb = async ({
     update_info = {}
 }) => {
     try {
-        let result = await UserModel.findOneAndUpdate(
-            search_key,
-            update_info,
-            { upsert: true, new: true }
-        );
+        // No upsert: a sign-in must never create a half-filled account record.
+        let result = await UserModel.findOneAndUpdate(search_key, update_info, { new: true });
         return result;
     } catch (error) {
         console.log(`Something went wrong: service: updateUsersInMongodb: ${error}`);
         throw error;
     };
+};
+
+module.exports.deleteUserInMongodb = async (search_key) => {
+    if (!search_key || !Object.keys(search_key).length) return null;
+    return UserModel.deleteOne(search_key);
 };

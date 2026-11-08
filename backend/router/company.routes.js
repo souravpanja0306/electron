@@ -1,53 +1,15 @@
-// Package...
+"use strict";
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const path = require("path");
-const { app } = require("electron");
-const fs = require("fs");
-const uploadPath = app.isPackaged
-    ? path.join(app.getPath("userData"), "uploads", "main")
-    : path.join(__dirname, "../../uploads/main");
-if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
-const file = multer({ dest: uploadPath });
-
-// Controllers...
+const middleware = require("../middleware/middleware");
+const { logoUpload } = require("../helper/upload");
 const CompanyController = require("../controller/company.controller");
 
-// Middleware...
-const middleware = require("../middleware/middleware");
-
-router.post(
-    "/create-company",
-    file.single('logo'),
-    middleware.isAuthenticated,
-    CompanyController.addCompany
-);
-
-router.get(
-    "/get-company",
-    middleware.isAuthenticated,
-    CompanyController.getCompany
-);
-
-router.get(
-    "/company/:id",
-    middleware.isAuthenticated,
-    CompanyController.getCompanyById
-);
-
-router.delete(
-    "/company-delete",
-    middleware.isAuthenticated,
-    CompanyController.removeCompany
-);
-
-router.put(
-    "/update-company/:id",
-    file.single('logo'),
-    middleware.isAuthenticated,
-    CompanyController.updateCompany
-);
-
+const auth = middleware.isAuthenticated;
+router.post("/create-company", auth, logoUpload.single("logo"), middleware.restoreAuth, CompanyController.addCompany);
+router.get("/get-company", auth, CompanyController.getCompany);
+router.get("/company/:id", auth, CompanyController.getCompanyById);
+router.delete("/company-delete", auth, CompanyController.removeCompany);
+router.put("/update-company/:id", auth, logoUpload.single("logo"), middleware.restoreAuth, CompanyController.updateCompany);
 
 module.exports = router;

@@ -11,20 +11,35 @@ const useReportStore = create((set) => ({
     dashboardStats: null,
     dashboardStatsLoading: false,
 
-    getDashboardStats: async ({ token }) => {
+    /** { company_id, from, to } — all optional; the server defaults to this financial year. */
+    getDashboardStats: async ({ company_id = "", from = "", to = "" } = {}) => {
         try {
             set({ dashboardStatsLoading: true });
             const result = await api({
                 method: "get",
                 url: "/report/dashboard-stats",
+                params: { company_id: company_id || undefined, from: from || undefined, to: to || undefined },
             });
-            if (result.data.status === 200) {
-                set({ dashboardStats: result.data.body, dashboardStatsLoading: false });
-            };
+            if (result.data.status === 200) set({ dashboardStats: result.data.body });
+            set({ dashboardStatsLoading: false });
             return result.data;
         } catch (error) {
             set({ dashboardStatsLoading: false });
-            throw error;
+            return error?.response?.data || { status: 500, message: "Could not load the dashboard." };
+        };
+    },
+
+    /** Invoice-level sales register for a period: { period, rows }. */
+    getSalesRegister: async ({ company_id = "", party_id = "", from = "", to = "" } = {}) => {
+        try {
+            const result = await api({
+                method: "get",
+                url: "/report/sales-report",
+                params: { company_id: company_id || undefined, party_id: party_id || undefined, from: from || undefined, to: to || undefined },
+            });
+            return result.data;
+        } catch (error) {
+            return error?.response?.data || { status: 500, message: "Could not load the sales register." };
         };
     },
 

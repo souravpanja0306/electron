@@ -1,171 +1,213 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { AiOutlineSave, AiOutlineTable, AiOutlineRollback, AiOutlineBarcode } from "react-icons/ai";
 
-// Components...
 import ActionArea from '../../../components/ActionArea';
 import PageTitle from '../../../components/PageTitle';
-import MainArea from '../../../components/MainArea';
 import CustomButton from '../../../components/CustomButton';
-
-// Icons...
-import { AiOutlineFileAdd, AiOutlineTable, AiOutlineRollback, AiOutlineEdit } from "react-icons/ai";
-
-// Stores...
-import useChallanStore from "../../../store/ChallanStore";
+import CustomLoader from '../../../components/CustomLoader';
+import MainArea from '../../../components/MainArea';
+import { FormSection, StackedField, inputProps, inputCls, errorCls, noSpinCls, focusNextOnEnter } from '../../../components/FormKit';
 import useAuthStore from '../../../store/AuthStore';
 import useHsnSacStore from "../../../store/HsnSacStore";
 import useShortcuts from "../../../hooks/useShortcuts";
+import useForm from "../../../hooks/useForm";
+import * as v from '../../../utils/validators';
+
+const EMPTY_HSN = { type: "HSN", code: "", gst_rate: "", description: "" };
+const GST_SLABS = ["0", "0.25", "3", "5", "12", "18", "28"];
+
+// HSN: 2, 4, 6 or 8 digits (goods). SAC: 4 or 6 digits starting with 99 (services).
+const codeRule = (code, d) => {
+    if (!code) return "";
+    if (d.type === "SAC") return /^99(\d{2}|\d{4})$/.test(code) ? "" : "SAC codes start with 99 and are 4 or 6 digits.";
+    return /^(\d{2}|\d{4}|\d{6}|\d{8})$/.test(code) ? "" : "HSN codes are 2, 4, 6 or 8 digits.";
+};
+
+const TYPE_OPTIONS = [
+    { value: "HSN", label: "HSN", hint: "Goods" },
+    { value: "SAC", label: "SAC", hint: "Services" },
+];
 
 const CreateHsnSac = () => {
     const { token } = useAuthStore();
     const { createHsnSac, updateHsnSac, hsnData, getAllHsnSac } = useHsnSacStore();
     const navigate = useNavigate();
-
-    useShortcuts({
-        s: (e) => handleSubmit(e),
-        i: () => navigate("/view-hsn-sac"),
-    });
     const [searchParams] = useSearchParams();
-
     const isBack = searchParams.get("back") === "true";
     const editId = searchParams.get("id");
+    const [status, setStatus] = useState(editId ? "loading" : "ready");
 
-
-    const [formData, setFormData] = useState({ code: '', type: 'HSN', description: '', gst_rate: '' });
+    const validator = (data) => v.validate(data, {
+        code: [
+            (x) => v.required(x, "Code"),
+            codeRule,
+            (x, d) => (hsnData || []).some((h) => String(h.id) !== String(editId) && h.code === x && String(h.type).toUpperCase() === d.type)
+                ? `This ${d.type} code already exists.` : "",
+        ],
+        gst_rate: [(x) => v.percent(x, 100)],
+    });
+    const form = useForm(EMPTY_HSN, validator);
+    const { data, set, errors, touch } = form;
 
     useEffect(() => {
-        if (editId) {
-            if (hsnData?.length) {
-                const editData = hsnData.find(item => item.id.toString() === editId);
-                if (editData) {
-                    setFormData({
-                        code: editData.code,
-                        type: editData.type,
-                        description: editData.description,
-                        gst_rate: editData.gst_rate
-                    });
-                }
+        let alive = true;
+        getAllHsnSac(token).then((result) => {
+            if (!alive || !editId) return;
+            const record = (result?.body || []).find((item) => String(item.id) === String(editId));
+            if (record) {
+                form.load({
+                    type: String(record.type || "HSN").toUpperCase(),
+                    code: record.code || "",
+                    gst_rate: record.gst_rate === null || record.gst_rate === undefined ? "" : String(record.gst_rate),
+                    description: record.description || "",
+                });
+                setStatus("ready");
             } else {
-                getAllHsnSac(token);
+                setStatus("missing");
+                toast.error("HSN/SAC record not found.");
             }
-        }
-    }, [editId, hsnData]);
+        });
+        return () => { alive = false; };
+    }, [editId]);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e) => {
-        if (e) e.preventDefault();
-        if (!formData.code) return toast.error("Code is required");
-
-        const payload = { ...formData, gst_rate: parseFloat(formData.gst_rate) || 0 };
+    const save = form.submit(async (d) => {
+        const payload = { type: d.type, code: d.code, description: d.description.trim(), gst_rate: parseFloat(d.gst_rate) || 0 };
         try {
-            let res;
-            if (editId) {
-                res = await updateHsnSac({ ...payload, id: editId }, token);
-            } else {
-                res = await createHsnSac(payload, token);
-            }
-
-            if (res.status === 200) {
-                toast.success(res.message);
+            const res = editId
+                ? await updateHsnSac({ ...payload, id: editId }, token)
+                : await createHsnSac(payload, token);
+            if (res?.status === 200) {
+                toast.success(res.message || "Saved.");
+                form.markSaved();
                 navigate("/view-hsn-sac");
             } else {
-                toast.error(res.message);
+                toast.error(res?.message || "Could not save the code.");
             }
         } catch (error) {
             toast.error("Failed to save data");
         }
-    };
+    });
+
+    useShortcuts({
+        s: (e) => status === "ready" && save(e),
+        i: () => navigate("/view-hsn-sac"),
+    });
+
+    if (status === "loading") return <CustomLoader />;
 
     return (
         <>
-            <PageTitle>{editId ? "Edit HSN & SAC" : "Create HSN & SAC"}</PageTitle>
-            <div className="flex flex-col gap-1 text-sm">
+            <PageTitle>{editId ? "Edit HSN / SAC" : "Add HSN / SAC"}</PageTitle>
+            <div className="flex flex-col gap-1">
                 <ActionArea>
-                    {isBack || editId ? (
+                    {(isBack || editId) && (
                         <div onClick={() => navigate(-1)}>
-                            <CustomButton title={"Back"} color={"slate"}>
-                                <AiOutlineRollback />
-                            </CustomButton>
+                            <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
                         </div>
-                    ) : null}
-                    <div onClick={handleSubmit}>
-                        <CustomButton title={editId ? "Update (Ctrl+S)" : "Save (Ctrl+S)"} color={"blue"}>
-                            {editId ? <AiOutlineEdit /> : <AiOutlineFileAdd />}
+                    )}
+                    {status === "ready" && (
+                        <CustomButton type="submit" form="hsn-form" title={form.saving ? "Saving..." : "Save (Ctrl+S)"} color={"blue"} disabled={form.saving || (editId && !form.dirty)}>
+                            <AiOutlineSave />
                         </CustomButton>
-                    </div>
+                    )}
                     <Link to="/view-hsn-sac">
-                        <CustomButton title={"View (Ctrl+I)"} color={"blue"}>
-                            <AiOutlineTable />
-                        </CustomButton>
+                        <CustomButton title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
                     </Link>
                 </ActionArea>
 
-                <MainArea>
-                    <div className='flex flex-col w-full sm:md:lg:xl:w-[50%] gap-1'>
-                        <PageTitle>HSN/SAC Details</PageTitle>
-                        <table className="w-full text-sm">
-                            <tbody>
-                                <tr className="dark:bg-slate-800">
-                                    <td className="p-1">Type</td>
-                                    <td className="p-1">
-                                        <select
-                                            className="w-full p-1 rounded text-slate-900 border border-slate-300 dark:border-slate-600"
-                                            name="type"
-                                            value={formData.type}
-                                            onChange={handleChange}
-                                        >
-                                            <option value="HSN">HSN (Goods)</option>
-                                            <option value="SAC">SAC (Services)</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr className="dark:bg-slate-800">
-                                    <td className="p-1">Code</td>
-                                    <td className="p-1">
-                                        <input
-                                            className="w-full p-1 rounded text-slate-900 border border-slate-300 dark:border-slate-600"
-                                            type="text"
-                                            name="code"
-                                            placeholder="Enter Code"
-                                            value={formData.code}
-                                            onChange={handleChange}
-                                        />
-                                    </td>
-                                </tr>
-                                <tr className="dark:bg-slate-800">
-                                    <td className="p-1">GST Rate (%)</td>
-                                    <td className="p-1">
-                                        <input
-                                            className="w-full p-1 rounded text-slate-900 border border-slate-300 dark:border-slate-600"
-                                            type="number"
-                                            name="gst_rate"
-                                            placeholder="0.00"
-                                            value={formData.gst_rate}
-                                            onChange={handleChange}
-                                        />
-                                    </td>
-                                </tr>
-                                <tr className="dark:bg-slate-800">
-                                    <td className="p-1">Description</td>
-                                    <td className="p-1">
-                                        <textarea
-                                            className="w-full p-1 rounded text-slate-900 border border-slate-300 dark:border-slate-600"
-                                            name="description"
-                                            rows="3"
-                                            placeholder="Enter description here..."
-                                            value={formData.description}
-                                            onChange={handleChange}
-                                        />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </MainArea>
+                {status === "missing" ? (
+                    <MainArea>
+                        <div className="w-full p-8 text-center text-sm text-slate-500 dark:text-slate-400">This HSN/SAC code could not be found.</div>
+                    </MainArea>
+                ) : (
+                    <form id="hsn-form" onSubmit={save} onKeyDown={focusNextOnEnter} noValidate autoComplete="off" className="max-w-3xl">
+                        <FormSection title="HSN / SAC code" description="Printed against each line item on invoices." icon={<AiOutlineBarcode />}>
+                            <div className="md:col-span-2 flex flex-col gap-1">
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Type</span>
+                                <div role="radiogroup" aria-label="Type" className="grid grid-cols-2 gap-2 max-w-sm">
+                                    {TYPE_OPTIONS.map((opt) => {
+                                        const active = data.type === opt.value;
+                                        return (
+                                            <button
+                                                key={opt.value}
+                                                type="button"
+                                                role="radio"
+                                                aria-checked={active}
+                                                onClick={() => set({ type: opt.value })}
+                                                className={`rounded-md border px-3 py-2 text-left transition-colors ${active
+                                                    ? "border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-500/15"
+                                                    : "border-slate-300 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"}`}
+                                            >
+                                                <div className={`text-sm font-semibold ${active ? "text-blue-700 dark:text-blue-300" : "text-slate-800 dark:text-slate-100"}`}>{opt.label}</div>
+                                                <div className="text-[11px] text-slate-500 dark:text-slate-400">{opt.hint}</div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <StackedField
+                                label="Code"
+                                required
+                                htmlFor="f-code"
+                                error={errors.code}
+                                hint={data.type === "SAC" ? "4 or 6 digits, starts with 99." : "2, 4, 6 or 8 digits."}
+                            >
+                                <input
+                                    {...inputProps({
+                                        name: "code",
+                                        value: data.code,
+                                        error: errors.code,
+                                        className: "tabular-nums tracking-wide",
+                                        onChange: (e) => set({ code: v.onlyDigits(e.target.value, 8) }),
+                                        onBlur: () => touch("code"),
+                                    })}
+                                    inputMode="numeric"
+                                    placeholder={data.type === "SAC" ? "e.g. 996511" : "e.g. 8421"}
+                                    autoFocus={!editId}
+                                />
+                            </StackedField>
+
+                            <StackedField label="GST rate (%)" htmlFor="f-gst_rate" error={errors.gst_rate} hint="Default rate suggested on invoices.">
+                                <input
+                                    {...inputProps({
+                                        name: "gst_rate",
+                                        value: data.gst_rate,
+                                        error: errors.gst_rate,
+                                        className: `${noSpinCls} text-right tabular-nums`,
+                                        onChange: (e) => set({ gst_rate: e.target.value }),
+                                        onBlur: () => touch("gst_rate"),
+                                    })}
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    step="any"
+                                    inputMode="decimal"
+                                    list="gst-slabs"
+                                    placeholder="e.g. 18"
+                                />
+                                <datalist id="gst-slabs">
+                                    {GST_SLABS.map((s) => <option key={s} value={s} />)}
+                                </datalist>
+                            </StackedField>
+
+                            <StackedField label="Description" htmlFor="f-description" className="md:col-span-2">
+                                <textarea
+                                    id="f-description"
+                                    name="description"
+                                    rows={3}
+                                    maxLength={500}
+                                    value={data.description}
+                                    onChange={(e) => set({ description: e.target.value })}
+                                    placeholder="What this code covers (optional)"
+                                    className={`${inputCls} h-auto py-1.5 resize-y ${errors.description ? errorCls : ""}`}
+                                />
+                            </StackedField>
+                        </FormSection>
+                    </form>
+                )}
             </div>
         </>
     );

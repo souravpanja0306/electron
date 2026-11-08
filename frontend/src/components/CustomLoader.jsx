@@ -13,8 +13,8 @@ const CustomLoader = () => {
     return (
         <div>
             <div className="min-h-[calc(100vh-20px)] flex flex-col items-center justify-center w-full py-10">
-                <div className="h-8 w-8 border-4 border-slate-300 border-t-blue-600 rounded-full animate-spin"></div>
-                <span>{randomText}</span>
+                <div className="h-8 w-8 border-4 border-slate-200 dark:border-slate-700 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin"></div>
+                <span className="mt-3 text-sm text-slate-500 dark:text-slate-400">{randomText}</span>
             </div>
         </div>
     );

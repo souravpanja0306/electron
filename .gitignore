@@ -5,3 +5,7 @@ backend/database/app.db
 backend/database/dev.db
 uploads/
 dist/
+backend/database/*.bak
+backend/database/*.restore-pending
+.env
+backend/database/.jwt-secret

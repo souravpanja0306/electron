@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import moment from 'moment';
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Components...
 import PageTitle from '../../components/PageTitle';
@@ -170,19 +170,13 @@ const CreateChallan = () => {
   return (
     <>
       <PageTitle>Create Challan</PageTitle>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <ActionArea>
           {back && (
-            <div onClick={() => navigate(-1)}>
-              <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-            </div>
+            <CustomButton onClick={() => navigate(-1)} title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
           )}
-          <div onClick={handleSubmitForm}>
-            <CustomButton title={"Save (Ctrl+S)"} color={"blue"} disabled={challanLoading}><AiOutlineFileAdd /></CustomButton>
-          </div>
-          <Link to="/view-challan">
-            <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
-          </Link>
+          <CustomButton onClick={handleSubmitForm} title={"Save (Ctrl+S)"} color={"blue"} disabled={challanLoading}><AiOutlineFileAdd /></CustomButton>
+          <CustomButton onClick={() => navigate("/view-challan")} title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
         </ActionArea>
 
         <ChallanForm

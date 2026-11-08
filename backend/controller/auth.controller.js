@@ -1,240 +1,154 @@
 // Package...
-const moment = require("moment");
-const jwt = require("jsonwebtoken")
 const crypto = require("crypto");
-const { app } = require("electron");
+const mongoose = require("mongoose");
 
-// Contents...
-const contents = require("../content/contents");
-
-// Services...
+// Services / helpers...
 const UserService = require("../service/user.service");
-const AdminService = require("../service/admin.service")
-const PartyService = require("../service/party.service");
-const AuthService = require("../service/auth.service")
-const InvoiceService = require("../service/invoice.service");
 const LicenseService = require("../service/license.service");
+const { errorHandler, ok, str, serverError } = require("../helper/http");
+const { hashPassword, verifyPassword, needsRehash } = require("../helper/password");
+const { signUserToken } = require("../helper/authToken");
 
-const errorHandler = (res, status, message) => {
-    return res.status(status).json({ status, message, body: [] });
-};
+const OFFLINE_MESSAGE = "Can't reach the MyERP licence server. Check your internet connection and try again.";
 
-const generateLicenseKey = () => {
-    return crypto.randomBytes(16).toString("hex").match(/.{1,4}/g).join("-").toUpperCase();
-};
+const generateLicenseKey = () => crypto.randomBytes(16).toString("hex").match(/.{1,4}/g).join("-").toUpperCase();
+
+// Mongo errors while offline / timing out read better as a single clear message.
+const isOfflineError = (error) => /buffering timed out|ECONNREFUSED|ENOTFOUND|Server selection timed out|MongoNetworkError/i.test(String(error?.message || error));
 
 module.exports.checkUsername = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { username } = req.params;
+        const username = str(req.params.username);
         if (!username) return errorHandler(res, 400, "Username Required.");
 
-        let isUsernameExist = await UserService.findUsersInMongodb({ username: username });
-        if (isUsernameExist.length) {
-            response.status = 409;
-            response.message = "Username already taken, try another.";
-            response.body = { exists: true };
-        } else {
-            response.status = 200;
-            response.message = "Username is available.";
-            response.body = { exists: false };
-        };
+        const existing = await UserService.findUsersInMongodb({ username });
+        if (existing.length) return res.status(409).json({ status: 409, message: "Username already taken, try another.", body: { exists: true } });
+        return ok(res, "Username is available.", { exists: false });
     } catch (error) {
-        console.log(`Something went wrong: controller: checkUsername: ${error}`);
-        response.status = 500;
-        response.message = "Internal Server Error";
+        if (isOfflineError(error)) return errorHandler(res, 503, OFFLINE_MESSAGE);
+        return serverError(res, "controller: checkUsername", error);
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.signup = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { name, mobile, email, username, password, machineId } = req.body;
+        const name = str(req.body.name);
+        const mobile = str(req.body.mobile);
+        const email = str(req.body.email).toLowerCase();
+        const username = str(req.body.username);
+        const password = typeof req.body.password === "string" ? req.body.password : "";
+        const machineId = str(req.body.machineId);
 
-        if (!name) return errorHandler(res, 400, "name Required.");
-        if (!mobile) return errorHandler(res, 400, "mobile Required.");
-        if (!email) return errorHandler(res, 400, "email Required.");
-        if (!username) return errorHandler(res, 400, "username Required.");
-        if (!password) return errorHandler(res, 400, "Password Required.");
-        if (!machineId) return errorHandler(res, 400, "machineId Required.");
+        if (!name) return errorHandler(res, 400, "Name is required.");
+        if (!/^[6-9]\d{9}$/.test(mobile)) return errorHandler(res, 400, "Enter a valid 10-digit mobile number.");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return errorHandler(res, 400, "Enter a valid email address.");
+        if (!/^[A-Za-z0-9._-]{3,30}$/.test(username)) return errorHandler(res, 400, "Username must be 3–30 letters, numbers, dots, dashes or underscores.");
+        if (password.length < 8) return errorHandler(res, 400, "Password must be at least 8 characters.");
+        if (!machineId) return errorHandler(res, 400, "Machine ID is required.");
 
-        let isMachineIdExist = await UserService.findUsersInMongodb({ machine_id: machineId });
-        if (isMachineIdExist.length) return errorHandler(res, 409, "This Machine is already registered. You cannot create new account with this machine.");
+        if ((await UserService.getUsers({ username })).length) return errorHandler(res, 409, "Username already taken, try another.");
 
-        let isEmailExist = await UserService.findUsersInMongodb({ email: email });
-        if (isEmailExist.length) return errorHandler(res, 409, "Email is already registered.");
+        if ((await UserService.findUsersInMongodb({ machine_id: machineId })).length) return errorHandler(res, 409, "This Machine is already registered. You cannot create new account with this machine.");
+        if ((await UserService.findUsersInMongodb({ email })).length) return errorHandler(res, 409, "Email is already registered.");
+        if ((await UserService.findUsersInMongodb({ mobile })).length) return errorHandler(res, 409, "Mobile is already registered.");
+        if ((await UserService.findUsersInMongodb({ username })).length) return errorHandler(res, 409, "Username already taken, try another.");
 
-        let isMobileExist = await UserService.findUsersInMongodb({ mobile: mobile });
-        if (isMobileExist.length) return errorHandler(res, 409, "Mobile is already registered.");
-
-        let isUsernameExist = await UserService.findUsersInMongodb({ username: username });
-        if (isUsernameExist.length) return errorHandler(res, 409, "Username already taken, try another.");
-
-        let license_key = generateLicenseKey();
-        let newData = {
-            name: name,
-            mobile: mobile,
-            email: email,
-            username: username,
-            password: password,
+        const license_key = generateLicenseKey();
+        const newData = {
+            name,
+            mobile,
+            email,
+            username,
+            password: hashPassword(password),
             machine_id: machineId,
-            license_key: license_key,
+            license_key,
         };
-        let mongoResult = await UserService.insertUsersInMongodb(newData);
-        if (mongoResult) {
-            // Create FREE 1 year license
-            const startDate = new Date();
-            const expiryDate = new Date();
-            expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
-            let newLicenseData = {
-                license_key: license_key,
-                machine_id: machineId ? machineId : "",
-                user_id: mongoResult.id ? mongoResult.id : "",
+        const mongoUser = await UserService.insertUsersInMongodb(newData);
+        if (!mongoUser) return errorHandler(res, 500, "Could not create the account. Please try again.");
+
+        // Free one-year licence.
+        const startDate = new Date();
+        const expiryDate = new Date(startDate);
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+        let license;
+        try {
+            license = await LicenseService.createLicense({
+                license_key,
+                machine_id: machineId,
+                user_id: mongoUser._id,
                 plan: "FREE",
                 max_devices: 1,
                 start_date: startDate,
                 expiry_date: expiryDate,
-                is_active: true
-            };
-            let licenseData = await LicenseService.createLicense(newLicenseData);
-            if (licenseData) {
-
-                let result = await UserService.insertUsers(newData);
-                let tokenData = {
-                    TOKEN_UID: result.id,
-                    TOKEN_MOBILE: result.mobile,
-                    TONEN_USERNAME: result.username,
-                    TONEN_NAME: result.name,
-                };
-                let token = jwt.sign(tokenData, "secretOrPrivateKey");
-
-                response.status = 200;
-                response.message = "Sign-up successful.";
-                response.body = {
-                    license_key: licenseData && licenseData.license_key ? licenseData.license_key : "",
-                    name: result.name,
-                    id: result.id,
-                    token: token,
-                };
-            };
-        } else {
-            response.status = 202;
-            response.message = "Something went wrong, please try again.";
-            response.body = {
-                license_key: "",
-                name: "",
-                id: "",
-                token: "",
-            };
+                is_active: true,
+            });
+        } catch (error) {
+            // Don't leave an account behind that can never sign in.
+            await UserService.deleteUserInMongodb({ _id: mongoUser._id }).catch(() => { });
+            throw error;
         };
+
+        const user = await UserService.insertUsers(newData);
+        if (!user) {
+            await LicenseService.deleteLicense({ license_key }).catch(() => { });
+            await UserService.deleteUserInMongodb({ _id: mongoUser._id }).catch(() => { });
+            return errorHandler(res, 500, "Could not save the account on this computer. Please try again.");
+        };
+
+        return ok(res, "Sign-up successful.", {
+            license_key: license?.license_key || license_key,
+            name: user.name,
+            id: user.id,
+            token: signUserToken(user),
+        });
     } catch (error) {
-        console.log(`Something went wrong: controller: signup: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: signup`;
-        response.body = error.body ? error.body : "";
+        if (isOfflineError(error)) return errorHandler(res, 503, OFFLINE_MESSAGE);
+        if (error?.code === 11000) return errorHandler(res, 409, "This account or machine is already registered.");
+        return serverError(res, "controller: signup", error, "Could not create the account. Please try again.");
     };
-    return res.status(response.status).json(response);
 };
 
 module.exports.signin = async (req, res) => {
-    let response = { ...contents.defaultResponse };
     try {
-        const { username, password, machineId } = req.body;
+        const username = str(req.body.username);
+        const password = typeof req.body.password === "string" ? req.body.password : "";
+        const machineId = str(req.body.machineId);
         if (!username) return errorHandler(res, 400, "Username Required.");
         if (!password) return errorHandler(res, 400, "Password Required.");
         if (!machineId) return errorHandler(res, 400, "Machine ID Required.");
 
-        let getUserDetails = await UserService.getUsers({
-            password: password,
-            username: username,
-        });
-        if (getUserDetails.length) {
-            let findMongoUser = await UserService.findUsersInMongodb({
-                username: username,
-                machine_id: machineId
-            });
-            if (!findMongoUser.length) {
-                response.status = 202;
-                response.message = "This is different machine. You cannot login here.";
-                response.body = {};
-                return res.status(response.status).json(response);
-            };
-            await UserService.updateUsersInMongodb({
-                search_key: {
-                    username: username,
-                },
-                update_info: {
-                    last_activity: new Date(),
-                    machine_id: machineId
-                }
-            });
-
-            let tokenData = {
-                TOKEN_UID: getUserDetails[0].id,
-                TOKEN_MOBILE: getUserDetails[0].mobile,
-                TONEN_USERNAME: getUserDetails[0].username,
-                TONEN_NAME: getUserDetails[0].name,
-            };
-            let token = jwt.sign(tokenData, "secretOrPrivateKey");
-
-            response.status = 200;
-            response.message = "Authentication successful.";
-            response.body = {
-                name: getUserDetails[0].name,
-                id: getUserDetails[0].id,
-                token: token,
-            };
-        } else {
-            response.status = 202;
-            response.message = "Incorrect username Or password.";
-            response.body = {};
+        const users = await UserService.getUsers({ username });
+        const user = users?.[0];
+        if (!user || user.is_deleted || !verifyPassword(password, user.password)) {
+            return res.status(202).json({ status: 202, message: "Incorrect username Or password.", body: {} });
         };
+
+        // The account is locked to the machine it was registered on.
+        if (mongoose.connection.readyState !== 1 && mongoose.connection.readyState !== 2) {
+            return errorHandler(res, 503, OFFLINE_MESSAGE);
+        };
+        const mongoUser = await UserService.findUsersInMongodb({ username, machine_id: machineId });
+        if (!mongoUser.length) {
+            return res.status(202).json({ status: 202, message: "This is different machine. You cannot login here.", body: {} });
+        };
+
+        // Old accounts stored the password as plain text: save it hashed from now on.
+        const update = { last_activity: new Date() };
+        if (needsRehash(user.password)) {
+            const hashed = hashPassword(password);
+            await UserService.updateUsers({ password: hashed }, user.id);
+            update.password = hashed;
+        };
+        await UserService.updateUsersInMongodb({ search_key: { username, machine_id: machineId }, update_info: update });
+
+        return ok(res, "Authentication successful.", {
+            name: user.name,
+            id: user.id,
+            token: signUserToken(user),
+        });
     } catch (error) {
-        console.log(`Something went wrong: controller: signin: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: signin`;
-        response.body = error.body ? error.body : "";
+        if (isOfflineError(error)) return errorHandler(res, 503, OFFLINE_MESSAGE);
+        return serverError(res, "controller: signin", error, "Could not sign in. Please try again.");
     };
-    return res.status(response.status).json(response);
-};
-
-module.exports.forgotPassword = async (req, res) => {
-    let response = { ...contents.defaultResponse };
-    try {
-
-    } catch (error) {
-        console.log(`Something went wrong: controller: forgotPassword: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: forgotPassword`;
-        response.body = error.body ? error.body : "";
-    };
-    return res.status(response.status).json(response);
-};
-
-module.exports.resetPassword = async (req, res) => {
-    let response = { ...contents.defaultResponse };
-    try {
-
-    } catch (error) {
-        console.log(`Something went wrong: controller: resetPassword: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: resetPassword`;
-        response.body = error.body ? error.body : "";
-    };
-    return res.status(response.status).json(response);
-};
-
-module.exports.viewProfile = async (req, res) => {
-    let response = { ...contents.defaultResponse };
-    try {
-
-    } catch (error) {
-        console.log(`Something went wrong: controller: viewProfile: ${error}`);
-        response.status = error.status ? error.status : 500;
-        response.message = error.message ? error.message : `Something went wrong: controller: viewProfile`;
-        response.body = error.body ? error.body : "";
-    };
-    return res.status(response.status).json(response);
 };

@@ -24,13 +24,15 @@ app.whenReady().then(() => {
         icon: iconPath,
         title: "MyERP — Complete Solution",
     });
-    win.loadURL("http://localhost:3000/");
-    // win.loadFile(path.join(__dirname, "frontend/build/index.html")); // This code is ready for Production.
-
-    win.webContents.openDevTools(); // For Permanents for Developments.
-    globalShortcut.register("Control+Shift+I", () => {
+    if (app.isPackaged) {
+        win.loadFile(path.join(__dirname, "frontend/build/index.html"));
+    } else {
+        win.loadURL("http://localhost:3000/");
         win.webContents.openDevTools();
-    });
+        globalShortcut.register("Control+Shift+I", () => {
+            win.webContents.openDevTools();
+        });
+    };
     ipcMain.on("minimize", () => win.minimize());
     ipcMain.on("maximize", () => { win.isMaximized() ? win.unmaximize() : win.maximize() });
     ipcMain.on("close", () => {
@@ -66,53 +68,74 @@ const dotenv = require("dotenv");
 const express = require("express");
 const exp = express();
 const cors = require("cors");
-const bodyParser = require('body-parser');
-const { connectMongo } = require("./backend/database/connection");
+const multer = require("multer");
 
-// ENV CONFIG...
+// ENV CONFIG (before anything that reads process.env)...
 dotenv.config({ path: path.join(__dirname, ".env"), quiet: true });
+const PORT = Number(process.env.PORT) || 3001;
+const API_VERSION = process.env.VERSION || "v1";
+
+const { connectMongo } = require("./backend/database/connection");
 connectMongo();
 
-exp.use(cors());
-exp.use(express.json({ limit: "50mb" }));
-exp.use(express.urlencoded({ limit: "50mb", extended: true }));
-exp.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
-exp.use(bodyParser.json({ limit: "50mb" }));
+exp.disable("x-powered-by");
 
-exp.use(`/api/${process.env.VERSION}/party/`, require("./backend/router/party.routes"));
-exp.use(`/api/${process.env.VERSION}/company/`, require("./backend/router/company.routes"));
-exp.use(`/api/${process.env.VERSION}/invoice/`, require("./backend/router/invoice.routes"));
-exp.use(`/api/${process.env.VERSION}/auth/`, require("./backend/router/auth.routes"));
-exp.use(`/api/${process.env.VERSION}/user/`, require("./backend/router/user.routes"));
-exp.use(`/api/${process.env.VERSION}/admin/`, require("./backend/router/admin.routes"));
-exp.use(`/api/${process.env.VERSION}/report/`, require("./backend/router/report.routes"));
-exp.use(`/api/${process.env.VERSION}/money-receipt/`, require("./backend/router/moneyReceipts.routes"));
-exp.use(`/api/${process.env.VERSION}/challan/`, require("./backend/router/challan.routes"));
-exp.use(`/api/${process.env.VERSION}/setting/`, require("./backend/router/setting.routes"));
+// Only the app itself may call the API: the dev server, or the packaged build (file://).
+// Requests without an Origin header (not from a browser page) are allowed.
+const ALLOWED_ORIGINS = new Set([
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "file://",
+    "null",
+]);
+exp.use(cors({
+    origin: (origin, cb) => cb(null, !origin || ALLOWED_ORIGINS.has(origin)),
+    exposedHeaders: ["Content-Disposition"],
+}));
 
-exp.get("/", (req, res) => {
-    return res.json({
-        status: "200",
-        body: [],
-        message: "Server is Ready To Go..."
-    }).status(200);
-});
+exp.use(express.json({ limit: "10mb" }));
+exp.use(express.urlencoded({ limit: "10mb", extended: true, parameterLimit: 10000 }));
 
-exp.listen(process.env.PORT, () => {
-    console.log(`Server started at http://localhost:${process.env.PORT}/`);
-});
+const ROUTES = {
+    "party": "party.routes",
+    "company": "company.routes",
+    "invoice": "invoice.routes",
+    "auth": "auth.routes",
+    "user": "user.routes",
+    "admin": "admin.routes",
+    "report": "report.routes",
+    "money-receipt": "moneyReceipts.routes",
+    "challan": "challan.routes",
+    "setting": "setting.routes",
+};
+for (const [base, file] of Object.entries(ROUTES)) {
+    exp.use(`/api/${API_VERSION}/${base}/`, require(`./backend/router/${file}`));
+};
+
+exp.get("/", (req, res) => res.status(200).json({ status: 200, body: [], message: "Server is Ready To Go..." }));
 
 const uploadPath = app.isPackaged
     ? path.join(app.getPath("userData"), "uploads")
     : path.join(__dirname, "uploads");
-exp.use("/uploads", express.static(uploadPath));
+// Logos only; the temp upload folder is never served.
+exp.use("/uploads/main", (req, res) => res.status(404).end());
+exp.use("/uploads", express.static(uploadPath, { dotfiles: "deny", index: false }));
 
-// error handler middleware
-exp.use(function (err, req, res, next) {
-    console.error(err.stack);
-    res.status(500).send({
-        status: 500,
-        message: err.message,
-        body: {},
-    });
+exp.use((req, res) => res.status(404).json({ status: 404, message: "Not found.", body: [] }));
+
+// Errors thrown by routes, body parsing or uploads.
+exp.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        const message = err.code === "LIMIT_FILE_SIZE" ? "The file is too large." : "The upload could not be processed.";
+        return res.status(400).json({ status: 400, message, body: [] });
+    };
+    const status = err.status || err.statusCode || 500;
+    if (status >= 500) console.error(err.stack || err);
+    const message = status >= 500 ? "Something went wrong. Please try again." : (err.expose === false ? "Bad request." : err.message);
+    return res.status(status).json({ status, message, body: [] });
+});
+
+// Loopback only: the API is never reachable from other machines on the network.
+exp.listen(PORT, "127.0.0.1", () => {
+    console.log(`Server started at http://localhost:${PORT}/`);
 });

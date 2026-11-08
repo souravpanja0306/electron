@@ -1,34 +1,46 @@
 const moment = require("moment");
 const { inrToWords } = require("./InWordConverter");
-const { app } = require("electron");
+const { esc, escObj, multiline, money, uploadUrl } = require("./html");
 
-module.exports.generateInvoiceHtml = ({ invoice, company }) => {
-    const items = invoice.data || [];
+const DEFAULT_TERMS = "Goods once sold will not be taken back. Interest may be charged on payments received after the due date. Subject to local jurisdiction only.";
+
+// Every text value is HTML-escaped before it reaches the template (see helper/html.js).
+module.exports.generateInvoiceHtml = ({ invoice: rawInvoice, company: rawCompany }) => {
+    const invoice = {
+        ...escObj(rawInvoice),
+        party_id: escObj(rawInvoice.party_id),
+        ship_to: escObj(rawInvoice.ship_to || rawInvoice.party_id),
+    };
+    const company = escObj(rawCompany);
+    const logoSrc = esc(uploadUrl("company", rawCompany?.logo));
+    const items = (rawInvoice.data || []).map(escObj);
+    const termsHtml = multiline(rawInvoice.terms_and_conditions || DEFAULT_TERMS);
 
     let itemsHtml = items.map((item, index) => `
         <tr>
             <td style="text-align:center;">${index + 1}</td>
             <td>${item.description || '--'}</td>
             <td style="text-align:center;">${item.hsn || '--'}</td>
-            <td style="text-align:right;">${item.quantity || '0'}</td>
-            <td style="text-align:right;">${item.rate || '0.00'}</td>
-            <td style="text-align:right;">${(item.quantity * item.rate).toFixed(2)}</td>
+            <td style="text-align:right;">${Number(item.quantity) || 0}</td>
+            <td style="text-align:right;">${money(item.rate)}</td>
+            <td style="text-align:right;">${Number(item.gst) || 0}%</td>
+            <td style="text-align:right;">${money((Number(item.quantity) || 0) * (Number(item.rate) || 0))}</td>
         </tr>
     `).join('');
 
     const emptyRowsCount = Math.max(0, 8 - items.length);
     for (let i = 0; i < emptyRowsCount; i++) {
-        itemsHtml += `<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+        itemsHtml += `<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
     }
 
     const formattedDate = invoice.invoice_date
         ? moment(invoice.invoice_date).format('DD MMM YYYY')
         : '--';
 
-    const grandTotal = (invoice.total_amount || 0)
-        + (invoice.total_cgst || 0)
-        + (invoice.total_sgst || 0)
-        + (invoice.total_igst || 0);
+    const grandTotal = Math.round(((Number(invoice.total_amount) || 0)
+        + (Number(invoice.total_cgst) || 0)
+        + (Number(invoice.total_sgst) || 0)
+        + (Number(invoice.total_igst) || 0)) * 100) / 100;
 
     return `<!DOCTYPE html>
 <html>
@@ -256,7 +268,7 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
         </div>
         <div class="header-right">
             ${company.logo
-            ? `<img src="http://localhost:3001/uploads/company/${company.logo}" alt="Logo" style="max-height:70px; max-width:160px; object-fit:contain;" />`
+            ? `<img src="${logoSrc}" alt="Logo" style="max-height:70px; max-width:160px; object-fit:contain;" />`
             : `<div style="width:160px; height:70px; border:1px dashed #aaa; display:flex; align-items:center; justify-content:center; font-size:9px; color:#aaa; text-align:center;">LOGO<br/>160×70</div>`
         }
         </div>
@@ -283,10 +295,10 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
             </td>
             <td style="width:33.33%;">
                 <span class="lbl">Ship To</span>
-                <strong>${invoice.party_id?.company_name || '--'}</strong><br/>
-                ${invoice.party_id?.address_1 || '--'}<br/>
-                ${invoice.party_id?.city || ''} ${invoice.party_id?.pincode || ''}<br/>
-                GSTIN: ${invoice.party_id?.gst || '--'}
+                <strong>${invoice.ship_to?.company_name || '--'}</strong><br/>
+                ${invoice.ship_to?.address_1 || '--'}<br/>
+                ${invoice.ship_to?.city || ''} ${invoice.ship_to?.pincode || ''}<br/>
+                GSTIN: ${invoice.ship_to?.gst || '--'}
             </td>
             <td style="width:33.33%;" class="shaded">
                 <span class="lbl">Dispatch Details</span>
@@ -308,6 +320,7 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
                 <th style="width:65px;">HSN/SAC</th>
                 <th style="width:50px; text-align:right;">Qty</th>
                 <th style="width:80px; text-align:right;">Rate</th>
+                <th style="width:50px; text-align:right;">GST</th>
                 <th style="width:90px; text-align:right;">Amount</th>
             </tr>
         </thead>
@@ -315,9 +328,10 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
         <tfoot>
             <tr>
                 <td colspan="3" style="text-align:right; padding:5px 10px;">Total</td>
-                <td style="text-align:right; padding:5px 10px;">${invoice.total_quantity || '0'}</td>
+                <td style="text-align:right; padding:5px 10px;">${Number(invoice.total_quantity) || 0}</td>
                 <td></td>
-                <td style="text-align:right; padding:5px 10px;">${(invoice.total_amount || 0).toFixed(2)}</td>
+                <td></td>
+                <td style="text-align:right; padding:5px 10px;">${money(invoice.total_amount)}</td>
             </tr>
         </tfoot>
     </table>
@@ -326,7 +340,7 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
     <div class="summary-wrap">
         <div class="amount-words">
             <span class="lbl">Amount in Words</span>
-            ${inrToWords(Math.round(grandTotal))}
+            ${inrToWords(grandTotal)}
 
             <div class="bank-details" style="margin-top:15px;">
                 <span class="lbl">Bank Details</span>
@@ -337,13 +351,13 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
             </div>
         </div>
         <table class="tax-table">
-            <tr><td>Total Before Tax</td><td>${(invoice.total_amount || 0).toFixed(2)}</td></tr>
-            <tr><td>Add: CGST</td><td>${(invoice.total_cgst || 0).toFixed(2)}</td></tr>
-            <tr><td>Add: SGST</td><td>${(invoice.total_sgst || 0).toFixed(2)}</td></tr>
-            <tr><td>Add: IGST</td><td>${(invoice.total_igst || 0).toFixed(2)}</td></tr>
+            <tr><td>Total Before Tax</td><td>${money(invoice.total_amount)}</td></tr>
+            ${Number(invoice.total_igst) ? `<tr><td>Add: IGST</td><td>${money(invoice.total_igst)}</td></tr>` : `
+            <tr><td>Add: CGST</td><td>${money(invoice.total_cgst)}</td></tr>
+            <tr><td>Add: SGST</td><td>${money(invoice.total_sgst)}</td></tr>`}
             <tr class="grand">
                 <td>Grand Total</td>
-                <td>${grandTotal.toFixed(2)}</td>
+                <td>${money(grandTotal)}</td>
             </tr>
         </table>
     </div>
@@ -351,10 +365,8 @@ module.exports.generateInvoiceHtml = ({ invoice, company }) => {
     <!-- FOOTER -->
     <div class="footer">
         <div class="bank-col">
-           <td style="width:50%; background:#f5f5f5;">
-                <span class="lbl">Remarks / Note</span>
-                    ${invoice.terms_and_conditions || "Goods are transported at owner's risk. Claims for damage or shortage must be reported at the time of delivery. This is not a tax invoice. Subject to City jurisdiction only."}
-            </td>
+            <span class="lbl">Terms &amp; Conditions</span>
+            ${termsHtml}
         </div>
         <div class="sig-col">
             <span class="for-company">For <strong>${company.company_name || 'Your Company Name'}</strong></span>
