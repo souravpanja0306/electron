@@ -199,7 +199,7 @@ const PartyCreate = () => {
                                 </table>
                             </div>
                         </MainArea>
-                        <MainArea>
+                        {/* <MainArea>
                             <div className='flex flex-col w-full gap-1'>
                                 <PageTitle>Preview</PageTitle>
                                 <hr />
@@ -225,7 +225,7 @@ const PartyCreate = () => {
                                     </div>
                                 </div>
                             </div>
-                        </MainArea>
+                        </MainArea> */}
                     </div>
 
                     <div className="flex border-slate-700">
