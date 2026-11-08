@@ -22,6 +22,9 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
+// Fields are shown unless explicitly switched off (older clients don't send the flag).
+const toShowFlag = (value) => (value === false || value === 0 || value === "0" || value === "false" ? 0 : 1);
+
 module.exports.addChallanSetting = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
@@ -111,6 +114,112 @@ module.exports.editChallanSetting = async (req, res) => {
         };
     } catch (error) {
         console.log(`Something went wrong: controller: editChallanSetting: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+module.exports.getTheme = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const theme = await SettingService.getUserTheme({ user_id: req.body.t_userId });
+        response.status = 200;
+        response.message = "Theme fetched successfully.";
+        response.body = { theme: theme || "light" };
+    } catch (error) {
+        console.log(`Something went wrong: controller: getTheme: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+module.exports.saveTheme = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { t_userId, theme } = req.body;
+        if (!["light", "dark"].includes(theme)) return errorHandler(res, 400, "Theme must be 'light' or 'dark'.");
+
+        await SettingService.saveUserTheme({ user_id: t_userId, theme });
+        response.status = 200;
+        response.message = "Theme saved successfully.";
+        response.body = { theme };
+    } catch (error) {
+        console.log(`Something went wrong: controller: saveTheme: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+// Field visibility shared by Create Invoice and Create Challan (currently: CHA).
+module.exports.getFieldSettings = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const showCha = await SettingService.getUserShowCha({ user_id: req.body.t_userId });
+        response.status = 200;
+        response.message = "Field settings fetched successfully.";
+        response.body = { show_cha: showCha ? 1 : 0 };
+    } catch (error) {
+        console.log(`Something went wrong: controller: getFieldSettings: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+module.exports.saveFieldSettings = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { t_userId, show_cha } = req.body;
+        const value = toShowFlag(show_cha);
+        await SettingService.saveUserShowCha({ user_id: t_userId, show_cha: value });
+        response.status = 200;
+        response.message = "Field settings saved successfully.";
+        response.body = { show_cha: value };
+    } catch (error) {
+        console.log(`Something went wrong: controller: saveFieldSettings: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+module.exports.saveInvoiceSetting = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { company_id, invoice_prefix, invoice_suffix, invoice_start_number, terms_and_conditions } = req.body;
+        if (!company_id) return errorHandler(res, 400, "Please select a company.");
+
+        const data = {
+            company_id: Number(company_id),
+            invoice_prefix: String(invoice_prefix || "INV-"),
+            invoice_suffix: String(invoice_suffix || ""),
+            invoice_start_number: Math.max(1, Number(invoice_start_number) || 1),
+            terms_and_conditions: String(terms_and_conditions || ""),
+        };
+        const existing = await SettingService.getInvoiceSetting({ company_id: data.company_id });
+        const result = existing.length
+            ? await SettingService.updateInvoiceSetting({ id: existing[0].id, data })
+            : await SettingService.createInvoiceSetting(data);
+
+        response.status = 200;
+        response.message = existing.length ? "Invoice settings updated successfully." : "Invoice settings saved successfully.";
+        response.body = result;
+    } catch (error) {
+        console.log(`Something went wrong: controller: saveInvoiceSetting: ${error}`);
+        return errorHandler(res, 500, "Internal Server Error");
+    };
+    return res.status(response.status).json(response);
+};
+
+module.exports.listInvoiceSetting = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        const { company_id } = req.query;
+        if (!company_id) return errorHandler(res, 400, "Company is required.");
+        const result = await SettingService.getInvoiceSetting({ company_id: Number(company_id) });
+        response.status = 200;
+        response.message = "Invoice settings fetched successfully.";
+        response.body = result;
+    } catch (error) {
+        console.log(`Something went wrong: controller: listInvoiceSetting: ${error}`);
         return errorHandler(res, 500, "Internal Server Error");
     };
     return res.status(response.status).json(response);

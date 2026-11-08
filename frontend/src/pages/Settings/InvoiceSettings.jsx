@@ -2,161 +2,167 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 
 // Icons...
-import { AiOutlineDownload, AiOutlineDelete } from 'react-icons/ai';
+import { AiOutlineFileAdd } from 'react-icons/ai';
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
 import MainArea from '../../components/MainArea';
-import CustomToggle from '../../components/CustomToggle';
 import CustomButton from '../../components/CustomButton';
+import SearchableSelect from '../../components/SearchableSelect';
+import { inputCls, labelCls, Required } from '../../components/FormKit';
+import ChaVisibilitySetting from '../../components/ChaVisibilitySetting';
 
 // Stores...
-import useAuthStore from '../../store/AuthStore';
+import useCompanyStore from '../../store/CompanyStore';
+import api from '../../utils/axiosInterceptor';
+import useShortcuts from "../../hooks/useShortcuts";
+
+const SettingCard = ({ title, description, children }) => (
+    <div className="flex flex-col gap-3 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
+        <div>
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{title}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
+        </div>
+        {children}
+    </div>
+);
 
 const InvoiceSettings = () => {
-    const { token } = useAuthStore();
+    const { companyData, getAllCompany } = useCompanyStore();
     const [data, setData] = useState({
-        prefix: "",
-        starting: "",
-        suffix: "",
+        company_id: "",
+        invoice_prefix: "INV-",
+        invoice_suffix: "",
+        invoice_start_number: 1,
+        terms_and_conditions: "",
+    });
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        getAllCompany();
+    }, []);
+
+    useEffect(() => {
+        const loadSettings = async () => {
+            if (!data.company_id) return;
+            setLoading(true);
+            try {
+                const response = await api.get(`/setting/invoice-setting?company_id=${data.company_id}`);
+                const settings = response.data.body?.[0];
+                setData((current) => ({
+                    ...current,
+                    invoice_prefix: settings?.invoice_prefix ?? "INV-",
+                    invoice_suffix: settings?.invoice_suffix ?? "",
+                    invoice_start_number: settings?.invoice_start_number ?? 1,
+                    terms_and_conditions: settings?.terms_and_conditions ?? "",
+                }));
+            } catch (error) {
+                toast.error(error.response?.data?.message || "Unable to load invoice settings.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadSettings();
+    }, [data.company_id]);
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setData((current) => ({ ...current, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        if (e?.preventDefault) e.preventDefault();
+        if (loading) return;
+        if (!data.company_id) {
+            toast.error("Please select a company.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const response = await api.post("/setting/invoice-setting", {
+                ...data,
+                invoice_start_number: Math.max(1, Number(data.invoice_start_number) || 1),
+            });
+            toast.success(response.data.message);
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Unable to save invoice settings.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useShortcuts({
+        s: (e) => handleSubmit(e),
     });
 
-    const handleChangeData = (e) => {
-        setData((prev) =>
-            prev.map((row) =>
-                row.id == e.target.id ? { ...row, [e.target.name]: e.target.value } : row
-            ),
-        );
-    };
-    const [active, setActive] = useState(1);
-    const [light, setLight] = useState(true);
-    const [theme, setTheme] = useState("light");
-
-
-    const HandleSubmit = async (e) => {
-
-    };
+    // Mirrors the backend: prefix + (start + existing invoices for the company) padded to 6 + suffix.
+    const preview = `${data.invoice_prefix || ""}${String(Math.max(1, Number(data.invoice_start_number) || 1)).padStart(6, "0")}${data.invoice_suffix || ""}`;
 
     return (
-        <div className='flex flex-col gap-1'>
+        <div className="flex flex-col gap-1">
             <PageTitle>Invoice Setup</PageTitle>
+
+            <ActionArea>
+                <CustomButton title="Save (Ctrl+S)" color="blue" onClick={handleSubmit} disabled={loading}><AiOutlineFileAdd /></CustomButton>
+            </ActionArea>
+
             <MainArea>
-                <div className="w-full max-w-xl space-y-1">
-                    {/* <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                        <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">GST</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Switch between GST and NON-GST invoice</p>
-                        </div>
-                        <CustomToggle
-                            activeColor="green"
-                            inactiveColor="blue"
-                            option={["GST", "NON-GST"]}
-                            value={light}
-                            onChange={changeTheme}
+                <form onSubmit={handleSubmit} className="w-full max-w-2xl flex flex-col gap-3 p-2" autoComplete="off">
+                    <div className="flex flex-col sm:flex-row sm:items-center w-full gap-1">
+                        <label className={`${labelCls} sm:w-32 sm:shrink-0`}>Company<Required /></label>
+                        <SearchableSelect
+                            className="w-full"
+                            name="company_id"
+                            value={data.company_id}
+                            onChange={handleChange}
+                            options={(companyData || []).map((company) => ({ id: company.id, label: company.company_name }))}
+                            placeholder="Select Company"
+                            required
                         />
-                    </div> */}
-
-                    {/* Prefix, starting and Suffix */}
-                    <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                        <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Invoice Prefix & Suffix</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Customize your invoice number format</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="text"
-                                name="prefix"
-                                placeholder="Prefix"
-                                value={data.prefix}
-                                onChange={(e) => handleChangeData(e)}
-                                className="w-24 text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            />
-                            <input
-                                type="text"
-                                placeholder="starting"
-                                placeholder="Starting"
-                                value={data.starting}
-                                onChange={(e) => handleChangeData(e)}
-                                className="w-24 text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            />
-                            <input
-                                type="text"
-                                placeholder="suffix"
-                                placeholder="Suffix"
-                                value={data.suffix}
-                                onChange={(e) => handleChangeData(e)}
-                                className="w-24 text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            />
-                        </div>
                     </div>
 
-                    {/* Default Due Days */}
-                    {/* <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                        <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Default Due Days</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Payment due after how many days</p>
+                    <SettingCard title="Invoice Number Format" description="Each company has its own invoice number series.">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div className="flex flex-col gap-1">
+                                <label className={labelCls} htmlFor="invoice_prefix">Prefix</label>
+                                <input id="invoice_prefix" name="invoice_prefix" value={data.invoice_prefix} onChange={handleChange} placeholder="e.g. INV-" className={inputCls} />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className={labelCls} htmlFor="invoice_start_number">Starting Number</label>
+                                <input id="invoice_start_number" name="invoice_start_number" value={data.invoice_start_number} onChange={handleChange} type="number" min="1" className={inputCls} />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className={labelCls} htmlFor="invoice_suffix">Suffix</label>
+                                <input id="invoice_suffix" name="invoice_suffix" value={data.invoice_suffix} onChange={handleChange} placeholder="e.g. /26-27" className={inputCls} />
+                            </div>
                         </div>
-                        <input
-                            type="number"
-                            value={dueDays}
-                            onChange={(e) => setDueDays(e.target.value)}
-                            min={0}
-                            className="w-20 text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                    </div> */}
+                        <div className="rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+                            First invoice number: <span className="font-mono font-semibold text-slate-800 dark:text-slate-100">{preview}</span>
+                            <span className="ml-1 text-slate-500 dark:text-slate-400">(later ones continue from your existing invoices)</span>
+                        </div>
+                    </SettingCard>
 
-                    {/* Default GST Type */}
-                    {/* <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                        <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Default GST Type</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Applied when creating new invoice</p>
-                        </div>
-                        <CustomToggle
-                            activeColor="green"
-                            inactiveColor="blue"
-                            option={["CGST/SGST", "IGST"]}
-                        value={gstType}
-                        onChange={setGstType}
-                        />
-                    </div> */}
-
-                    {/* Show Signature */}
-                    {/* <div className="flex items-center justify-between rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                        <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Show Signature</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Display signature on invoice</p>
-                        </div>
-                        <CustomToggle
-                            activeColor="green"
-                            inactiveColor="blue"
-                            option={["Yes", "No"]}
-                        value={showSignature}
-                        onChange={setShowSignature}
-                        />
-                    </div> */}
-
-                    {/* Terms & Conditions */}
-                    <div className="flex flex-col gap-2 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-4">
-                        <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Terms & Conditions</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Default text shown on every invoice</p>
-                        </div>
+                    <SettingCard title="Terms & Conditions" description="Printed on every new invoice for this company.">
                         <textarea
-                            // value={terms}
-                            // onChange={(e) => setTerms(e.target.value)}
-                            rows={3}
+                            name="terms_and_conditions"
+                            value={data.terms_and_conditions}
+                            onChange={handleChange}
+                            rows={4}
                             placeholder="e.g. Goods once sold will not be taken back..."
-                            className="text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+                            className={`${inputCls} h-auto py-1 resize-y`}
                         />
-                    </div>
+                    </SettingCard>
+
+                    <ChaVisibilitySetting />
+
                     <div className="rounded border border-dashed border-slate-300 dark:border-slate-600 p-4 text-center text-xs text-slate-400">
                         More settings coming soon…
                     </div>
-                </div>
+                </form>
             </MainArea>
         </div>
-    )
-}
+    );
+};
 
 export default InvoiceSettings

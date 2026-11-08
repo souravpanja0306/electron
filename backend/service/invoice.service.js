@@ -18,6 +18,8 @@ module.exports.findInvoices = async ({
     id = "",
     created_by = "",
     invoice_no = "",
+    company_id = "",
+    challan_id = "",
     startDate = "",
     endDate = "",
     search = "",
@@ -42,6 +44,16 @@ module.exports.findInvoices = async ({
         if (invoice_no) {
             query += " AND invoice_no = ?";
             params.push(invoice_no);
+        };
+
+        if (company_id) {
+            query += " AND company_id = ?";
+            params.push(company_id);
+        };
+
+        if (challan_id) {
+            query += " AND challan_id = ?";
+            params.push(challan_id);
         };
 
         if (startDate && endDate) {
@@ -89,10 +101,17 @@ module.exports.deleteInvoices = async ({
 }) => {
     try {
         if (id) {
-            const result = db
-                .prepare("UPDATE invoice SET is_deleted = 1 WHERE id = ?")
-                .run(id);
-            return { deleted: result.changes };
+            return db.transaction(() => {
+                const invoice = db.prepare("SELECT challan_id FROM invoice WHERE id = ?").get(id);
+                const result = db
+                    .prepare("UPDATE invoice SET is_deleted = 1 WHERE id = ?")
+                    .run(id);
+                // Free the source challan so an invoice can be created for it again
+                if (result.changes && invoice?.challan_id) {
+                    db.prepare("UPDATE challan SET invoiced = 0 WHERE id = ?").run(invoice.challan_id);
+                }
+                return { deleted: result.changes };
+            })();
         };
     } catch (error) {
         console.log(error);
@@ -109,6 +128,27 @@ module.exports.updateInvoiceData = async (id, data) => {
             .prepare(`UPDATE invoice SET ${setClause} WHERE id = @id`)
             .run({ ...data, id });
         return result;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    };
+};
+
+module.exports.insertInvoiceFromChallan = async (invoiceData, challanId, createdBy) => {
+    try {
+        return db.transaction(() => {
+            const keys = Object.keys(invoiceData);
+            const invoice = db
+                .prepare(`INSERT INTO invoice (${keys.join(",")}) VALUES (${keys.map(key => "@" + key).join(",")})`)
+                .run(invoiceData);
+
+            const challan = db
+                .prepare("UPDATE challan SET invoiced = 1 WHERE id = ? AND created_by = ? AND is_deleted = 0")
+                .run(challanId, createdBy);
+
+            if (challan.changes !== 1) throw new Error("Source challan not found.");
+            return invoice;
+        })();
     } catch (error) {
         console.log(error);
         throw error;

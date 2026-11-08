@@ -32,7 +32,7 @@ const useHsnSacStore = create((set) => ({
             return res.data;
         } catch (error) {
             set({ loading: false });
-            return { status: 500, message: "Server Error" };
+            return error.response?.data || { status: 500, message: "Server Error" };
         };
     },
 

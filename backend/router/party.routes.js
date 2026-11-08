@@ -19,6 +19,7 @@ const middleware = require("../middleware/middleware");
 
 router.post(
     "/party-create",
+    file.single('logo'),
     middleware.isAuthenticated,
     PartyController.addParty
 );
@@ -37,6 +38,7 @@ router.delete(
 
 router.put(
     "/party-update/:id",
+    file.single('logo'),
     middleware.isAuthenticated,
     PartyController.editParty
 );

@@ -10,6 +10,8 @@ module.exports.insertMoneyReceipts = async (data) => {
         return result;
     } catch (error) {
         console.log(error);
+        // Re-throw so the controller reports the failure instead of a silent "success"
+        throw error;
     };
 };
 

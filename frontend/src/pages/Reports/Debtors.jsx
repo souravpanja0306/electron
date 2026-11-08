@@ -1,164 +1,90 @@
 import React, { useEffect, useState } from 'react';
-import PageTitle from '../../components/PageTitle';
+import { AiOutlineReload, AiOutlineRollback } from 'react-icons/ai';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ActionArea from '../../components/ActionArea';
-import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
 import CustomLoader from '../../components/CustomLoader';
-import { inrToWords } from '../../utils/InWordConverter';
+import MainArea from '../../components/MainArea';
+import PageTitle from '../../components/PageTitle';
+import SearchableSelect from '../../components/SearchableSelect';
+import useAuthStore from '../../store/AuthStore';
+import useCompanyStore from '../../store/CompanyStore';
+import useReportStore from '../../store/ReportStore';
 
-// Icon...
-import {
-  AiOutlinePlusSquare,
-  AiOutlineFileAdd,
-  AiOutlineMinusSquare,
-  AiOutlineDownload,
-  AiOutlinePrinter,
-  AiOutlineTable,
-  AiOutlineRollback,
-} from "react-icons/ai";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Link, NavLink } from "react-router-dom";
-
-
-// Stores...
-import useInvoiceStore from '../../store/InvoiceStore';
-import useMoneyReceiptStore from "../../store/MoneyReceiptStore";
-import useCompanyStore from "../../store/CompanyStore";
-import usePartyStore from "../../store/PartyStore"
-import useReportStore from "../../store/ReportStore";
-import useAuthStore from "../../store/AuthStore";
-
+const currency = (value) => Number(value || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
 
 const Debtors = () => {
-  const [searchParams] = useSearchParams();
-  const back = searchParams.get("back");
-  const navigate = useNavigate();
-
-  const { reportData, getDebtors, reportLoading } = useReportStore();
-  const { companyData, getAllCompany } = useCompanyStore();
   const { token } = useAuthStore();
+  const { companyData, getAllCompany } = useCompanyStore();
+  const { getDebtors, reportLoading } = useReportStore();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [ledger, setLedger] = useState([]);
+  const [totals, setTotals] = useState({ total_invoice: 0, total_payment: 0, total_due: 0 });
+  const [companyId, setCompanyId] = useState('');
 
-  const [{ ledger, totals }, setDebtors] = useState({
-    ledger: [],
-    totals: {
-      total_invoice: 0,
-      total_payment: 0,
-      total_due: 0
+  const loadDebtors = async (selectedCompanyId = companyId) => {
+    try {
+      const result = await getDebtors({ token, company_id: selectedCompanyId });
+      if (result.status === 200) {
+        setLedger(result.body.ledger || []);
+        setTotals(result.body.totals || {});
+      }
+    } catch (error) {
+      console.log(error);
     }
-  });
-
-  const getDebtorsData = async () => {
-    let result = await getDebtors({ token: token });
-    if (result.body) {
-      setDebtors(result.body);
-    };
   };
 
   useEffect(() => {
-    getDebtorsData(token);
-    getAllCompany(token)
+    getAllCompany(token);
   }, []);
 
-  if (reportLoading) return <CustomLoader />;
-  return (
-    <>
-      <PageTitle>Debtors</PageTitle>
-      <div className="flex flex-col gap-1">
-        <ActionArea>
-          {
-            back ?
-              <div onClick={() => navigate(-1)}>
-                <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
-              </div>
-              : ""
-          }
-          <div>
-            <CustomButton title={"Export"} color={"blue"} ><AiOutlineDownload /></CustomButton>
-          </div>
-          <div>
-            <CustomButton title={"Print"} color={"blue"} ><AiOutlinePrinter /></CustomButton>
-          </div>
-        </ActionArea>
-        <MainArea>
-          <table className="table-fixed w-full overflow-auto">
-            <thead>
-              <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
-                <th className="p-1 text-start truncate" colSpan="3">
-                  <div className='flex gap-1 items-center'>
-                    Select Company
-                    <select className="min-w-36 h-8 p-1 rounded text-slate-900 border border-slate-300 dark:border-slate-600">
-                      {companyData?.map((item, index) => (
-                        <option key={item.id} value={item.id} selected={index == 1} className='capitalize'>
-                          {item.company_name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <thead>
-              <tr className="border-b border-slate-300 p-1 text-slate-600 dark:text-white text-sm font-semibold text-center">
-                <th className="p-1 text-start truncate">Sl. No</th>
-                <th className="p-1 text-start truncate">Party Id</th>
-                <th className="p-1 text-start truncate">Party Name</th>
-                <th className="p-1 text-start truncate">Total Invoice (₹)</th>
-                <th className="p-1 text-start truncate">Total Payment (₹)</th>
-                <th className="p-1 text-start truncate">Total Due (₹)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ledger?.map((item, index) => (
-                <tr key={index} className="border-b border-slate-300 p-1 hover:bg-blue-200 dark:hover:bg-slate-600 duration-200 cursor-pointer">
-                  <td className="p-1 text-start truncate capitalize">{index + 1}</td>
-                  <td className="p-1 text-start truncate capitalize">{item.party_id}</td>
-                  <td className="p-1 text-start truncate capitalize hover:underline text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
-                    <Link to={`/debtors/details-debtors?id=${item.party_id}&back=true`}>
-                      {item.company_name ? item.company_name : "--"}
-                    </Link>
-                  </td>
-                  <td className="p-1 text-start truncate capitalize">{item.total_invoice ? item.total_invoice.toLocaleString("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                  }) : "0.00"}</td>
-                  <td className="p-1 text-start truncate capitalize">{item.total_payment ? item.total_payment.toLocaleString("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                  }) : "0.00"}</td>
-                  <td className="p-1 text-start truncate capitalize">{item.total_due ? item.total_due.toLocaleString("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                  }) : "0.00"}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot className="bg-slate-50 dark:bg-slate-700 font-semibold">
-              <tr className="border-t">
-                <td className="p-1 text-start truncate capitalize" colSpan="3">Total</td>
-                <td className="p-1 text-start truncate capitalize">{totals?.total_invoice.toLocaleString("en-IN", {
-                  style: "currency",
-                  currency: "INR",
-                })}</td>
-                <td className="p-1 text-start truncate capitalize">{totals?.total_payment.toLocaleString("en-IN", {
-                  style: "currency",
-                  currency: "INR",
-                })}</td>
-                <td className="p-1 text-start truncate capitalize">{totals?.total_due.toLocaleString("en-IN", {
-                  style: "currency",
-                  currency: "INR",
-                })}</td>
-              </tr>
-              <tr className="border-t">
-                <td className="p-1 text-start truncate capitalize text-red-600" colSpan="6">
-                  In Words : {inrToWords(totals?.total_due)}.
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </MainArea>
-      </div>
-    </>
-  )
-}
+  useEffect(() => {
+    loadDebtors();
+  }, [companyId]);
 
-export default Debtors
+  if (reportLoading) return <CustomLoader />;
+
+  const summary = [
+    { label: 'Invoiced', value: totals.total_invoice, color: 'text-blue-600' },
+    { label: 'Received', value: totals.total_payment, color: 'text-green-600' },
+    { label: 'Outstanding', value: totals.total_due, color: 'text-red-600' },
+  ];
+
+  return (
+    <div className="flex flex-col gap-1">
+      <PageTitle>Debtors</PageTitle>
+      <ActionArea>
+        {searchParams.get('back') && <div onClick={() => navigate(-1)}><CustomButton title="Back" color="slate"><AiOutlineRollback /></CustomButton></div>}
+        <div onClick={loadDebtors}><CustomButton title="Refresh" color="blue"><AiOutlineReload /></CustomButton></div>
+        <div className="w-52">
+          <SearchableSelect
+            name="company_id"
+            value={companyId}
+            onChange={(event) => setCompanyId(event.target.value)}
+            options={companyData?.map((company) => ({ id: company.id, label: company.company_name }))}
+            placeholder="All Companies"
+          />
+        </div>
+      </ActionArea>
+
+      <div className="grid grid-cols-1 gap-1 md:grid-cols-3">
+        {summary.map((item) => <MainArea key={item.label}><div className="p-3"><p className="text-xs font-medium text-slate-500">{item.label}</p><p className={`mt-1 text-xl font-bold ${item.color}`}>{currency(item.value)}</p></div></MainArea>)}
+      </div>
+
+      <MainArea>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm">
+            <thead><tr className="border-b border-slate-300 text-left text-xs font-semibold text-slate-500 dark:border-slate-600"><th className="p-2">Party</th><th className="p-2 text-right">Invoiced</th><th className="p-2 text-right">Received</th><th className="p-2 text-right">Outstanding</th></tr></thead>
+            <tbody>
+              {ledger.length ? ledger.map((item) => <tr key={item.party_id} className="border-b border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"><td className="p-2 font-medium"><Link className="hover:text-blue-600 hover:underline" to={`/debtors/details-debtors?id=${item.party_id}&back=true${companyId ? `&company_id=${companyId}` : ''}`}>{item.company_name || '--'}</Link></td><td className="p-2 text-right">{currency(item.total_invoice)}</td><td className="p-2 text-right text-green-600">{currency(item.total_payment)}</td><td className="p-2 text-right font-semibold text-red-600">{currency(item.total_due)}</td></tr>) : <tr><td className="p-8 text-center text-slate-500" colSpan={4}>No debtor transactions found.</td></tr>}
+            </tbody>
+            {ledger.length > 0 && <tfoot className="border-t border-slate-300 bg-slate-50 font-semibold dark:border-slate-600 dark:bg-slate-800"><tr><td className="p-2">Total</td><td className="p-2 text-right">{currency(totals.total_invoice)}</td><td className="p-2 text-right text-green-600">{currency(totals.total_payment)}</td><td className="p-2 text-right text-red-600">{currency(totals.total_due)}</td></tr></tfoot>}
+          </table>
+        </div>
+      </MainArea>
+    </div>
+  );
+};
+
+export default Debtors;

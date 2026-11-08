@@ -12,42 +12,19 @@ import CustomToggle from '../../components/CustomToggle';
 import CustomButton from '../../components/CustomButton';
 
 // Stores...
-import useAuthStore from '../../store/AuthStore';
+import useThemeStore from '../../store/ThemeStore';
 
 const Setting = () => {
-    const { token } = useAuthStore();
+    const { theme, saveTheme } = useThemeStore();
+    const light = theme !== "dark";
 
-    const [active, setActive] = useState(0);
-    const [light, setLight] = useState(true);
-    const [theme, setTheme] = useState("light");
-
-    const getThemeData = async () => {
-        const getTheme = await window.api?.getItem("theme");
-        if (getTheme) {
-            setTheme(getTheme);
-            setLight(getTheme === "light");
+    const changeTheme = async (isLight) => {
+        try {
+            await saveTheme(isLight ? "light" : "dark");
+        } catch (error) {
+            console.log(error);
+            toast.error("Could not save the theme. Please try again.");
         };
-    };
-
-    useEffect(() => {
-        getThemeData();
-    }, []);
-
-    useEffect(() => {
-        if (theme === "dark") {
-            setLight(false);
-            document.documentElement.classList.add("dark");
-        } else {
-            setLight(true);
-            document.documentElement.classList.remove("dark");
-        };
-    }, [theme]);
-
-    const changeTheme = async (e) => {
-        const newTheme = e ? "light" : "dark";
-        setTheme(newTheme);
-        setLight(e);
-        window.api?.setItem("theme", newTheme);
     };
 
 

@@ -14,11 +14,16 @@ import CustomButton from '../../../components/CustomButton';
 // Store...
 import useAuthStore from '../../../store/AuthStore';
 import useChaStore from '../../../store/ChaStore';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const ChaEdit = () => {
     const { token } = useAuthStore();
     const { chaData, updateCha, getAllCha } = useChaStore();
     const navigate = useNavigate();
+
+    useShortcuts({
+        s: (e) => handleSubmit(e),
+    });
     const { id } = useParams();
 
     const [data, setData] = useState({
@@ -30,7 +35,7 @@ const ChaEdit = () => {
 
     useEffect(() => {
         if (!chaData || chaData.length === 0) {
-            getAllCha(token);
+            getAllCha();
         }
     }, []);
 

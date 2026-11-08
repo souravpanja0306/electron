@@ -18,80 +18,45 @@ import {
     AiOutlineFilter
 } from "react-icons/ai";
 
-// Store...
-import useCompanyStore from '../../../store/CompanyStore';
-import useAuthStore from '../../../store/AuthStore';
-import usePartyStore from '../../../store/PartyStore';
+// Hooks...
+import { usePartyHook } from '../../../hooks/usePartyHook';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const ViewParty = () => {
-    const { token } = useAuthStore();
-    const { createParty, getAllParty, getPartyById, updateParty, parties } = usePartyStore()
     const [page, setPage] = useState(1);
-    const [party, setParty] = useState([]);
-
-    const getPartys = async () => {
-        let result = await getAllParty();
-        if (result.body.length) {
-            result.body.map(item => item.is_selected = false)
-            setParty(result.body);
-        };
-    };
-    useEffect(() => {
-        getPartys();
-    }, []);
-
     const [checkedIds, setCheckedIds] = useState(null);
+    const { parties, getParty, handleDeleteParty } = usePartyHook({
+        onSuccess: () => {
+            setCheckedIds(null);
+        }
+    });
+
     const handleChecked = (e, id) => {
         setCheckedIds(null);
         if (e.target.checked) setCheckedIds(id);
     };
 
-    const handleDelete = async () => {
-        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
-            try {
-                if (!checkedIds.length) {
-                    toast.error("Please select an item to delete.");
-                } else {
-                    await window.api.deleteParty({ ids: checkedIds }).then((res) => {
-                        if (res.status === 200) {
-                            setCheckedIds([]);
-                        };
-                    });
-                    await window.api.getParty({}).then((data) => {
-                        setParty(data.body);
-                    });
-                };
-            } catch (error) {
-                console.log(error);
-            };
-        };
-    };
-
     const navigate = useNavigate();
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                navigate("/add-party");
-            };
-
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                handleDelete()
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, []);
+    useShortcuts({
+        n: () => navigate("/add-party"),
+        d: () => {
+            if (!checkedIds) return toast.warning("Please select which one you want to delete.");
+            return handleDeleteParty(checkedIds);
+        },
+        e: () => {
+            if (!checkedIds) return toast.warning("Please select which one you want to edit.");
+            navigate(`/edit-party/${checkedIds}`);
+        },
+    });
 
     const limit = 10;
-    const total = party?.length || 0;
+    const total = parties?.body?.length || 0;
     const totalPages = Math.ceil(total / limit);
 
     const start = total === 0 ? 0 : (page - 1) * limit + 1;
     const end = Math.min(page * limit, total);
 
-    const currentData = party?.slice((page - 1) * limit, page * limit) || [];
+    const currentData = parties?.body?.slice((page - 1) * limit, page * limit) || [];
 
     return (
         <>
@@ -109,16 +74,16 @@ const ViewParty = () => {
                                 </Link>
                             )}
                             {checkedIds && (
-                                <div onClick={(e) => handleDelete(e)}>
+                                <div onClick={() => handleDeleteParty(checkedIds)}>
                                     <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                                 </div>
                             )}
                         </div>
                         <div className="flex gap-1">
-                            <div onClick={(e) => getPartys(e)}>
+                            <div onClick={() => getParty()}>
                                 <CustomButton title={"Refrash"} color={"blue"}><AiOutlineSync /></CustomButton>
                             </div>
-                            <div onClick={(e) => getPartys(e)}>
+                            <div>
                                 <CustomButton title={"Filter"} color={"blue"}><AiOutlineFilter /></CustomButton>
                             </div>
                         </div>

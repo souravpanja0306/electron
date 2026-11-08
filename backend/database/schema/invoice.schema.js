@@ -4,6 +4,7 @@ module.exports = `
       
       company_id INTEGER,
       party_id INTEGER,
+      challan_id INTEGER,
 
       ship_to TEXT,
       type TEXT,
@@ -13,7 +14,10 @@ module.exports = `
       transporter TEXT,
       lorry_no TEXT,
       lr_no TEXT,
+      container TEXT,
+      cha INTEGER,
       placeOfSupply TEXT,
+      terms_and_conditions TEXT,
       data TEXT,
       total_amount INTEGER DEFAULT 0,
       total_quantity INTEGER DEFAULT 0,

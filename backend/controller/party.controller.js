@@ -1,6 +1,8 @@
 // Package...
 const moment = require("moment");
 const { app } = require("electron");
+const fs = require("fs");
+const path = require("path");
 
 // Contents...
 const contents = require("../content/contents");
@@ -46,6 +48,23 @@ module.exports.addParty = async (req, res) => {
             account_no: req.body.account_no,
             created_by: t_userId,
         };
+        const partyFolder = app.isPackaged
+            ? path.join(app.getPath("userData"), "uploads", "party")
+            : path.join(__dirname, "../../uploads/party");
+        if (!fs.existsSync(partyFolder)) fs.mkdirSync(partyFolder, { recursive: true });
+
+        if (req.file) {
+            let oldpath = req.file.path;
+            let file_date = moment().format("DD-MM-YYYY");
+            let random_number = Math.floor(Math.random() * 10000000000 + 1);
+            let fileName = `${random_number}_${file_date}_${req.file.originalname}`
+            let filePath = path.join(partyFolder, fileName);
+
+            fs.renameSync(oldpath, filePath, (err) => {
+                if (err) console.log(err)
+            });
+            finalData["logo"] = fileName
+        };
 
         let result = await PartyService.createParty(finalData);
 
@@ -74,6 +93,9 @@ module.exports.listParty = async (req, res) => {
         let result = await PartyService.getParty(search_key);
 
         if (result.length) {
+            result.map((item) => {
+                item["logo"] = `http://localhost:3001/uploads/party/${item.logo}`;
+            });
             response.status = 200;
             response.message = "Data fetched succesfully.";
             response.body = result;
@@ -156,6 +178,24 @@ module.exports.editParty = async (req, res) => {
             ifse: req.body.ifse,
             branch: req.body.branch,
             account_no: req.body.account_no,
+            logo: req.body.logo,
+        };
+
+        const partyFolder = app.isPackaged
+            ? path.join(app.getPath("userData"), "uploads", "party")
+            : path.join(__dirname, "../../uploads/party");
+        if (!fs.existsSync(partyFolder)) fs.mkdirSync(partyFolder, { recursive: true });
+
+        if (req.file) {
+            let oldpath = req.file.path;
+            let file_date = moment().format("DD-MM-YYYY");
+            let random_number = Math.floor(Math.random() * 10000000000 + 1);
+            let fileName = `${random_number}_${file_date}_${req.file.originalname}`
+            let filePath = path.join(partyFolder, fileName);
+            fs.renameSync(oldpath, filePath, (err) => {
+                if (err) console.log(err)
+            });
+            finalData["logo"] = fileName;
         };
 
         // Remove undefined fields

@@ -15,6 +15,7 @@ import CustomButton from '../../../components/CustomButton';
 // Store...
 import useAuthStore from '../../../store/AuthStore';
 import useChaStore from '../../../store/ChaStore';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const ChaCreate = () => {
     const { token } = useAuthStore();
@@ -53,21 +54,10 @@ const ChaCreate = () => {
         };
     };
 
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                handleSubmit(e);
-            };
-
-            if (e.ctrlKey && e.key === 'i') {
-                e.preventDefault();
-                navigate("/view-cha");
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [data]);
+    useShortcuts({
+        s: (e) => handleSubmit(e),
+        i: () => navigate("/view-cha"),
+    });
 
     return (
         <>

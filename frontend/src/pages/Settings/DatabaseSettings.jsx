@@ -21,7 +21,7 @@ const DatabaseSettings = () => {
 
     const handleDumpDB = async () => {
         try {
-            let result = await dumpDatabase();
+            let result = await dumpDatabase({});
             toast.success("Database backup started.");
         } catch (error) {
             toast.error("Failed to dump database.");
@@ -31,8 +31,7 @@ const DatabaseSettings = () => {
     const handleResetDB = async () => {
         if (window.confirm("Are you sure you want to reset ALL tables? This cannot be undone.")) {
             try {
-                const tablesToReset = "parties,invoices,challans,money_receipts,gst,hsn_sac";
-                const res = await resetAllTables({ token, tablesToReset });
+                const res = await resetAllTables({ tableNames: "all" });
                 if (res.status === 200) {
                     toast.success(res.message);
                 } else {

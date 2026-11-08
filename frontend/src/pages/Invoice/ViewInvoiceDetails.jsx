@@ -1,29 +1,23 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from 'sonner';
-import moment from 'moment';
 
 // Icon...
 import {
-    AiOutlineFileAdd,
     AiOutlineSync,
     AiOutlinePrinter,
     AiOutlineDelete,
-    AiOutlineEdit,
     AiOutlineRollback,
-    AiOutlineTable,
     AiOutlineSave,
-    AiOutlinePlusSquare,
-    AiOutlineMinusSquare
+    AiOutlineTable,
 } from "react-icons/ai";
 
 // Components...
 import PageTitle from '../../components/PageTitle';
 import ActionArea from '../../components/ActionArea';
-import MainArea from '../../components/MainArea';
 import CustomButton from '../../components/CustomButton';
-import SearchableSelect from '../../components/SearchableSelect';
-import { inrToWords } from '../../utils/InWordConverter';
+import InvoiceForm from '../../components/InvoiceForm';
+import { PartyQuickAddModal, ChaQuickAddModal, HsnQuickAddModal } from '../../components/FormKit';
 
 // Stores...
 import useInvoiceStore from '../../store/InvoiceStore';
@@ -31,610 +25,276 @@ import useCompanyStore from "../../store/CompanyStore";
 import usePartyStore from "../../store/PartyStore";
 import useAuthStore from '../../store/AuthStore';
 import useGstStore from "../../store/GstStore";
+import useHsnSacStore from "../../store/HsnSacStore";
+
+// Utils / hooks...
+import { newInvoiceRow, toInvoicePayloadItems } from '../../utils/invoiceTotals';
+import { errorMessage, openPrintWindow } from '../../utils/format';
+import useShortcuts from "../../hooks/useShortcuts";
+import usePartyQuickAdd from "../../hooks/usePartyQuickAdd";
+import { useChaHook } from "../../hooks/useChaHook";
+import useFormFieldSettings from "../../hooks/useFormFieldSettings";
+import useHsnQuickAdd from "../../hooks/useHsnQuickAdd";
 
 const ViewInvoiceDetails = () => {
     const navigate = useNavigate();
-    const { invoiceData, getAllInvoice, deleteInvoice, printInvoice, updateInvoice, invoiceLoading } = useInvoiceStore();
+    const { getAllInvoice, deleteInvoice, printInvoice, updateInvoice } = useInvoiceStore();
     const { companyData, getAllCompany } = useCompanyStore();
     const { parties, getAllParty } = usePartyStore();
     const { gstData, getAllGst } = useGstStore();
+    const { hsnData, getAllHsnSac } = useHsnSacStore();
     const { token } = useAuthStore();
 
     const [searchParams] = useSearchParams();
     const back = searchParams.get("back");
     const invoiceId = searchParams.get("id");
 
-    const [isSameState, setIsSameState] = useState(true);
-    const [grandTotal, setGrandTotal] = useState({
-        total_quantity: 0,
-        total_value: 0,
-        total_cgst: 0,
-        total_sgst: 0,
-        total_igst: 0,
-        grand_total: 0,
-        inWord: ""
-    });
-
-    const [invoiceDetails, setInvoiceDetails] = useState({
+    const [details, setDetails] = useState({
         type: "tax",
         company_id: "",
-        invoice_no: "",
-        invoice_date: "",
+        invoiceNo: "",
+        date: "",
         transporter: "",
-        eway_bill: "",
-        party_id: "",
+        ewayBill: "",
+        billTo: "",
+        shipTo: "",
         placeOfSupply: "",
         lorry_no: "",
-        lr_no: ""
+        lr_no: "",
+        container: "",
+        cha: "",
+    });
+    const [items, setItems] = useState([newInvoiceRow()]);
+    const [sameShip, setSameShip] = useState(true);
+    const [fromChallan, setFromChallan] = useState(false);
+    const [saving, setSaving] = useState(false);
+
+    const partyAdd = usePartyQuickAdd({
+        token,
+        onCreated: (id, field) => {
+            if (field === "shipTo") setSameShip(false);
+            setDetails(prev => ({ ...prev, [field]: id }));
+        },
     });
 
-    const [invoiceFields, setInvoiceFields] = useState([]);
+    const [chaModal, setChaModal] = useState(false);
+    const { handleChaSubmit, chaData, getCha, loading: chaLoading, error: chaError } = useChaHook({
+        onSuccess: () => setChaModal(false),
+    });
 
-    const calculateGrandTotal = (fields, billFromId, billToId) => {
-        let finalQuantity = 0;
-        let finalValue = 0;
-        let finalCGST = 0;
-        let finalSGST = 0;
-        let finalIGST = 0;
+    const { showCha } = useFormFieldSettings();
+    const hsnAdd = useHsnQuickAdd({ token });
 
-        const company = companyData.find(c => String(c.id) === String(billFromId));
-        const selectedParty = parties?.body?.find(p => String(p.id) === String(billToId));
-
-        if (!company || !selectedParty) return;
-
-        const companyState = (company?.state || "").toLowerCase().trim();
-        const partyState = (selectedParty?.state || "").toLowerCase().trim();
-        const sameState = companyState === partyState;
-        setIsSameState(sameState);
-
-        fields.forEach(item => {
-            let qty = parseFloat(item.quantity || 0);
-            let rate = parseFloat(item.rate || 0);
-            let gstRate = parseFloat(item.gst || 0);
-            let subtotal = qty * rate;
-
-            finalQuantity += qty;
-            finalValue += subtotal;
-
-            let taxAmount = subtotal * (gstRate / 100);
-
-            if (sameState) {
-                finalCGST += taxAmount / 2;
-                finalSGST += taxAmount / 2;
-            } else {
-                finalIGST += taxAmount;
-            }
-        });
-
-        const grandTotalValue = finalValue + finalCGST + finalSGST + finalIGST;
-
-        setGrandTotal({
-            total_quantity: finalQuantity,
-            total_value: finalValue,
-            total_cgst: finalCGST,
-            total_sgst: finalSGST,
-            total_igst: finalIGST,
-            grand_total: grandTotalValue,
-            inWord: inrToWords(grandTotalValue)
-        });
-    };
+    const partyList = parties?.body || [];
 
     const fetchInvoiceData = async () => {
         try {
-            let result = await getAllInvoice({ id: invoiceId, token: token });
+            const result = await getAllInvoice({ id: invoiceId, token: token });
             if (result.status === 200 && result.body.length > 0) {
                 const item = result.body[0];
-                const updatedDetails = {
+                const billTo = item.party_id?.id || "";
+                setDetails({
                     type: item.type || "tax",
                     company_id: item.company_id?.id || "",
-                    invoice_no: item.invoice_no || "",
-                    invoice_date: item.invoice_date || "",
+                    invoiceNo: item.invoice_no || "",
+                    date: item.invoice_date || "",
                     transporter: item.transporter || "",
-                    eway_bill: item.eway_bill || "",
-                    party_id: item.party_id?.id || "",
+                    ewayBill: item.eway_bill || "",
+                    billTo,
+                    shipTo: item.ship_to || billTo,
                     placeOfSupply: item.placeOfSupply || "",
                     lorry_no: item.lorry_no || "",
-                    lr_no: item.lr_no || ""
-                };
-                setInvoiceDetails(updatedDetails);
-                const fields = item.data.map(f => ({
-                    ...f,
-                    id: f.id || Math.floor(Math.random() * 10000000000)
+                    lr_no: item.lr_no || "",
+                    container: item.container || "",
+                    cha: item.cha?.id || "",
+                });
+                setSameShip(!item.ship_to || String(item.ship_to) === String(billTo));
+                setFromChallan(Boolean(item.challan_id));
+                const rows = (Array.isArray(item.data) ? item.data : []).map(row => ({
+                    ...newInvoiceRow(),
+                    ...row,
+                    id: row.id || Math.floor(Math.random() * 10000000000),
                 }));
-                setInvoiceFields(fields);
+                setItems(rows.length ? rows : [newInvoiceRow()]);
             } else {
                 toast.error("Invoice not found");
                 navigate("/view-invoice");
             }
         } catch (error) {
             console.error("Error fetching invoice:", error);
+            toast.error(errorMessage(error, "Could not load the invoice."));
         }
     };
 
     useEffect(() => {
+        getCha();
         getAllParty(token);
         getAllCompany(token);
         getAllGst(token);
-        if (invoiceId) {
-            fetchInvoiceData();
-        }
+        getAllHsnSac(token);
+        if (invoiceId) fetchInvoiceData();
     }, [invoiceId, token]);
 
-    useEffect(() => {
-        if (invoiceFields.length > 0 && companyData.length > 0 && parties?.body?.length > 0) {
-            calculateGrandTotal(invoiceFields, invoiceDetails.company_id, invoiceDetails.party_id);
-        }
-    }, [invoiceDetails.company_id, invoiceDetails.party_id, companyData, parties, invoiceFields]);
-
-    const handleAddFields = () => {
-        const newFields = [...invoiceFields, {
-            id: Math.floor(Math.random() * 10000000000),
-            description: "",
-            hsn: "",
-            quantity: 0,
-            rate: 0,
-            gst: 0,
-            total: 0
-        }];
-        setInvoiceFields(newFields);
+    const handleDetailChange = (e) => {
+        const { name, value } = e.target;
+        setDetails(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleRemoveFields = (id) => {
-        const newFields = invoiceFields.filter(item => item.id !== id);
-        setInvoiceFields(newFields);
-        calculateGrandTotal(newFields, invoiceDetails.company_id, invoiceDetails.party_id);
+    const handleItemChange = (id, patch) => {
+        setItems(prev => prev.map(item => (item.id === id ? { ...item, ...patch } : item)));
     };
 
-    const handleChangeField = (id, key, value) => {
-        const updatedFields = invoiceFields.map(item =>
-            item.id === id ? { ...item, [key]: value } : item
-        );
-        setInvoiceFields(updatedFields);
-        calculateGrandTotal(updatedFields, invoiceDetails.company_id, invoiceDetails.party_id);
+    const handleAddRow = () => setItems(prev => [...prev, newInvoiceRow()]);
+
+    const handleRemoveRow = (id) => {
+        setItems(prev => (prev.length > 1 ? prev.filter(item => item.id !== id) : prev));
     };
 
-    const handleUpdate = async () => {
+    const handleUpdate = async (e) => {
+        if (e?.preventDefault) e.preventDefault();
+        if (saving) return;
+
+        if (!details.company_id) return toast.error("Please select a company.");
+        if (!details.billTo) return toast.error("Please select who the invoice is billed to.");
+        if (!details.date) return toast.error("Please enter the invoice date.");
+        const filled = items.filter(item => item.description || Number(item.quantity) || Number(item.rate));
+        if (!filled.length) return toast.error("Add at least one item.");
+        if (filled.some(item => !String(item.description).trim())) return toast.error("Every item needs a description.");
+
+        const payload = {
+            type: details.type,
+            company_id: details.company_id,
+            invoice_no: details.invoiceNo,
+            invoice_date: details.date,
+            transporter: details.transporter,
+            eway_bill: details.ewayBill,
+            party_id: details.billTo,
+            ship_to: sameShip ? details.billTo : (details.shipTo || details.billTo),
+            placeOfSupply: details.placeOfSupply,
+            lorry_no: details.lorry_no,
+            lr_no: details.lr_no,
+            container: details.container,
+            cha: details.cha,
+            data: toInvoicePayloadItems(filled),
+        };
+
         try {
-            if (!invoiceDetails.party_id) {
-                return toast.error("Party is required.");
-            }
-
-            let payload = { ...invoiceDetails, data: invoiceFields };
-            let result = await updateInvoice(invoiceId, payload, token);
+            setSaving(true);
+            const result = await updateInvoice(invoiceId, payload, token);
             if (result.status === 200) {
                 toast.success(result.message);
                 if (back) navigate(-1);
                 else navigate("/view-invoice");
             } else {
                 toast.error(result.message);
-            };
+            }
         } catch (error) {
             console.error(error);
-            toast.error("Something went wrong!");
-        };
+            toast.error(errorMessage(error));
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleDelete = async () => {
-        if (window.confirm("Are you sure you want to delete this record? This cannot be undone.")) {
-            try {
-                if (!invoiceId) return;
-                let result = await deleteInvoice({ id: invoiceId, token: token });
-                if (result.status === 200) {
-                    toast.success(result.message);
-                    navigate("/view-invoice");
-                } else {
-                    toast.error(result.message);
-                };
-            } catch (error) {
-                console.log(error);
-                toast.error(error.message);
-            };
-        };
+        if (!invoiceId) return;
+        const message = fromChallan
+            ? "Delete this invoice? Its challan will become available for a new invoice. This cannot be undone."
+            : "Are you sure you want to delete this record? This cannot be undone.";
+        if (!window.confirm(message)) return;
+        try {
+            const result = await deleteInvoice({ id: invoiceId, token: token });
+            if (result.status === 200) {
+                toast.success(result.message);
+                navigate("/view-invoice");
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error(errorMessage(error));
+        }
     };
 
     const handlePrint = async () => {
+        if (!invoiceId) return;
         try {
-            if (!invoiceId) return toast("Please select which one you want to print.");
-            let result = await printInvoice({ id: invoiceId, token: token });
-            if (result.status === 200) {
-                const newWindow = window.open();
-                newWindow.document.write(result.body.html);
-                toast.info("Generating Print View...");
-            } else {
-                toast.error(result.message);
-            };
+            const result = await printInvoice({ id: invoiceId, token: token });
+            if (result.status !== 200) return toast.error(result.message);
+            if (!openPrintWindow(result.body.html)) return toast.error("Pop-up blocked. Allow pop-ups to print.");
+            toast.info("Generating Print View...");
         } catch (error) {
             console.log(error);
-            toast.error(error.message);
-        };
+            toast.error(errorMessage(error));
+        }
     };
+
+    useShortcuts({
+        s: (e) => handleUpdate(e),
+        p: () => handlePrint(),
+        d: () => handleDelete(),
+        i: () => navigate("/view-invoice"),
+    }, !partyAdd.isOpen && !chaModal && !hsnAdd.isOpen);
 
     return (
         <>
-            <PageTitle>Edit Invoice Details</PageTitle>
+            <PageTitle>Edit Invoice{details.invoiceNo ? ` — ${details.invoiceNo}` : ""}</PageTitle>
             <div className='flex flex-col gap-1'>
                 <ActionArea>
-                    <div className="flex justify-between w-full">
-                        <div className="flex gap-1">
+                    <div className="flex flex-wrap justify-between w-full gap-1">
+                        <div className="flex flex-wrap gap-1">
                             <div onClick={() => navigate(-1)}>
                                 <CustomButton title={"Back"} color={"slate"}><AiOutlineRollback /></CustomButton>
                             </div>
                             <div onClick={handleUpdate}>
-                                <CustomButton title={"Update (Ctrl+S)"} color={"blue"}><AiOutlineSave /></CustomButton>
+                                <CustomButton title={"Update (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineSave /></CustomButton>
                             </div>
                             <div onClick={handlePrint}>
                                 <CustomButton title={"Print (Ctrl+P)"} color={"blue"}><AiOutlinePrinter /></CustomButton>
+                            </div>
+                            <div onClick={() => navigate("/view-invoice")}>
+                                <CustomButton title={"View (Ctrl+I)"} color={"blue"}><AiOutlineTable /></CustomButton>
                             </div>
                             <div onClick={handleDelete}>
                                 <CustomButton title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                             </div>
                         </div>
-                        <div className="flex gap-1">
-                            <div onClick={() => fetchInvoiceData()}>
-                                <CustomButton title={"Refresh"} color={"blue"}><AiOutlineSync /></CustomButton>
-                            </div>
+                        <div onClick={() => fetchInvoiceData()}>
+                            <CustomButton title={"Reload"} color={"blue"}><AiOutlineSync /></CustomButton>
                         </div>
                     </div>
                 </ActionArea>
 
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-1'>
-                    <div className='flex flex-col gap-1'>
-                        <PageTitle>Party Information</PageTitle>
-                        <MainArea>
-                            <div className='flex flex-col w-full gap-2 p-1'>
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Bill From</label>
-                                    <div className='flex items-center gap-1 w-[75%]'>
-                                        <SearchableSelect
-                                            className="w-full"
-                                            name="company_id"
-                                            value={invoiceDetails.company_id}
-                                            onChange={(e) =>
-                                                setInvoiceDetails({ ...invoiceDetails, company_id: e.target.value })
-                                            }
-                                            options={companyData?.map(item => ({ id: item.id, label: item.company_name }))}
-                                            placeholder="Select Company"
-                                            required
-                                        />
-                                        <Link
-                                            to="/add-company?back=true"
-                                            className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
-                                        >
-                                            + New
-                                        </Link>
-                                    </div>
-                                </div>
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Bill To</label>
-                                    <div className='flex items-center gap-1 w-[75%]'>
-                                        <SearchableSelect
-                                            className="w-full"
-                                            name="party_id"
-                                            value={invoiceDetails.party_id}
-                                            onChange={(e) =>
-                                                setInvoiceDetails({ ...invoiceDetails, party_id: e.target.value })
-                                            }
-                                            options={parties?.body?.map(item => ({ id: item.id, label: item.company_name }))}
-                                            placeholder="Select Party"
-                                            required
-                                        />
-                                        <Link
-                                            to="/add-party?back=true"
-                                            className="h-8 px-3 flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-700 transition whitespace-nowrap text-xs"
-                                        >
-                                            + New
-                                        </Link>
-                                    </div>
-                                </div>
-
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Place of Supply</label>
-                                    <input
-                                        className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                                        value={invoiceDetails.placeOfSupply}
-                                        onChange={(e) =>
-                                            setInvoiceDetails({ ...invoiceDetails, placeOfSupply: e.target.value })
-                                        }
-                                        type="text"
-                                    />
-                                </div>
-                            </div>
-                        </MainArea>
-                    </div>
-
-                    <div className='flex flex-col gap-1'>
-                        <PageTitle>Invoice Info</PageTitle>
-                        <MainArea>
-                            <div className='flex flex-col w-full gap-2 p-1'>
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Date</label>
-                                    <input
-                                        className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                                        type="date"
-                                        value={invoiceDetails.invoice_date}
-                                        onChange={(e) =>
-                                            setInvoiceDetails({ ...invoiceDetails, invoice_date: e.target.value })
-                                        }
-                                        required
-                                    />
-                                </div>
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Invoice No</label>
-                                    <input
-                                        className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600 bg-slate-50"
-                                        type="text"
-                                        value={invoiceDetails.invoice_no}
-                                        readOnly
-                                    />
-                                </div>
-                            </div>
-                        </MainArea>
-                    </div>
-                </div>
-
-                <PageTitle>Invoice Details</PageTitle>
-                <MainArea>
-                    <table className='w-full select-none'>
-                        <thead>
-                            <tr className='text-slate-600 dark:text-white text-sm font-semibold text-center'>
-                                <th className='w-12'>Sl. No.</th>
-                                <th className=''>Description</th>
-                                <th className='w-24'>HSN</th>
-                                <th className='w-20'>Qty</th>
-                                <th className='w-24'>Rate</th>
-                                <th className='w-24'>Subtotal</th>
-                                <th className='w-24'>Tax (%)</th>
-                                {isSameState ? (
-                                    <>
-                                        <th className='w-20'>CGST</th>
-                                        <th className='w-20'>SGST</th>
-                                    </>
-                                ) : (
-                                    <th className='w-20'>IGST</th>
-                                )}
-                                <th className='w-24'>Total</th>
-                                <th className='w-12'>#</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                invoiceFields.map((item, index) => {
-                                    const isLast = index === invoiceFields.length - 1;
-                                    const subtotal = parseFloat(item.quantity || 0) * parseFloat(item.rate || 0);
-                                    const taxAmount = subtotal * (parseFloat(item.gst || 0) / 100);
-                                    const cgst = isSameState ? (taxAmount / 2).toFixed(2) : "0.00";
-                                    const sgst = isSameState ? (taxAmount / 2).toFixed(2) : "0.00";
-                                    const igst = !isSameState ? taxAmount.toFixed(2) : "0.00";
-                                    const total = subtotal + taxAmount;
-
-                                    return (
-                                        <tr key={item.id} className='items-center text-black'>
-                                            <td className=''>
-                                                <input
-                                                    className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-center"
-                                                    value={index + 1}
-                                                    disabled
-                                                />
-                                            </td>
-                                            <td className=''>
-                                                <input
-                                                    className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 capitalize"
-                                                    value={item.description}
-                                                    onChange={(e) => handleChangeField(item.id, "description", e.target.value)}
-                                                    type="text"
-                                                />
-                                            </td>
-                                            <td className=''>
-                                                <input
-                                                    className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600"
-                                                    value={item.hsn}
-                                                    onChange={(e) => handleChangeField(item.id, "hsn", e.target.value)}
-                                                    type="text"
-                                                />
-                                            </td>
-                                            <td className=''>
-                                                <input
-                                                    className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
-                                                    value={item.quantity}
-                                                    onChange={(e) => handleChangeField(item.id, "quantity", e.target.value)}
-                                                    type='number'
-                                                />
-                                            </td>
-                                            <td className=''>
-                                                <input
-                                                    className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
-                                                    value={item.rate}
-                                                    onChange={(e) => handleChangeField(item.id, "rate", e.target.value)}
-                                                    type='number'
-                                                />
-                                            </td>
-                                            <td className=''>
-                                                <input
-                                                    className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
-                                                    value={subtotal.toFixed(2)}
-                                                    readOnly
-                                                />
-                                            </td>
-                                            <td className=''>
-                                                <select
-                                                    className="h-8 p-1 rounded w-full text-slate-900 border border-slate-400 dark:border-slate-600"
-                                                    value={item.gst}
-                                                    onChange={(e) => handleChangeField(item.id, "gst", e.target.value)}
-                                                >
-                                                    <option value="" disabled>Select GST</option>
-                                                    <option value={0}>0%</option>
-                                                    {gstData?.map(g => (
-                                                        <option key={g.id} value={g.total_rate}>{g.title}</option>
-                                                    ))}
-                                                </select>
-                                            </td>
-                                            {isSameState ? (
-                                                <>
-                                                    <td className=''>
-                                                        <input
-                                                            className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
-                                                            value={cgst}
-                                                            readOnly
-                                                        />
-                                                    </td>
-                                                    <td className=''>
-                                                        <input
-                                                            className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
-                                                            value={sgst}
-                                                            readOnly
-                                                        />
-                                                    </td>
-                                                </>
-                                            ) : (
-                                                <td className=''>
-                                                    <input
-                                                        className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right"
-                                                        value={igst}
-                                                        readOnly
-                                                    />
-                                                </td>
-                                            )}
-                                            <td className=''>
-                                                <input
-                                                    className="w-full h-8 p-1 rounded border border-slate-400 dark:border-slate-600 text-right font-bold"
-                                                    value={total.toFixed(2)}
-                                                    readOnly
-                                                />
-                                            </td>
-                                            <td className=''>
-                                                <div
-                                                    className="w-full flex justify-center text-2xl cursor-pointer transition"
-                                                    onClick={() => isLast ? handleAddFields() : handleRemoveFields(item.id)}
-                                                >
-                                                    {isLast ? (
-                                                        <AiOutlinePlusSquare className="text-slate-600 hover:text-green-600" />
-                                                    ) : (
-                                                        <AiOutlineMinusSquare className="text-slate-600 hover:text-red-600" />
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )
-                                })
-                            }
-                        </tbody>
-                    </table>
-                </MainArea>
-
-                <div className='flex flex-col lg:flex-row gap-1'>
-                    <div className='w-full lg:w-3/4'>
-                        <PageTitle>Additional Info</PageTitle>
-                        <MainArea>
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-2 w-full p-1'>
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>E-Way Bill</label>
-                                    <input
-                                        className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                                        type="text"
-                                        value={invoiceDetails.eway_bill}
-                                        onChange={(e) =>
-                                            setInvoiceDetails({ ...invoiceDetails, eway_bill: e.target.value })
-                                        }
-                                    />
-                                </div>
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Transporter</label>
-                                    <input
-                                        className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                                        type="text"
-                                        value={invoiceDetails.transporter}
-                                        onChange={(e) =>
-                                            setInvoiceDetails({ ...invoiceDetails, transporter: e.target.value })
-                                        }
-                                    />
-                                </div>
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>Lorry No</label>
-                                    <input
-                                        className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                                        type="text"
-                                        value={invoiceDetails.lorry_no}
-                                        onChange={(e) =>
-                                            setInvoiceDetails({ ...invoiceDetails, lorry_no: e.target.value })
-                                        }
-                                    />
-                                </div>
-                                <div className='flex justify-between items-center w-full gap-1'>
-                                    <label className='text-xs w-[25%]'>LR No</label>
-                                    <input
-                                        className="h-8 p-1 rounded w-[75%] text-slate-900 border border-slate-400 dark:border-slate-600"
-                                        type="text"
-                                        value={invoiceDetails.lr_no}
-                                        onChange={(e) =>
-                                            setInvoiceDetails({ ...invoiceDetails, lr_no: e.target.value })
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        </MainArea>
-                    </div>
-                    <div className='w-full lg:w-1/4'>
-                        <PageTitle>Summary</PageTitle>
-                        <MainArea>
-                            <div className='flex flex-col justify-end gap-1 w-full p-1'>
-                                <div className='flex justify-between w-full gap-1 font-bold'>
-                                    <span className=''>Total Quantity</span>
-                                    <span className=' text-blue-600'>{grandTotal.total_quantity}</span>
-                                </div>
-                                <hr />
-                                <div className='flex justify-between w-full gap-1 font-bold'>
-                                    <span className=''>Subtotal</span>
-                                    <span className=' text-blue-600'>{grandTotal.total_value.toLocaleString("en-IN", {
-                                        style: "currency",
-                                        currency: "INR",
-                                    })}</span>
-                                </div>
-                                <hr />
-                                {grandTotal.total_igst > 0 ? (
-                                    <div className='flex justify-between w-full gap-1'>
-                                        <span className=''>IGST</span>
-                                        <span className=''>{grandTotal.total_igst.toLocaleString("en-IN", {
-                                            style: "currency",
-                                            currency: "INR",
-                                        })}</span>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className='flex justify-between w-full gap-1'>
-                                            <span className=''>SGST</span>
-                                            <span className=''>{grandTotal.total_sgst.toLocaleString("en-IN", {
-                                                style: "currency",
-                                                currency: "INR",
-                                            })}</span>
-                                        </div>
-                                        <hr />
-                                        <div className='flex justify-between w-full gap-1'>
-                                            <span className=''>CGST</span>
-                                            <span className=''>{grandTotal.total_cgst.toLocaleString("en-IN", {
-                                                style: "currency",
-                                                currency: "INR",
-                                            })}</span>
-                                        </div>
-                                    </>
-                                )}
-                                <hr />
-                                <div className='text-lg flex justify-between w-full gap-1 font-bold'>
-                                    <span className=' text-xl'>Grand Total</span>
-                                    <span className=' text-blue-600 text-xl'>{grandTotal.grand_total.toLocaleString("en-IN", {
-                                        style: "currency",
-                                        currency: "INR",
-                                    })}</span>
-                                </div>
-                                <div className='bg-white flex flex-col justify-between w-full gap-1 text-black p-1 rounded'>
-                                    <span className=' font-bold'>In Rupees :</span>
-                                    <span className=' text-xs italic'>{grandTotal.inWord}</span>
-                                </div>
-                            </div>
-                        </MainArea>
-                    </div>
-                </div>
+                <InvoiceForm
+                    details={details}
+                    onDetailChange={handleDetailChange}
+                    sameShip={sameShip}
+                    onSameShipChange={setSameShip}
+                    items={items}
+                    onItemChange={handleItemChange}
+                    onAddRow={handleAddRow}
+                    onRemoveRow={handleRemoveRow}
+                    onSubmit={handleUpdate}
+                    companyData={companyData}
+                    parties={partyList}
+                    gstData={gstData}
+                    hsnData={hsnData}
+                    onAddParty={partyAdd.open}
+          onAddHsn={hsnAdd.open}
+                    chaData={chaData}
+                    onAddCha={() => setChaModal(true)}
+                    showCha={showCha}
+                    notice={fromChallan ? (
+                        <div className="rounded border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+                            This invoice was created from a challan. Changes here don't change the challan.
+                        </div>
+                    ) : null}
+                />
             </div>
 
+            <PartyQuickAddModal {...partyAdd.modalProps} />
+            <ChaQuickAddModal isOpen={chaModal} onClose={() => setChaModal(false)} onSubmit={handleChaSubmit} loading={chaLoading} error={chaError} />
+      <HsnQuickAddModal {...hsnAdd.modalProps} />
         </>
     );
 };

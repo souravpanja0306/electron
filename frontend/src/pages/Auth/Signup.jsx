@@ -43,18 +43,12 @@ const Signup = () => {
     };
 
     const handleSubmitSignup = async (e) => {
-        e.preventDefault();
-        if (signinLoading) return;
-
-        if (usernameExists) {
-            return toast.error("Username already taken. Please choose another.");
-        }
-
-        if (!data.machineId) {
-            return toast.error("Hardware ID not found. Please restart the app.");
-        }
-
         try {
+            e.preventDefault();
+            if (signinLoading) return;
+            if (usernameExists) return toast.error("Username already taken. Please choose another.");
+            if (!data.machineId) return toast.error("Hardware ID not found. Please restart the app.");
+
             let result = await signup(data);
             if (result.status === 200) {
                 window.api?.setItem("token", result.body.token);
@@ -66,7 +60,7 @@ const Signup = () => {
             };
         } catch (error) {
             console.error(error);
-            toast.error("An unexpected error occurred. Please try again.");
+            toast.error(error.response.data.message);
         };
     };
     return (
@@ -76,7 +70,7 @@ const Signup = () => {
             <div className="titlebar border-b border-slate-600 w-full h-10 bg-slate-950 text-white flex items-center justify-between p-2 shadow-md">
                 <div className="flex items-center gap-2">
                     <div className="font-semibold tracking-wide">
-                        <Link to="#">ZeroERP</Link>
+                        <Link to="#">MyERP</Link>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm">

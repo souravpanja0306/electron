@@ -64,6 +64,23 @@ module.exports.resetAllTable = async (req, res) => {
     return res.status(response.status).json(response);
 };
 
+module.exports.getAllCollection = async (req, res) => {
+    let response = { ...contents.defaultResponse };
+    try {
+        let result = await AdminService.getAllCollectionData();
+
+        response.status = 200;
+        response.message = "Collections Fetched Successfully";
+        response.body = result;
+    } catch (error) {
+        console.log(`Something went wrong: controller: getAllCollection: ${error}`);
+        response.status = error.status ? error.status : 500;
+        response.message = error.message ? error.message : "Something went wrong: controller: getAllCollection";
+        response.body = error.body ? error.body : "";
+    };
+    return res.status(response.status).json(response);
+};
+
 module.exports.migrateTable = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {

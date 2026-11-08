@@ -15,11 +15,17 @@ import { AiOutlineFileAdd, AiOutlineTable, AiOutlineRollback, AiOutlineEdit } fr
 import useChallanStore from "../../../store/ChallanStore";
 import useAuthStore from '../../../store/AuthStore';
 import useHsnSacStore from "../../../store/HsnSacStore";
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const CreateHsnSac = () => {
     const { token } = useAuthStore();
     const { createHsnSac, updateHsnSac, hsnData, getAllHsnSac } = useHsnSacStore();
     const navigate = useNavigate();
+
+    useShortcuts({
+        s: (e) => handleSubmit(e),
+        i: () => navigate("/view-hsn-sac"),
+    });
     const [searchParams] = useSearchParams();
 
     const isBack = searchParams.get("back") === "true";

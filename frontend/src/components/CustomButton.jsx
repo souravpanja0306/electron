@@ -4,6 +4,11 @@ const CustomButton = ({
     children,
     title = "",
     color = "",
+    type = "button",
+    onClick,
+    disabled,
+    name,
+    ...props
 }) => {
     const COLORS = {
         blue: "bg-blue-600 text-white hover:bg-blue-700",
@@ -15,8 +20,12 @@ const CustomButton = ({
 
     return (
         <button
-            type="button"
-            className={`h-8 min-w-20 p-2 cursor-pointer rounded text-xs flex gap-2 items-center justify-center select-none font-medium transition-all active:bg-slate-600 active:dark:bg-slate-900 shadow-sm ${COLORS[color] || COLORS.blue}`}
+            type={type}
+            name={name}
+            onClick={onClick}
+            disabled={disabled}
+            {...props}
+            className={`h-8 min-w-20 p-2 cursor-pointer rounded text-xs flex gap-2 items-center justify-center select-none font-medium transition-all active:bg-slate-600 active:dark:bg-slate-900 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${COLORS[color] || COLORS.blue}`}
         >
             <span className="text-base">
                 {children}

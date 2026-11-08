@@ -74,3 +74,49 @@ module.exports.updateChallanSetting = async ({
         throw error;
     };
 };
+
+module.exports.getUserTheme = async ({ user_id }) => {
+    const row = db.prepare("SELECT theme FROM user_setting WHERE user_id = ?").get(user_id);
+    return row ? row.theme : null;
+};
+
+module.exports.saveUserTheme = async ({ user_id, theme }) => {
+    return db.prepare(`
+        INSERT INTO user_setting (user_id, theme) VALUES (@user_id, @theme)
+        ON CONFLICT(user_id) DO UPDATE SET theme = @theme, updated_at = CURRENT_TIMESTAMP
+    `).run({ user_id, theme });
+};
+
+// CHA field is shown unless the user switched it off.
+module.exports.getUserShowCha = async ({ user_id }) => {
+    const row = db.prepare("SELECT show_cha FROM user_setting WHERE user_id = ?").get(user_id);
+    return !row || row.show_cha !== 0;
+};
+
+module.exports.saveUserShowCha = async ({ user_id, show_cha }) => {
+    return db.prepare(`
+        INSERT INTO user_setting (user_id, show_cha) VALUES (@user_id, @show_cha)
+        ON CONFLICT(user_id) DO UPDATE SET show_cha = @show_cha, updated_at = CURRENT_TIMESTAMP
+    `).run({ user_id, show_cha });
+};
+
+module.exports.createInvoiceSetting = async (data) => {
+    const keys = Object.keys(data);
+    return db.prepare(`INSERT INTO invoice_setting (${keys.join(",")}) VALUES (${keys.map(key => `@${key}`).join(",")})`).run(data);
+};
+
+module.exports.getInvoiceSetting = async ({ company_id = "" }) => {
+    let query = "SELECT * FROM invoice_setting";
+    const params = [];
+    if (company_id) {
+        query += " WHERE company_id = ?";
+        params.push(company_id);
+    };
+    return db.prepare(query).all(...params);
+};
+
+module.exports.updateInvoiceSetting = async ({ id, data }) => {
+    const keys = Object.keys(data);
+    const setClause = keys.map(key => `${key} = @${key}`).join(", ");
+    return db.prepare(`UPDATE invoice_setting SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = @id`).run({ ...data, id });
+};

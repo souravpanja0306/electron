@@ -27,6 +27,6 @@ module.exports = `
     thermal_size TEXT DEFAULT '80mm',
 
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
 `;

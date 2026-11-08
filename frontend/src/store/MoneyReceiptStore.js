@@ -43,6 +43,15 @@ const useMoneyReceiptStore = create((set) => ({
         };
     },
 
+    // Loads one receipt without replacing the list held in `moneyReceipts`.
+    getMoneyReceiptById: async (id) => {
+        const result = await api({
+            method: "get",
+            url: `/money-receipt/get-money-receipt?id=${encodeURIComponent(id)}`,
+        });
+        return result.data;
+    },
+
     downloadMoneyReceipts: async ({
         id = "",
         token = ""

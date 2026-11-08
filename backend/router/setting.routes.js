@@ -29,4 +29,40 @@ router.get(
     SettingController.listChallanSetting
 );
 
+router.post(
+    "/invoice-setting",
+    middleware.isAuthenticated,
+    SettingController.saveInvoiceSetting
+);
+
+router.get(
+    "/invoice-setting",
+    middleware.isAuthenticated,
+    SettingController.listInvoiceSetting
+);
+
+router.get(
+    "/field-settings",
+    middleware.isAuthenticated,
+    SettingController.getFieldSettings
+);
+
+router.put(
+    "/field-settings",
+    middleware.isAuthenticated,
+    SettingController.saveFieldSettings
+);
+
+router.get(
+    "/theme",
+    middleware.isAuthenticated,
+    SettingController.getTheme
+);
+
+router.put(
+    "/theme",
+    middleware.isAuthenticated,
+    SettingController.saveTheme
+);
+
 module.exports = router;

@@ -8,11 +8,17 @@ import { AiOutlineFileAdd, AiOutlineTable, AiOutlineRollback, AiOutlineEdit } fr
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import useGstStore from '../../../store/GstStore';
 import useAuthStore from '../../../store/AuthStore';
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const CreateGst = () => {
   const { token } = useAuthStore();
   const { createGst, updateGst, getAllGst, gstData, gstLoading } = useGstStore();
   const navigate = useNavigate();
+
+  useShortcuts({
+      s: (e) => submitData(e),
+      i: () => navigate("/view-gst"),
+  });
   const [searchParams] = useSearchParams();
   const back = searchParams.get("back");
   const editId = searchParams.get("id");

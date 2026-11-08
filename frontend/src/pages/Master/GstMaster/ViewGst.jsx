@@ -17,11 +17,21 @@ import useGstStore from "../../../store/GstStore";
 import useChallanStore from "../../../store/ChallanStore";
 import useAuthStore from '../../../store/AuthStore';
 import useHsnSacStore from "../../../store/HsnSacStore";
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const GstTable = () => {
     const { token } = useAuthStore();
     const { gstData, getAllGst, deleteGst, gstLoading } = useGstStore();
     const navigate = useNavigate();
+
+    useShortcuts({
+        n: () => navigate("/create-gst"),
+        d: () => handleDelete(),
+        e: () => {
+            if (!checkedIds) return toast.error("Please select a GST record to edit.");
+            navigate(`/create-gst?id=${checkedIds}`);
+        },
+    });
     const [checkedIds, setCheckedIds] = useState(null);
 
     useEffect(() => {

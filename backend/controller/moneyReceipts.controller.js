@@ -19,6 +19,44 @@ const errorHandler = (res, status, message) => {
     return res.status(status).json({ status, message, body: [] });
 };
 
+const toText = (value) => (value === undefined || value === null ? "" : String(value).trim());
+
+const parseJsonArray = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return [];
+};
+
+// Drops empty rows and recomputes the total so a blank amount can never store "NaN".
+const normaliseReceiptItems = (data) => {
+    const items = parseJsonArray(data)
+        .filter((row) => row && (toText(row.description) || Number(row.amount)))
+        .map((row, index) => ({
+            id: row.id ?? Date.now() + index,
+            sl_no: index + 1,
+            description: toText(row.description),
+            amount: Number(row.amount) || 0,
+        }));
+    const total = items.reduce((sum, row) => sum + row.amount, 0);
+    return { items, total: Math.round(total * 100) / 100 };
+};
+
+const validateReceipt = ({ company_id, party_id, receipt_no, items }) => {
+    if (!company_id) return "Please select Company.";
+    if (!party_id) return "Please select Party.";
+    if (!toText(receipt_no)) return "Receipt Number is required.";
+    if (!items.length) return "Add at least one payment line.";
+    if (items.some((row) => row.amount < 0)) return "Amounts cannot be negative.";
+    return null;
+};
+
 module.exports.printMoneyReceipt = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
@@ -108,23 +146,27 @@ module.exports.createMoneyReceipt = async (req, res) => {
     let response = { ...contents.defaultResponse };
     try {
         const { t_userId, t_mobile, t_username, t_name } = req.body;
-        let { company_id, party_id, receipt_no, receipt_date, data, remarks, total_value, payment_mode, reference } = req.body;
+        let { company_id, party_id, receipt_no, receipt_date, data, remarks, payment_mode, reference } = req.body;
 
-        let totalValue = 0;
-        data.length && data.map((item) => {
-            totalValue += parseFloat(item.amount);
-        });
+        const { items, total } = normaliseReceiptItems(data);
+        const invalid = validateReceipt({ company_id, party_id, receipt_no, items });
+        if (invalid) return errorHandler(res, 400, invalid);
+
+        let dupKey = { receipt_no: toText(receipt_no) };
+        if (t_userId) dupKey["created_by"] = t_userId.toString();
+        const existing = await MoneyReceiptService.findMoneyReceipts(dupKey);
+        if (existing.length) return errorHandler(res, 409, "Receipt Number Already Exists.");
 
         let finalData = {
             company_id: company_id,
             party_id: party_id,
-            receipt_no: receipt_no,
-            receipt_date: receipt_date,
-            data: JSON.stringify(data),
-            remarks: remarks,
-            total_value: (totalValue).toFixed(2),
-            payment_mode: payment_mode,
-            reference: reference,
+            receipt_no: toText(receipt_no),
+            receipt_date: toText(receipt_date),
+            data: JSON.stringify(items),
+            remarks: toText(remarks),
+            total_value: total,
+            payment_mode: toText(payment_mode) || "Cash",
+            reference: toText(reference),
             created_by: t_userId,
         };
 
@@ -171,12 +213,12 @@ module.exports.getMoneyReceipt = async (req, res) => {
                 } : "",
                 receipt_no: item.receipt_no,
                 receipt_date: item.receipt_date,
-                data: JSON.parse(item.data),
+                data: parseJsonArray(item.data),
                 remarks: item.remarks,
                 payment_mode: item.payment_mode,
                 reference: item.reference,
-                total_value: item.total_value,
-                created_by: item.t_userId,
+                total_value: Number(item.total_value) || 0,
+                created_by: item.created_by,
             };
             finalData.push(newData);
         };
@@ -346,7 +388,10 @@ module.exports.updateMoneyReceipt = async (req, res) => {
         const { id, company_id, party_id, receipt_no, receipt_date, data, remarks, payment_mode, reference } = req.body;
 
         if (!id) return errorHandler(res, 400, "Money Receipt ID is required.");
-        if (!party_id) return errorHandler(res, 400, "Please select Party.");
+
+        const { items, total } = normaliseReceiptItems(data);
+        const invalid = validateReceipt({ company_id, party_id, receipt_no, items });
+        if (invalid) return errorHandler(res, 400, invalid);
 
         let search_key = { id };
         if (t_userId) search_key["created_by"] = t_userId.toString();
@@ -354,24 +399,24 @@ module.exports.updateMoneyReceipt = async (req, res) => {
         let checkReceipt = await MoneyReceiptService.findMoneyReceipts(search_key);
         if (!checkReceipt.length) return errorHandler(res, 404, "Money Receipt not found.");
 
-        let items = typeof data === 'string' ? JSON.parse(data) : data;
-        let totalValue = 0;
-        if (items && items.length) {
-            for (let item of items) {
-                totalValue += parseFloat(item.amount || 0);
-            };
-        };
+        // Receipt number must stay unique, ignoring this receipt itself.
+        let dupKey = { receipt_no: toText(receipt_no) };
+        if (t_userId) dupKey["created_by"] = t_userId.toString();
+        const sameNo = await MoneyReceiptService.findMoneyReceipts(dupKey);
+        if (sameNo.some((item) => String(item.id) !== String(id))) {
+            return errorHandler(res, 409, "Receipt Number Already Exists.");
+        }
 
         let updateData = {
             company_id: company_id,
             party_id: party_id,
-            receipt_no: receipt_no,
-            receipt_date: receipt_date,
+            receipt_no: toText(receipt_no),
+            receipt_date: toText(receipt_date),
             data: JSON.stringify(items),
-            remarks: remarks,
-            total_value: (totalValue).toFixed(2),
-            payment_mode: payment_mode,
-            reference: reference,
+            remarks: toText(remarks),
+            total_value: total,
+            payment_mode: toText(payment_mode) || "Cash",
+            reference: toText(reference),
         };
 
         let result = await MoneyReceiptService.updateMoneyReceiptData(id, updateData);

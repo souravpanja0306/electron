@@ -21,6 +21,7 @@ import CustomLoader from "../../../components/CustomLoader";
 // Stores...
 import useCompanyStore from "../../../store/CompanyStore";
 import useAuthStore from "../../../store/AuthStore";
+import useShortcuts from "../../../hooks/useShortcuts";
 
 const ViewCompany = () => {
     const { companyData, getAllCompany, deleteCompany, companyLoading } = useCompanyStore();
@@ -80,30 +81,17 @@ const ViewCompany = () => {
         toast.info("Company Data Refreshing.");
     };
 
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.ctrlKey && e.key === 'n') {
-                e.preventDefault();
-                navigate("/add-company");
-            };
-
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                handleDelete()
-            };
-
-            if (e.ctrlKey && e.key === 'e') {
-                e.preventDefault();
-                if (checkedIds.length === 1) {
-                    navigate(`/edit-company/${checkedIds[0]}`);
-                } else {
-                    toast.warning("Please select exactly one company to edit.");
-                }
-            };
-        };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [checkedIds]);
+    useShortcuts({
+        n: () => navigate("/add-company"),
+        d: () => {
+            if (!checkedIds.length) return toast.warning("Please select an item to delete.");
+            return handleDelete();
+        },
+        e: () => {
+            if (checkedIds.length !== 1) return toast.warning("Please select exactly one company to edit.");
+            navigate(`/edit-company/${checkedIds[0]}`);
+        },
+    });
 
     const limit = 10;
     const total = companyData?.length || 0;
