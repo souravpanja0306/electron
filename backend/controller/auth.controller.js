@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 // Services / helpers...
 const UserService = require("../service/user.service");
 const LicenseService = require("../service/license.service");
+const AccessService = require("../service/access.service");
 const { errorHandler, ok, str, serverError } = require("../helper/http");
 const { hashPassword, verifyPassword, needsRehash } = require("../helper/password");
 const { signUserToken } = require("../helper/authToken");
@@ -109,6 +110,17 @@ module.exports.signup = async (req, res) => {
     };
 };
 
+/** Subscription / lock status for the signed-in user. `?refresh=1` asks the licence server now. */
+module.exports.accessStatus = async (req, res) => {
+    try {
+        const force = ["1", "true"].includes(String(req.query.refresh || ""));
+        const access = await AccessService.getAccess(req.auth, { force });
+        return ok(res, access.locked ? access.message : "OK", { access });
+    } catch (error) {
+        return serverError(res, "controller: accessStatus", error, "Could not check the subscription.");
+    };
+};
+
 module.exports.signin = async (req, res) => {
     try {
         const username = str(req.body.username);
@@ -133,6 +145,12 @@ module.exports.signin = async (req, res) => {
             return res.status(202).json({ status: 202, message: "This is different machine. You cannot login here.", body: {} });
         };
 
+        // Admin lock / suspended or expired subscription.
+        const access = await AccessService.checkNow(user);
+        if (access.locked) {
+            return res.status(403).json({ status: 403, code: access.code, message: access.reason ? `${access.message} Reason: ${access.reason}` : access.message, body: { access } });
+        };
+
         // Old accounts stored the password as plain text: save it hashed from now on.
         const update = { last_activity: new Date() };
         if (needsRehash(user.password)) {
@@ -146,9 +164,10 @@ module.exports.signin = async (req, res) => {
             name: user.name,
             id: user.id,
             token: signUserToken(user),
+            access,
         });
     } catch (error) {
-        if (isOfflineError(error)) return errorHandler(res, 503, OFFLINE_MESSAGE);
+        if (error?.offline || isOfflineError(error)) return errorHandler(res, 503, OFFLINE_MESSAGE);
         return serverError(res, "controller: signin", error, "Could not sign in. Please try again.");
     };
 };

@@ -4,51 +4,8 @@ const { esc, escObj, multiline, money, uploadUrl } = require("./html");
 
 const DEFAULT_TERMS = "Goods once sold will not be taken back. Interest may be charged on payments received after the due date. Subject to local jurisdiction only.";
 
-// Every text value is HTML-escaped before it reaches the template (see helper/html.js).
-module.exports.generateInvoiceHtml = ({ invoice: rawInvoice, company: rawCompany }) => {
-    const invoice = {
-        ...escObj(rawInvoice),
-        party_id: escObj(rawInvoice.party_id),
-        ship_to: escObj(rawInvoice.ship_to || rawInvoice.party_id),
-    };
-    const company = escObj(rawCompany);
-    const logoSrc = esc(uploadUrl("company", rawCompany?.logo));
-    const items = (rawInvoice.data || []).map(escObj);
-    const termsHtml = multiline(rawInvoice.terms_and_conditions || DEFAULT_TERMS);
-
-    let itemsHtml = items.map((item, index) => `
-        <tr>
-            <td style="text-align:center;">${index + 1}</td>
-            <td>${item.description || '--'}</td>
-            <td style="text-align:center;">${item.hsn || '--'}</td>
-            <td style="text-align:right;">${Number(item.quantity) || 0}</td>
-            <td style="text-align:right;">${money(item.rate)}</td>
-            <td style="text-align:right;">${Number(item.gst) || 0}%</td>
-            <td style="text-align:right;">${money((Number(item.quantity) || 0) * (Number(item.rate) || 0))}</td>
-        </tr>
-    `).join('');
-
-    const emptyRowsCount = Math.max(0, 8 - items.length);
-    for (let i = 0; i < emptyRowsCount; i++) {
-        itemsHtml += `<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
-    }
-
-    const formattedDate = invoice.invoice_date
-        ? moment(invoice.invoice_date).format('DD MMM YYYY')
-        : '--';
-
-    const grandTotal = Math.round(((Number(invoice.total_amount) || 0)
-        + (Number(invoice.total_cgst) || 0)
-        + (Number(invoice.total_sgst) || 0)
-        + (Number(invoice.total_igst) || 0)) * 100) / 100;
-
-    return `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Tax Invoice : ${invoice.invoice_no || ''}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <style>
+// Print stylesheet, shared with the credit / debit note print (helper/generateNoteHtml.js).
+const INVOICE_STYLES = `
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
@@ -251,7 +208,53 @@ module.exports.generateInvoiceHtml = ({ invoice: rawInvoice, company: rawCompany
             body { padding: 0; }
             .print-btn { display: none; }
         }
-    </style>
+    `;
+
+// Every text value is HTML-escaped before it reaches the template (see helper/html.js).
+module.exports.generateInvoiceHtml = ({ invoice: rawInvoice, company: rawCompany }) => {
+    const invoice = {
+        ...escObj(rawInvoice),
+        party_id: escObj(rawInvoice.party_id),
+        ship_to: escObj(rawInvoice.ship_to || rawInvoice.party_id),
+    };
+    const company = escObj(rawCompany);
+    const logoSrc = esc(uploadUrl("company", rawCompany?.logo));
+    const items = (rawInvoice.data || []).map(escObj);
+    const termsHtml = multiline(rawInvoice.terms_and_conditions || DEFAULT_TERMS);
+
+    let itemsHtml = items.map((item, index) => `
+        <tr>
+            <td style="text-align:center;">${index + 1}</td>
+            <td>${item.description || '--'}</td>
+            <td style="text-align:center;">${item.hsn || '--'}</td>
+            <td style="text-align:right;">${Number(item.quantity) || 0}</td>
+            <td style="text-align:right;">${money(item.rate)}</td>
+            <td style="text-align:right;">${Number(item.gst) || 0}%</td>
+            <td style="text-align:right;">${money((Number(item.quantity) || 0) * (Number(item.rate) || 0))}</td>
+        </tr>
+    `).join('');
+
+    const emptyRowsCount = Math.max(0, 8 - items.length);
+    for (let i = 0; i < emptyRowsCount; i++) {
+        itemsHtml += `<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+    }
+
+    const formattedDate = invoice.invoice_date
+        ? moment(invoice.invoice_date).format('DD MMM YYYY')
+        : '--';
+
+    const grandTotal = Math.round(((Number(invoice.total_amount) || 0)
+        + (Number(invoice.total_cgst) || 0)
+        + (Number(invoice.total_sgst) || 0)
+        + (Number(invoice.total_igst) || 0)) * 100) / 100;
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tax Invoice : ${invoice.invoice_no || ''}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>${INVOICE_STYLES}</style>
 </head>
 <body>
 <button class="print-btn" onclick="window.print()">Print</button>
@@ -379,3 +382,5 @@ module.exports.generateInvoiceHtml = ({ invoice: rawInvoice, company: rawCompany
 </body>
 </html>`;
 };
+
+module.exports.INVOICE_STYLES = INVOICE_STYLES;

@@ -16,6 +16,8 @@ import "../index.css"
 import { Toaster } from 'sonner'
 
 import Header from "./Header";
+import PrintPreview from "./PrintPreview";
+import AccessGate, { AccessBanner } from "./AccessGate";
 
 // Stores...
 import useAuthStore from '../store/AuthStore';
@@ -115,6 +117,8 @@ const Layout = () => {
     return (
         <div className="flex flex-col h-screen select-none">
             <Toaster />
+            <PrintPreview />
+            <AccessGate />
             {/* Custom Title Bar */}
             <Header />
 
@@ -234,6 +238,7 @@ const Layout = () => {
 
                 {/* Main Content Area */}
                 <div className="flex-1 min-w-0 bg-slate-100 dark:bg-slate-900 flex flex-col overflow-hidden">
+                    <AccessBanner />
                     <main className="flex-1 p-2 overflow-auto bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 relative z-0">
                         <Outlet />
                     </main>

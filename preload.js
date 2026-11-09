@@ -11,4 +11,6 @@ contextBridge.exposeInMainWorld("api", {
     deleteItem: (key) => ipcRenderer.send('store-delete', key),
     clearAll: () => ipcRenderer.send("store-clear-all"),
     showNotification: (data) => ipcRenderer.send("show-notification", data),
+    printHtml: (html) => ipcRenderer.invoke("print-html", html),
+    savePdf: (html, suggestedName) => ipcRenderer.invoke("save-pdf", html, suggestedName),
 });

@@ -54,6 +54,26 @@ const MenuMap = {
                 { title: "View Invoices", url: "/view-invoice", icon: <AiOutlineFileSearch /> },
             ]
         },
+        {
+            type: "main",
+            title: "Credit Notes",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Create Credit Note", url: "/create-credit-note", icon: <AiOutlinePlusSquare /> },
+                { title: "View Credit Notes", url: "/view-credit-notes", icon: <AiOutlineFileSearch /> },
+            ]
+        },
+        {
+            type: "main",
+            title: "Debit Notes",
+            url: "#",
+            icon: <AiOutlineDiff />,
+            submenu: [
+                { title: "Create Debit Note", url: "/create-debit-note", icon: <AiOutlinePlusSquare /> },
+                { title: "View Debit Notes", url: "/view-debit-notes", icon: <AiOutlineFileSearch /> },
+            ]
+        },
         // {
         //     type: "main",
         //     title: "Vendor Expenses(Creditors)",

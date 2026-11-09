@@ -34,7 +34,7 @@ const checkLinks = ({ userId, company_id, parties = [], cha }) => {
     return "";
 };
 
-const LOADABLE = new Set(["company", "party", "cha"]);
+const LOADABLE = new Set(["company", "party", "cha", "invoice"]);
 
 /** Map of id -> row for the given ids (duplicates and empties ignored). */
 const loadById = (table, ids) => {

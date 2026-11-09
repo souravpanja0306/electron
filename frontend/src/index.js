@@ -49,6 +49,8 @@ import ContactUs from './pages/ContactUs';
 import ChaCreate from './pages/Master/ChaMaster/ChaCreate';
 import ChaView from './pages/Master/ChaMaster/ChaView';
 import ChaEdit from './pages/Master/ChaMaster/ChaEdit';
+import NoteEditor from './pages/Notes/NoteEditor';
+import ViewNotes from './pages/Notes/ViewNotes';
 
 import { Middleware } from './middleware/middleware';
 import Modal from './components/CustomModal';
@@ -65,6 +67,14 @@ const router = createHashRouter([
       { path: "/create-invoice", element: <CreateInvoice /> },
       { path: "/view-invoice", element: <ViewInvoice /> },
       { path: "/view-invoice/details", element: <ViewInvoiceDetails /> },
+
+      // Credit / debit notes
+      { path: "/create-credit-note", element: <NoteEditor key="cn-new" type="credit" /> },
+      { path: "/view-credit-notes", element: <ViewNotes key="cn-list" type="credit" /> },
+      { path: "/view-credit-note/details", element: <NoteEditor key="cn-edit" type="credit" /> },
+      { path: "/create-debit-note", element: <NoteEditor key="dn-new" type="debit" /> },
+      { path: "/view-debit-notes", element: <ViewNotes key="dn-list" type="debit" /> },
+      { path: "/view-debit-note/details", element: <NoteEditor key="dn-edit" type="debit" /> },
       { path: "/create-creditors", element: <CreateInvoice /> },
       { path: "/create-moeny-receipts", element: <CreateMoneyReceipts /> },
       { path: "/view-money-receipts", element: <ViewMoneyReceipts /> },

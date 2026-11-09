@@ -53,10 +53,13 @@ const CustomerLedger = () => {
         });
     }, [ledger]);
 
-    const linkFor = (entry) =>
-        entry.entry_type === "receipt"
-            ? `/view-money-receipt/details?id=${entry.id}&back=true`
-            : `/view-invoice/details?id=${entry.id}&back=true`;
+    const LINKS = {
+        receipt: (id) => `/view-money-receipt/details?id=${id}&back=true`,
+        credit_note: (id) => `/view-credit-note/details?id=${id}&back=true`,
+        debit_note: (id) => `/view-debit-note/details?id=${id}&back=true`,
+    };
+    const linkFor = (entry) => (LINKS[entry.entry_type] || ((id) => `/view-invoice/details?id=${id}&back=true`))(entry.id);
+    const isCreditEntry = (r) => r.entry_type === "receipt" || r.entry_type === "credit_note";
 
     const exportCsv = () => {
         downloadCsv(`ledger_${(party?.company_name || "customer").replace(/[^\w-]+/g, "_")}.csv`, [
@@ -86,9 +89,8 @@ const CustomerLedger = () => {
             <tbody>${body}</tbody>
             <tfoot><tr><td colspan="3">Total</td><td class="n">${escapeHtml(formatINR(totals.total_dr))}</td><td class="n">${escapeHtml(formatINR(totals.total_cr))}</td>
             <td class="n">${escapeHtml(balanceText(totals.balance))}</td></tr></tfoot></table>
-            <p style="margin-top:8px">Balance in words: ${escapeHtml(inrToWords(Math.abs(totals.balance)))}</p>
-            <script>window.onload = () => window.print();</script></body></html>`;
-        if (!openPrintWindow(html)) toast.error("Pop-up blocked. Allow pop-ups to print.");
+            <p style="margin-top:8px">Balance in words: ${escapeHtml(inrToWords(Math.abs(totals.balance)))}</p></body></html>`;
+        if (!openPrintWindow(html)) toast.error("Nothing to print.");
     };
 
     if (state.status === "loading") return <CustomLoader />;
@@ -119,8 +121,8 @@ const CustomerLedger = () => {
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <KpiTile label="Invoiced (debit)" icon={<AiOutlineDiff />} value={formatINR(totals.total_dr)} sub={`${rows.filter((r) => r.entry_type !== "receipt").length} invoices incl. GST`} />
-                    <KpiTile label="Received (credit)" icon={<AiOutlineWallet />} value={formatINR(totals.total_cr)} sub={`${rows.filter((r) => r.entry_type === "receipt").length} receipts`} />
+                    <KpiTile label="Invoiced (debit)" icon={<AiOutlineDiff />} value={formatINR(totals.total_dr)} sub={`${rows.filter((r) => !isCreditEntry(r)).length} invoices / debit notes incl. GST`} />
+                    <KpiTile label="Received (credit)" icon={<AiOutlineWallet />} value={formatINR(totals.total_cr)} sub={`${rows.filter(isCreditEntry).length} receipts / credit notes`} />
                     <KpiTile
                         label={balance > 0 ? "Balance due" : balance < 0 ? "Advance held" : "Balance"}
                         value={balanceText(balance)}

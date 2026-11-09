@@ -1,8 +1,12 @@
 // Services / helpers...
 const UserService = require("../service/user.service");
+const AccessService = require("../service/access.service");
 const { verifyUserToken } = require("../helper/authToken");
 
 const unauthorized = (res, message = "Unauthorized") => res.status(401).json({ status: 401, message, body: [] });
+
+/** 403 sent while the account is locked or the subscription has lapsed. The app shows its lock screen. */
+const locked = (res, access) => res.status(403).json({ status: 403, code: access.code, message: access.message, body: { access } });
 
 // Copies the signed-in user onto req.body, where the controllers read it.
 const applyAuth = (req) => {
@@ -16,9 +20,10 @@ const applyAuth = (req) => {
 
 /**
  * Verifies the Bearer token and that the user still exists. The identity is set by the
- * server only: any t_userId sent by the client is overwritten.
+ * server only: any t_userId sent by the client is overwritten. With `checkAccess`, a locked
+ * account or lapsed subscription is refused with 403 (see service/access.service.js).
  */
-module.exports.isAuthenticated = async (req, res, next) => {
+const authenticate = (checkAccess) => async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) return unauthorized(res);
@@ -39,6 +44,10 @@ module.exports.isAuthenticated = async (req, res, next) => {
             username: users[0].username,
             name: users[0].name,
         };
+        if (checkAccess) {
+            const access = await AccessService.getAccess(req.auth);
+            if (access.locked) return locked(res, access);
+        };
         applyAuth(req);
         return next();
     } catch (error) {
@@ -46,6 +55,12 @@ module.exports.isAuthenticated = async (req, res, next) => {
         return unauthorized(res);
     };
 };
+
+/** Signed in and allowed to use the app. Used by every business route. */
+module.exports.isAuthenticated = authenticate(true);
+
+/** Signed in, lock not checked. Only for the subscription status endpoint the lock screen uses. */
+module.exports.isSignedIn = authenticate(false);
 
 /**
  * Multer replaces req.body when it parses a multipart form, so routes that upload a file

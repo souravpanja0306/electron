@@ -1,3 +1,5 @@
+import usePrintStore from "../store/PrintStore";
+
 // Number / currency formatting shared by the challan, invoice and receipt pages.
 
 export const formatNumber = (value, maxDigits = 2) =>
@@ -31,13 +33,11 @@ export const formatDate = (value) => {
     return `${m[3]} ${MONTHS[Number(m[2]) - 1] || m[2]} ${m[1]}`;
 };
 
-// Opens the server-rendered HTML in a new window for printing.
-// Returns false when the window could not be opened (pop-up blocked).
-export const openPrintWindow = (html) => {
-    const win = window.open();
-    if (!win) return false;
-    win.document.write(html);
-    win.document.close();
+// Shows the HTML in the app-wide print preview, which then opens the printer dialog
+// (components/PrintPreview.jsx). Returns false when there is nothing to show.
+export const openPrintWindow = (html, title = "") => {
+    if (!html) return false;
+    usePrintStore.getState().openPreview(html, title);
     return true;
 };
 

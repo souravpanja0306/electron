@@ -1,5 +1,6 @@
-const { app, BrowserWindow, Menu, globalShortcut, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, globalShortcut, ipcMain, dialog } = require("electron");
 const path = require("path");
+const fs = require("fs");
 const { machineIdSync } = require('node-machine-id');
 const Store = require('electron-store').default;
 const { Notification } = require("electron");
@@ -55,6 +56,53 @@ app.whenReady().then(() => {
     ipcMain.on("store-clear-all", (event, key) => {
         store.clear();
     });
+    // Printing: the HTML is loaded into a hidden window, so the printed page is exactly the document
+    // (not the app around it). print-html opens the system printer dialog; save-pdf writes a PDF file.
+    const withPrintWindow = async (html, job) => {
+        if (typeof html !== "string" || !html.trim()) return { ok: false, error: "Nothing to print." };
+        const file = path.join(app.getPath("temp"), `myerp-print-${process.pid}-${Date.now()}.html`);
+        const printWin = new BrowserWindow({
+            show: false,
+            parent: win,
+            webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false },
+        });
+        try {
+            fs.writeFileSync(file, html, "utf8");
+            await printWin.loadFile(file);
+            // Wait for web fonts and images (capped, in case the font host is offline).
+            await printWin.webContents.executeJavaScript(`Promise.race([
+                Promise.all([
+                    document.fonts ? document.fonts.ready : null,
+                    ...Array.from(document.images).filter(i => !i.complete).map(i => new Promise(r => { i.onload = i.onerror = r; })),
+                ]),
+                new Promise(r => setTimeout(r, 3000)),
+            ]).then(() => true)`);
+            return await job(printWin.webContents);
+        } catch (error) {
+            return { ok: false, error: error.message };
+        } finally {
+            if (!printWin.isDestroyed()) printWin.destroy();
+            fs.unlink(file, () => { });
+        }
+    };
+    ipcMain.handle("print-html", (_, html) => withPrintWindow(html, (contents) => new Promise((resolve) => {
+        contents.print({ silent: false, printBackground: true }, (success, failureReason) =>
+            resolve({ ok: success, error: success ? "" : String(failureReason || "") }));
+    })));
+    ipcMain.handle("save-pdf", async (_, html, suggestedName) => {
+        const name = String(suggestedName || "document.pdf").replace(/[\\/:*?"<>|]+/g, "_");
+        const { canceled, filePath } = await dialog.showSaveDialog(win, {
+            title: "Save as PDF",
+            defaultPath: path.join(app.getPath("documents"), name.endsWith(".pdf") ? name : `${name}.pdf`),
+            filters: [{ name: "PDF", extensions: ["pdf"] }],
+        });
+        if (canceled || !filePath) return { ok: false, error: "" };
+        return withPrintWindow(html, async (contents) => {
+            const pdf = await contents.printToPDF({ printBackground: true, pageSize: "A4", margins: { marginType: "default" } });
+            fs.writeFileSync(filePath, pdf);
+            return { ok: true, filePath };
+        });
+    });
     ipcMain.on("show-notification", (_, data) => {
         new Notification({
             title: data.title,
@@ -107,6 +155,7 @@ const ROUTES = {
     "money-receipt": "moneyReceipts.routes",
     "challan": "challan.routes",
     "setting": "setting.routes",
+    "note": "note.routes",
 };
 for (const [base, file] of Object.entries(ROUTES)) {
     exp.use(`/api/${API_VERSION}/${base}/`, require(`./backend/router/${file}`));

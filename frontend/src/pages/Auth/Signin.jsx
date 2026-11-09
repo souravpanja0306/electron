@@ -7,6 +7,7 @@ import { MdCropSquare, MdOutlineClose, MdHorizontalRule } from "react-icons/md";
 
 // Store...
 import useAuthStore from '../../store/AuthStore';
+import useAccessStore from '../../store/AccessStore';
 
 const Signin = () => {
   const { signinData, signin, signinLoading, authToken, token } = useAuthStore();
@@ -26,6 +27,7 @@ const Signin = () => {
       let MACHINE_ID = await window.api.getMachineId();
       let result = await signin({ username: data.username, password: data.password, machineId: MACHINE_ID });
       if (result.status === 200) {
+        useAccessStore.getState().setAccess(result.body.access);
         window.api?.setItem("token", result.body.token);
         window.api?.setItem("user", JSON.stringify(result.body));
         navigate("/");
@@ -33,7 +35,8 @@ const Signin = () => {
         setErrorMessage(result.message);
       };
     } catch (error) {
-      console.log(error);
+      // Locked account / lapsed subscription (403), offline (503), etc.
+      setErrorMessage(error?.response?.data?.message || "Could not sign in. Please try again.");
     };
   };
 

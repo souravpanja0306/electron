@@ -11,6 +11,8 @@ import {
     AiOutlineRollback,
     AiOutlineSave,
     AiOutlineTable,
+    AiOutlineMinusCircle,
+    AiOutlinePlusCircle,
 } from "react-icons/ai";
 
 // Components...
@@ -222,8 +224,7 @@ const ViewInvoiceDetails = () => {
         try {
             const result = await printInvoice({ id: invoiceId, token: token });
             if (result.status !== 200) return toast.error(result.message);
-            if (!openPrintWindow(result.body.html)) return toast.error("Pop-up blocked. Allow pop-ups to print.");
-            toast.info("Generating Print View...");
+            if (!openPrintWindow(result.body.html)) return toast.error("Nothing to print.");
         } catch (error) {
             console.log(error);
             toast.error(errorMessage(error));
@@ -248,6 +249,8 @@ const ViewInvoiceDetails = () => {
                             <CustomButton onClick={handleUpdate} title={"Update (Ctrl+S)"} color={"blue"} disabled={saving}><AiOutlineSave /></CustomButton>
                             <CustomButton onClick={handlePrint} title={"Print (Ctrl+P)"} color={"slate"}><AiOutlinePrinter /></CustomButton>
                             <CustomButton onClick={() => navigate("/view-invoice")} title={"View (Ctrl+I)"} color={"slate"}><AiOutlineTable /></CustomButton>
+                            <CustomButton onClick={() => navigate(`/create-credit-note?invoiceId=${invoiceId}&back=true`)} title={"Credit Note"} color={"slate"}><AiOutlineMinusCircle /></CustomButton>
+                            <CustomButton onClick={() => navigate(`/create-debit-note?invoiceId=${invoiceId}&back=true`)} title={"Debit Note"} color={"slate"}><AiOutlinePlusCircle /></CustomButton>
                             <CustomButton onClick={handleDelete} title={"Delete (Ctrl+D)"} color={"red"}><AiOutlineDelete /></CustomButton>
                         </div>
                         <CustomButton onClick={() => fetchInvoiceData()} title={"Reload"} color={"slate"}><AiOutlineSync /></CustomButton>

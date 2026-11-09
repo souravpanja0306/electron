@@ -25,6 +25,11 @@ api.interceptors.response.use(
             window.api?.clearAll();
             window.location.hash = "/signin";
         };
+        // Account locked / subscription lapsed: AccessStore shows the lock screen.
+        const access = error.response?.data?.body?.access;
+        if (error.response?.status === 403 && access?.locked) {
+            window.dispatchEvent(new CustomEvent("myerp:access", { detail: access }));
+        };
         return Promise.reject(error);
     },
 );

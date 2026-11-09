@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import usePrintStore from "../store/PrintStore";
 
 /**
  * Registers Ctrl (or Cmd) + <key> keyboard shortcuts for a page.
@@ -28,6 +29,8 @@ const useShortcuts = (shortcuts, enabled = true) => {
 
         const onKeyDown = (e) => {
             if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+            // The print preview owns the keyboard while it is open (Ctrl+P prints, Esc closes).
+            if (usePrintStore.getState().html) return;
 
             const fromKey = typeof e.key === "string" ? e.key.toLowerCase() : "";
             const fromCode = e.code && e.code.startsWith("Key") ? e.code.slice(3).toLowerCase() : "";

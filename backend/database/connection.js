@@ -72,6 +72,8 @@ const db = new Database(dbPath);
     "settingSchema",
     "cha.schema",
     "vendor.schema",
+    "note.schema",
+    "access.schema",
 ].forEach((schema) => db.exec(require(`../database/schema/${schema}`)));
 
 // Keep existing SQLite installations compatible with schema additions.
@@ -110,6 +112,8 @@ if (userSettingColumns.length && !userSettingColumns.some(column => column.name 
     "CREATE INDEX IF NOT EXISTS idx_receipt_party ON money_receipts(party_id)",
     "CREATE INDEX IF NOT EXISTS idx_party_user ON party(created_by)",
     "CREATE INDEX IF NOT EXISTS idx_company_user ON company(created_by)",
+    "CREATE INDEX IF NOT EXISTS idx_note_user ON invoice_note(created_by, is_deleted, note_type, company_id)",
+    "CREATE INDEX IF NOT EXISTS idx_note_party ON invoice_note(party_id)",
 ].forEach((sql) => db.exec(sql));
 
 module.exports = { connectMongo, db, dbPath, pendingRestorePath };

@@ -120,8 +120,7 @@ const ViewMoneyReceipts = () => {
         try {
             const result = await printMoneyReceipt({ id, token });
             if (result.status !== 200) return toast.error(result.message);
-            if (!openPrintWindow(result.body.html)) return toast.error("Pop-up blocked. Allow pop-ups to print.");
-            toast.info("Generating Print View...");
+            if (!openPrintWindow(result.body.html)) return toast.error("Nothing to print.");
         } catch (error) {
             console.log(error);
             toast.error(errorMessage(error));

@@ -10,7 +10,9 @@ const licenseSchema = new mongoose.Schema(
         max_devices: { type: Number, default: 1 },
         start_date: { type: Date, required: true },
         expiry_date: { type: Date, required: true },
+        // false = subscription suspended (e.g. payment failed). Expiry locks the app after grace_days.
         is_active: { type: Boolean, default: true },
+        suspend_reason: { type: String, default: "" },
         grace_days: { type: Number, default: 3 }
     },
     {

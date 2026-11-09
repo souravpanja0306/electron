@@ -26,6 +26,7 @@ import { usePartyHook } from '../../hooks/usePartyHook';
 import { useChaHook } from '../../hooks/useChaHook';
 import useShortcuts from "../../hooks/useShortcuts";
 import useFormFieldSettings from "../../hooks/useFormFieldSettings";
+import { openPrintWindow } from "../../utils/format";
 
 const newRow = () => ({
     id: Math.floor(Math.random() * 10000000000),
@@ -189,11 +190,7 @@ const EditChallan = () => {
         try {
             let result = await printChallan({ id, token });
             if (result.status === 200) {
-                const newWindow = window.open();
-                if (!newWindow) return toast.error("Pop-up blocked. Allow pop-ups to print.");
-                newWindow.document.write(result.body.html);
-                newWindow.document.close();
-                toast.info("PDF generated.");
+                openPrintWindow(result.body.html);
             } else {
                 toast.error(result.message);
             };

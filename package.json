@@ -9,7 +9,8 @@
   "scripts": {
     "start": "nodemon --exec electron .",
     "dev": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "subs": "node tools/subscription-admin.js"
   },
   "build": {
     "appId": "com.company.billing",

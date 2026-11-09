@@ -36,4 +36,7 @@ const signUserToken = (user) => jwt.sign({
 
 const verifyUserToken = (token) => jwt.verify(token, SECRET);
 
-module.exports = { signUserToken, verifyUserToken };
+/** HMAC of a string with this installation's secret (used to detect hand-edited local records). */
+const signValue = (value) => crypto.createHmac("sha256", SECRET).update(String(value)).digest("hex");
+
+module.exports = { signUserToken, verifyUserToken, signValue };

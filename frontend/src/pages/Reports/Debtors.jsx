@@ -79,8 +79,8 @@ const Debtors = () => {
   useShortcuts({ f: () => panel.openAndFocus() });
 
   const summary = [
-    { label: 'Invoiced', value: shown.total_invoice, color: 'text-blue-600 dark:text-blue-400' },
-    { label: 'Received', value: shown.total_payment, color: 'text-emerald-600 dark:text-emerald-400' },
+    { label: 'Billed', value: shown.total_invoice, color: 'text-blue-600 dark:text-blue-400' },
+    { label: 'Received / Credited', value: shown.total_payment, color: 'text-emerald-600 dark:text-emerald-400' },
     { label: 'Outstanding', value: shown.total_due, color: 'text-red-600 dark:text-red-400' },
   ];
 
@@ -118,8 +118,8 @@ const Debtors = () => {
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-left text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     <th className="p-2">Party</th>
-                    <th className="p-2 text-right">Invoiced</th>
-                    <th className="p-2 text-right">Received</th>
+                    <th className="p-2 text-right" title="Invoices + debit notes">Billed</th>
+                    <th className="p-2 text-right" title="Payments + credit notes">Received / Credited</th>
                     <th className="p-2 text-right">Outstanding</th>
                   </tr>
                 </thead>

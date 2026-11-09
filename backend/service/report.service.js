@@ -5,6 +5,9 @@ const { db } = require("../database/connection");
 // invoiceGrandTotal() in frontend/src/utils/invoiceTotals.js.
 const GRAND_TOTAL = "(COALESCE(total_amount, 0) + COALESCE(total_cgst, 0) + COALESCE(total_sgst, 0) + COALESCE(total_igst, 0))";
 
+// Credit / debit notes (invoice_note) adjust a party's balance: a debit note adds to what
+// the party owes like an invoice, a credit note reduces it like a payment.
+
 module.exports.getDebtors = async ({
     created_by = "",
     company_id = ""
@@ -26,20 +29,32 @@ module.exports.getDebtors = async ({
                 FROM money_receipts
                 WHERE is_deleted = 0${userFilter}${companyFilter}
                 GROUP BY party_id
+            ), note_totals AS (
+                SELECT party_id,
+                       SUM(CASE WHEN note_type = 'debit' THEN ${GRAND_TOTAL} ELSE 0 END) AS total_debit_note,
+                       SUM(CASE WHEN note_type = 'credit' THEN ${GRAND_TOTAL} ELSE 0 END) AS total_credit_note
+                FROM invoice_note
+                WHERE is_deleted = 0${userFilter}${companyFilter}
+                GROUP BY party_id
             )
             SELECT
                 p.id AS party_id,
                 p.company_name,
-                COALESCE(i.total_invoice, 0) AS total_invoice,
-                COALESCE(r.total_payment, 0) AS total_payment,
-                COALESCE(i.total_invoice, 0) - COALESCE(r.total_payment, 0) AS total_due
+                COALESCE(i.total_invoice, 0) + COALESCE(n.total_debit_note, 0) AS total_invoice,
+                COALESCE(r.total_payment, 0) + COALESCE(n.total_credit_note, 0) AS total_payment,
+                COALESCE(n.total_debit_note, 0) AS total_debit_note,
+                COALESCE(n.total_credit_note, 0) AS total_credit_note,
+                COALESCE(i.total_invoice, 0) + COALESCE(n.total_debit_note, 0)
+                    - COALESCE(r.total_payment, 0) - COALESCE(n.total_credit_note, 0) AS total_due
             FROM party p
             LEFT JOIN invoice_totals i ON i.party_id = p.id
             LEFT JOIN receipt_totals r ON r.party_id = p.id
+            LEFT JOIN note_totals n ON n.party_id = p.id
             WHERE p.is_deleted = 0${userFilter}
-              AND (COALESCE(i.total_invoice, 0) <> 0 OR COALESCE(r.total_payment, 0) <> 0)
+              AND (COALESCE(i.total_invoice, 0) <> 0 OR COALESCE(r.total_payment, 0) <> 0
+                   OR COALESCE(n.total_debit_note, 0) <> 0 OR COALESCE(n.total_credit_note, 0) <> 0)
             ORDER BY total_due DESC, p.company_name COLLATE NOCASE
-        `).all(...invoiceParams, ...receiptParams, ...partyParams);
+        `).all(...invoiceParams, ...receiptParams, ...receiptParams, ...partyParams);
 
         const totals = rows.reduce((summary, row) => ({
             total_invoice: summary.total_invoice + Number(row.total_invoice || 0),
@@ -70,13 +85,22 @@ module.exports.getDebtorsDetails = async ({
             SELECT id, invoice_date AS date, 'Invoice #' || invoice_no AS description, ${GRAND_TOTAL} AS dr, 0 AS cr, 'invoice' AS entry_type FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}
             UNION ALL
             SELECT id, receipt_date AS date, 'Payment #' || receipt_no AS description, 0 AS dr, total_value AS cr, 'receipt' AS entry_type FROM money_receipts WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}
+            UNION ALL
+            SELECT id, note_date AS date,
+                   CASE WHEN note_type = 'debit' THEN 'Debit Note #' ELSE 'Credit Note #' END || note_no AS description,
+                   CASE WHEN note_type = 'debit' THEN ${GRAND_TOTAL} ELSE 0 END AS dr,
+                   CASE WHEN note_type = 'credit' THEN ${GRAND_TOTAL} ELSE 0 END AS cr,
+                   note_type || '_note' AS entry_type
+            FROM invoice_note WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}
             ORDER BY date ASC, entry_type ASC, id ASC
         `);
 
         const totalStmt = db.prepare(`
             SELECT 
-                IFNULL((SELECT SUM(${GRAND_TOTAL}) FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_dr,
-                IFNULL((SELECT SUM(total_value) FROM money_receipts WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_cr
+                IFNULL((SELECT SUM(${GRAND_TOTAL}) FROM invoice WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0)
+                  + IFNULL((SELECT SUM(${GRAND_TOTAL}) FROM invoice_note WHERE note_type = 'debit' AND party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_dr,
+                IFNULL((SELECT SUM(total_value) FROM money_receipts WHERE party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0)
+                  + IFNULL((SELECT SUM(${GRAND_TOTAL}) FROM invoice_note WHERE note_type = 'credit' AND party_id = ? AND is_deleted = 0${userFilter}${companyFilter}), 0) AS total_cr
         `);
 
         const queryParams = (includePartyId) => [
@@ -84,8 +108,8 @@ module.exports.getDebtorsDetails = async ({
             ...(created_by ? [created_by] : []),
             ...(company_id ? [company_id] : [])
         ];
-        const totals = totalStmt.get(...queryParams(true), ...queryParams(true));
-        const rows = stmt.all(...queryParams(true), ...queryParams(true));
+        const totals = totalStmt.get(...queryParams(true), ...queryParams(true), ...queryParams(true), ...queryParams(true));
+        const rows = stmt.all(...queryParams(true), ...queryParams(true), ...queryParams(true));
 
         return {
             party: party,
@@ -157,16 +181,25 @@ const AGING_BUCKETS = [
 const receivablesAging = (filters) => {
     const inv = scope("i", filters);
     const rec = scope("r", filters);
+    const note = scope("n", filters);
     const invoices = db.prepare(`
-        SELECT i.party_id, i.invoice_date AS date, ${grandOf("i")} AS amount
-        FROM invoice i WHERE i.is_deleted = 0${inv.sql}
-        ORDER BY i.party_id, i.invoice_date, i.id
-    `).all(...inv.params);
+        SELECT party_id, date, amount FROM (
+            SELECT i.party_id, i.invoice_date AS date, ${grandOf("i")} AS amount, 0 AS kind, i.id
+            FROM invoice i WHERE i.is_deleted = 0${inv.sql}
+            UNION ALL
+            SELECT n.party_id, n.note_date, (COALESCE(n.total_amount, 0) + COALESCE(n.total_cgst, 0) + COALESCE(n.total_sgst, 0) + COALESCE(n.total_igst, 0)), 1, n.id
+            FROM invoice_note n WHERE n.is_deleted = 0 AND n.note_type = 'debit'${note.sql}
+        ) ORDER BY party_id, date, kind, id
+    `).all(...inv.params, ...note.params);
     const paidByParty = new Map(db.prepare(`
-        SELECT r.party_id, SUM(r.total_value) AS paid
-        FROM money_receipts r WHERE r.is_deleted = 0${rec.sql}
-        GROUP BY r.party_id
-    `).all(...rec.params).map((row) => [row.party_id, Number(row.paid) || 0]));
+        SELECT party_id, SUM(paid) AS paid FROM (
+            SELECT r.party_id, r.total_value AS paid
+            FROM money_receipts r WHERE r.is_deleted = 0${rec.sql}
+            UNION ALL
+            SELECT n.party_id, (COALESCE(n.total_amount, 0) + COALESCE(n.total_cgst, 0) + COALESCE(n.total_sgst, 0) + COALESCE(n.total_igst, 0))
+            FROM invoice_note n WHERE n.is_deleted = 0 AND n.note_type = 'credit'${note.sql}
+        ) GROUP BY party_id
+    `).all(...rec.params, ...note.params).map((row) => [row.party_id, Number(row.paid) || 0]));
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const buckets = AGING_BUCKETS.map((b) => ({ ...b, amount: 0, invoices: 0 }));

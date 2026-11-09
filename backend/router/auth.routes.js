@@ -7,5 +7,6 @@ const AuthController = require("../controller/auth.controller");
 router.post("/signup", AuthController.signup);
 router.post("/signin", AuthController.signin);
 router.get("/check-username/:username", AuthController.checkUsername);
+router.get("/access-status", middleware.isSignedIn, AuthController.accessStatus);
 
 module.exports = router;
